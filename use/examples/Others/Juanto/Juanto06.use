@@ -1,0 +1,36 @@
+model Juanto
+ class JGClass01
+ attributes
+   varStr101: String
+   varInt101: Integer
+   varInt102: Integer
+   varInt103: Integer
+ end
+ 
+class JGClass02
+ attributes
+   varStr201: String
+   varInt201: Integer
+   varInt202: Integer
+   varInt203: Integer
+ end
+ 
+ constraints
+
+context JGClass01 inv validLessVarInt01:
+  self.varInt101 > 3   
+  
+context JGClass01 inv validGreatVarInt01:
+  self.varInt101 < 8     
+
+-- Absurdo
+context JGClass01 inv validAbsVarInt01:
+  self.varInt101 < 3 and self.varInt101 > 3        
+  
+context JGClass02 inv validGreatVarInt01:
+  self.varInt201 > 8  
+  
+
+
+
+ 

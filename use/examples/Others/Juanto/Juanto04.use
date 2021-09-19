@@ -1,0 +1,22 @@
+model Juanto
+ class JGClass01
+ attributes
+   varStr01: String
+   varInt01: Integer
+   varInt02: Integer
+   varInt03: Integer
+ end
+ constraints
+
+context JGClass01 inv validVarInt01:
+  self.varInt01 > 3   
+  
+context JGClass01 inv validVarInt02:
+  self.varInt02 > 8  
+  
+context JGClass01 inv validVarInt03:
+  self.varInt03 > 15    
+  
+context JGClass01 inv validVar0102:
+  (self.varInt01 + self.varInt02 ) > 10  
+ 

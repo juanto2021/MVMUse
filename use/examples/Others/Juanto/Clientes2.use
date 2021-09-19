@@ -1,0 +1,32 @@
+model Clientes
+ class Cliente
+ attributes
+   nombre : String
+   tipo: Integer
+   saldo: Integer
+   nivel: Integer 
+ end
+
+constraints
+
+context Cliente inv validTipo:
+  self.tipo > 8   
+  
+context Cliente inv validNegTipo:
+  self.tipo < 8 
+  
+context Cliente inv validSaldo:
+  self.saldo > 8  
+  
+context Cliente inv validNegSaldo:
+  self.saldo < 8      
+  
+context Cliente inv validNivel:
+  self.nivel > 15    
+  
+context Cliente inv validTipoSaldo:
+  self.nivel > ( self.tipo + self.saldo ) and self.nivel > 5
+  
+context Cliente inv validRangoSaldo:
+ self.saldo > 0 and self.saldo < 15
+ 

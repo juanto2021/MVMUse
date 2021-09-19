@@ -1,0 +1,29 @@
+model Juanto
+ class JGClass01
+ attributes
+   varStr101: String
+   varInt101: Integer
+   varInt102: Integer
+   varInt103: Integer
+ end
+ 
+class JGClass02
+ attributes
+   varStr201: String
+   varInt201: Integer
+   varInt202: Integer
+   varInt203: Integer
+ end
+ 
+ constraints
+
+context JGClass01 inv validVarInt01:
+  self.varInt101 > 3   
+  
+context JGClass02 inv validVarInt01:
+  self.varInt201 > 8  
+  
+
+
+
+ 

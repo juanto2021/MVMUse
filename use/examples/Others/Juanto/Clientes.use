@@ -1,0 +1,14 @@
+model Clientes
+ class Cliente
+ attributes
+   nombre : String
+   tipo: Integer
+   saldo: Real
+ end
+ constraints
+
+context Cliente inv validTipo:
+  self.tipo > 3   
+  
+context Cliente inv validSaldo:
+  self.saldo > 50.0     

@@ -1,0 +1,20 @@
+model Clientes
+ class Cliente
+ attributes
+   tipo: Integer
+   saldo: Integer   
+end
+
+constraints
+
+context Cliente inv validTipo:
+  self.tipo > 8   
+  
+context Cliente inv validNegTipo:
+  self.tipo < 8   
+  
+context Cliente inv validSaldo:
+  self.saldo > 8 
+ 
+ context Cliente inv validAbsurdoTipo:
+  self.tipo < 3 and self.tipo > 3  
