@@ -412,13 +412,7 @@ public final class Shell implements Runnable, PPCHandler {
 		} else if (line.startsWith("!")) {
 			cmdExec(line.substring(1).trim(), false);
 		} else if (line.equals("check") || line.startsWith("check ")) {
-			//JG va a hacer check
-			Log.println("JG2: Hace check en shell normal");
 			cmdCheck(line);
-		} else if (line.equals("checkJG") || line.startsWith("checkJG ")||line.equals("cjg") ) {
-			//JG va a hacer check
-			Log.println("JG: Hace check en shell para JG");
-			cmdCheckJG(line);			
 		} else if (line.equals("genvcg")) {
 			cmdGenVCG(null);
 		} else if (line.startsWith("genvcg ")) {
@@ -634,47 +628,7 @@ public final class Shell implements Runnable, PPCHandler {
 				invNames);
 	}
 
-	/**
-	 * Checks integrity constraints of current system state.
-	 */
-	private void cmdCheckJG(String line) throws NoSystemException {
-		Log.println("JG: Entra en checkJG");
-		boolean verbose = false;
-		boolean details = false;
-		boolean all = false;
-		ArrayList<String> invNames = new ArrayList<String>();
-		StringTokenizer tokenizer = new StringTokenizer(line);
-		// skip command
-		tokenizer.nextToken();
-		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			if (token.equals("-v")) {
-				verbose = true;
-			} else if (token.equals("-d")) {
-				details = true;
-			} else if (token.equals("-a")) {
-				all = true;
-			} else {
-				MClassInvariant inv = system().model().getClassInvariant(token);
-				if (inv == null){
-					Log.error("Model has no invariant named " + StringUtil.inQuotes(token) + ".");
-				}
-				else {
-					invNames.add(token);
-				}
-			}
-		}
 
-		PrintWriter out;
-		if (Options.quiet && !Options.quietAndVerboseConstraintCheck) {
-			out = new PrintWriter(new NullWriter());
-		} else {
-			out = new PrintWriter(Log.out());
-		}
-		fLastCheckResult = system().state().checkJG(out, verbose, details, all,
-				invNames);
-		Log.println("JG: En checkJG fLastCheckResult ("+fLastCheckResult+")");
-	}
 	/**
 	 * Executes a SOIL statement (started by <code>!</code> or <code>!!</code>)
 	 * @param line The command line without <code>!</code>

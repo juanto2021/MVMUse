@@ -575,15 +575,6 @@ public class MainWindow extends JFrame {
 		// not yet implemented in swing: menuBar.setHelpMenu(menu);
 		mi = menu.add(fActionHelpAbout);
 		mi.setMnemonic('A');
-		
-//		// `Validator Juanto submenu
-//		menu = new JMenu("Validation Juanto");
-//		menu.setMnemonic('V');
-//		fMenuBar.add(menu);
-//
-//		// not yet implemented in swing: menuBar.setHelpMenu(menu);
-//		mi = menu.add(fActionJuanto);
-//		mi.setMnemonic('V');
 
         // initialize application state to current system
         sessionChanged();
@@ -1141,11 +1132,6 @@ public class MainWindow extends JFrame {
     private final ActionViewCloseAll fActionViewCloseAll = new ActionViewCloseAll();
 
     private final ActionHelpAbout fActionHelpAbout = new ActionHelpAbout();
-    
-    private final ActionJuanto fActionJuanto = new ActionJuanto();
-    
-//    private final ActionJuanto fActionJuanto = new KodkodValidateJuanto;
-////    KodkodValidateJuanto
 
     /**
      * Opens and compiles a specification file.
@@ -1992,7 +1978,7 @@ public class MainWindow extends JFrame {
 		public void actionPerformed(ActionEvent e) {
             ClassInvariantView civ = new ClassInvariantView(MainWindow.this,
                     fSession.system());
-            ViewFrame f = new ViewFrame("Class invariants JG", civ,
+            ViewFrame f = new ViewFrame("Class invariants", civ,
                     "InvariantView.gif");
             civ.setViewFrame(f);
             
@@ -2233,24 +2219,6 @@ public class MainWindow extends JFrame {
                 y += h; // start the next row
                 x = 0;
             }
-        }
-    }
-    
-    /**
-     * Action Juanto.
-     */
-    private class ActionJuanto extends AbstractAction {
-    	ActionJuanto() {
-            super("About...");
-        }
-
-        @Override
-		public void actionPerformed(ActionEvent e) {
-//            AboutDialog dlg = new AboutDialog(MainWindow.this);
-//            dlg.setVisible(true);
-        	 JOptionPane.showMessageDialog(MainWindow.this, "Lanza juanto",
-                     "Validacion", JOptionPane.PLAIN_MESSAGE);
-//        	 KodkodValidateJuanto jg = new KodkodValidateJuanto();
         }
     }
 

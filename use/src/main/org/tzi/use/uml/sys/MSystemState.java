@@ -1570,13 +1570,6 @@ public final class MSystemState {
     	return evaluateDeriveExpression(objVal, attribute);
 	}
 	
-	public boolean checkJG(PrintWriter out, boolean traceEvaluation,
-			boolean showDetails, boolean allInvariants, final List<String> invNames) {
-		boolean valid = true;
-		out.println("JG: llamada a cjg");
-		out.flush();
-		return valid;
-	}
 	/**
 	 * Checks for a valid system state. Returns true if all constraints hold for
 	 * all objects. Prints result of subexpressions for failing constraints to
@@ -1594,7 +1587,7 @@ public final class MSystemState {
 		}
 
 		if (Options.EVAL_NUMTHREADS > 1)
-			out.println("	s (using " + Options.EVAL_NUMTHREADS
+			out.println("checking invariants (using " + Options.EVAL_NUMTHREADS
 					+ " concurrent threads)...");
 		else
 			out.println("checking invariants...");
@@ -1650,12 +1643,9 @@ public final class MSystemState {
 				exprList, this);
 
 		// receive results
-		boolean todasOk=true;
-		out.println("JG: Chequea "+exprList.size()+" invs");
 		for (int i = 0; i < exprList.size(); i++) {
 			MClassInvariant inv = invList.get(i);
 			numChecked++;
-			out.println("JG: Chequeando "+inv.name());
 			String msg = "checking invariant (" + numChecked + ") `"
 					+ inv.cls().name() + "::" + inv.name() + "': ";
 			out.print(msg); // + inv.bodyExpression());
@@ -1675,7 +1665,6 @@ public final class MSystemState {
 					if (ok)
 						out.println("OK."); // (" + timeStr +").");
 					else {
-						todasOk=false;
 						out.println("FAILED."); // (" + timeStr +").");
 						out.println("  -> " + v.toStringWithType());
 
@@ -1703,7 +1692,6 @@ public final class MSystemState {
 						numFailed++;
 					}
 				}
-
 			} catch (InterruptedException ex) {
 				Log.error("InterruptedException: " + ex.getMessage());
 			}
@@ -1715,7 +1703,6 @@ public final class MSystemState {
 		out.println("checked " + numChecked + " invariant"
 				+ ((numChecked == 1) ? "" : "s") + (Options.testMode ? "" : " in " + timeStr) + ", "
 				+ numFailed + " failure" + ((numFailed == 1) ? "" : "s") + '.');
-		out.println("JG: todasOk "+todasOk);
 		out.flush();
 		return valid;
 	}
@@ -1832,7 +1819,6 @@ public final class MSystemState {
 		long start = System.currentTimeMillis();
 		
 		boolean res = true;
-		out.println("Aqui se hace check JG"); 
 		out.println("checking structure...");
 		out.flush();
 		
@@ -1846,7 +1832,6 @@ public final class MSystemState {
 		
 		// check all associations
 		for (MAssociation assoc : fSystem.model().associations()) {
-			out.println("JG: checkea asociacion "+assoc.name()); 
 			res = checkStructure(assoc, out, reportAllErrors) && res;
 			if (!reportAllErrors && !res) return false;
 		}
