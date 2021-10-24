@@ -87,6 +87,11 @@ context JGClass03 inv validGreatVarInt301:
 context JGClass03 inv validGreatVarInt302:
   self.varInt302 > 8 
   
+context JGClass03 inv validGreatVarInt303:
+  self.varInt303 > 8    
+  
+context JGClass03 inv validGreatVarInt304:
+  self.varInt304 > 8  
 
 context JGClass03 inv validGreatVarInt305:
   self.varInt305 > 8    
@@ -94,4 +99,8 @@ context JGClass03 inv validGreatVarInt305:
 context JGClass03 inv validAbsVarInt301:
   self.varInt301 < 3 and self.varInt301 > 3 
 
-  
+context JGClass03 inv validAbsVarInt302:
+  self.varInt302 < 3 and self.varInt302 > 3   
+
+context JGClass03 inv validAbsVarInt303:
+  self.varInt303 < 3 and self.varInt303 > 3      
