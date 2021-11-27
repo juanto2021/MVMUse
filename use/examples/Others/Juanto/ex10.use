@@ -1,0 +1,43 @@
+-- Satisfiable
+model Juanto
+ class Person
+ attributes
+   att01: Integer
+   att02: Integer
+   att03: Integer
+   att04: Integer
+ end
+
+constraints
+context Person inv att01Less2:
+  self.att01<2
+
+context Person inv att01Less3:
+  self.att01<3  
+
+context Person inv att01Less4:
+  self.att01<4    
+  
+context Person inv att02Eq4:
+  self.att02=4    
+
+context Person inv att02Eq5:
+  self.att02=5      
+
+context Person inv att03Eq6:
+  self.att02=4 and self.att03=6        
+
+context Person inv att03Eq7:
+  self.att02=4 and self.att03=7     
+
+context Person inv att03Between8_9:
+  self.att02=5 and self.att03>=8 and self.att03<=9    
+  
+  context Person inv att03Eq9:
+  self.att02=5 and self.att03=9 
+
+context Person inv att03Between10_11:
+  self.att02=5 and self.att03>=10 and self.att03<=11    
+  
+  context Person inv att03Eq11:
+  self.att02=5 and self.att03=11   

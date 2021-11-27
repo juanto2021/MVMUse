@@ -1,0 +1,59 @@
+model Juanto
+ class JGClass01
+ attributes
+   nombre101: String
+   edad101: Integer
+   altura102: Integer
+   medida103: Integer
+ end
+ 
+class JGClass02
+ attributes
+   nombre201: String
+   edad201: Integer
+   altura202: Integer
+   medida203: Integer
+ end
+ 
+class JGClass03
+ attributes
+   nombre301: String
+   edad301: Integer
+   altura302: Integer
+   medida303: Integer
+ end
+
+-- Associations
+
+association AssocOne between
+  JGClass01[1]
+  JGClass02[1]
+end
+
+association AssocTwo between
+  JGClass02[*]
+  JGClass03[1]
+end
+
+constraints
+
+context JGClass01 inv validGreatEdad101:
+  self.edad101 > 3
+  
+context JGClass01 inv validGreatAltura102:
+  self.altura102 > 3 
+
+context JGClass01 inv validLessEdad101:
+  self.edad101 < 3
+  
+context JGClass01 inv validLessAltura102:
+  self.altura102 < 3   
+  
+context JGClass01 inv validGreatMedida103:
+  self.medida103 > 20   
+
+context JGClass02 inv validLessEdad201:
+  self.edad201 < 3
+  
+context JGClass02 inv validLessAltura202:
+  self.altura202 < 3 

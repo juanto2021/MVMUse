@@ -1,0 +1,21 @@
+-- Satisfiable
+model Juanto
+ class Person
+ attributes
+   idPerson: Integer
+   namePerson: String
+   age: Integer
+   height: Integer
+   weight: Integer
+ end
+
+constraints
+context Person inv validAge10_60:
+  self.age > 10 and self.age < 60  
+  
+context Person inv validBetweenHeight50_70:
+  self.height > 50 and self.height < 70
+
+context Person inv validHigherWeight30:
+  self.weight > 30 
+ 
