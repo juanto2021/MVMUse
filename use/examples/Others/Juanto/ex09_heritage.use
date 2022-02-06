@@ -16,7 +16,7 @@ end
 
 class Student < Person
  attributes
-  antiquity: Integer
+   antiquity: Integer
 end
 
 association BelongsTo between
