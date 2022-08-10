@@ -1,0 +1,41 @@
+model Animals
+ class Person
+ attributes
+   age: Integer
+   height: Integer
+   weight: Integer
+ end
+ 
+class Pet
+ attributes
+   name: String
+   species: String   
+   weight: Integer
+ end
+ 
+association BelongsTo between
+  Person[*]
+  Pet[*]
+end 
+ constraints
+
+context Person inv allWeightGreaterPets: 
+   self.pet -> forAll(p|p.weight>5)
+   
+context Person inv allWeightSmallerPets: 
+   self.pet -> forAll(p|p.weight<50)   
+
+context Pet inv existsWeightGreaterPets: 
+   Pet.allInstances()->exists(p|p.weight>5)
+
+-- One or the other will be valid but not both at the same time
+context Pet inv validGreaterThanWeight:
+  self.weight >= 0 
+  
+context Pet inv validSmallerThanWeight:
+  self.weight < 4    
+  
+
+
+
+ 
