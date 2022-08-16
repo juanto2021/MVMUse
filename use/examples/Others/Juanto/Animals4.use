@@ -35,7 +35,11 @@ context Person inv allWeightSmallerPets:
    self.pet -> forAll(p|p.weight<50)
 
 context Person inv validHW:
-   self.height >= 5 and self.weight >=5    
+   self.height >= 5 and self.weight >=5
+
+-- To elicit common attributes on related invariants   
+context Person inv validWH:
+   self.weight >= 5 and self.height >=5    
 
 context Pet inv existsWeightGreaterPets: 
    Pet.allInstances()->exists(p|p.weight>5)
