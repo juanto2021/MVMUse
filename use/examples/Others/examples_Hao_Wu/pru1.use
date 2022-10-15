@@ -1,0 +1,44 @@
+model Pru1
+
+class Person
+attributes
+  name: String
+  age: Integer
+  gender: Gender
+end
+
+class Student
+attributes
+  id: Integer
+  year: Integer
+end
+
+class Module
+attributes
+  code: Integer
+  year: Integer
+end
+
+association BelongsTo between
+  Student[*]
+  Module[*]
+end 
+
+constraints
+
+context Person 
+   inv invl:
+   Person.allInstances()->forAll(p|p.age>0 and p.age<18) 
+
+
+context Student 
+   inv inv2: self.age>18 
+   inv inv3: self.year>=1 and self.year<=6 
+   inv inv4: Student.allInstances()->forAll(s1 ,s2:Student|s1 implies s1.id <> s2.id) 
+   inv inv5: Student.allInstances()->forAll(s|s.module->forAll(m|s.year=m.year)) 
+   inv inv6: Student.allInstances()->exists(s|s.year=6) and Student.allInstances()->exists(s|s.year<6) 
+   inv inv7: Student.allInstances()->forAll(s|s.module->notEmpty()) 
+
+context Module 
+   inv inv8: self.year>=1 and self.year<=5 
+

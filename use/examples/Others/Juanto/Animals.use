@@ -1,10 +1,12 @@
 model Animals
- class Person
- attributes
+
+class Person
+ 
+attributes
    age: Integer
    height: Integer
    weight: Integer
- end
+end
  
 class Pet
  attributes
