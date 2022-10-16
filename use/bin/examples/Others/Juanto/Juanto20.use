@@ -1,0 +1,97 @@
+model Juanto
+ class JGClass01
+ attributes
+   varStr101: String
+   varInt101: Integer
+   varInt102: Integer
+   varInt103: Integer
+   varInt104: Integer
+   varInt105: Integer
+ end
+ 
+class JGClass02
+ attributes
+   varStr201: String
+   varInt201: Integer
+   varInt202: Integer
+   varInt203: Integer
+   varInt204: Integer
+   varInt205: Integer   
+ end
+
+class JGClass03
+ attributes
+   varStr301: String
+   varInt301: Integer
+   varInt302: Integer
+   varInt303: Integer
+   varInt304: Integer
+   varInt305: Integer   
+ end 
+ 
+ constraints
+
+context JGClass01 inv validGreatVarInt101:
+  self.varInt101 > 3   
+  
+context JGClass01 inv validLessNegVarInt101:
+  self.varInt101 < 8     
+
+-- Absurdo que nunca se cumplira
+context JGClass01 inv validAbsVarInt101:
+  self.varInt101 < 3 and self.varInt101 > 3 
+  
+context JGClass01 inv validGreatVarInt102:
+  self.varInt102 > 3 
+  
+context JGClass01 inv validGreatVarInt103:
+  self.varInt103 > 3   
+
+context JGClass01 inv validGreatVarInt104:
+  self.varInt104 > 3  
+
+context JGClass01 inv validGreatVarInt105:
+  self.varInt105 > 3   
+  
+-- Sera valida una u otra pero no las 2 al mismo tiempo  
+context JGClass02 inv validGreatVarInt201:
+  self.varInt201 > 8  
+
+context JGClass02 inv validGreatAbsForceVarInt201:
+  self.varInt201 < 8    
+  
+context JGClass02 inv validGreatVarInt202:
+  self.varInt202 > 8 
+  
+context JGClass02 inv validGreatVarInt203:
+  self.varInt203 > 8    
+  
+context JGClass02 inv validGreatVarInt204:
+  self.varInt204 > 8  
+
+context JGClass02 inv validGreatVarInt205:
+  self.varInt205 > 8    
+  
+context JGClass02 inv validAbsVarInt201:
+  self.varInt201 < 3 and self.varInt201 > 3 
+
+context JGClass02 inv validAbsVarInt202:
+  self.varInt202 < 3 and self.varInt202 > 3   
+
+context JGClass02 inv validAbsVarInt203:
+  self.varInt203 < 3 and self.varInt203 > 3    
+  
+context JGClass03 inv validGreatVarInt301:
+  self.varInt301 > 8  
+  
+context JGClass03 inv validGreatVarInt302:
+  self.varInt302 > 8 
+  
+
+context JGClass03 inv validGreatVarInt305:
+  self.varInt305 > 8    
+  
+context JGClass03 inv validAbsVarInt301:
+  self.varInt301 < 3 and self.varInt301 > 3 
+
+  
