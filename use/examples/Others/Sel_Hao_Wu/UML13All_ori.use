@@ -1052,7 +1052,7 @@ end
 
 composition Association_AssociationEnd between
   Association[1] role association_
-  AssociationEnd[1..*] role connection ordered
+  AssociationEnd[2..*] role connection ordered
 end
 
 composition AssociationEnd_Attribute between
@@ -1203,7 +1203,7 @@ end
 
 composition Link_LinkEnd between
   Link[1]
-  LinkEnd[1..*] role connection ordered
+  LinkEnd[2..*] role connection ordered
 end
 
 association Link_Association between
@@ -1318,7 +1318,7 @@ end
 -- Derived:
 -- composition AssociationRole_AssociationEndRole between
 --   AssociationRole[1]
---   AssociationEndRole[1..*] role connection ordered -- MM-ERR: ordered is missing
+--   AssociationEndRole[2..*] role connection ordered -- MM-ERR: ordered is missing
 -- end
 
 aggregation AssociationEndRole_Attribute between

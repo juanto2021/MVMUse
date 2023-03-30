@@ -115,7 +115,7 @@ end
 
 association Stops between
   Way[*];
-  Station[1..*] ordered;
+  Station[2..*] ordered;
 end
 
 association RFrom between
