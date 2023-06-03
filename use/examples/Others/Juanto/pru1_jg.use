@@ -1,0 +1,17 @@
+model Juanto1
+ class Person
+ attributes
+   age: Integer
+ end
+
+ constraints
+
+context Person inv validGreaterThanAge:
+  self.age > 3   
+  
+context Person inv validSmallerThanAge:
+  self.age < 20     
+
+context Person inv validGSAge:
+   self.age >= 19 and self.age <25     
+  
