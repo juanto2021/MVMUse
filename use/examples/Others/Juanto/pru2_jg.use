@@ -16,4 +16,9 @@ context Person inv validSmallerThanAge:
 
 context Person inv validGSAge:
    self.age >= 19 and self.age <25     
- 
+  
+context Person inv validWeight:
+  self.weight > 0.0
+  
+context Person inv validSize:
+  self.size = 'A' or self.size = 'B'
