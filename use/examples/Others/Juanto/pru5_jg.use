@@ -1,0 +1,27 @@
+model Juanto5
+ class Person
+ attributes
+   age: Integer
+   width: Integer
+   height: Integer
+ end
+ 
+ class Department
+ attributes
+   name: String
+   number: Integer
+ end
+
+constraints
+
+context Person inv validGreaterThanAge:
+  self.age > 3   
+  
+context Person inv validSmallerThanAge:
+  self.age < 19     
+
+context Person inv validGSAge:
+   self.age >= 19 and self.age <25     
+ 
+context Department inv validNumber:
+  self.number > 0    
