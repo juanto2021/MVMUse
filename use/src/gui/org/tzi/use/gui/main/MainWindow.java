@@ -98,6 +98,7 @@ import org.tzi.use.gui.views.ClassExtentView;
 import org.tzi.use.gui.views.ClassInvariantView;
 import org.tzi.use.gui.views.CommandView;
 import org.tzi.use.gui.views.LinkCountView;
+
 import org.tzi.use.gui.views.ObjectCountView;
 import org.tzi.use.gui.views.ObjectPropertiesView;
 import org.tzi.use.gui.views.PrintableView;
@@ -2250,6 +2251,18 @@ public class MainWindow extends JFrame {
 		ObjectPropertiesView opv = new ObjectPropertiesView(MainWindow.this,
 				fSession.system());
 		ViewFrame f = new ViewFrame("Object properties", opv,
+				"ObjectProperties.gif");
+		JComponent c = (JComponent) f.getContentPane();
+		c.setLayout(new BorderLayout());
+		c.add(opv, BorderLayout.CENTER);
+		addNewViewFrame(f);
+		return opv;
+	}
+	
+	public ObjectPropertiesView showMVMWizard() {
+		ObjectPropertiesView opv = new ObjectPropertiesView(MainWindow.this,
+				fSession.system());
+		ViewFrame f = new ViewFrame("MVM Wizard", opv,
 				"ObjectProperties.gif");
 		JComponent c = (JComponent) f.getContentPane();
 		c.setLayout(new BorderLayout());

@@ -2,7 +2,7 @@ model Juanto5
  class Person
  attributes
    age: Integer
-   width: Integer
+   weight: Integer
    height: Integer
  end
  
@@ -11,6 +11,11 @@ model Juanto5
    name: String
    number: Integer
  end
+
+association BelongsTo between
+  Person[*] role student
+  Department[*] role entity
+end 
 
 constraints
 
