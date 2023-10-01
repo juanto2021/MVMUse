@@ -85,6 +85,7 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import org.tzi.kodkod.model.iface.IModel;
 import org.tzi.use.config.Options;
 import org.tzi.use.config.RecentItems;
 import org.tzi.use.config.RecentItems.RecentItemsObserver;
@@ -104,6 +105,7 @@ import org.tzi.use.gui.views.ObjectPropertiesView;
 import org.tzi.use.gui.views.PrintableView;
 import org.tzi.use.gui.views.StateEvolutionView;
 import org.tzi.use.gui.views.View;
+import org.tzi.use.gui.views.WizardMVMView;
 import org.tzi.use.gui.views.diagrams.behavior.communicationdiagram.CommunicationDiagramView;
 import org.tzi.use.gui.views.diagrams.behavior.sequencediagram.SDScrollPane;
 import org.tzi.use.gui.views.diagrams.behavior.sequencediagram.SequenceDiagramView;
@@ -111,6 +113,8 @@ import org.tzi.use.gui.views.diagrams.behavior.shared.VisibleDataManager;
 import org.tzi.use.gui.views.diagrams.classdiagram.ClassDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.statemachine.StateMachineDiagramView;
+import org.tzi.use.kodkod.UseKodkodModelValidator;
+import org.tzi.use.kodkod.plugin.PluginModelFactory;
 import org.tzi.use.main.ChangeEvent;
 import org.tzi.use.main.ChangeListener;
 import org.tzi.use.main.Session;
@@ -2259,9 +2263,9 @@ public class MainWindow extends JFrame {
 		return opv;
 	}
 	
-	public ObjectPropertiesView showMVMWizard() {
-		ObjectPropertiesView opv = new ObjectPropertiesView(MainWindow.this,
-				fSession.system());
+	public WizardMVMView showMVMWizard() {
+		WizardMVMView opv = new WizardMVMView(MainWindow.this,
+				fSession);
 		ViewFrame f = new ViewFrame("MVM Wizard", opv,
 				"ObjectProperties.gif");
 		JComponent c = (JComponent) f.getContentPane();
