@@ -747,6 +747,20 @@ public abstract class DiagramView extends JPanel
             fLayoutThread.start();
         }
     }
+    public void forceStartLayoutThread() {
+//        if (fOpt.isDoAutoLayout()) {//JG
+            fLayoutThread = new LayoutThread();
+            fLayoutThread.doLayout = true;
+            fLayoutThread.start();
+//        }
+    }
+    public void forceStopLayoutThread() {
+//        if (fLayoutThread != null) {//JG
+            fLayoutThread.doLayout = false;
+            fLayoutThread.interrupt();
+            fLayoutThread = null;
+//        }
+    }
 
     public enum LayoutType {
         Hierarchical,

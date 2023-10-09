@@ -77,7 +77,8 @@ public class Options {
     public static int EVAL_NUMTHREADS = 1;
     
     private static final String DEFAULT_WIDTH_P = "use.gui.main.defaultWidth";
-    public static int DEFAULT_WIDTH = 900;
+//    public static int DEFAULT_WIDTH = 900;
+    public static int DEFAULT_WIDTH = 2000;
     private static final String DEFAULT_HEIGHT_P = "use.gui.main.defaultHeight";
     public static int DEFAULT_HEIGHT = 550;
 

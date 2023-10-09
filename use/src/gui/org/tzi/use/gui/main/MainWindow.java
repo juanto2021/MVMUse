@@ -193,6 +193,9 @@ public class MainWindow extends JFrame {
 	private static final String DEFAULT_UNDO_TEXT = "Undo last statement";
 	private static final String DEFAULT_REDO_TEXT = "Redo last undone statement";
 
+	private static int DEFAULT_WIDTH_MVM = 1200;
+	private static int DEFAULT_HEIGHT_MVM = 800;
+
 	private static final String STATE_EVAL_OCL = "Evaluate OCL expression";
 
 	private PageFormat fPageFormat;
@@ -470,16 +473,35 @@ public class MainWindow extends JFrame {
 		// put the three panels into split panes
 		JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 				fModelBrowser, fDesk);
-		sp.setDividerLocation((int) (0.25 * Options.DEFAULT_WIDTH));//FIXME 200); 
-		fTopSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sp, fLogPanel);
-		fTopSplitPane.setDividerLocation((int) (0.72 * Options.DEFAULT_HEIGHT));//FIXME 400);
+		//		sp.setDividerLocation((int) (0.25 * Options.DEFAULT_WIDTH));//FIXME 200); 
+		//		fTopSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sp, fLogPanel);
+		//		fTopSplitPane.setDividerLocation((int) (0.72 * Options.DEFAULT_HEIGHT));//FIXME 400);
+		//		fTopSplitPane.setOneTouchExpandable(true);
+		//		fTopSplitPane.setResizeWeight(.8d);
+		//
+		//		// Layout and set the content pane
+		//		JPanel contentPane = new JPanel();
+		//		contentPane.setLayout(new BorderLayout());
+		//		contentPane.setPreferredSize(new Dimension(Options.DEFAULT_WIDTH, Options.DEFAULT_HEIGHT));// FIXME 800, 550));
+		//		contentPane.add(fToolBar, BorderLayout.NORTH);
+		//		contentPane.add(fTopSplitPane, BorderLayout.CENTER);
+		//		contentPane.add(fStatusBar, BorderLayout.SOUTH);
+		//		setContentPane(contentPane);
+
+		//		sp.setDividerLocation((int) (0.25 * Options.DEFAULT_WIDTH));//FIXME 200); 
+		//		sp.setDividerLocation((int) (0.25 * DEFAULT_WIDTH_MVM));//FIXME 200); // Amplio ancho pantalla para MVM
+		sp.setDividerLocation((int) (0.13 * DEFAULT_WIDTH_MVM));//FIXME 200); // Amplio ancho pantalla para MVM
+		fTopSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sp, fLogPanel); 
+		//		fTopSplitPane.setDividerLocation((int) (0.72 * Options.DEFAULT_HEIGHT));//FIXME 400);
+		fTopSplitPane.setDividerLocation((int) (0.72 * DEFAULT_HEIGHT_MVM));//FIXME 400);
 		fTopSplitPane.setOneTouchExpandable(true);
 		fTopSplitPane.setResizeWeight(.8d);
 
 		// Layout and set the content pane
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BorderLayout());
-		contentPane.setPreferredSize(new Dimension(Options.DEFAULT_WIDTH, Options.DEFAULT_HEIGHT));// FIXME 800, 550));
+		//		contentPane.setPreferredSize(new Dimension(Options.DEFAULT_WIDTH, Options.DEFAULT_HEIGHT));// FIXME 800, 550));
+		contentPane.setPreferredSize(new Dimension(DEFAULT_WIDTH_MVM, DEFAULT_HEIGHT_MVM));// FIXME 800, 550));// Amplio ancho pantalla para MVM
 		contentPane.add(fToolBar, BorderLayout.NORTH);
 		contentPane.add(fTopSplitPane, BorderLayout.CENTER);
 		contentPane.add(fStatusBar, BorderLayout.SOUTH);
@@ -2262,7 +2284,7 @@ public class MainWindow extends JFrame {
 		addNewViewFrame(f);
 		return opv;
 	}
-	
+
 	public WizardMVMView showMVMWizard() {
 		WizardMVMView opv = new WizardMVMView(MainWindow.this,
 				fSession);
@@ -2330,8 +2352,8 @@ public class MainWindow extends JFrame {
 	private Icon getIcon(String name) {
 		return new ImageIcon(Options.getIconPath(name).toString());
 	}
-//	public void doActionViewTile() {
-//		ActionViewTile fActionViewTileMVM = new ActionViewTile();
-//		System.out.println("lanza doActionViewTile");
-//	}
+	//	public void doActionViewTile() {
+	//		ActionViewTile fActionViewTileMVM = new ActionViewTile();
+	//		System.out.println("lanza doActionViewTile");
+	//	}
 }

@@ -21,17 +21,16 @@ package org.tzi.use.gui.views;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -39,12 +38,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -53,16 +50,17 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.gui.main.ModelBrowserSorting;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeEvent;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
 import org.tzi.use.gui.util.ExtendedJTable;
+
 import org.tzi.use.main.Session;
-import org.tzi.use.main.shell.Shell;
 import org.tzi.use.parser.ocl.OCLCompiler;
 import org.tzi.use.uml.mm.MAttribute;
 import org.tzi.use.uml.mm.MClass;
@@ -95,32 +93,89 @@ public class WizardMVMView extends JPanel implements View {
 	private MSystem fSystem;
 	private MObject fObject;
 
-	private JComboBox<String> fObjectComboBox;
+	//---
+	private JFrame frame;
+	private JPanel panel;
+
+	private DefaultListModel<MClass> modelClass;
+	private DefaultListModel<String> modelObjects;
+	//	private DefaultListModel<String> modelAttrs;
+	private DefaultTableModel modelTabAttrs;
+	private DefaultListModel<String> modelAssocs;
+	private JTableHeader header;
+
+	private JLabel lbClass;
+	private JLabel lbObjects;
+	private JLabel lbAttrs;
+	private JLabel lbAssoc;
+	private JLabel lbObj;
+	//	private JLabel lbValue;	
+	private JLabel lbFrom;
+	private JLabel lbTo;
+	private JLabel lbAclass;	
+	private JLabel lbAobject;	
+	private JLabel lbAmultiplicity;	
+	private JLabel lbAresMultiplicity;
+
+	private JList<MClass> lClass;
+	private JList<String> lObjects;
+	private JList<String> lAssocs;
+	private JList<String> lAttrs;
+
+	private JTable tabAttr;
+	private JScrollPane paneTabAttrs;
+
+	private JTextField txNewObject;
+	private String nomClass;
+	private MClass oClass;
+	private String nomObj;	
+	private JComboBox<String> cmbClassOri;
+	private JComboBox<String> cmbClassDes;
+	private JComboBox<String> cmbObjectOri;
+	private JComboBox<String> cmbObjectDes;
+	private JComboBox<String> cmbMultiOri;
+	private JComboBox<String> cmbMultiDes;
+	//	private JTextField txSetValue;
+
+	private JButton btnCreateObject;
+	private JButton btnDeleteObject;
+	private JButton btnSaveObject;
+	private JButton btnCancelObject;
+	private JButton btnCreateAssoc;
+	private JButton btnSaveAssoc;	
+	//	private JButton btnSetValue;
+
+	private boolean bNewObj;
+
+	//	private NewObjectDiagramView fOdv;
+	//---
+
+	//	private JComboBox<String> fObjectComboBox;
 	private JTable fTable;
 	private JScrollPane fTablePane;
-	private JPanel fListPanel;
-	private JPanel fInputsPanel;	
-	private JPanel pObjectPanel;
-	private JPanel pAttrPanel;
-	
-	private JButton fBtnApply;
-	private JButton fBtnReset;
-	private JButton fBtnJuanto;
+//	private JPanel fListPanel;
+//	private JPanel fInputsPanel;	
+//	private JPanel pObjectPanel;
+//	private JPanel pAttrPanel;
+
+//	private JButton fBtnApply;
+//	private JButton fBtnReset;
+//	private JButton fBtnJuanto;
 	private TableModel fTableModel;
-	private ObjectComboBoxActionListener fObjectComboBoxActionListener;
+	//	private ObjectComboBoxActionListener fObjectComboBoxActionListener;
 
 	private List<MAttribute> fAttributes;
 	private String[] fValues;
 	private Map<MAttribute, Value> fAttributeValueMap;
 
 	//---
-	private JList<String> fListClass;
-	private JList<String> fListObjects;
-	private JList<String> fListAttrs;
-	private JLabel lNomObj;
-	private JLabel lValAttr;
-	private JTextField fNomObj;
-	private JTextField fValAttr;
+//	private JList<String> fListClass;
+//	private JList<String> fListObjects;
+//	private JList<String> fListAttrs;
+//	private JLabel lNomObj;
+//	private JLabel lValAttr;
+//	private JTextField fNomObj;
+//	private JTextField fValAttr;
 	//---
 
 
@@ -198,16 +253,6 @@ public class WizardMVMView extends JPanel implements View {
 		}
 	}
 
-	class ObjectComboBoxActionListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-			String objName = (String)fObjectComboBox.getSelectedItem();
-
-			if (!NO_OBJECTS_AVAILABLE.equals(objName))
-				selectObject(objName);
-		}
-	}
-
-	//    public WizardMVMView(MainWindow parent, MSystem system) {
 	public WizardMVMView(MainWindow parent, Session session) {
 		super(new BorderLayout());
 		fMainWindow = parent;
@@ -215,161 +260,250 @@ public class WizardMVMView extends JPanel implements View {
 		fSystem = session.system();
 		fSystem.registerRequiresAllDerivedValues();
 		fSystem.getEventBus().register(this);
+		bNewObj=false;
 
-		// create combo box with available objects
-		fObjectComboBox = new JComboBox<String>();
-		fObjectComboBoxActionListener = new ObjectComboBoxActionListener();
+		frame = new JFrame("Prototipo MVM Wizard");
+		frame.setSize(630, 660);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setLocationRelativeTo(null);
+
+		panel = new JPanel();
+
+		lAttrs = new JList<String>();
+		lObjects = new JList<String>();
+
+		frame.add(panel);
+
+		panel.setLayout(null);
+
+		modelClass = new DefaultListModel<MClass>();
+		modelObjects = new DefaultListModel<>();
+		modelAssocs = new DefaultListModel<>();
+
+		modelTabAttrs = new DefaultTableModel();
+		tabAttr = new JTable(modelTabAttrs);
+
+		lbClass = new JLabel("Class");
+		lbClass.setBounds(10, 15, 60, 25);
+		panel.add(lbClass);
+
+		lbObjects = new JLabel("Objects");
+		lbObjects.setBounds(110, 15, 60, 25);
+		panel.add(lbObjects);	   
+
+		lbAttrs = new JLabel("Attributes");
+		lbAttrs.setBounds(245, 15, 60, 25);
+		panel.add(lbAttrs);			
+
+		lClass = new JList<MClass>(loadListMClass());
+		lClass.setBounds(10, 40, 90, 140);
+		lClass.setBorder(BorderFactory.createLineBorder(Color.black));
+		lClass.setSelectedIndex(0);
+		oClass = lClass.getSelectedValue();
+		nomClass = oClass.name();
+
+		lClass.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent evt) {
+				oClass = lClass.getSelectedValue();
+				nomClass = oClass.name();
+				lObjects.setModel(loadListObjects(nomClass));
+				lObjects.setSelectedIndex(0);
+				nomObj = (String) lObjects.getSelectedValue();
+				selectObject( nomObj);
+				txNewObject.setText(nomObj);
+				txNewObject.setEnabled(false);
+			}
+		});
+
+		modelObjects=loadListObjects(nomClass);
+
+		lObjects = new JList<String>( modelObjects );
+		lObjects.setBounds(110, 40, 90, 140);
+		lObjects.setBorder(BorderFactory.createLineBorder(Color.black));
+		lObjects.setSelectedIndex(0);
+		nomObj = (String) lObjects.getSelectedValue();
+
+		lObjects.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent evt) {
+				oClass = lClass.getSelectedValue();
+				nomClass = oClass.name();
+				nomObj = (String) lObjects.getSelectedValue();
+				selectObject( nomObj);
+				txNewObject.setText(nomObj);
+				txNewObject.setEnabled(false);
+			}
+		});
 
 		// create table of attribute/value pairs
 		fTableModel = new TableModel();
 		fTable = new ExtendedJTable(fTableModel);
 		fTable.setPreferredScrollableViewportSize(new Dimension(250, 70));
+
 		fTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		fTablePane = new JScrollPane(fTable);
+		fTablePane.setBounds(210, 40, 180, 140);
 
-		// create buttons
-		fBtnApply = new JButton("Apply");
-		fBtnApply.setMnemonic('A');
-		fBtnApply.addActionListener(new ActionListener() {
+		selectObject(nomObj);
+
+		lbObj = new JLabel("Object");
+		lbObj.setBounds(400, 15, 160, 25);
+		panel.add(lbObj);	
+
+		txNewObject = new JTextField(20);
+		txNewObject.setBounds(400, 40, 100, 25);
+		txNewObject.setEnabled(false);
+		txNewObject.addKeyListener(new KeyAdapter() {
+			public void keyReleased(KeyEvent e) { //watch for key strokes
+				if(txNewObject.getText().length() == 0 )
+					btnSaveObject.setEnabled(false);
+				else
+				{
+					btnSaveObject.setEnabled(true);
+				}
+			}
+		});
+		panel.add(txNewObject);
+
+		nomObj = (String) lObjects.getSelectedValue();
+		txNewObject.setText(nomObj);
+
+		btnCreateObject = new JButton("New Object");
+		btnCreateObject.setBounds(400, 70, 100, 25);
+		btnCreateObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				applyChanges();
+				txNewObject.setText("");
+				txNewObject.setEnabled(true);
+				bNewObj=true;
 			}
 		});
-		fBtnReset = new JButton("Reset");
-		fBtnReset.setMnemonic('R');
-		fBtnReset.addActionListener(new ActionListener() {
+		panel.add(btnCreateObject);
+
+		btnSaveObject = new JButton("Save Object");
+		btnSaveObject.setBounds(400, 100, 100, 25);
+
+		btnSaveObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				update();
+				nomObj = txNewObject.getText();
+				oClass = lClass.getSelectedValue();
+				saveObject(oClass, nomObj);
+				bNewObj=false;
+				txNewObject.setEnabled(false);
+				// Select objecto tratado
+				selectObject(nomObj);
 			}
 		});
 
-		fBtnJuanto = new JButton("Create Object");
-		fBtnJuanto.setPreferredSize(new Dimension(50, 20));
-		fBtnJuanto.setMnemonic('J');
-		fBtnJuanto.addActionListener(new ActionListener() {
+		panel.add(btnSaveObject);
+
+		btnCancelObject = new JButton("Cancel Object");
+		btnCancelObject.setBounds(400, 130, 100, 25);
+
+		btnCancelObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// Crear objeto
-				String nomClass = fListClass.getSelectedValue();
-				String nomObj = fNomObj.getText();
-				createObject(nomClass,  nomObj);
-				fListObjects.setModel(loadListObjects(nomClass));
+				selectObject(nomObj);
 			}
 		});
+		panel.add(btnCancelObject);
 
-		//---
+		btnDeleteObject = new JButton("Delete Object");
+		btnDeleteObject.setBounds(400, 160, 100, 25);
+		panel.add(btnDeleteObject);
 
-		fListClass = new JList<String>(loadListClass());
-		fListClass.setPreferredSize(new Dimension(100, 200));
-		fListClass.setFixedCellWidth(100);
-		fListClass.setFixedCellHeight(20);
-		fListClass.setBorder(BorderFactory.createLineBorder(Color.black));
-		
-		fListClass.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent evt) {
-				String nomClass = fListClass.getSelectedValue();
-				fListObjects.setModel(loadListObjects(nomClass));
-				fListObjects.setSelectedIndex(0);
-				String nomObj = (String) fListObjects.getSelectedValue();
-				fListAttrs.setModel(loadListAttrs(nomClass,nomObj));
-				fListAttrs.setSelectedIndex(0);
-			}
-		});
-		
-		fListClass.setSelectedIndex(0);
-		String nomClass = fListClass.getSelectedValue();
 
-		fListObjects = new JList<String>(loadListObjects(nomClass));	
-		fListObjects.setPreferredSize(new Dimension(100, 140));
-		fListObjects.setFixedCellWidth(100);
-		fListObjects.setFixedCellHeight(20);
-		fListObjects.setBorder(BorderFactory.createLineBorder(Color.black));
-		fListObjects.setSelectedIndex(0);
-		String nomObj = (String) fListObjects.getSelectedValue();
-		
-		fListObjects.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent evt) {
-				String nomClass = fListClass.getSelectedValue();
-				String nomObj = (String) fListObjects.getSelectedValue();
-//				fListAttrs = new JList<String>(loadListAttrs(nomClass,nomObj));
-				fListAttrs.setModel(loadListAttrs(nomClass,nomObj));
-			}
-		});
-		
-		pObjectPanel = new JPanel();
-		pObjectPanel.setLayout(new BoxLayout(pObjectPanel, BoxLayout.Y_AXIS));
-		pObjectPanel.add(fListObjects);
+		lbAssoc = new JLabel("Assoc");
+		lbAssoc.setBounds(10, 190, 160, 25);
+		panel.add(lbAssoc);	
 
-		fListAttrs = new JList<String>(loadListAttrs(nomClass,nomObj));
-		fListAttrs.setPreferredSize(new Dimension(100, 160));
-		fListAttrs.setFixedCellWidth(100);
-		fListAttrs.setFixedCellHeight(20);		
-		fListAttrs.setBorder(BorderFactory.createLineBorder(Color.black));
-		
-		pAttrPanel = new JPanel();
-		pAttrPanel.setLayout(new BoxLayout(pAttrPanel, BoxLayout.Y_AXIS));
-		pAttrPanel.add(fListAttrs);
-		
-		//---
+		lbFrom = new JLabel("From");
+		lbFrom.setBounds(220, 190, 160, 25);
+		panel.add(lbFrom);
 
-		// layout the buttons centered from left to right
-		JPanel buttonPane = new JPanel();
-		buttonPane.setLayout(new BoxLayout(buttonPane, BoxLayout.X_AXIS));
-		buttonPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		buttonPane.add(Box.createHorizontalGlue());
-		buttonPane.add(fBtnApply);
-		buttonPane.add(Box.createRigidArea(new Dimension(10, 0)));
-		buttonPane.add(fBtnReset);
-		buttonPane.add(Box.createHorizontalGlue());
-//		buttonPane.add(fBtnJuanto);
-//		buttonPane.add(Box.createHorizontalGlue());      
+		lbTo = new JLabel("To");
+		lbTo.setBounds(350, 190, 160, 25);
+		panel.add(lbTo);
 
-		fListPanel = new JPanel();
-		
-		fListPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-		
-		fListPanel.add(fListClass);
-		fListPanel.add(pObjectPanel);
-		fListPanel.add(pAttrPanel);
-		
-		fInputsPanel = new JPanel();
-		lNomObj = new JLabel("Nom. Object");
-		lNomObj.setPreferredSize(new Dimension(50, 20));
-		lValAttr = new JLabel("Val. attribute");
-//		lValAttr.setAlignmentX(Component.LEFT_ALIGNMENT);
-//		lValAttr.setHorizontalAlignment(JLabel.LEFT);
-//		lValAttr.setHorizontalAlignment(JLabel.LEFT);
-		lValAttr.setPreferredSize(new Dimension(50, 20));
-		fNomObj= new JTextField();
-		fNomObj.setPreferredSize(new Dimension(50, 20));
-		fValAttr= new JTextField();
-		fValAttr.setPreferredSize(new Dimension(50, 20));
-		
-		pObjectPanel.add(lNomObj);
-		pObjectPanel.add(fNomObj);
-		pObjectPanel.add(fBtnJuanto);
-		
-		pAttrPanel.add(lValAttr);
-		pAttrPanel.add(fValAttr);		
+		lAssocs = new JList<String>( modelAssocs );
+		lAssocs.setBounds(10, 215, 110, 85);
+		lAssocs.setBorder(BorderFactory.createLineBorder(Color.black));
 
-		// layout panel
-		add(fObjectComboBox, BorderLayout.NORTH);
-		add(fListPanel, BorderLayout.CENTER);
-//		add(buttonPane, BorderLayout.SOUTH);
-		add(fInputsPanel, BorderLayout.SOUTH);
+		lbAclass = new JLabel("Class");
+		lbAclass.setBounds(150, 215, 100, 25);
+		panel.add(lbAclass);
 
-		setSize(new Dimension(300, 300));
+		lbAobject = new JLabel("Object");
+		lbAobject.setBounds(150, 245, 100, 25);
+		panel.add(lbAobject);	
 
-		updateGUIState();
+		lbAmultiplicity = new JLabel("Multiplicity");
+		lbAmultiplicity.setBounds(150, 275, 100, 25);
+		panel.add(lbAmultiplicity);
+
+		cmbClassOri = new JComboBox<String>();
+		cmbClassOri.setBounds(220, 215, 120, 25);
+		panel.add(cmbClassOri);
+
+		cmbClassDes = new JComboBox<String>();
+		cmbClassDes.setBounds(350, 215, 120, 25);
+		panel.add(cmbClassDes);
+
+		cmbObjectOri = new JComboBox<String>();
+		cmbObjectOri.setBounds(220, 245, 120, 25);
+		panel.add(cmbObjectOri);
+
+		cmbObjectDes = new JComboBox<String>();
+		cmbObjectDes.setBounds(350, 245, 120, 25);
+		panel.add(cmbObjectDes);
+
+		cmbMultiOri = new JComboBox<String>();
+		cmbMultiOri.setBounds(220, 275, 120, 25);
+		panel.add(cmbMultiOri);		
+
+		cmbMultiDes = new JComboBox<String>();
+		cmbMultiDes.setBounds(350, 275, 120, 25);
+		panel.add(cmbMultiDes);		
+
+		btnCreateAssoc = new JButton("Create Assoc");
+		btnCreateAssoc.setBounds(15, 310, 110, 25);
+		panel.add(btnCreateAssoc);
+
+		btnSaveAssoc = new JButton("Save Assoc");
+		btnSaveAssoc.setBounds(220, 310, 120, 25);
+		panel.add(btnSaveAssoc);
+
+		panel.add(lClass);
+		panel.add(lObjects);
+		panel.add(lAttrs);		
+		panel.add(fTablePane);	
+
+		lClass.setSelectedIndex(0);
+		nomClass = ((MClass) lClass.getSelectedValue()).name();
+		lObjects.setModel(loadListObjects(nomClass));
+		lObjects.setSelectedIndex(0);
+//		String nomObj = (String) lObjects.getSelectedValue();
+
+		add(panel);
+
+		setSize(new Dimension(400, 300));
+
 	}
 
-	// Aqui1
-	private DefaultListModel<String> loadListClass() {
-		DefaultListModel<String> ldefLModel = new DefaultListModel<String>();
+//
+//	private DefaultListModel<String> loadListClass() {
+//		DefaultListModel<String> ldefLModel = new DefaultListModel<String>();
+//		for (MClass oClass : fSystem.model().classes()) {
+//			ldefLModel.addElement(oClass.name());
+//		}
+//		return ldefLModel;
+//	}
+
+	private DefaultListModel<MClass> loadListMClass() {
+		DefaultListModel<MClass> ldefLModel = new DefaultListModel<MClass>();
 		for (MClass oClass : fSystem.model().classes()) {
-			ldefLModel.addElement(oClass.name());
+			ldefLModel.addElement(oClass);
 		}
 		return ldefLModel;
 	}
+
 	private DefaultListModel<String> loadListObjects(String nomClass) {
 		DefaultListModel<String> ldefLModel = new DefaultListModel<String>();
 		MSystemState state = fSystem.state();
@@ -383,26 +517,21 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return ldefLModel;
 	}
-	private DefaultListModel<String> loadListAttrs(String nomClass, String nomObj) {
-		MSystemState state = fSystem.state();
-		fObject = state.objectByName(nomObj);
-		DefaultListModel<String> ldefLModel = new DefaultListModel<String>();
-		MObjectState objState = fObject.state(fSystem.state());
-		fAttributeValueMap = objState.attributeValueMap();
 
-		Collection<MAttribute> attributes = ModelBrowserSorting.getInstance().sortAttributes( fAttributeValueMap.keySet() );
-		fAttributes = Lists.newArrayList(attributes);
-		for (MAttribute attr: fAttributes) {
-			ldefLModel.addElement(attr.name());
-		}
-		
-		return ldefLModel;
+	private void createObject(MClass oClass, String nomObj) {
+		fMainWindow.createObject(oClass, nomObj);
+		lObjects.setModel(loadListObjects(nomClass));
 	}
-	private void createObject(String nomClass, String nomObj) {
-		Shell.createInstance(fSession, MainWindow.instance().getfPluginRuntime());
-		Shell sh = Shell.getInstance();
-		String line = "!create "+nomObj+" : "+nomClass;
-		sh.processLineSafely(line);
+	private void saveObject(MClass oClass, String nomObj) {
+		if (bNewObj) {
+			createObject(oClass, nomObj);
+			MSystemState state = fSystem.state();
+			fObject = state.objectByName(nomObj);
+//			applyChanges();
+//		}else {
+//			applyChanges();
+		}
+		applyChanges();
 	}
 
 	/**
@@ -480,49 +609,22 @@ public class WizardMVMView extends JPanel implements View {
 	/**
 	 * Initializes and updates the list of available objects.
 	 */
-	private void updateGUIState() {
-		// temporarily turn off action listener, since setting the
-		// model triggers a select action which cannot be
-		// distinguished from a user initiated selection
-		fObjectComboBox.removeActionListener(fObjectComboBoxActionListener);
-
-		// build list of names of currently existing objects
-		MSystemState state = fSystem.state();
-		Set<MObject> allObjects = state.allObjects();
-		ArrayList<String> livingObjects = new ArrayList<String>();
-
-		for (MObject obj : allObjects) {
-			if (obj.exists(state) )
-				livingObjects.add(obj.name());
-		}
-
-		if (livingObjects.isEmpty() ) {
-			livingObjects.add(NO_OBJECTS_AVAILABLE);
-			fObjectComboBox.setEnabled(false);
-			fObject = null;
-		} else
-			fObjectComboBox.setEnabled(true);
-
-		String[] objNames = livingObjects.toArray(new String[]{});
-		Arrays.sort(objNames);
-
-		// create combo box with available objects
-		fObjectComboBox.setModel(new DefaultComboBoxModel<String>(objNames));
-
-		// try to keep selection
-		if (haveObject() )
-			fObjectComboBox.setSelectedItem(fObject.name());
-		fObjectComboBox.addActionListener(fObjectComboBoxActionListener);
-
-
-		//---
-		//		DefaultListModel<String> ldefLModel = new DefaultListModel<String>();
-		//		for (MClass oClass : fSystem.model().classes()) {
-		//			ldefLModel.addElement(oClass.name());
-		//		}
-		//		fListClass = new JList<String>(ldefLModel);	
-
-	}
+//	private void updateGUIState() {
+//		// temporarily turn off action listener, since setting the
+//		// model triggers a select action which cannot be
+//		// distinguished from a user initiated selection
+//		//		fObjectComboBox.removeActionListener(fObjectComboBoxActionListener);
+//
+//		// build list of names of currently existing objects
+//		MSystemState state = fSystem.state();
+//		Set<MObject> allObjects = state.allObjects();
+//		ArrayList<String> livingObjects = new ArrayList<String>();
+//
+//		for (MObject obj : allObjects) {
+//			if (obj.exists(state) )
+//				livingObjects.add(obj.name());
+//		}
+//	}
 
 
 
@@ -534,15 +636,25 @@ public class WizardMVMView extends JPanel implements View {
 		MSystemState state = fSystem.state();
 		fObject = state.objectByName(objName);
 		fTableModel.update();
-		if (!fObjectComboBox.getSelectedItem().equals(objName)) {
-			fObjectComboBox.setSelectedItem(objName);
+		//		if (!fObjectComboBox.getSelectedItem().equals(objName)) {
+		//			fObjectComboBox.setSelectedItem(objName);
+		
+		//		}
+		// Buscar en lista
+		lObjects.setSelectedIndex(0);
+		int nObjs= lObjects.getModel().getSize();
+		for (int nObj=0;nObj<nObjs;nObj++) {
+			if (lObjects.getModel().getElementAt(nObj).equals(objName)) {
+				lObjects.setSelectedIndex(nObj);
+			}
 		}
+		return;
 	}
 
 
 	private void update() {
-		updateGUIState();
-		fTableModel.update();
+//		updateGUIState();
+				fTableModel.update();
 	}
 
 	@Subscribe

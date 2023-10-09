@@ -696,7 +696,10 @@ public final class Shell implements Runnable, PPCHandler {
 		// Write command history to file
 		if (!Options.quiet) {
 			try {
-				fReadline.writeHistory(Options.USE_HISTORY_PATH);
+				if (fReadline!=null) {
+					fReadline.writeHistory(Options.USE_HISTORY_PATH);
+				}
+//				fReadline.writeHistory(Options.USE_HISTORY_PATH);// Original comentado para que no falle MVM
 			} catch (IOException ex) {
 				Log.error("Can't write history file "
 						+ Options.USE_HISTORY_PATH + " : " + ex.getMessage());
