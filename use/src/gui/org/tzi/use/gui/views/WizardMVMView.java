@@ -371,9 +371,12 @@ public class WizardMVMView extends JPanel implements View {
 		btnCreateObject.setBounds(400, 70, 100, 25);
 		btnCreateObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				txNewObject.setText("");
-				txNewObject.setEnabled(true);
-				bNewObj=true;
+//				txNewObject.setText("");
+//				// Poner a null campos de table
+//				//Aqui
+//				txNewObject.setEnabled(true);
+//				bNewObj=true;
+				initNewObject();
 			}
 		});
 		panel.add(btnCreateObject);
@@ -517,7 +520,76 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return ldefLModel;
 	}
+private void initNewObject() {
+	//aqui2
+	txNewObject.setText("");
+	txNewObject.setEnabled(true);
+	
+	//---
+	
+	for (int i = 0; i < fValues.length; ++i) {
+		MAttribute attribute = fAttributes.get(i);
+		String newValue = fValues[i];
+		System.out.println("attribute [" + attribute.name()+"]");
+		System.out.println("newValue [" + newValue+"]");
+//		String oldValue = fAttributeValueMap.get(attribute).toString();
+//		fTable.setValueAt("", i, 1);
+		fTable.getModel().setValueAt("", i, 1);
+	}
+//	fAttributes = Collections.emptyList();
+//	fValues = new String[0];
+//	modelTabAttrs.fireTableDataChanged();
+	
+//	fTable.fireTableDataChanged();
 
+	
+//		if (!newValue.equals(oldValue)) {
+//
+//			StringWriter errorOutput = new StringWriter();
+//			Expression valueAsExpression = 
+//					OCLCompiler.compileExpression(
+//							fSystem.model(),
+//							fSystem.state(),
+//							newValue, 
+//							"<input>", 
+//							new PrintWriter(errorOutput, true), 
+//							fSystem.varBindings());
+//
+////			if (valueAsExpression == null) {
+////				JOptionPane.showMessageDialog(
+////						fMainWindow, 
+////						errorOutput, 
+////						"Error", 
+////						JOptionPane.ERROR_MESSAGE);
+////				error = true;
+////				continue;
+////			}
+//
+////			try {
+////				fSystem.execute(
+////						new MAttributeAssignmentStatement(
+////								fObject, 
+////								attribute, 
+////								valueAsExpression));
+////
+////			} catch (MSystemException e) {
+////				JOptionPane.showMessageDialog(
+////						fMainWindow, 
+////						e.getMessage(), 
+////						"Error", 
+////						JOptionPane.ERROR_MESSAGE);
+////				error = true;
+////			}
+//		}
+//	}
+
+	
+	
+	//---
+	
+	bNewObj=true;
+}
+	
 	private void createObject(MClass oClass, String nomObj) {
 		fMainWindow.createObject(oClass, nomObj);
 		lObjects.setModel(loadListObjects(nomClass));
