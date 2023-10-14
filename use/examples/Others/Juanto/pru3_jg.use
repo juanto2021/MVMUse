@@ -12,10 +12,10 @@ model Juanto1
    name: String
  end 
 
- association BelongsTo between
-	 Person[*] 
-	 Country[*] 
- end 
+-- association BelongsTo between
+--	 Person[*] 
+--	 Country[*] 
+-- end 
 
 constraints
 
