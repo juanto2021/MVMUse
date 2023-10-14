@@ -31,6 +31,7 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -65,13 +67,17 @@ import org.tzi.use.gui.main.ViewFrame;
 import org.tzi.use.gui.util.ExtendedJTable;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
-//import org.tzi.use.kodkod.solution.ObjectDiagramCreator;
 import org.tzi.use.main.Session;
 import org.tzi.use.parser.ocl.OCLCompiler;
+import org.tzi.use.uml.mm.MAssociation;
+import org.tzi.use.uml.mm.MAssociationEnd;
 import org.tzi.use.uml.mm.MAttribute;
 import org.tzi.use.uml.mm.MClass;
+import org.tzi.use.uml.mm.MMultiplicity;
 import org.tzi.use.uml.ocl.expr.Expression;
 import org.tzi.use.uml.ocl.value.Value;
+import org.tzi.use.uml.sys.MLink;
+import org.tzi.use.uml.sys.MLinkEnd;
 import org.tzi.use.uml.sys.MObject;
 import org.tzi.use.uml.sys.MObjectState;
 import org.tzi.use.uml.sys.MSystem;
@@ -108,7 +114,7 @@ public class WizardMVMView extends JPanel implements View {
 	private DefaultListModel<String> modelObjects;
 
 	private DefaultTableModel modelTabAttrs;
-	private DefaultListModel<String> modelAssocs;
+	private DefaultListModel<MAssociation> modelAssocs;
 	private JTableHeader header;
 
 	private JLabel lbClass;
@@ -122,22 +128,25 @@ public class WizardMVMView extends JPanel implements View {
 	private JLabel lbAclass;	
 	private JLabel lbAobject;	
 	private JLabel lbAmultiplicity;	
+	private JLabel lbArole;	
 	private JLabel lbAresMultiplicity;
 
 	private JList<MClass> lClass;
 	private JList<String> lObjects;
-	private JList<String> lAssocs;
+	private JList<MAssociation> lAssocs;
 	private JList<String> lAttrs;
 
 	private JTable tabAttr;
 	private JScrollPane paneTabAttrs;
 
 	private JTextField txNewObject;
+	private JTextField txOriAssocRole;
+	private JTextField txDesAssocRole;
 	private String nomClass;
 	private MClass oClass;
 	private String nomObj;	
-	private JComboBox<String> cmbClassOri;
-	private JComboBox<String> cmbClassDes;
+	private JComboBox<MClass> cmbClassOri;
+	private JComboBox<MClass> cmbClassDes;
 	private JComboBox<String> cmbObjectOri;
 	private JComboBox<String> cmbObjectDes;
 	private JComboBox<String> cmbMultiOri;
@@ -160,6 +169,8 @@ public class WizardMVMView extends JPanel implements View {
 	private String[] fValues;
 	private Map<MAttribute, Value> fAttributeValueMap;
 	private NewObjectDiagram odvAssoc;
+	private String aMulti[] = new String[] { 
+			"0", "1", "0..1","0..*", "1..*", "*" };
 
 	/**
 	 * The table model.
@@ -262,7 +273,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		modelClass = new DefaultListModel<MClass>();
 		modelObjects = new DefaultListModel<>();
-		modelAssocs = new DefaultListModel<>();
+		modelAssocs = new DefaultListModel<MAssociation>();
 
 		modelTabAttrs = new DefaultTableModel();
 		tabAttr = new JTable(modelTabAttrs);
@@ -280,7 +291,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lbAttrs);			
 
 		lClass = new JList<MClass>(loadListMClass());
-		lClass.setBounds(10, 40, 90, 140);
+		lClass.setBounds(10, 40, 90, 145);
 		lClass.setBorder(BorderFactory.createLineBorder(Color.black));
 		lClass.setSelectedIndex(0);
 		oClass = lClass.getSelectedValue();
@@ -302,7 +313,7 @@ public class WizardMVMView extends JPanel implements View {
 		modelObjects=loadListObjects(nomClass);
 
 		lObjects = new JList<String>( modelObjects );
-		lObjects.setBounds(110, 40, 90, 140);
+		lObjects.setBounds(110, 40, 90, 145);
 		lObjects.setBorder(BorderFactory.createLineBorder(Color.black));
 		lObjects.setSelectedIndex(0);
 		nomObj = (String) lObjects.getSelectedValue();
@@ -324,7 +335,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		fTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		fTablePane = new JScrollPane(fTable);
-		fTablePane.setBounds(210, 40, 180, 140);
+		fTablePane.setBounds(210, 40, 180, 145);
 
 		selectObject(nomObj);
 
@@ -370,6 +381,8 @@ public class WizardMVMView extends JPanel implements View {
 				bNewObj=false;
 				txNewObject.setEnabled(false);
 				selectObject(nomObj);
+				cmbObjectOri.setModel(loadComboObject(cmbClassOri));
+				cmbObjectDes.setModel(loadComboObject(cmbClassDes));
 			}
 		});
 
@@ -390,11 +403,11 @@ public class WizardMVMView extends JPanel implements View {
 		btnDeleteObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				deleteObject(nomObj);
+				cmbObjectOri.setModel(loadComboObject(cmbClassOri));
+				cmbObjectDes.setModel(loadComboObject(cmbClassDes));
 			}
 		});
 		panel.add(btnDeleteObject);
-
-		//deleteObject(String nomObj) {
 
 		lbAssoc = new JLabel("Assoc");
 		lbAssoc.setBounds(10, 190, 160, 25);
@@ -407,10 +420,18 @@ public class WizardMVMView extends JPanel implements View {
 		lbTo = new JLabel("To");
 		lbTo.setBounds(350, 190, 160, 25);
 		panel.add(lbTo);
+		//Aqui
+		lAssocs = new JList<MAssociation>(loadListAssoc());
 
-		lAssocs = new JList<String>( modelAssocs );
 		lAssocs.setBounds(10, 215, 110, 85);
 		lAssocs.setBorder(BorderFactory.createLineBorder(Color.black));
+		lAssocs.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent evt) {
+				MAssociation oAssoc = lAssocs.getSelectedValue();
+				setComposAssoc(oAssoc);
+			}
+		});
+		lAssocs.setSelectedIndex(0);
 		panel.add(lAssocs);
 
 		lbAclass = new JLabel("Class");
@@ -425,36 +446,63 @@ public class WizardMVMView extends JPanel implements View {
 		lbAmultiplicity.setBounds(150, 275, 100, 25);
 		panel.add(lbAmultiplicity);
 
-		cmbClassOri = new JComboBox<String>();
+		lbArole = new JLabel("Role");
+		lbArole.setBounds(150, 305, 100, 25);
+		panel.add(lbArole);
+
+		cmbClassOri = new JComboBox<MClass>();
+
+		cmbClassOri.setModel(loadComboClass());
 		cmbClassOri.setBounds(220, 215, 120, 25);
+		cmbClassOri.addActionListener (new ActionListener () {
+			public void actionPerformed(ActionEvent e) {
+				cmbObjectOri.setModel(loadComboObject(cmbClassOri));
+			}
+		});
 		panel.add(cmbClassOri);
 
-		cmbClassDes = new JComboBox<String>();
+		cmbClassDes = new JComboBox<MClass>();
+		cmbClassDes.setModel(loadComboClass());
 		cmbClassDes.setBounds(350, 215, 120, 25);
+		cmbClassDes.addActionListener (new ActionListener () {
+			public void actionPerformed(ActionEvent e) {
+				cmbObjectDes.setModel(loadComboObject(cmbClassDes));
+			}
+		});
 		panel.add(cmbClassDes);
 
 		cmbObjectOri = new JComboBox<String>();
+		cmbObjectOri.setModel(loadComboObject(cmbClassOri));
 		cmbObjectOri.setBounds(220, 245, 120, 25);
 		panel.add(cmbObjectOri);
 
 		cmbObjectDes = new JComboBox<String>();
+		cmbObjectDes.setModel(loadComboObject(cmbClassDes));
 		cmbObjectDes.setBounds(350, 245, 120, 25);
 		panel.add(cmbObjectDes);
 
-		cmbMultiOri = new JComboBox<String>();
+		cmbMultiOri = new JComboBox<String>(aMulti);
 		cmbMultiOri.setBounds(220, 275, 120, 25);
 		panel.add(cmbMultiOri);		
 
-		cmbMultiDes = new JComboBox<String>();
+		cmbMultiDes = new JComboBox<String>(aMulti);
 		cmbMultiDes.setBounds(350, 275, 120, 25);
 		panel.add(cmbMultiDes);		
 
+		txOriAssocRole = new JTextField(20);
+		txOriAssocRole.setBounds(220, 305, 120, 25);
+		panel.add(txOriAssocRole);	
+
+		txDesAssocRole = new JTextField(20);
+		txDesAssocRole.setBounds(350, 305, 120, 25);
+		panel.add(txDesAssocRole);	
+
 		btnCreateAssoc = new JButton("Create Assoc");
-		btnCreateAssoc.setBounds(15, 310, 110, 25);
+		btnCreateAssoc.setBounds(10, 340, 110, 25);
 		panel.add(btnCreateAssoc);
 
 		btnSaveAssoc = new JButton("Save Assoc");
-		btnSaveAssoc.setBounds(220, 310, 120, 25);
+		btnSaveAssoc.setBounds(220, 340, 120, 25);
 		panel.add(btnSaveAssoc);
 
 		panel.add(lClass);
@@ -488,7 +536,6 @@ public class WizardMVMView extends JPanel implements View {
 		DefaultListModel<String> ldefLModel = new DefaultListModel<String>();
 		MSystemState state = fSystem.state();
 		Set<MObject> allObjects = state.allObjects();
-		//		ArrayList<String> livingObjects = new ArrayList<String>();
 
 		for (MObject obj : allObjects) {
 			if (obj.cls().name().equals(nomClass)) {
@@ -496,6 +543,87 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}
 		return ldefLModel;
+	}
+	private  DefaultComboBoxModel<MClass> loadComboClass() {
+		String[] classNames;
+		DefaultComboBoxModel<MClass> cbm = new DefaultComboBoxModel<MClass>();
+
+		for (MClass oClass : fSystem.model().classes()) {
+			cbm.addElement(oClass);
+		}
+		return cbm;
+
+	}
+
+	private  DefaultComboBoxModel<String> loadComboObject(JComboBox cmbClass) {
+		DefaultComboBoxModel<String> cbm = new DefaultComboBoxModel<String>();
+		MClass oClass = (MClass) cmbClass.getItemAt(cmbClass.getSelectedIndex());
+		DefaultListModel<String> ldefLModel =loadListObjects(oClass.name());
+		for(int i = 0;i<ldefLModel.size();i++) {
+			String obj = ldefLModel.get(i);
+			cbm.addElement(obj);
+		}
+		return cbm;
+
+	}
+
+	private DefaultListModel<MAssociation> loadListAssoc() {
+		DefaultListModel<MAssociation> ldefLModel = new DefaultListModel<MAssociation>();
+		for (MAssociation oClass : fSystem.model().associations()) {
+			ldefLModel.addElement(oClass);
+		}
+		return ldefLModel;
+	}
+	private void setComposAssoc(MAssociation oAssoc) {
+
+		Set<MLink> links = fSystem.state().linksOfAssociation(oAssoc).links();
+		// Inicialmente suponderemos que solo hay un link
+		int nLink=0;
+		for (MLink oLink:links) {
+			System.out.println(oLink.linkedObjects());
+			// Solo tratamos el primer link
+			if (oLink.association().equals(oAssoc)) {
+				System.out.println("son iguales");
+			}
+			if (nLink==0) {
+				MObject oOri=null;
+				MObject oDes=null;
+
+				int nLinkEnd=0;
+				for(MLinkEnd oMlinkEnd: oLink.linkEnds()) {
+					System.out.println(oMlinkEnd.object().name());
+					MAssociationEnd oMAssociationEnd=oMlinkEnd.associationEnd();
+					System.out.println(oMAssociationEnd.name());
+
+					MMultiplicity oMMultiplicity=oMAssociationEnd.multiplicity();
+
+					System.out.println(oMMultiplicity.toString());
+					switch(nLinkEnd){
+					case 0:
+						oOri=oMlinkEnd.object();
+						txOriAssocRole.setText(oMAssociationEnd.name());
+						cmbClassOri.setSelectedItem(oOri.cls());
+						cmbObjectOri.setSelectedItem(oOri);
+						cmbMultiOri.setSelectedItem(oMMultiplicity.toString());
+						break;
+					case 1:
+						oDes=oMlinkEnd.object();
+						txDesAssocRole.setText(oMAssociationEnd.name());
+						cmbClassDes.setSelectedItem(oDes.cls());
+						cmbObjectDes.setSelectedItem(oDes);
+						cmbMultiDes.setSelectedItem(oMMultiplicity.toString());
+						break;
+					default:
+						// De momento no hacemos nada
+						break;
+					}
+					nLinkEnd+=1;
+				}
+
+			}
+		}
+		System.out.println(oAssoc.name());
+
 	}
 
 	private void searchObjDiagramAssociated() {
@@ -551,7 +679,7 @@ public class WizardMVMView extends JPanel implements View {
 		// Ver frames
 		JDesktopPane fDesk = fMainWindow.getFdesk();
 		JInternalFrame[] allframes = fDesk.getAllFrames();
-		
+
 		for (JInternalFrame ifr: allframes) {
 			if (ifr.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 				existDiagram=true;
