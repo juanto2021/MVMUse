@@ -474,21 +474,6 @@ public class MainWindow extends JFrame {
 		JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 				fModelBrowser, fDesk);
 		//		sp.setDividerLocation((int) (0.25 * Options.DEFAULT_WIDTH));//FIXME 200); 
-		//		fTopSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sp, fLogPanel);
-		//		fTopSplitPane.setDividerLocation((int) (0.72 * Options.DEFAULT_HEIGHT));//FIXME 400);
-		//		fTopSplitPane.setOneTouchExpandable(true);
-		//		fTopSplitPane.setResizeWeight(.8d);
-		//
-		//		// Layout and set the content pane
-		//		JPanel contentPane = new JPanel();
-		//		contentPane.setLayout(new BorderLayout());
-		//		contentPane.setPreferredSize(new Dimension(Options.DEFAULT_WIDTH, Options.DEFAULT_HEIGHT));// FIXME 800, 550));
-		//		contentPane.add(fToolBar, BorderLayout.NORTH);
-		//		contentPane.add(fTopSplitPane, BorderLayout.CENTER);
-		//		contentPane.add(fStatusBar, BorderLayout.SOUTH);
-		//		setContentPane(contentPane);
-
-		//		sp.setDividerLocation((int) (0.25 * Options.DEFAULT_WIDTH));//FIXME 200); 
 		//		sp.setDividerLocation((int) (0.25 * DEFAULT_WIDTH_MVM));//FIXME 200); // Amplio ancho pantalla para MVM
 		sp.setDividerLocation((int) (0.13 * DEFAULT_WIDTH_MVM));//FIXME 200); // Amplio ancho pantalla para MVM
 		fTopSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sp, fLogPanel); 
@@ -1997,9 +1982,9 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	//    public void doActionViewTile() {
-	//    	ActionViewTile fActionViewTileMVM = new ActionViewTile();
-	//    }
+	    public void doActionViewTile() {
+	    	ActionViewTile fActionViewTileMVM = new ActionViewTile();
+	    }
 
 	/**
 	 * Creates a new class invariant view.
@@ -2285,11 +2270,12 @@ public class MainWindow extends JFrame {
 		return opv;
 	}
 
-	public WizardMVMView showMVMWizard() {
+	public WizardMVMView showMVMWizard(String name) {
 		WizardMVMView opv = new WizardMVMView(MainWindow.this,
 				fSession);
 		ViewFrame f = new ViewFrame("MVM Wizard", opv,
 				"ObjectProperties.gif");
+		f.setName(name);
 		JComponent c = (JComponent) f.getContentPane();
 		c.setLayout(new BorderLayout());
 		c.add(opv, BorderLayout.CENTER);

@@ -85,7 +85,7 @@ public final class Main {
 			ExtensionManager.EXTENSIONS_FOLDER = Options.homeDir + "/oclextensions";
 			ExtensionManager.getInstance().loadExtensions();
 		}
-		
+
 		// Plugin Framework
 		if (Options.doPLUGIN) {
 			// create URL from plugin directory
@@ -97,9 +97,9 @@ public final class Main {
 						.forName("org.tzi.use.runtime.MainPluginRuntime");
 			} catch (ClassNotFoundException e) {
 				Log
-						.error("Could not load PluginRuntime. Probably use-runtime-...jar is missing.\n"
-								+ "Try starting use with -noplugins switch.\n"
-								+ e.getMessage());
+				.error("Could not load PluginRuntime. Probably use-runtime-...jar is missing.\n"
+						+ "Try starting use with -noplugins switch.\n"
+						+ e.getMessage());
 				System.exit(1);
 			}
 			try {
@@ -140,7 +140,7 @@ public final class Main {
 			}
 			if (!Options.testMode)
 				Options.getRecentFiles().push(Options.specFilename);
-			
+
 			if (Options.compileOnly) {
 				Log.verbose("no errors.");
 				if (Options.compileAndPrint) {
@@ -167,8 +167,8 @@ public final class Main {
 				Log.debug("Initializing [" + mainWindowClass.toString() + "]");
 			} catch (ClassNotFoundException e) {
 				Log
-						.error("Could not load GUI. Probably use-gui-...jar is missing.\n"
-								+ "Try starting use with -nogui switch.\n" + e);
+				.error("Could not load GUI. Probably use-gui-...jar is missing.\n"
+						+ "Try starting use with -nogui switch.\n" + e);
 				System.exit(1);
 			}
 			if (mainWindowClass == null) {
@@ -191,8 +191,8 @@ public final class Main {
 							+ session.toString() + "] ["
 							+ pluginRuntime.toString() + "]");
 					create
-							.invoke(null,
-									new Object[] { session, pluginRuntime });
+					.invoke(null,
+							new Object[] { session, pluginRuntime });
 				}
 			} catch (Exception e) {
 				Log.error("FATAL ERROR.", e);

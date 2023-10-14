@@ -4,7 +4,7 @@
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of the
+ * published by the Free Software Foundat	ion; either version 2 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
@@ -28,9 +28,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyVetoException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +41,10 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -58,8 +61,11 @@ import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.gui.main.ModelBrowserSorting;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeEvent;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
+import org.tzi.use.gui.main.ViewFrame;
 import org.tzi.use.gui.util.ExtendedJTable;
-
+import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
+import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
+//import org.tzi.use.kodkod.solution.ObjectDiagramCreator;
 import org.tzi.use.main.Session;
 import org.tzi.use.parser.ocl.OCLCompiler;
 import org.tzi.use.uml.mm.MAttribute;
@@ -88,6 +94,7 @@ import com.google.common.eventbus.Subscribe;
 public class WizardMVMView extends JPanel implements View {
 	private static final String NO_OBJECTS_AVAILABLE = "(No objects available.)";
 
+	private static final String NAMEFRAMEMVMDIAGRAM = "MVM";
 	private MainWindow fMainWindow;
 	private Session fSession;
 	private MSystem fSystem;
@@ -99,7 +106,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	private DefaultListModel<MClass> modelClass;
 	private DefaultListModel<String> modelObjects;
-	//	private DefaultListModel<String> modelAttrs;
+
 	private DefaultTableModel modelTabAttrs;
 	private DefaultListModel<String> modelAssocs;
 	private JTableHeader header;
@@ -135,7 +142,6 @@ public class WizardMVMView extends JPanel implements View {
 	private JComboBox<String> cmbObjectDes;
 	private JComboBox<String> cmbMultiOri;
 	private JComboBox<String> cmbMultiDes;
-	//	private JTextField txSetValue;
 
 	private JButton btnCreateObject;
 	private JButton btnDeleteObject;
@@ -143,42 +149,17 @@ public class WizardMVMView extends JPanel implements View {
 	private JButton btnCancelObject;
 	private JButton btnCreateAssoc;
 	private JButton btnSaveAssoc;	
-	//	private JButton btnSetValue;
 
 	private boolean bNewObj;
-
-	//	private NewObjectDiagramView fOdv;
-	//---
-
-	//	private JComboBox<String> fObjectComboBox;
 	private JTable fTable;
 	private JScrollPane fTablePane;
-//	private JPanel fListPanel;
-//	private JPanel fInputsPanel;	
-//	private JPanel pObjectPanel;
-//	private JPanel pAttrPanel;
 
-//	private JButton fBtnApply;
-//	private JButton fBtnReset;
-//	private JButton fBtnJuanto;
 	private TableModel fTableModel;
-	//	private ObjectComboBoxActionListener fObjectComboBoxActionListener;
 
 	private List<MAttribute> fAttributes;
 	private String[] fValues;
 	private Map<MAttribute, Value> fAttributeValueMap;
-
-	//---
-//	private JList<String> fListClass;
-//	private JList<String> fListObjects;
-//	private JList<String> fListAttrs;
-//	private JLabel lNomObj;
-//	private JLabel lValAttr;
-//	private JTextField fNomObj;
-//	private JTextField fValAttr;
-	//---
-
-
+	private NewObjectDiagram odvAssoc;
 
 	/**
 	 * The table model.
@@ -260,6 +241,9 @@ public class WizardMVMView extends JPanel implements View {
 		fSystem = session.system();
 		fSystem.registerRequiresAllDerivedValues();
 		fSystem.getEventBus().register(this);
+
+		searchObjDiagramAssociated();
+
 		bNewObj=false;
 
 		frame = new JFrame("Prototipo MVM Wizard");
@@ -334,7 +318,6 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 
-		// create table of attribute/value pairs
 		fTableModel = new TableModel();
 		fTable = new ExtendedJTable(fTableModel);
 		fTable.setPreferredScrollableViewportSize(new Dimension(250, 70));
@@ -371,11 +354,6 @@ public class WizardMVMView extends JPanel implements View {
 		btnCreateObject.setBounds(400, 70, 100, 25);
 		btnCreateObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-//				txNewObject.setText("");
-//				// Poner a null campos de table
-//				//Aqui
-//				txNewObject.setEnabled(true);
-//				bNewObj=true;
 				initNewObject();
 			}
 		});
@@ -391,7 +369,6 @@ public class WizardMVMView extends JPanel implements View {
 				saveObject(oClass, nomObj);
 				bNewObj=false;
 				txNewObject.setEnabled(false);
-				// Select objecto tratado
 				selectObject(nomObj);
 			}
 		});
@@ -403,15 +380,21 @@ public class WizardMVMView extends JPanel implements View {
 
 		btnCancelObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				selectObject(nomObj);
+				cancelObject(nomObj);
 			}
 		});
 		panel.add(btnCancelObject);
 
 		btnDeleteObject = new JButton("Delete Object");
 		btnDeleteObject.setBounds(400, 160, 100, 25);
+		btnDeleteObject.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				deleteObject(nomObj);
+			}
+		});
 		panel.add(btnDeleteObject);
 
+		//deleteObject(String nomObj) {
 
 		lbAssoc = new JLabel("Assoc");
 		lbAssoc.setBounds(10, 190, 160, 25);
@@ -428,6 +411,7 @@ public class WizardMVMView extends JPanel implements View {
 		lAssocs = new JList<String>( modelAssocs );
 		lAssocs.setBounds(10, 215, 110, 85);
 		lAssocs.setBorder(BorderFactory.createLineBorder(Color.black));
+		panel.add(lAssocs);
 
 		lbAclass = new JLabel("Class");
 		lbAclass.setBounds(150, 215, 100, 25);
@@ -482,7 +466,6 @@ public class WizardMVMView extends JPanel implements View {
 		nomClass = ((MClass) lClass.getSelectedValue()).name();
 		lObjects.setModel(loadListObjects(nomClass));
 		lObjects.setSelectedIndex(0);
-//		String nomObj = (String) lObjects.getSelectedValue();
 
 		add(panel);
 
@@ -490,15 +473,9 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 
-//
-//	private DefaultListModel<String> loadListClass() {
-//		DefaultListModel<String> ldefLModel = new DefaultListModel<String>();
-//		for (MClass oClass : fSystem.model().classes()) {
-//			ldefLModel.addElement(oClass.name());
-//		}
-//		return ldefLModel;
-//	}
-
+	public void setFrameName(String name) {
+		frame.setName(name);
+	}
 	private DefaultListModel<MClass> loadListMClass() {
 		DefaultListModel<MClass> ldefLModel = new DefaultListModel<MClass>();
 		for (MClass oClass : fSystem.model().classes()) {
@@ -511,7 +488,7 @@ public class WizardMVMView extends JPanel implements View {
 		DefaultListModel<String> ldefLModel = new DefaultListModel<String>();
 		MSystemState state = fSystem.state();
 		Set<MObject> allObjects = state.allObjects();
-		ArrayList<String> livingObjects = new ArrayList<String>();
+		//		ArrayList<String> livingObjects = new ArrayList<String>();
 
 		for (MObject obj : allObjects) {
 			if (obj.cls().name().equals(nomClass)) {
@@ -520,90 +497,111 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return ldefLModel;
 	}
-private void initNewObject() {
-	//aqui2
-	txNewObject.setText("");
-	txNewObject.setEnabled(true);
-	
-	//---
-	
-	for (int i = 0; i < fValues.length; ++i) {
-		MAttribute attribute = fAttributes.get(i);
-		String newValue = fValues[i];
-		System.out.println("attribute [" + attribute.name()+"]");
-		System.out.println("newValue [" + newValue+"]");
-//		String oldValue = fAttributeValueMap.get(attribute).toString();
-//		fTable.setValueAt("", i, 1);
-		fTable.getModel().setValueAt("", i, 1);
+
+	private void searchObjDiagramAssociated() {
+		odvAssoc = null; 
+		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
+			if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+				odvAssoc = odv.getDiagram();
+				return;
+			}
+		}
 	}
-//	fAttributes = Collections.emptyList();
-//	fValues = new String[0];
-//	modelTabAttrs.fireTableDataChanged();
-	
-//	fTable.fireTableDataChanged();
 
-	
-//		if (!newValue.equals(oldValue)) {
-//
-//			StringWriter errorOutput = new StringWriter();
-//			Expression valueAsExpression = 
-//					OCLCompiler.compileExpression(
-//							fSystem.model(),
-//							fSystem.state(),
-//							newValue, 
-//							"<input>", 
-//							new PrintWriter(errorOutput, true), 
-//							fSystem.varBindings());
-//
-////			if (valueAsExpression == null) {
-////				JOptionPane.showMessageDialog(
-////						fMainWindow, 
-////						errorOutput, 
-////						"Error", 
-////						JOptionPane.ERROR_MESSAGE);
-////				error = true;
-////				continue;
-////			}
-//
-////			try {
-////				fSystem.execute(
-////						new MAttributeAssignmentStatement(
-////								fObject, 
-////								attribute, 
-////								valueAsExpression));
-////
-////			} catch (MSystemException e) {
-////				JOptionPane.showMessageDialog(
-////						fMainWindow, 
-////						e.getMessage(), 
-////						"Error", 
-////						JOptionPane.ERROR_MESSAGE);
-////				error = true;
-////			}
-//		}
-//	}
+	private void createObjDiagram() {
+		NewObjectDiagramView odv = new NewObjectDiagramView(fMainWindow, fSession.system());
+		ViewFrame f = new ViewFrame("Object diagram", odv, "ObjectDiagram.gif");
 
-	
-	
-	//---
-	
-	bNewObj=true;
-}
-	
+		int OBJECTS_LARGE_SYSTEM = 100;
+
+		// Many objects. Ask user if all objects should be hidden
+		if (fSession.system().state().allObjects().size() > OBJECTS_LARGE_SYSTEM) {
+
+			int option = JOptionPane.showConfirmDialog(new JPanel(),
+					"The current system state contains more then " + OBJECTS_LARGE_SYSTEM + " instances." +
+							"This can slow down the object diagram.\r\nDo you want to start with an empty object diagram?",
+							"Large system state", JOptionPane.YES_NO_OPTION);
+
+			if (option == JOptionPane.YES_OPTION) {
+				odv.getDiagram().hideAll();
+			}
+		}
+
+		JComponent c = (JComponent) f.getContentPane();
+		c.setLayout(new BorderLayout());
+		c.add(odv, BorderLayout.CENTER);
+		fMainWindow.addNewViewFrame(f);
+		fMainWindow.getObjectDiagrams().add(odv);
+		odvAssoc = odv.getDiagram();
+
+		tile();
+	}
+
+	private void initNewObject() {
+		txNewObject.setText("");
+		txNewObject.setEnabled(true);
+		bNewObj=true;
+	}
+
+	private void cancelObject(String nomObj) {
+		selectObject(nomObj);
+	}
+	private boolean checkExistObjDiagram() {
+		boolean existDiagram=false;
+		// Ver frames
+		JDesktopPane fDesk = fMainWindow.getFdesk();
+		JInternalFrame[] allframes = fDesk.getAllFrames();
+		
+		for (JInternalFrame ifr: allframes) {
+			if (ifr.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+				existDiagram=true;
+				continue;
+			}
+		}
+
+		if (!existDiagram) {
+			createObjDiagram();
+		}
+		return existDiagram;
+	}
 	private void createObject(MClass oClass, String nomObj) {
 		fMainWindow.createObject(oClass, nomObj);
 		lObjects.setModel(loadListObjects(nomClass));
+
+		checkExistObjDiagram();
+		odvAssoc.forceStartLayoutThread();
 	}
 	private void saveObject(MClass oClass, String nomObj) {
 		if (bNewObj) {
+			// Hacer copia de fValues
+			String[] fValuesAnt = new String[fAttributes.size()];
+			for (int i = 0; i < fAttributes.size(); i++) {
+				fValuesAnt[i] = fValues[i];
+			}
 			createObject(oClass, nomObj);
-			MSystemState state = fSystem.state();
-			fObject = state.objectByName(nomObj);
-//			applyChanges();
-//		}else {
-//			applyChanges();
+			selectObject( nomObj);
+			for (int i = 0; i < fAttributes.size(); i++) {
+				fValues[i] = fValuesAnt[i];
+			}
 		}
 		applyChanges();
+		if (!checkExistObjDiagram()) {
+			odvAssoc.forceStartLayoutThread();
+		}
+
+	}
+	private void deleteObject(String nomObj) {
+		selectObject(nomObj);
+		MSystemState state = fSystem.state();
+		// Localizar diagrama y ver si se puede actualizar
+		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
+			if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+				odv.getDiagram().deleteObject(fObject);
+				odv.repaint();
+			}
+		}
+		state.deleteObject(fObject);
+		lObjects.setModel(loadListObjects(nomClass));
 	}
 
 	/**
@@ -679,28 +677,6 @@ private void initNewObject() {
 	}
 
 	/**
-	 * Initializes and updates the list of available objects.
-	 */
-//	private void updateGUIState() {
-//		// temporarily turn off action listener, since setting the
-//		// model triggers a select action which cannot be
-//		// distinguished from a user initiated selection
-//		//		fObjectComboBox.removeActionListener(fObjectComboBoxActionListener);
-//
-//		// build list of names of currently existing objects
-//		MSystemState state = fSystem.state();
-//		Set<MObject> allObjects = state.allObjects();
-//		ArrayList<String> livingObjects = new ArrayList<String>();
-//
-//		for (MObject obj : allObjects) {
-//			if (obj.exists(state) )
-//				livingObjects.add(obj.name());
-//		}
-//	}
-
-
-
-	/**
 	 * An object has been selected from the list. Update the table of
 	 * properties.
 	 */
@@ -708,10 +684,7 @@ private void initNewObject() {
 		MSystemState state = fSystem.state();
 		fObject = state.objectByName(objName);
 		fTableModel.update();
-		//		if (!fObjectComboBox.getSelectedItem().equals(objName)) {
-		//			fObjectComboBox.setSelectedItem(objName);
-		
-		//		}
+
 		// Buscar en lista
 		lObjects.setSelectedIndex(0);
 		int nObjs= lObjects.getModel().getSize();
@@ -725,8 +698,7 @@ private void initNewObject() {
 
 
 	private void update() {
-//		updateGUIState();
-				fTableModel.update();
+		fTableModel.update();
 	}
 
 	@Subscribe
@@ -740,6 +712,53 @@ private void initNewObject() {
 	public void detachModel() {
 		fSystem.getEventBus().unregister(this);
 		fSystem.unregisterRequiresAllDerivedValues();
+	}
+	private void tile() {
+		JDesktopPane fDesk = fMainWindow.getFdesk();
+		JInternalFrame[] allframes = fDesk.getAllFrames();
+		int count = allframes.length;
+		if (count == 0)
+			return;
+
+		// Determine the necessary grid size
+		int sqrt = (int) Math.sqrt(count);
+		int rows = sqrt;
+		int cols = sqrt;
+		if (rows * cols < count) {
+			cols++;
+			if (rows * cols < count) {
+				rows++;
+			}
+		}
+
+		// Define some initial values for size & location
+		Dimension size = fDesk.getSize();
+
+		int w = size.width / cols;
+		int h = size.height / rows;
+		int x = 0;
+		int y = 0;
+
+		// Iterate over the frames, deiconifying any iconified frames and
+		// then relocating & resizing each
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols && ((i * cols) + j < count); j++) {
+				JInternalFrame f = allframes[(i * cols) + j];
+
+				if (f.isIcon() && !f.isClosed()) {
+					try {
+						f.setIcon(false);
+					} catch (PropertyVetoException ex) {
+						// ignored
+					}
+				}
+				fDesk.getDesktopManager().resizeFrame(f, x, y, w, h);
+				x += w;
+			}
+			y += h; // start the next row
+			x = 0;
+		}
+
 	}
 }
 
