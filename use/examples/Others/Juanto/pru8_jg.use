@@ -1,6 +1,6 @@
 model Juanto8
 
-  class Person
+ class Person
  attributes
    age: Integer
    weight: Integer
@@ -12,11 +12,42 @@ model Juanto8
    name: String
    points: Integer
  end
+ 
  class Teacher
  attributes
    name: String
  end
+ 
+ class Class1
+ attributes
+   attr1: Integer
+ end
 
+ class Class2
+ attributes
+   attr1: Integer
+ end 
+ 
+ class Class3
+ attributes
+   attr1: Integer
+ end
+  
+ class Class4
+ attributes
+   attr1: Integer
+ end
+  
+ class Class5
+ attributes
+   attr1: Integer
+ end
+ 
+ class Class6
+ attributes
+   attr1: Integer
+ end
+ 
 association Teach between
   Matters[1] role matter
   Teacher[1] role studentOf
