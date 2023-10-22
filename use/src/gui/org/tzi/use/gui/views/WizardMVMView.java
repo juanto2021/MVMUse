@@ -22,6 +22,7 @@ package org.tzi.use.gui.views;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -31,11 +32,19 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -54,17 +63,20 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import org.tzi.use.config.Options;
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.gui.main.ModelBrowserSorting;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeEvent;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
 import org.tzi.use.gui.main.ViewFrame;
 import org.tzi.use.gui.util.ExtendedJTable;
+
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.QualifierInputView;
@@ -74,8 +86,13 @@ import org.tzi.use.uml.mm.MAssociation;
 import org.tzi.use.uml.mm.MAssociationEnd;
 import org.tzi.use.uml.mm.MAttribute;
 import org.tzi.use.uml.mm.MClass;
+import org.tzi.use.uml.mm.MClassInvariant;
+import org.tzi.use.uml.mm.MModel;
 import org.tzi.use.uml.mm.MMultiplicity;
+import org.tzi.use.uml.ocl.expr.Evaluator;
 import org.tzi.use.uml.ocl.expr.Expression;
+import org.tzi.use.uml.ocl.expr.MultiplicityViolationException;
+import org.tzi.use.uml.ocl.value.BooleanValue;
 import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.sys.MLink;
 import org.tzi.use.uml.sys.MLinkEnd;
@@ -88,6 +105,7 @@ import org.tzi.use.uml.sys.events.tags.SystemStateChangedEvent;
 import org.tzi.use.uml.sys.soil.MAttributeAssignmentStatement;
 import org.tzi.use.uml.sys.soil.MLinkDeletionStatement;
 import org.tzi.use.uml.sys.soil.MLinkInsertionStatement;
+import org.tzi.use.util.NullWriter;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -134,6 +152,9 @@ public class WizardMVMView extends JPanel implements View {
 	private JLabel lbAmultiplicity;	
 	private JLabel lbArole;	
 	private JLabel lbAresMultiplicity;
+	private JLabel lbClassInvariants;
+	private JLabel lbResClassInvariants;
+	private JLabel lbCheckStructure;
 
 	private JList<MClass> lClass;
 	private JList<String> lObjects;
@@ -162,6 +183,8 @@ public class WizardMVMView extends JPanel implements View {
 	private JButton btnCancelObject;
 	private JButton btnInsertLinkAssoc;
 	private JButton btnDeleteLink;	
+	private JButton btnShowClassInvariants;	
+	private JButton btnShowCheckStructure;
 
 	private boolean bNewObj;
 	private JTable fTable;
@@ -175,6 +198,7 @@ public class WizardMVMView extends JPanel implements View {
 	private NewObjectDiagram odvAssoc;
 	private String aMulti[] = new String[] { 
 			"0", "1", "*" };
+	private List<Future<EvalResult>> futures;
 
 	/**
 	 * The table model.
@@ -539,7 +563,54 @@ public class WizardMVMView extends JPanel implements View {
 				deleteLink(oAssoc) ;
 			}
 		});
+
 		panel.add(btnDeleteLink);
+
+		//--
+		lbClassInvariants = new JLabel("State invariants");
+		lbClassInvariants.setBounds(220, 375, 120, 25);
+		panel.add(lbClassInvariants);
+
+		lbResClassInvariants = new JLabel("");
+		lbResClassInvariants.setBounds(350, 375, 120, 25);
+		lbResClassInvariants.setBorder(blackline);
+		lbResClassInvariants.setVerticalAlignment(SwingConstants.CENTER);
+		lbResClassInvariants.setHorizontalAlignment(SwingConstants.CENTER);
+		lbResClassInvariants.setFont(new Font("Serif", Font.BOLD, 18));
+		lbResClassInvariants.setVisible(false);
+		panel.add(lbResClassInvariants);
+
+		//btnShowClassInvariants
+		btnShowClassInvariants = new JButton("OK");
+		btnShowClassInvariants.setBounds(350, 375, 120, 25);
+		btnShowClassInvariants.setVerticalAlignment(SwingConstants.CENTER);
+		btnShowClassInvariants.setHorizontalAlignment(SwingConstants.CENTER);
+		btnShowClassInvariants.setFont(new Font("Serif", Font.BOLD, 18));
+		btnShowClassInvariants.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showClassInvariantsState();
+			}
+		});
+		panel.add(btnShowClassInvariants);
+
+		lbCheckStructure = new JLabel("Check Structure");
+		lbCheckStructure.setBounds(220, 410, 120, 25);
+		panel.add(lbCheckStructure);
+
+		btnShowCheckStructure = new JButton("OK");
+		btnShowCheckStructure.setBounds(350, 410, 120, 25);
+		btnShowCheckStructure.setVerticalAlignment(SwingConstants.CENTER);
+		btnShowCheckStructure.setHorizontalAlignment(SwingConstants.CENTER);
+		btnShowCheckStructure.setFont(new Font("Serif", Font.BOLD, 18));
+		btnShowCheckStructure.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				showClassInvariantsState();
+			}
+		});
+		panel.add(btnShowCheckStructure);
+
+
+		//--
 
 		panel.add(lClass);
 		panel.add(lObjects);
@@ -553,11 +624,140 @@ public class WizardMVMView extends JPanel implements View {
 		lAssocs.setSelectedIndex(0);
 		MAssociation oAssoc = lAssocs.getSelectedValue();
 		setComposAssoc(oAssoc);
-
+		setResClassInvariants();
+		setResCheckStructure();
 		add(panel);
 
 		setSize(new Dimension(400, 300));
 
+	}
+	public void setResCheckStructure() {
+		boolean bRes = checkStructure();
+		String sRes="OK";
+		if (!bRes) sRes="KO";
+		btnShowCheckStructure.setText(sRes);
+		if(!bRes) {
+			btnShowCheckStructure.setForeground(Color.white);
+			btnShowCheckStructure.setBackground(Color.red);
+		}else {
+			btnShowCheckStructure.setForeground(Color.black);
+			btnShowCheckStructure.setBackground(Color.green);
+		}
+	}
+
+	public void setResClassInvariants() {
+		boolean bRes = check_inv_state();
+		String sRes="OK";
+		if (!bRes) sRes="KO";
+		lbResClassInvariants.setText(sRes);
+		btnShowClassInvariants.setText(sRes);
+		if(!bRes) {
+			lbResClassInvariants.setForeground(Color.white);
+			lbResClassInvariants.setBackground(Color.red);
+			btnShowClassInvariants.setForeground(Color.white);
+			btnShowClassInvariants.setBackground(Color.red);
+		}else {
+			lbResClassInvariants.setForeground(Color.black);
+			lbResClassInvariants.setBackground(Color.green);
+			btnShowClassInvariants.setForeground(Color.black);
+			btnShowClassInvariants.setBackground(Color.green);
+		}
+		lbResClassInvariants.setOpaque(true);
+
+	}
+	public void showClassInvariantsState() {
+		ClassInvariantView civ = new ClassInvariantView(fMainWindow,
+				fSession.system());
+		ViewFrame f = new ViewFrame("Class invariants", civ,
+				"InvariantView.gif");
+		civ.setViewFrame(f);
+		JComponent c = (JComponent) f.getContentPane();
+		c.setLayout(new BorderLayout());
+		c.add(civ, BorderLayout.CENTER);
+		fMainWindow.addNewViewFrame(f);
+	}
+	public boolean check_inv_state() {
+		boolean bRes = false;
+
+		MModel fModel = fSystem.model();
+		int n = fModel.classInvariants().size();
+		MClassInvariant[] fClassInvariants = new MClassInvariant[0];
+		fClassInvariants = new MClassInvariant[n];
+		System.arraycopy(fModel.classInvariants().toArray(), 0,
+				fClassInvariants, 0, n);
+		Arrays.sort(fClassInvariants);
+		EvalResult[] fValues;
+		fValues = new EvalResult[n];
+		for (int i = 0; i < fValues.length; i++) {
+			fValues[i] = null;
+		}
+		ExecutorService executor = Executors.newFixedThreadPool(Options.EVAL_NUMTHREADS);
+		futures = new ArrayList<Future<EvalResult>>();
+		ExecutorCompletionService<EvalResult> ecs = new ExecutorCompletionService<EvalResult>(executor);
+		boolean violationLabel = false; 
+		int numFailures = 0;
+		boolean structureOK = true;
+		for (int i = 0; i < fClassInvariants.length; i++) {
+			if(!fClassInvariants[i].isActive()){
+				continue;
+			}
+			MyEvaluatorCallable cb = new MyEvaluatorCallable(fSystem.state(), i, fClassInvariants[i]);
+			futures.add(ecs.submit(cb));
+		}
+
+		for (int i = 0; i < fClassInvariants.length && !isCancelled(); i++) {
+			if(!fClassInvariants[i].isActive()){
+				continue;
+			}
+			try {
+				EvalResult res;
+				res = ecs.take().get();
+				fValues[res.index] = res;
+
+				boolean ok = false;
+				// if v == null it is not considered as a failure, rather it is
+				// a MultiplicityViolation and it is skipped as failure count
+				boolean skip = false;
+				if (res.result != null) {
+					ok = res.result.isDefined() && ((BooleanValue)res.result).isTrue();
+				} else {
+					violationLabel = true;
+					skip = true;
+				}
+
+				if (!skip && !ok)
+					numFailures++;
+
+			} catch (InterruptedException ex) {
+				break;
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+
+		for (Future<EvalResult> f : futures) {
+			f.cancel(true);
+		}
+
+		structureOK = fSystem.state().checkStructure(new PrintWriter(new NullWriter()), false);
+
+		boolean todosOk=true;
+		for (EvalResult res : fValues) {
+			Boolean boolRes=  ((BooleanValue)res.result).value();
+
+			if (boolRes.equals(false)) todosOk=false;
+			System.out.println("res ["+res.toString()+"] result ["+res.result+"]");
+		}
+		System.out.println("todosOk ["+todosOk+"]");
+		executor.shutdown();
+
+		return todosOk;
+
+	}
+	private boolean checkStructure() {
+		boolean ok = fSession.system().state().checkStructure(new PrintWriter(new NullWriter()));
+		System.out.println("AssocOk ["+ok+"]");
+		return ok;
 	}
 
 	public void setFrameName(String name) {
@@ -584,7 +784,7 @@ public class WizardMVMView extends JPanel implements View {
 		return ldefLModel;
 	}
 	private  DefaultComboBoxModel<MClass> loadComboClass() {
-		String[] classNames;
+		//		String[] classNames;
 		DefaultComboBoxModel<MClass> cbm = new DefaultComboBoxModel<MClass>();
 
 		for (MClass oClass : fSystem.model().classes()) {
@@ -594,17 +794,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 
-	private  DefaultComboBoxModel<String> loadComboObject(JComboBox cmbClass) {
-		DefaultComboBoxModel<String> cbm = new DefaultComboBoxModel<String>();
-		MClass oClass = (MClass) cmbClass.getItemAt(cmbClass.getSelectedIndex());
-		DefaultListModel<String> ldefLModel =loadListObjects(oClass.name());
-		for(int i = 0;i<ldefLModel.size();i++) {
-			String obj = ldefLModel.get(i);
-			cbm.addElement(obj);
-		}
-		return cbm;
-	}
-	private  DefaultComboBoxModel<MObject> loadComboObjectMObject(JComboBox cmbClass) {
+	private  DefaultComboBoxModel<MObject> loadComboObjectMObject(JComboBox<MClass> cmbClass) {
 		DefaultComboBoxModel<MObject> cbm = new DefaultComboBoxModel<MObject>();
 		MClass oClass = (MClass) cmbClass.getItemAt(cmbClass.getSelectedIndex());
 		MSystemState state = fSystem.state();
@@ -636,15 +826,11 @@ public class WizardMVMView extends JPanel implements View {
 				String className=ma.cls().name();
 				switch(nLink){
 				case 0:
-					//					cmbClassOri.setSelectedItem(ma.cls());
 					selectClasInCombo(cmbClassOri,className);
 					lbFromClass.setText(className);
-					//					cmbClassOri.invalidate();
 				case 1:
-					//					cmbClassDes.setSelectedItem(ma.cls());
 					selectClasInCombo(cmbClassDes,className);
 					lbToClass.setText(className);
-					//					cmbClassDes.updateUI();
 				default:
 					// De momento no hacemos nada
 					break;
@@ -713,6 +899,7 @@ public class WizardMVMView extends JPanel implements View {
 			QualifierInputView input = new QualifierInputView(fMainWindow, fSystem, association, objects);
 			input.setLocationRelativeTo(this);
 			input.setVisible(true);
+
 		} else {
 			try {
 				fSystem.execute(new MLinkInsertionStatement(association, objects, Collections.<List<Value>>emptyList()));
@@ -724,12 +911,12 @@ public class WizardMVMView extends JPanel implements View {
 						JOptionPane.ERROR_MESSAGE);
 			}
 		}
+		setResCheckStructure();
 	}
 	private void deleteLink(MAssociation oAssoc) {
 		// Averiguar el link del que se trata
 		MObject oOri = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
 		MObject oDes = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
-		MObject[] fParticipants = new MObject[] {oOri,oDes};
 
 		MLink oLinkTOdel=null;
 		Set<MLink> links = fSystem.state().linksOfAssociation(oAssoc).links();
@@ -778,14 +965,14 @@ public class WizardMVMView extends JPanel implements View {
 					"Error", 
 					JOptionPane.ERROR_MESSAGE);
 		}
-		MSystemState state = fSystem.state();
+		//		MSystemState state = fSystem.state();
 		// Localizar diagrama y ver si se puede actualizar
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
 			if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
-				//				odv.getDiagram().deleteObject(fObject);
 				odv.repaint();
 			}
 		}
+		setResCheckStructure();
 	}
 
 	private void searchObjDiagramAssociated() {
@@ -878,6 +1065,8 @@ public class WizardMVMView extends JPanel implements View {
 		if (!checkExistObjDiagram()) {
 			odvAssoc.forceStartLayoutThread();
 		}
+		setResClassInvariants();
+		checkStructure();
 
 	}
 	private void deleteObject(String nomObj) {
@@ -987,7 +1176,7 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return;
 	}
-	//Aqui
+
 	public void selectClasInCombo(JComboBox<MClass> cmb, String className) {
 
 		// Buscar en lista
@@ -1066,6 +1255,52 @@ public class WizardMVMView extends JPanel implements View {
 			x = 0;
 		}
 
+	}
+	public final boolean isCancelled() {
+		//        return future.isCancelled();
+		return false;
+	}
+	private class EvalResult {
+		public final int index;
+		public final Value result;
+		public final String message;
+		public final long duration;
+
+		public EvalResult(int index, Value result, String message, long duration) {
+			this.index = index;
+			this.result = result;
+			this.message = message;
+			this.duration = duration;
+		}
+	}
+	private class MyEvaluatorCallable implements Callable<EvalResult> {
+		final int index;
+		final MSystemState state;
+		final MClassInvariant inv;
+
+		public MyEvaluatorCallable(MSystemState state, int index, MClassInvariant inv) {
+			this.state = state;
+			this.index = index;
+			this.inv = inv;
+		}
+
+		@Override
+		public EvalResult call() throws Exception {
+			if (isCancelled()) return null;
+
+			Evaluator eval = new Evaluator();
+			Value v = null;
+			String message = null;
+			long start = System.currentTimeMillis();
+
+			try {
+				v = eval.eval(inv.flaggedExpression(), state);
+			} catch (MultiplicityViolationException e) {
+				message = e.getMessage();
+			}
+
+			return new EvalResult(index, v, message, System.currentTimeMillis() - start);
+		}
 	}
 }
 

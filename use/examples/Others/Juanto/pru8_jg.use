@@ -1,0 +1,34 @@
+model Juanto8
+
+  class Person
+ attributes
+   age: Integer
+   weight: Integer
+   height: Integer
+ end
+ 
+ class Matters
+ attributes
+   name: String
+   points: Integer
+ end
+ class Teacher
+ attributes
+   name: String
+ end
+
+association Teach between
+  Matters[1] role matter
+  Teacher[1] role studentOf
+end 
+
+constraints
+
+context Person inv validGreaterThanAge:
+  self.age > 3   
+  
+context Person inv validSmallerThanAge:
+  self.age < 19     
+
+context Person inv validGSAge:
+   self.age >= 10 and self.age <25     
