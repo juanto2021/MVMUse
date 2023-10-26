@@ -666,7 +666,8 @@ public class WizardMVMView extends JPanel implements View {
 		btnShowCheckStructure.setFont(new Font("Serif", Font.BOLD, 18));
 		btnShowCheckStructure.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				showClassInvariantsState();
+//				showClassInvariantsState();
+				checkStructure();
 			}
 		});
 		panel.add(btnShowCheckStructure);
@@ -842,14 +843,15 @@ public class WizardMVMView extends JPanel implements View {
 			f.cancel(true);
 		}
 
-		structureOK = fSystem.state().checkStructure(new PrintWriter(new NullWriter()), false);
+//		structureOK = fSystem.state().checkStructure(new PrintWriter(new NullWriter()), false);
 
 		boolean todosOk=true;
 		for (EvalResult res : fValues) {
 			Boolean boolRes=  ((BooleanValue)res.result).value();
 
 			if (boolRes.equals(false)) todosOk=false;
-			System.out.println("res ["+res.toString()+"] result ["+res.result+"]");
+			System.out.println("res.index ["+res.index+"]");
+			System.out.println("Para invs res ["+fClassInvariants[res.index].name()+"] result ["+res.result+"]");
 		}
 		System.out.println("todosOk ["+todosOk+"]");
 		executor.shutdown();
@@ -858,8 +860,30 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 	private boolean checkStructure() {
-		boolean ok = fSession.system().state().checkStructure(new PrintWriter(new NullWriter()));
-		System.out.println("AssocOk ["+ok+"]");
+		//Aqui2
+		StringWriter buffer = new StringWriter();
+		PrintWriter out = new PrintWriter(buffer);
+		
+//		boolean ok = fSession.system().state().checkStructure(new PrintWriter(new NullWriter()));
+		boolean ok = fSession.system().state().checkStructure(out);
+		//--
+		boolean res=false;
+		// check all associations
+		boolean reportAllErrors = true;
+		for (MAssociation assoc : fSystem.model().associations()) {
+			StringWriter buffer2 = new StringWriter();
+			PrintWriter out2 = new PrintWriter(buffer2);
+			 res = fSession.system().state().checkStructure(assoc, out2, reportAllErrors) ;
+			 System.out.println("Para assoc ["+assoc.name()+" -  ["+res+"] ["+buffer2+"]");
+//			if (!reportAllErrors && !res) return false;
+		}
+		
+		//---
+		
+		
+		
+		System.out.println("Total ["+ok+"]");
+		System.out.println("Totalout ["+buffer+"]");
 		return ok;
 	}
 
@@ -1185,7 +1209,8 @@ public class WizardMVMView extends JPanel implements View {
 			odvAssoc.forceStartLayoutThread();
 		}
 		setResClassInvariants();
-		checkStructure();
+//		checkStructure();
+		setResCheckStructure();
 
 	}
 	private void deleteObject(String nomObj) {
@@ -1200,6 +1225,9 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		state.deleteObject(fObject);
 		lObjects.setModel(loadListObjects(nomClass));
+		setResClassInvariants();
+//		checkStructure();
+		setResCheckStructure();
 	}
 
 
