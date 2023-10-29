@@ -24,8 +24,8 @@ model Juanto8
  end
 
  association Teach between
-  Matters[1] role matter
-  Teacher[1] role studentOf
+  Matters[2] role matter
+  Teacher[1] role teach
 end 
 
 constraints

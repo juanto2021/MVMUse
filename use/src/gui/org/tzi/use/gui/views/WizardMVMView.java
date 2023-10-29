@@ -36,11 +36,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -78,7 +76,6 @@ import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeEvent;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
 import org.tzi.use.gui.main.ViewFrame;
 import org.tzi.use.gui.util.ExtendedJTable;
-
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.QualifierInputView;
@@ -107,7 +104,6 @@ import org.tzi.use.uml.sys.events.tags.SystemStateChangedEvent;
 import org.tzi.use.uml.sys.soil.MAttributeAssignmentStatement;
 import org.tzi.use.uml.sys.soil.MLinkDeletionStatement;
 import org.tzi.use.uml.sys.soil.MLinkInsertionStatement;
-import org.tzi.use.util.NullWriter;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -121,7 +117,7 @@ import com.google.common.eventbus.Subscribe;
  */
 @SuppressWarnings("serial")
 public class WizardMVMView extends JPanel implements View {
-	private static final String NO_OBJECTS_AVAILABLE = "(No objects available.)";
+//	private static final String NO_OBJECTS_AVAILABLE = "(No objects available.)";
 
 	private static final String NAMEFRAMEMVMDIAGRAM = "MVM";
 	private MainWindow fMainWindow;
@@ -133,12 +129,12 @@ public class WizardMVMView extends JPanel implements View {
 	private JFrame frame;
 	private JPanel panel;
 
-	private DefaultListModel<MClass> modelClass;
+//	private DefaultListModel<MClass> modelClass;
 	private DefaultListModel<String> modelObjects;
 
 	private DefaultTableModel modelTabAttrs;
-	private DefaultListModel<MAssociation> modelAssocs;
-	private JTableHeader header;
+//	private DefaultListModel<MAssociation> modelAssocs;
+//	private JTableHeader header;
 
 	private JLabel lbClass;
 	private JLabel lbObjects;
@@ -153,7 +149,7 @@ public class WizardMVMView extends JPanel implements View {
 	private JLabel lbAobject;	
 	private JLabel lbAmultiplicity;	
 	private JLabel lbArole;	
-	private JLabel lbAresMultiplicity;
+//	private JLabel lbAresMultiplicity;
 	private JLabel lbClassInvariants;
 	private JLabel lbResClassInvariants;
 	private JLabel lbCheckStructure;
@@ -166,8 +162,8 @@ public class WizardMVMView extends JPanel implements View {
 	private JList<MAssociation> lAssocs;
 	private JList<String> lAttrs;
 
-	private JTable tabAttr;
-	private JScrollPane paneTabAttrs;
+//	private JTable tabAttr;
+//	private JScrollPane paneTabAttrs;
 
 	private JTextField txNewObject;
 	private JTextField txMultiOri;
@@ -310,12 +306,12 @@ public class WizardMVMView extends JPanel implements View {
 
 		panel.setLayout(null);
 
-		modelClass = new DefaultListModel<MClass>();
+//		modelClass = new DefaultListModel<MClass>();
 		modelObjects = new DefaultListModel<>();
-		modelAssocs = new DefaultListModel<MAssociation>();
+//		modelAssocs = new DefaultListModel<MAssociation>();
 
 		modelTabAttrs = new DefaultTableModel();
-		tabAttr = new JTable(modelTabAttrs);
+//		tabAttr = new JTable(modelTabAttrs);
 
 		lbClass = new JLabel("Class");
 		lbClass.setBounds(10, 15, 60, 25);
@@ -354,7 +350,7 @@ public class WizardMVMView extends JPanel implements View {
 		scrollPaneClass.setBounds(10, 40, 90, 145);
 
 		modelObjects=loadListObjects(nomClass);
-		
+
 
 		lObjects = new JList<String>( modelObjects );
 		lObjects.setBounds(110, 40, 90, 110);
@@ -666,7 +662,7 @@ public class WizardMVMView extends JPanel implements View {
 		btnShowCheckStructure.setFont(new Font("Serif", Font.BOLD, 18));
 		btnShowCheckStructure.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-//				showClassInvariantsState();
+				//				showClassInvariantsState();
 				checkStructure();
 			}
 		});
@@ -688,7 +684,10 @@ public class WizardMVMView extends JPanel implements View {
 		lObjects.setSelectedIndex(0);
 		lAssocs.setSelectedIndex(0);
 		MAssociation oAssoc = lAssocs.getSelectedValue();
-		setComposAssoc(oAssoc);
+		if (oAssoc!=null) {
+			setComposAssoc(oAssoc);
+		}
+		
 		setResClassInvariants();
 		setResCheckStructure();
 		add(panel);
@@ -703,14 +702,14 @@ public class WizardMVMView extends JPanel implements View {
 		String nomProposed = nomClass.toLowerCase() + numObj; 
 
 		// Averiguar si existe objeto o no en base a una iteracion
-		// Aqui1
+
 		while(existObject(nomProposed)) {
 			numObj+=1;
 			nomProposed = nomClass.toLowerCase() + numObj; 
 		}
 		System.out.println("nomProposed [" + nomProposed+"]");
 		oClass = lClass.getSelectedValue();
-		//		saveObject(oClass, nomProposed);
+
 		bNewObj=true;
 		saveObject(oClass, nomProposed);
 
@@ -843,7 +842,7 @@ public class WizardMVMView extends JPanel implements View {
 			f.cancel(true);
 		}
 
-//		structureOK = fSystem.state().checkStructure(new PrintWriter(new NullWriter()), false);
+		//		structureOK = fSystem.state().checkStructure(new PrintWriter(new NullWriter()), false);
 
 		boolean todosOk=true;
 		for (EvalResult res : fValues) {
@@ -860,11 +859,10 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 	private boolean checkStructure() {
-		//Aqui2
 		StringWriter buffer = new StringWriter();
 		PrintWriter out = new PrintWriter(buffer);
-		
-//		boolean ok = fSession.system().state().checkStructure(new PrintWriter(new NullWriter()));
+
+		//		boolean ok = fSession.system().state().checkStructure(new PrintWriter(new NullWriter()));
 		boolean ok = fSession.system().state().checkStructure(out);
 		//--
 		boolean res=false;
@@ -873,15 +871,10 @@ public class WizardMVMView extends JPanel implements View {
 		for (MAssociation assoc : fSystem.model().associations()) {
 			StringWriter buffer2 = new StringWriter();
 			PrintWriter out2 = new PrintWriter(buffer2);
-			 res = fSession.system().state().checkStructure(assoc, out2, reportAllErrors) ;
-			 System.out.println("Para assoc ["+assoc.name()+" -  ["+res+"] ["+buffer2+"]");
-//			if (!reportAllErrors && !res) return false;
+			res = fSession.system().state().checkStructure(assoc, out2, reportAllErrors) ;
+			System.out.println("Para assoc ["+assoc.name()+" -  ["+res+"] ["+buffer2+"]");
 		}
-		
-		//---
-		
-		
-		
+
 		System.out.println("Total ["+ok+"]");
 		System.out.println("Totalout ["+buffer+"]");
 		return ok;
@@ -902,30 +895,15 @@ public class WizardMVMView extends JPanel implements View {
 		DefaultListModel<String> ldefLModel = new DefaultListModel<String>();
 		MSystemState state = fSystem.state();
 		Set<MObject> allObjects = state.allObjects();
-		
-//		Set<MObject> mObjectSet = new TreeSet<>(new MObjectComparator());
-
 
 		for (MObject obj : allObjects) {
-//			for (MObject obj : mObjectSet) {
 			if (obj.cls().name().equals(nomClass)) {
 				ldefLModel.addElement(obj.name());
 			}
 		}
-		
-//		
-//		M[] contents = ldefLModel.toArray();
-//		Arrays.sort(contents);
-//		ldefLModel.clear();
-//		for (Object item: contents)
-//			ldefLModel.add( item );
-////		ldefLModel.copyInto(contents);
-//		
-		
 		return ldefLModel;
 	}
 	private  DefaultComboBoxModel<MClass> loadComboClass() {
-		//		String[] classNames;
 		DefaultComboBoxModel<MClass> cbm = new DefaultComboBoxModel<MClass>();
 
 		for (MClass oClass : fSystem.model().classes()) {
@@ -1108,7 +1086,6 @@ public class WizardMVMView extends JPanel implements View {
 					"Error", 
 					JOptionPane.ERROR_MESSAGE);
 		}
-		//		MSystemState state = fSystem.state();
 		// Localizar diagrama y ver si se puede actualizar
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
 			if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
@@ -1198,10 +1175,29 @@ public class WizardMVMView extends JPanel implements View {
 			for (int i = 0; i < fAttributes.size(); i++) {
 				fValuesAnt[i] = fValues[i];
 			}
-			createObject(oClass, nomObj);
+			if (!existObject(nomObj)) {
+				createObject(oClass, nomObj);
+			}
+
 			selectObject( nomObj);
-			for (int i = 0; i < fAttributes.size(); i++) {
-				fValues[i] = fValuesAnt[i];
+			if (fValues.length == fValuesAnt.length) {
+				for (int i = 0; i < fAttributes.size(); i++) {
+					fValues[i] = fValuesAnt[i];
+				}
+			}else {
+				for (int i = 0; i < fAttributes.size(); i++) {
+					MAttribute attr = (MAttribute) fAttributes.get(i);
+					// Aqui8
+					attr.type();
+					if (attr.type().isTypeOfInteger()) {
+						fValues[i] = "1";
+					}else if (attr.type().isTypeOfString()) {
+						fValues[i] = "'x'";
+					}
+
+
+
+				}
 			}
 		}
 		applyChanges();
@@ -1209,7 +1205,7 @@ public class WizardMVMView extends JPanel implements View {
 			odvAssoc.forceStartLayoutThread();
 		}
 		setResClassInvariants();
-//		checkStructure();
+		//		checkStructure();
 		setResCheckStructure();
 
 	}
@@ -1226,7 +1222,6 @@ public class WizardMVMView extends JPanel implements View {
 		state.deleteObject(fObject);
 		lObjects.setModel(loadListObjects(nomClass));
 		setResClassInvariants();
-//		checkStructure();
 		setResCheckStructure();
 	}
 
@@ -1449,16 +1444,5 @@ public class WizardMVMView extends JPanel implements View {
 			return new EvalResult(index, v, message, System.currentTimeMillis() - start);
 		}
 	}
-//	public class MObjectComparator implements Comparator<MObject> {
-//	    @Override
-//	    public int compare(MObject obj1, MObject obj2) {
-//	        // Implement your comparison logic here.
-//	        // Return a negative value if obj1 comes before obj2, 
-//	        // a positive value if obj1 comes after obj2,
-//	        // and 0 if they are equal.
-//	    	return (obj1.name().compareTo(obj2.name()));
-//	    	
-//	    }
-//	}
 }
 
