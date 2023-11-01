@@ -120,6 +120,7 @@ public class WizardMVMView extends JPanel implements View {
 //	private static final String NO_OBJECTS_AVAILABLE = "(No objects available.)";
 
 	private static final String NAMEFRAMEMVMDIAGRAM = "MVM";
+	private static final String NAMEFRAMEMVMWIZARD = "MVMWizard";
 	private MainWindow fMainWindow;
 	private Session fSession;
 	private MSystem fSystem;
@@ -204,6 +205,8 @@ public class WizardMVMView extends JPanel implements View {
 			"0", "1", "*" };
 	private List<Future<EvalResult>> futures;
 	private Color colorSoftGray;
+	
+	private JInternalFrame[] allframes;
 
 	/**
 	 * The table model.
@@ -715,7 +718,9 @@ public class WizardMVMView extends JPanel implements View {
 
 		bNewObj=false;
 		txNewObject.setEnabled(false);
+		//Aqui1
 		selectObject(nomProposed);
+		nomObj = nomProposed;
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 	}
@@ -1098,9 +1103,11 @@ public class WizardMVMView extends JPanel implements View {
 	private void searchObjDiagramAssociated() {
 		odvAssoc = null; 
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
-			if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
-				odvAssoc = odv.getDiagram();
-				return;
+			if (odv.getName()!=null) {
+				if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+					odvAssoc = odv.getDiagram();
+					return;
+				}
 			}
 		}
 	}
@@ -1108,6 +1115,8 @@ public class WizardMVMView extends JPanel implements View {
 	private void createObjDiagram() {
 		NewObjectDiagramView odv = new NewObjectDiagramView(fMainWindow, fSession.system());
 		ViewFrame f = new ViewFrame("Object diagram", odv, "ObjectDiagram.gif");
+		f.setName(NAMEFRAMEMVMDIAGRAM);
+		odv.setName(NAMEFRAMEMVMDIAGRAM);
 
 		int OBJECTS_LARGE_SYSTEM = 100;
 
@@ -1147,12 +1156,14 @@ public class WizardMVMView extends JPanel implements View {
 		boolean existDiagram=false;
 		// Ver frames
 		JDesktopPane fDesk = fMainWindow.getFdesk();
-		JInternalFrame[] allframes = fDesk.getAllFrames();
+		allframes = fDesk.getAllFrames();
 
 		for (JInternalFrame ifr: allframes) {
-			if (ifr.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
-				existDiagram=true;
-				continue;
+			if (ifr.getName()!=null ) {
+				if (ifr.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+					existDiagram=true;
+					continue;
+				}	
 			}
 		}
 
@@ -1162,13 +1173,20 @@ public class WizardMVMView extends JPanel implements View {
 		return existDiagram;
 	}
 	private void createObject(MClass oClass, String nomObj) {
+
+		checkExistObjDiagram();
 		fMainWindow.createObject(oClass, nomObj);
 		lObjects.setModel(loadListObjects(nomClass));
 
-		checkExistObjDiagram();
+//		checkExistObjDiagram();
 		odvAssoc.forceStartLayoutThread();
 	}
 	private void saveObject(MClass oClass, String nomObj) {
+		// Verificamos existencia de ObjectDiagram MVM
+//		boolean existDiagram=false;
+		//aqui8
+		checkExistObjDiagram();
+		
 		if (bNewObj) {
 			// Hacer copia de fValues
 			String[] fValuesAnt = new String[fAttributes.size()];
@@ -1194,9 +1212,6 @@ public class WizardMVMView extends JPanel implements View {
 					}else if (attr.type().isTypeOfString()) {
 						fValues[i] = "'x'";
 					}
-
-
-
 				}
 			}
 		}
@@ -1209,18 +1224,25 @@ public class WizardMVMView extends JPanel implements View {
 		setResCheckStructure();
 
 	}
-	private void deleteObject(String nomObj) {
-		selectObject(nomObj);
+	private void deleteObject(String nomObjDel) {
+		int idx = selectObject(nomObjDel);
 		MSystemState state = fSystem.state();
 		// Localizar diagrama y ver si se puede actualizar
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
 			if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 				odv.getDiagram().deleteObject(fObject);
 				odv.repaint();
+				idx=idx-1;
+
 			}
 		}
 		state.deleteObject(fObject);
 		lObjects.setModel(loadListObjects(nomClass));
+		if (idx<0) idx=0;
+		if (idx>-1) {
+			lObjects.setSelectedIndex(idx);
+			nomObj = (String) lObjects.getSelectedValue();
+		}
 		setResClassInvariants();
 		setResCheckStructure();
 	}
@@ -1303,7 +1325,8 @@ public class WizardMVMView extends JPanel implements View {
 	 * An object has been selected from the list. Update the table of
 	 * properties.
 	 */
-	public void selectObject(String objName) {
+	public int selectObject(String objName) {
+		int idx = -1;
 		MSystemState state = fSystem.state();
 		fObject = state.objectByName(objName);
 		fTableModel.update();
@@ -1314,9 +1337,11 @@ public class WizardMVMView extends JPanel implements View {
 		for (int nObj=0;nObj<nObjs;nObj++) {
 			if (lObjects.getModel().getElementAt(nObj).equals(objName)) {
 				lObjects.setSelectedIndex(nObj);
+				idx=nObj;
+				return idx;
 			}
 		}
-		return;
+		return idx;
 	}
 
 	public void selectClasInCombo(JComboBox<MClass> cmb, String className) {
@@ -1353,7 +1378,8 @@ public class WizardMVMView extends JPanel implements View {
 	}
 	private void tile() {
 		JDesktopPane fDesk = fMainWindow.getFdesk();
-		JInternalFrame[] allframes = fDesk.getAllFrames();
+//		allframes = fDesk.getAllFrames();
+		allframes = fMainWindow.sortInternalFrames(fDesk.getAllFrames());
 		int count = allframes.length;
 		if (count == 0)
 			return;
