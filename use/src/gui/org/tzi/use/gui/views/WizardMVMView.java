@@ -467,7 +467,7 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnDeleteObject);
 
-		lbAssoc = new JLabel("Assoc");
+		lbAssoc = new JLabel("Association");
 		lbAssoc.setBounds(10, 190, 160, 25);
 		panel.add(lbAssoc);	
 
@@ -882,6 +882,15 @@ public class WizardMVMView extends JPanel implements View {
 
 		System.out.println("Total ["+ok+"]");
 		System.out.println("Totalout ["+buffer+"]");
+		String msgRef = buffer.toString();
+		msgRef.replaceAll("\\r\\n", "");
+		String[] lineas = msgRef.split(".");
+		int nLineas = lineas.length;
+		for (int nLinea=0;nLinea<nLineas;nLinea++) {
+			System.out.println("Linea ["+lineas[nLinea]+"]");
+		}
+		System.out.println("Ya");
+		
 		return ok;
 	}
 
