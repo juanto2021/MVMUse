@@ -883,8 +883,11 @@ public class WizardMVMView extends JPanel implements View {
 		System.out.println("Total ["+ok+"]");
 		System.out.println("Totalout ["+buffer+"]");
 		String msgRef = buffer.toString();
-		msgRef.replaceAll("\\r\\n", "");
-		String[] lineas = msgRef.split(".");
+		msgRef.replaceAll("[\\r\\n]+", "");
+		msgRef.replaceAll("[\\n]+", "");
+		msgRef.replaceAll("[\\r]+", "");
+		//sw.toString().replaceAll("[\\r\\n]+", "");
+		String[] lineas = msgRef.split("'.");
 		int nLineas = lineas.length;
 		for (int nLinea=0;nLinea<nLineas;nLinea++) {
 			System.out.println("Linea ["+lineas[nLinea]+"]");
