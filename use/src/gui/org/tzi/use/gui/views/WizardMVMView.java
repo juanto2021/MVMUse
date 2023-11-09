@@ -883,17 +883,22 @@ public class WizardMVMView extends JPanel implements View {
 		System.out.println("Total ["+ok+"]");
 		System.out.println("Totalout ["+buffer+"]");
 		String msgRef = buffer.toString();
-		msgRef.replaceAll("[\\r\\n]+", "");
-		msgRef.replaceAll("[\\n]+", "");
-		msgRef.replaceAll("[\\r]+", "");
-		//sw.toString().replaceAll("[\\r\\n]+", "");
-		String[] lineas = msgRef.split("'.");
+		String msg = msgRef.replace("\r\n", "");
+		String[] lineas = msg.split("\\.");
 		int nLineas = lineas.length;
+		System.out.println("nLineas"+nLineas+"]");
 		for (int nLinea=0;nLinea<nLineas;nLinea++) {
-			System.out.println("Linea ["+lineas[nLinea]+"]");
+			String linea = lineas[nLinea];
+			System.out.println("Linea ["+linea+"]");
+			String[] partes = linea.split("'");
+			int nPartes = partes.length;
+			for (int nParte=0;nParte<nPartes;nParte++) {
+				String parte = partes[nParte];
+				System.out.println("Parte ["+parte+"]");
+			}
 		}
 		System.out.println("Ya");
-		
+
 		return ok;
 	}
 
