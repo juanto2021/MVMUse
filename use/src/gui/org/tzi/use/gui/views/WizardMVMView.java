@@ -25,6 +25,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -50,6 +52,7 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
@@ -110,6 +113,10 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 
+import org.tzi.mvm.AssocWizard;
+import org.tzi.mvm.LinkWizard;
+import org.tzi.mvm.MVMWizardAssoc;
+
 /** 
  * A view for showing and changing object properties (attributes).
  *  
@@ -117,7 +124,7 @@ import com.google.common.eventbus.Subscribe;
  */
 @SuppressWarnings("serial")
 public class WizardMVMView extends JPanel implements View {
-//	private static final String NO_OBJECTS_AVAILABLE = "(No objects available.)";
+	//	private static final String NO_OBJECTS_AVAILABLE = "(No objects available.)";
 
 	private static final String NAMEFRAMEMVMDIAGRAM = "MVM";
 	private static final String NAMEFRAMEMVMWIZARD = "MVMWizard";
@@ -126,16 +133,11 @@ public class WizardMVMView extends JPanel implements View {
 	private MSystem fSystem;
 	private MObject fObject;
 
-	//---
 	private JFrame frame;
 	private JPanel panel;
 
-//	private DefaultListModel<MClass> modelClass;
 	private DefaultListModel<String> modelObjects;
-
 	private DefaultTableModel modelTabAttrs;
-//	private DefaultListModel<MAssociation> modelAssocs;
-//	private JTableHeader header;
 
 	private JLabel lbClass;
 	private JLabel lbObjects;
@@ -150,7 +152,6 @@ public class WizardMVMView extends JPanel implements View {
 	private JLabel lbAobject;	
 	private JLabel lbAmultiplicity;	
 	private JLabel lbArole;	
-//	private JLabel lbAresMultiplicity;
 	private JLabel lbClassInvariants;
 	private JLabel lbResClassInvariants;
 	private JLabel lbCheckStructure;
@@ -162,9 +163,6 @@ public class WizardMVMView extends JPanel implements View {
 	private JList<String> lObjects;
 	private JList<MAssociation> lAssocs;
 	private JList<String> lAttrs;
-
-//	private JTable tabAttr;
-//	private JScrollPane paneTabAttrs;
 
 	private JTextField txNewObject;
 	private JTextField txMultiOri;
@@ -180,7 +178,8 @@ public class WizardMVMView extends JPanel implements View {
 	private JComboBox<MObject> cmbObjectDes;
 	private JComboBox<String> cmbMultiOri;
 	private JComboBox<String> cmbMultiDes;
-
+	private JCheckBox chkAutoLayout;	
+	
 	private JButton btnCreateObject;
 	private JButton btnNewObjectAuto;
 	private JButton btnDeleteObject;
@@ -204,8 +203,9 @@ public class WizardMVMView extends JPanel implements View {
 	private String aMulti[] = new String[] { 
 			"0", "1", "*" };
 	private List<Future<EvalResult>> futures;
+	private List<AssocWizard> lAssocsWizard;
 	private Color colorSoftGray;
-	
+
 	private JInternalFrame[] allframes;
 
 	/**
@@ -288,7 +288,6 @@ public class WizardMVMView extends JPanel implements View {
 		fSystem = session.system();
 		fSystem.registerRequiresAllDerivedValues();
 		fSystem.getEventBus().register(this);
-		//		colorSoftGray=new Color(196,244,244);
 		colorSoftGray=new Color(218,224,224);
 
 		searchObjDiagramAssociated();
@@ -309,12 +308,8 @@ public class WizardMVMView extends JPanel implements View {
 
 		panel.setLayout(null);
 
-//		modelClass = new DefaultListModel<MClass>();
 		modelObjects = new DefaultListModel<>();
-//		modelAssocs = new DefaultListModel<MAssociation>();
-
 		modelTabAttrs = new DefaultTableModel();
-//		tabAttr = new JTable(modelTabAttrs);
 
 		lbClass = new JLabel("Class");
 		lbClass.setBounds(10, 15, 60, 25);
@@ -394,6 +389,23 @@ public class WizardMVMView extends JPanel implements View {
 		fTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		fTablePane = new JScrollPane(fTable);
 		fTablePane.setBounds(210, 40, 180, 100);
+		
+		//aqui2
+		// chkAutoLayout
+		chkAutoLayout=new JCheckBox("Auto Layout");
+		chkAutoLayout.setBounds(210, 160, 160, 25);
+		chkAutoLayout.setSelected(true);
+		chkAutoLayout.addItemListener(new ItemListener() {
+	         public void itemStateChanged(ItemEvent e) {
+//	            statusLabel.setText("Football Checkbox: " + (e.getStateChange()==1?"checked":"unchecked"));
+	            if (e.getStateChange()==1) {
+	            	odvAssoc.forceStartLayoutThread();
+	            }else {
+	            	odvAssoc.forceStopLayoutThread();
+	            }
+	         }
+	      });
+		panel.add(chkAutoLayout);	
 
 		selectObject(nomObj);
 
@@ -627,7 +639,6 @@ public class WizardMVMView extends JPanel implements View {
 
 		panel.add(btnDeleteLink);
 
-		//--
 		lbClassInvariants = new JLabel("State invariants");
 		lbClassInvariants.setBounds(220, 375, 120, 25);
 		panel.add(lbClassInvariants);
@@ -641,7 +652,6 @@ public class WizardMVMView extends JPanel implements View {
 		lbResClassInvariants.setVisible(false);
 		panel.add(lbResClassInvariants);
 
-		//btnShowClassInvariants
 		btnShowClassInvariants = new JButton("OK");
 		btnShowClassInvariants.setBounds(350, 375, 120, 25);
 		btnShowClassInvariants.setVerticalAlignment(SwingConstants.CENTER);
@@ -665,17 +675,14 @@ public class WizardMVMView extends JPanel implements View {
 		btnShowCheckStructure.setFont(new Font("Serif", Font.BOLD, 18));
 		btnShowCheckStructure.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//				showClassInvariantsState();
-				checkStructure();
+				boolean ok=checkStructure();
+				if (!ok) {
+					MVMWizardAssoc dW= new MVMWizardAssoc(lAssocsWizard);
+				}
 			}
 		});
 		panel.add(btnShowCheckStructure);
-
-		//--
-
-		//		panel.add(lClass);
 		panel.add(scrollPaneClass);
-		//		panel.add(lObjects);
 		panel.add(scrollPaneObj);
 
 		panel.add(lAttrs);		
@@ -690,7 +697,7 @@ public class WizardMVMView extends JPanel implements View {
 		if (oAssoc!=null) {
 			setComposAssoc(oAssoc);
 		}
-		
+
 		setResClassInvariants();
 		setResCheckStructure();
 		add(panel);
@@ -718,7 +725,6 @@ public class WizardMVMView extends JPanel implements View {
 
 		bNewObj=false;
 		txNewObject.setEnabled(false);
-		//Aqui1
 		selectObject(nomProposed);
 		nomObj = nomProposed;
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
@@ -846,9 +852,6 @@ public class WizardMVMView extends JPanel implements View {
 		for (Future<EvalResult> f : futures) {
 			f.cancel(true);
 		}
-
-		//		structureOK = fSystem.state().checkStructure(new PrintWriter(new NullWriter()), false);
-
 		boolean todosOk=true;
 		for (EvalResult res : fValues) {
 			Boolean boolRes=  ((BooleanValue)res.result).value();
@@ -866,8 +869,6 @@ public class WizardMVMView extends JPanel implements View {
 	private boolean checkStructure() {
 		StringWriter buffer = new StringWriter();
 		PrintWriter out = new PrintWriter(buffer);
-
-		//		boolean ok = fSession.system().state().checkStructure(new PrintWriter(new NullWriter()));
 		boolean ok = fSession.system().state().checkStructure(out);
 		//--
 		boolean res=false;
@@ -882,23 +883,133 @@ public class WizardMVMView extends JPanel implements View {
 
 		System.out.println("Total ["+ok+"]");
 		System.out.println("Totalout ["+buffer+"]");
+
+		lAssocsWizard = new ArrayList<AssocWizard>();
+
 		String msgRef = buffer.toString();
-		String msg = msgRef.replace("\r\n", "");
-		String[] lineas = msg.split("\\.");
-		int nLineas = lineas.length;
-		System.out.println("nLineas"+nLineas+"]");
-		for (int nLinea=0;nLinea<nLineas;nLinea++) {
-			String linea = lineas[nLinea];
-			System.out.println("Linea ["+linea+"]");
-			String[] partes = linea.split("'");
-			int nPartes = partes.length;
-			for (int nParte=0;nParte<nPartes;nParte++) {
-				String parte = partes[nParte];
-				System.out.println("Parte ["+parte+"]");
+		if (msgRef.contains("Multiplicity")) {
+
+			String msg = msgRef.replace("\r\n", "");
+			String[] lineas = msg.split("\\.");
+			int nLineas = lineas.length;
+			System.out.println("nLineas"+nLineas+"]");
+			for (int nLinea=0;nLinea<nLineas;nLinea++) {
+				String linea = lineas[nLinea];
+				System.out.println("Linea ["+linea+"]");
+				if (linea.contains("Multiplicity constraint violation")) {
+					String cause="";
+					String fullMessage="";
+					String nomAssociation="";
+					String nomAssocObject="";
+					String nomAssocClass="";
+					String connectedNum="";
+					String connectedClass="";
+					String assoccEnd="";
+					String multiplicity="";		
+
+					fullMessage=linea;
+					String linea2 = linea.replaceFirst("of class","of class1");
+					linea=linea2;
+					String[] partes = linea.split("'");
+					int nPartes = partes.length;
+					for (int nParte=0;nParte<nPartes;nParte++) {
+						String parte = partes[nParte];
+						System.out.println("Parte ["+parte+"]");
+						//Multiplicity constraint violation
+						if (parte.contains("Multiplicity constraint violation")) {
+							String[] subPartes = parte.split(":");
+							cause=subPartes[0]+"'";
+							String[] subPartes2 = parte.split("`");
+							nomAssociation=subPartes2[1];
+						}
+						if (parte.contains(":  Object")) {
+							String[] subPartes = parte.split("`");
+							nomAssocObject=subPartes[1];
+						}else if (parte.contains("of class1")) {
+							String[] subPartes = parte.split("`");
+							nomAssocClass=subPartes[1];
+						}else if (parte.contains("objects of class")) {
+							String[] subPartesSPC = parte.split(" ");
+							connectedNum = subPartesSPC[4];
+							String[] subPartes = parte.split("`");
+							connectedClass=subPartes[1];
+						}else if (parte.contains("at association end")) {
+							String[] subPartes = parte.split("`");
+							assoccEnd=subPartes[1];
+						}else if (parte.contains("but the multiplicity")) {
+							String[] subPartes = parte.split("`");
+							multiplicity=subPartes[1];
+						}
+					}
+
+					// Busca assoc en lista
+
+					List<LinkWizard> lLinksWizard = new ArrayList<LinkWizard>();
+
+					AssocWizard aw = new AssocWizard();
+					boolean existAssocWizard=false;
+					int indexAssoc=-1;
+					for(indexAssoc=0;indexAssoc<lAssocsWizard.size();indexAssoc++) {
+						AssocWizard awl = lAssocsWizard.get(indexAssoc);
+						if (awl.getName().equals(nomAssociation)) {
+							aw = awl;
+							existAssocWizard=true;
+							break;
+						}
+					}
+					if (existAssocWizard) {
+						lLinksWizard=aw.getlLinks();
+					}else {
+						aw.setName(nomAssociation);
+						aw.setState("ko");
+					}
+					// Si no esta, crea nueva assoc
+					// Si esta, la usa
+					System.out.println("cause ["+cause+"]");
+					System.out.println("nomAssociation  ["+ nomAssociation +"]");
+					System.out.println("nomAssocObject ["+nomAssocObject+"]");
+					System.out.println("nomAssocClass ["+nomAssocClass+"]");
+					System.out.println("connectedNum ["+connectedNum+"]");
+					System.out.println("connectedClass ["+connectedClass+"]");
+					System.out.println("assoccEnd ["+assoccEnd+"]");
+					System.out.println("multiplicity ["+multiplicity+"]");	
+					//				
+					LinkWizard lw = new LinkWizard();
+					lw.setObject(nomAssocObject);
+					lw.setNomClass(nomAssocClass);
+					lw.setConnectedTo(connectedNum);
+					lw.setOfClass(connectedClass);
+					lw.setAssocEnd(assoccEnd);
+					lw.setMultiSpecified(multiplicity);
+					lw.setCause(cause);
+					lw.setFullMessage(fullMessage);
+					lLinksWizard.add(lw);
+					aw.setlLinks(lLinksWizard);
+
+					if (existAssocWizard) {
+						lAssocsWizard.remove(indexAssoc);
+						lAssocsWizard.add(aw);
+					}else {
+						lAssocsWizard.add(aw);
+					}
+				}
+
+			}
+
+		}
+
+		System.out.println("Ya");
+		for (AssocWizard aw: lAssocsWizard) {
+			System.out.println("aw ["+aw.getName()+"]");	
+			for (LinkWizard lw: aw.getlLinks()) {
+				System.out.println("lw ["+lw.getObject()+"] cause ["+lw.getCause()+"]");
 			}
 		}
-		System.out.println("Ya");
-
+		//Aqui1
+//		if (!ok) {
+//			MVMWizardAssoc dW= new MVMWizardAssoc();
+//		}
+		
 		return ok;
 	}
 
@@ -1195,15 +1306,15 @@ public class WizardMVMView extends JPanel implements View {
 		fMainWindow.createObject(oClass, nomObj);
 		lObjects.setModel(loadListObjects(nomClass));
 
-//		checkExistObjDiagram();
+		//		checkExistObjDiagram();
 		odvAssoc.forceStartLayoutThread();
 	}
 	private void saveObject(MClass oClass, String nomObj) {
 		// Verificamos existencia de ObjectDiagram MVM
-//		boolean existDiagram=false;
+		//		boolean existDiagram=false;
 		//aqui8
 		checkExistObjDiagram();
-		
+
 		if (bNewObj) {
 			// Hacer copia de fValues
 			String[] fValuesAnt = new String[fAttributes.size()];
@@ -1369,7 +1480,7 @@ public class WizardMVMView extends JPanel implements View {
 			MClass cl = (MClass) cmb.getModel().getElementAt(nObj);
 			if (cl.name().equals(className)) {
 				cmb.setSelectedIndex(nObj);
-				System.out.println("indice " + nObj);
+				//				System.out.println("indice " + nObj);
 				return;
 			}
 		}
@@ -1395,7 +1506,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 	private void tile() {
 		JDesktopPane fDesk = fMainWindow.getFdesk();
-//		allframes = fDesk.getAllFrames();
+		//		allframes = fDesk.getAllFrames();
 		allframes = fMainWindow.sortInternalFrames(fDesk.getAllFrames());
 		int count = allframes.length;
 		if (count == 0)
