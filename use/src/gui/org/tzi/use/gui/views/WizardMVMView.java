@@ -179,7 +179,7 @@ public class WizardMVMView extends JPanel implements View {
 	private JComboBox<String> cmbMultiOri;
 	private JComboBox<String> cmbMultiDes;
 	private JCheckBox chkAutoLayout;	
-	
+
 	private JButton btnCreateObject;
 	private JButton btnNewObjectAuto;
 	private JButton btnDeleteObject;
@@ -389,22 +389,24 @@ public class WizardMVMView extends JPanel implements View {
 		fTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		fTablePane = new JScrollPane(fTable);
 		fTablePane.setBounds(210, 40, 180, 100);
-		
+
 		//aqui2
 		// chkAutoLayout
 		chkAutoLayout=new JCheckBox("Auto Layout");
 		chkAutoLayout.setBounds(210, 160, 160, 25);
 		chkAutoLayout.setSelected(true);
 		chkAutoLayout.addItemListener(new ItemListener() {
-	         public void itemStateChanged(ItemEvent e) {
-//	            statusLabel.setText("Football Checkbox: " + (e.getStateChange()==1?"checked":"unchecked"));
-	            if (e.getStateChange()==1) {
-	            	odvAssoc.forceStartLayoutThread();
-	            }else {
-	            	odvAssoc.forceStopLayoutThread();
-	            }
-	         }
-	      });
+			public void itemStateChanged(ItemEvent e) {
+				//	            statusLabel.setText("Football Checkbox: " + (e.getStateChange()==1?"checked":"unchecked"));
+				if (odvAssoc!=null) {
+					if (e.getStateChange()==1) {
+						odvAssoc.forceStartLayoutThread();
+					}else {
+						odvAssoc.forceStopLayoutThread();
+					}
+				}
+			}
+		});
 		panel.add(chkAutoLayout);	
 
 		selectObject(nomObj);
@@ -1006,10 +1008,10 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}
 		//Aqui1
-//		if (!ok) {
-//			MVMWizardAssoc dW= new MVMWizardAssoc();
-//		}
-		
+		//		if (!ok) {
+		//			MVMWizardAssoc dW= new MVMWizardAssoc();
+		//		}
+
 		return ok;
 	}
 
@@ -1307,7 +1309,9 @@ public class WizardMVMView extends JPanel implements View {
 		lObjects.setModel(loadListObjects(nomClass));
 
 		//		checkExistObjDiagram();
-		odvAssoc.forceStartLayoutThread();
+		if (chkAutoLayout.isSelected()) {
+			odvAssoc.forceStartLayoutThread();
+		}
 	}
 	private void saveObject(MClass oClass, String nomObj) {
 		// Verificamos existencia de ObjectDiagram MVM

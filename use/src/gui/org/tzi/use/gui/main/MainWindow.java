@@ -2018,7 +2018,7 @@ public class MainWindow extends JFrame {
 	 */
 	private class ActionViewCreateMVMWizard extends AbstractAction {
 		ActionViewCreateMVMWizard() {
-			super("MVM Wizard", getIcon("MVM_Wizard.gif"));
+			super("MVM Wizard", getIcon("MVM_Wizard.png"));
 		}
 
 		@Override
@@ -2393,7 +2393,7 @@ public class MainWindow extends JFrame {
 		WizardMVMView opv = new WizardMVMView(MainWindow.this,
 				fSession);
 		ViewFrame f = new ViewFrame("MVM Wizard", opv,
-				"MVM_Wizard.gif");
+				"MVM_Wizard.png");
 		f.setName(name);
 		JComponent c = (JComponent) f.getContentPane();
 		c.setLayout(new BorderLayout());
