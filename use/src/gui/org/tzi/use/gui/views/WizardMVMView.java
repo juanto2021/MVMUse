@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -680,6 +681,7 @@ public class WizardMVMView extends JPanel implements View {
 				boolean ok=checkStructure();
 				if (!ok) {
 					MVMWizardAssoc dW= new MVMWizardAssoc(lAssocsWizard);
+					
 				}
 			}
 		});
@@ -869,6 +871,9 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 	private boolean checkStructure() {
+
+		Map<String, List<String>> mapObjects = new HashMap<String, List<String>>();
+
 		StringWriter buffer = new StringWriter();
 		PrintWriter out = new PrintWriter(buffer);
 		boolean ok = fSession.system().state().checkStructure(out);
@@ -930,7 +935,7 @@ public class WizardMVMView extends JPanel implements View {
 						}else if (parte.contains("of class1")) {
 							String[] subPartes = parte.split("`");
 							nomAssocClass=subPartes[1];
-						}else if (parte.contains("objects of class")) {
+						}else if (parte.contains("objects of class")||parte.contains("object of class")) {
 							String[] subPartesSPC = parte.split(" ");
 							connectedNum = subPartesSPC[4];
 							String[] subPartes = parte.split("`");
@@ -985,7 +990,27 @@ public class WizardMVMView extends JPanel implements View {
 					lw.setMultiSpecified(multiplicity);
 					lw.setCause(cause);
 					lw.setFullMessage(fullMessage);
+					
+					//--
+					int multi = 0; 
+					int connectedTo=0; 
+					try {
+						multi = Integer.parseInt(lw.getMultiSpecified()); 
+					}catch(Exception e) {}
+					try {
+						connectedTo=Integer.parseInt(lw.getConnectedTo()); 
+					}catch(Exception e) {}
+					int needed = multi-connectedTo;
+					lw.setNeeded(needed);
+//					String objectName = lw.getObject();
+//					String nomClass = lw.getNomClass(); //Clase del objeto principal
+//					String classOfName = lw.getOfClass(); // Clase del objeto que necesita
+					
+					//--
+					
+					
 					lLinksWizard.add(lw);
+
 					aw.setlLinks(lLinksWizard);
 
 					if (existAssocWizard) {
@@ -1004,8 +1029,40 @@ public class WizardMVMView extends JPanel implements View {
 		for (AssocWizard aw: lAssocsWizard) {
 			System.out.println("aw ["+aw.getName()+"]");	
 			for (LinkWizard lw: aw.getlLinks()) {
-				System.out.println("lw ["+lw.getObject()+"] cause ["+lw.getCause()+"]");
+				int needed = lw.getNeeded();
+				String objectName = lw.getObject();
+				String nomClass = lw.getNomClass(); //Clase del objeto principal
+				String classOfName = lw.getOfClass(); // Clase del objeto que necesita
+				System.out.println("lw ["+objectName+"] cause ["+lw.getCause()+"] necesita ["+needed+"] de la clase ["+classOfName+"]");
+				// Pasada para ver los objetos disponibles por clase
+				if (needed>0) {
+					List lObjDisponibles = new ArrayList<String>();
+					// Si tiene alguna necesidad es que puede linkarse con otros objetos segun relacion
+					if (mapObjects.containsKey(nomClass)) {
+						lObjDisponibles=mapObjects.get(nomClass);
+						if (!lObjDisponibles.contains(objectName)) {
+							lObjDisponibles.add(objectName);
+						}
+					}else{
+						lObjDisponibles.add(objectName);
+						mapObjects.put(nomClass, lObjDisponibles);
+					}
+				}
 			}
+			// Revision de clases disponibles y objetos disponibles de cada una de las mismas
+			//Aqui3
+			for (Map.Entry<String, List<String>> entry : mapObjects.entrySet()) {
+				String className = (String) entry.getKey();
+				List<String> lObjDisponibles = new ArrayList<String>();
+				lObjDisponibles = entry.getValue();
+				System.out.println("La clase ["+className+"] tiene disponibles:");
+				for(String nameObject: lObjDisponibles) {
+					System.out.println("   Object ["+nameObject+"] ");
+				}
+			}
+			//Aqui1
+			// Analisis de problemas a solucionar
+			analyzeProposals(mapObjects);
 		}
 		//Aqui1
 		//		if (!ok) {
@@ -1013,6 +1070,86 @@ public class WizardMVMView extends JPanel implements View {
 		//		}
 
 		return ok;
+	}
+	/** En base a la estructura de un objecto de la associacion, propone crear y/o linkar
+	 * dicho objeto a otros
+	 * 
+	 */
+	public void analyzeProposals(Map<String, List<String>> mapObjects) {
+
+		// Veamos para cada assoc que links ha de cubrir
+		for (AssocWizard aw: lAssocsWizard) {
+			System.out.println("aw ["+aw.getName()+"]");	
+			for (LinkWizard lw: aw.getlLinks()) {
+				List<String> lObjAsignar = new ArrayList<String>();
+				int needed = lw.getNeeded();
+				int cover = 0;
+				int pending=0;
+				int canAssig = 0;
+				int canCreate = 0;
+				String objectNameToSolve = lw.getObject();// Object a solucionar
+				String nomClass = lw.getNomClass(); //Clase del objeto principal
+				String classNeeded = lw.getOfClass(); // Clase del objeto que se necesita
+				System.out.println("lw ["+objectNameToSolve+"] cause ["+lw.getCause()+"] necesita ["+needed+"] de la clase ["+classNeeded+"]");
+				// Buscar cuantos objectos necesarios estan disponibles
+				
+				
+				String strAssig="";
+				for (Map.Entry<String, List<String>> entry : mapObjects.entrySet()) {
+					String className = (String) entry.getKey();
+					if (className.equals(classNeeded)){
+						List<String> lObjDisponibles = new ArrayList<String>();
+						lObjDisponibles = entry.getValue();
+
+						for(String nameObject: lObjDisponibles) {
+							 pending = needed - cover;
+							if (pending > 0 ) {
+								System.out.println("   Object ["+nameObject+"] ");
+								lObjAsignar.add(nameObject);
+								cover+=1;
+								canAssig+=1;
+								if (strAssig!="") {
+									strAssig+=",";
+								}
+								strAssig+=nameObject;
+							}
+						}
+					}
+				}
+				canCreate = needed - cover;
+				Map<String, String> mapActions = new HashMap<String, String>();
+				String linkAction="";
+				if (canAssig > 0) {
+					System.out.println("Para ["+objectNameToSolve+"] asignamos ["+canAssig+"] ["+strAssig+"] y queda pendiente ["+canCreate+"]");
+					mapActions.put("A", strAssig);
+					linkAction=objectNameToSolve+":"+strAssig;
+				}
+
+				// Si queda algun objeto pendiente de asignar hemos de crearlo
+				if (canCreate > 0 ) {
+					System.out.println("Para ["+objectNameToSolve+"] hemos de crear ["+canCreate+"] objects de tipo ["+classNeeded+"]");
+					mapActions.put("C", classNeeded);
+					// Considerar calcular los nombres de los nuevos objectos para cambiar NEWS por dichos nombres
+					if (linkAction!="") {
+						linkAction+=",(NEWS)";
+					}else {
+						linkAction=objectNameToSolve+":(NEWS)";
+					}
+				}
+				if (linkAction!="") {
+					mapActions.put("I", linkAction);
+				}
+				// Insertamos acciones en lw
+				lw.setMapActions(mapActions);
+//				aw.setlLinks(lw);
+				//Falta actualizar la lista de links con el nuevo link y luego
+				// Actulaizar la asociacion y la lista dse asociaciones
+				
+				
+				
+			}
+		}
+		System.out.println("Ya");
 	}
 
 	public void setFrameName(String name) {
