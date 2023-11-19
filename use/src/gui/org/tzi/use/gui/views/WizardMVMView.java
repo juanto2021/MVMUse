@@ -1006,6 +1006,7 @@ public class WizardMVMView extends JPanel implements View {
 //					String nomClass = lw.getNomClass(); //Clase del objeto principal
 //					String classOfName = lw.getOfClass(); // Clase del objeto que necesita
 					
+					
 					//--
 					
 					
