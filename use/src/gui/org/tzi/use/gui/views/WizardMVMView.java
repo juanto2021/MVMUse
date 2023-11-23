@@ -1129,7 +1129,7 @@ public class WizardMVMView extends JPanel implements View {
 				// Si queda algun objeto pendiente de asignar hemos de crearlo
 				if (canCreate > 0 ) {
 					System.out.println("Para ["+objectNameToSolve+"] hemos de crear ["+canCreate+"] objects de tipo ["+classNeeded+"]");
-					mapActions.put("C", classNeeded);
+					mapActions.put("C-"+canCreate, classNeeded);
 					// Considerar calcular los nombres de los nuevos objectos para cambiar NEWS por dichos nombres
 					if (linkAction!="") {
 						linkAction+=",(NEWS)";
@@ -1142,6 +1142,16 @@ public class WizardMVMView extends JPanel implements View {
 				}
 				// Insertamos acciones en lw
 				lw.setMapActions(mapActions);
+				
+				//Aqui3
+				System.out.println();
+				for (Map.Entry<String, String> entry : mapActions.entrySet()) {
+					String actionW =  entry.getKey();
+					String infoW = entry.getValue();
+					System.out.println("ActionW ["+actionW+"]");
+					System.out.println("InfoW   ["+infoW+"]");
+				}
+				
 //				aw.setlLinks(lw);
 				//Falta actualizar la lista de links con el nuevo link y luego
 				// Actulaizar la asociacion y la lista dse asociaciones
