@@ -130,6 +130,7 @@ public class WizardMVMView extends JPanel implements View {
 	private static final String NAMEFRAMEMVMDIAGRAM = "MVM";
 	private static final String NAMEFRAMEMVMWIZARD = "MVMWizard";
 	private MainWindow fMainWindow;
+	private WizardMVMView thisWizard;
 	private Session fSession;
 	private MSystem fSystem;
 	private MObject fObject;
@@ -284,6 +285,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	public WizardMVMView(MainWindow parent, Session session) {
 		super(new BorderLayout());
+		thisWizard=this;
 		fMainWindow = parent;
 		fSession = session;
 		fSystem = session.system();
@@ -330,7 +332,7 @@ public class WizardMVMView extends JPanel implements View {
 		lClass.setSelectedIndex(0);
 		oClass = lClass.getSelectedValue();
 		nomClass = oClass.name();
-
+		//Aqui5
 		lClass.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
 				oClass = lClass.getSelectedValue();
@@ -391,14 +393,11 @@ public class WizardMVMView extends JPanel implements View {
 		fTablePane = new JScrollPane(fTable);
 		fTablePane.setBounds(210, 40, 180, 100);
 
-		//aqui2
-		// chkAutoLayout
 		chkAutoLayout=new JCheckBox("Auto Layout");
 		chkAutoLayout.setBounds(210, 160, 160, 25);
 		chkAutoLayout.setSelected(true);
 		chkAutoLayout.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				//	            statusLabel.setText("Football Checkbox: " + (e.getStateChange()==1?"checked":"unchecked"));
 				if (odvAssoc!=null) {
 					if (e.getStateChange()==1) {
 						odvAssoc.forceStartLayoutThread();
@@ -680,8 +679,13 @@ public class WizardMVMView extends JPanel implements View {
 			public void actionPerformed(ActionEvent e) {
 				boolean ok=checkStructure();
 				if (!ok) {
-					MVMWizardAssoc dW= new MVMWizardAssoc(lAssocsWizard);
-					
+					MVMWizardAssoc dW= new MVMWizardAssoc(frame,lAssocsWizard);
+					dW.setSize(910,490);
+					dW.setLocationRelativeTo(null);
+					dW.setVisible(true);
+					String commandWizard = dW.getCommandWizard();
+					System.out.println("getActionCommand " + commandWizard);
+
 				}
 			}
 		});
@@ -990,7 +994,7 @@ public class WizardMVMView extends JPanel implements View {
 					lw.setMultiSpecified(multiplicity);
 					lw.setCause(cause);
 					lw.setFullMessage(fullMessage);
-					
+
 					//--
 					int multi = 0; 
 					int connectedTo=0; 
@@ -1002,14 +1006,7 @@ public class WizardMVMView extends JPanel implements View {
 					}catch(Exception e) {}
 					int needed = multi-connectedTo;
 					lw.setNeeded(needed);
-//					String objectName = lw.getObject();
-//					String nomClass = lw.getNomClass(); //Clase del objeto principal
-//					String classOfName = lw.getOfClass(); // Clase del objeto que necesita
-					
-					
-					//--
-					
-					
+
 					lLinksWizard.add(lw);
 
 					aw.setlLinks(lLinksWizard);
@@ -1065,11 +1062,6 @@ public class WizardMVMView extends JPanel implements View {
 			// Analisis de problemas a solucionar
 			analyzeProposals(mapObjects);
 		}
-		//Aqui1
-		//		if (!ok) {
-		//			MVMWizardAssoc dW= new MVMWizardAssoc();
-		//		}
-
 		return ok;
 	}
 	/** En base a la estructura de un objecto de la associacion, propone crear y/o linkar
@@ -1080,21 +1072,24 @@ public class WizardMVMView extends JPanel implements View {
 
 		// Veamos para cada assoc que links ha de cubrir
 		for (AssocWizard aw: lAssocsWizard) {
+			AssocWizard awNew = aw;
 			System.out.println("aw ["+aw.getName()+"]");	
-			for (LinkWizard lw: aw.getlLinks()) {
+			List<LinkWizard> oLinks = aw.getlLinks();
+			List<LinkWizard> oNewLinks = new ArrayList<LinkWizard>();
+			//List<LinkWizard> lLinksWizard = new ArrayList<LinkWizard>();
+			for (LinkWizard lw: oLinks) {
 				List<String> lObjAsignar = new ArrayList<String>();
 				int needed = lw.getNeeded();
 				int cover = 0;
 				int pending=0;
 				int canAssig = 0;
-				int canCreate = 0;
+				int mustCreate = 0;
 				String objectNameToSolve = lw.getObject();// Object a solucionar
 				String nomClass = lw.getNomClass(); //Clase del objeto principal
 				String classNeeded = lw.getOfClass(); // Clase del objeto que se necesita
 				System.out.println("lw ["+objectNameToSolve+"] cause ["+lw.getCause()+"] necesita ["+needed+"] de la clase ["+classNeeded+"]");
 				// Buscar cuantos objectos necesarios estan disponibles
-				
-				
+
 				String strAssig="";
 				for (Map.Entry<String, List<String>> entry : mapObjects.entrySet()) {
 					String className = (String) entry.getKey();
@@ -1103,7 +1098,7 @@ public class WizardMVMView extends JPanel implements View {
 						lObjDisponibles = entry.getValue();
 
 						for(String nameObject: lObjDisponibles) {
-							 pending = needed - cover;
+							pending = needed - cover;
 							if (pending > 0 ) {
 								System.out.println("   Object ["+nameObject+"] ");
 								lObjAsignar.add(nameObject);
@@ -1117,19 +1112,19 @@ public class WizardMVMView extends JPanel implements View {
 						}
 					}
 				}
-				canCreate = needed - cover;
+				mustCreate = needed - cover;
 				Map<String, String> mapActions = new HashMap<String, String>();
 				String linkAction="";
 				if (canAssig > 0) {
-					System.out.println("Para ["+objectNameToSolve+"] asignamos ["+canAssig+"] ["+strAssig+"] y queda pendiente ["+canCreate+"]");
+					System.out.println("Para ["+objectNameToSolve+"] asignamos ["+canAssig+"] ["+strAssig+"] y queda pendiente ["+mustCreate+"]");
 					mapActions.put("A", strAssig);
 					linkAction=objectNameToSolve+":"+strAssig;
 				}
 
 				// Si queda algun objeto pendiente de asignar hemos de crearlo
-				if (canCreate > 0 ) {
-					System.out.println("Para ["+objectNameToSolve+"] hemos de crear ["+canCreate+"] objects de tipo ["+classNeeded+"]");
-					mapActions.put("C-"+canCreate, classNeeded);
+				if (mustCreate > 0 ) {
+					System.out.println("Para ["+objectNameToSolve+"] hemos de crear ["+mustCreate+"] objects de tipo ["+classNeeded+"]");
+					mapActions.put("C-"+mustCreate, classNeeded);
 					// Considerar calcular los nombres de los nuevos objectos para cambiar NEWS por dichos nombres
 					if (linkAction!="") {
 						linkAction+=",(NEWS)";
@@ -1142,7 +1137,7 @@ public class WizardMVMView extends JPanel implements View {
 				}
 				// Insertamos acciones en lw
 				lw.setMapActions(mapActions);
-				
+
 				//Aqui3
 				System.out.println();
 				for (Map.Entry<String, String> entry : mapActions.entrySet()) {
@@ -1151,16 +1146,12 @@ public class WizardMVMView extends JPanel implements View {
 					System.out.println("ActionW ["+actionW+"]");
 					System.out.println("InfoW   ["+infoW+"]");
 				}
-				
-//				aw.setlLinks(lw);
-				//Falta actualizar la lista de links con el nuevo link y luego
-				// Actulaizar la asociacion y la lista dse asociaciones
-				
-				
-				
+				oNewLinks.add(lw);
 			}
+			awNew.setlLinks(oNewLinks);
+			lAssocsWizard.remove(aw);
+			lAssocsWizard.add(awNew);
 		}
-		System.out.println("Ya");
 	}
 
 	public void setFrameName(String name) {
@@ -1456,15 +1447,12 @@ public class WizardMVMView extends JPanel implements View {
 		fMainWindow.createObject(oClass, nomObj);
 		lObjects.setModel(loadListObjects(nomClass));
 
-		//		checkExistObjDiagram();
 		if (chkAutoLayout.isSelected()) {
 			odvAssoc.forceStartLayoutThread();
 		}
 	}
 	private void saveObject(MClass oClass, String nomObj) {
 		// Verificamos existencia de ObjectDiagram MVM
-		//		boolean existDiagram=false;
-		//aqui8
 		checkExistObjDiagram();
 
 		if (bNewObj) {
@@ -1485,7 +1473,6 @@ public class WizardMVMView extends JPanel implements View {
 			}else {
 				for (int i = 0; i < fAttributes.size(); i++) {
 					MAttribute attr = (MAttribute) fAttributes.get(i);
-					// Aqui8
 					attr.type();
 					if (attr.type().isTypeOfInteger()) {
 						fValues[i] = "1";
@@ -1500,7 +1487,6 @@ public class WizardMVMView extends JPanel implements View {
 			odvAssoc.forceStartLayoutThread();
 		}
 		setResClassInvariants();
-		//		checkStructure();
 		setResCheckStructure();
 
 	}
@@ -1526,8 +1512,6 @@ public class WizardMVMView extends JPanel implements View {
 		setResClassInvariants();
 		setResCheckStructure();
 	}
-
-
 
 	/**
 	 * Applies changes by setting new attribute values. Entries may be
@@ -1632,7 +1616,6 @@ public class WizardMVMView extends JPanel implements View {
 			MClass cl = (MClass) cmb.getModel().getElementAt(nObj);
 			if (cl.name().equals(className)) {
 				cmb.setSelectedIndex(nObj);
-				//				System.out.println("indice " + nObj);
 				return;
 			}
 		}
