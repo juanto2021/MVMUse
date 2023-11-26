@@ -71,8 +71,10 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 
+import org.tzi.mvm.AssocWizard;
+import org.tzi.mvm.LinkWizard;
+import org.tzi.mvm.MVMWizardAssoc;
 import org.tzi.use.config.Options;
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.gui.main.ModelBrowserSorting;
@@ -113,10 +115,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
-
-import org.tzi.mvm.AssocWizard;
-import org.tzi.mvm.LinkWizard;
-import org.tzi.mvm.MVMWizardAssoc;
 
 /** 
  * A view for showing and changing object properties (attributes).
@@ -684,8 +682,7 @@ public class WizardMVMView extends JPanel implements View {
 					dW.setLocationRelativeTo(null);
 					dW.setVisible(true);
 					String commandWizard = dW.getCommandWizard();
-					System.out.println("getActionCommand " + commandWizard);
-
+					doActionsWizardAssoc(commandWizard);
 				}
 			}
 		});
@@ -713,20 +710,88 @@ public class WizardMVMView extends JPanel implements View {
 		setSize(new Dimension(400, 300));
 
 	}
-	public void newObjectAuto() {
+	private void doActionsWizardAssoc(String commandWizard) {
+		System.out.println("getActionCommand " + commandWizard);
+		ArrayList<String> lNewObjects = new ArrayList<String>();
+		String[] partes = commandWizard.split("-");
+		int nPartes = partes.length;
+		for (int nParte=0;nParte<nPartes;nParte++) {
+			String parte = partes[nParte];
+			String[] subPartes = parte.split(" ");
+			String action=subPartes[0];
+			String paramAction=subPartes[1];
+			switch(action) {
+			case "C": // Create objects
+				String[] subParamC = paramAction.split(":");
+				int canCrear=Integer.valueOf(subParamC[0]);
+				String classCrear=subParamC[1];
+				for (int n=0;n<canCrear;n++) {
+					String nomObjNew=findNomProposed(classCrear);
+					bNewObj=true;
+					MClass oClassCreate = findMClassByName(classCrear);
+					saveObject(oClassCreate, nomObjNew);
+					System.out.println("Creo objeto ["+nomObjNew+"] [" + classCrear+"]");
+					// Guardar objeto en lNewObjects
+					lNewObjects.add(nomObjNew);
+				}
 
+				break;
+			case "I": // Insert links
+				String[] subParamI = paramAction.split(":");
+				String objPral=subParamI[0];
+				String restoParam=subParamI[1];
+				if (restoParam.contains("(NEWS)")) {
+					// Se han de recuperar los objetos creados y sustituir (NEWS) por dichos objetos
+					// Los objetos estan en lNewObjects
+					String agrupador="";
+					for(String newObject: lNewObjects) {
+						if (agrupador!="") {
+							agrupador+=",";
+						}
+						agrupador+=newObject;
+					}
+					String strPaso=restoParam.replace("(NEWS)", agrupador);
+					restoParam=strPaso;
+				}
+				String[] objsLinkar = restoParam.split(",");
+				int nObjs = objsLinkar.length;
+				for(int nObj=0;nObj<nObjs;nObj++) {
+					String objLinkar = objsLinkar[nObj];
 
+					System.out.println("Inserto link entre ["+objPral+"] [" + objLinkar+"]");
+
+					// Buscar nombre assoc y su objeto
+					MAssociation oAssoc = lAssocs.getSelectedValue();
+					// Buscar objetos
+					MObject oDes = findObjectByName(objPral);
+					MObject oOri = findObjectByName(objLinkar);
+
+					MObject[] fParticipants = new MObject[] {oOri,oDes};
+					insertLink(oAssoc, fParticipants);
+				}
+				break;			    
+			default:
+
+			}
+		}
+	}
+	public String findNomProposed(String className) {
 		int numObj = 1;
-		String nomProposed = nomClass.toLowerCase() + numObj; 
+		String nomProposed = className.toLowerCase() + numObj; 
 
 		// Averiguar si existe objeto o no en base a una iteracion
 
 		while(existObject(nomProposed)) {
 			numObj+=1;
-			nomProposed = nomClass.toLowerCase() + numObj; 
+			nomProposed = className.toLowerCase() + numObj; 
 		}
 		System.out.println("nomProposed [" + nomProposed+"]");
+		return nomProposed;
+	}
+	public void newObjectAuto() {
 		oClass = lClass.getSelectedValue();
+		nomClass = oClass.name();
+		String nomProposed = findNomProposed(nomClass);
 
 		bNewObj=true;
 		saveObject(oClass, nomProposed);
@@ -1076,7 +1141,7 @@ public class WizardMVMView extends JPanel implements View {
 			System.out.println("aw ["+aw.getName()+"]");	
 			List<LinkWizard> oLinks = aw.getlLinks();
 			List<LinkWizard> oNewLinks = new ArrayList<LinkWizard>();
-			//List<LinkWizard> lLinksWizard = new ArrayList<LinkWizard>();
+
 			for (LinkWizard lw: oLinks) {
 				List<String> lObjAsignar = new ArrayList<String>();
 				int needed = lw.getNeeded();
@@ -1088,7 +1153,7 @@ public class WizardMVMView extends JPanel implements View {
 				String nomClass = lw.getNomClass(); //Clase del objeto principal
 				String classNeeded = lw.getOfClass(); // Clase del objeto que se necesita
 				System.out.println("lw ["+objectNameToSolve+"] cause ["+lw.getCause()+"] necesita ["+needed+"] de la clase ["+classNeeded+"]");
-				// Buscar cuantos objectos necesarios estan disponibles
+				// Buscar cuantos objetos necesarios estan disponibles
 
 				String strAssig="";
 				for (Map.Entry<String, List<String>> entry : mapObjects.entrySet()) {
@@ -1137,8 +1202,6 @@ public class WizardMVMView extends JPanel implements View {
 				}
 				// Insertamos acciones en lw
 				lw.setMapActions(mapActions);
-
-				//Aqui3
 				System.out.println();
 				for (Map.Entry<String, String> entry : mapActions.entrySet()) {
 					String actionW =  entry.getKey();
@@ -1606,6 +1669,23 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}
 		return idx;
+	}
+	private MObject findObjectByName(String nameObject) {
+		MObject oRes=null;
+		MSystemState state = fSystem.state();
+		oRes=state.objectByName(nameObject);
+		return oRes;
+	}
+
+	private MClass findMClassByName(String nameClass) {
+		MClass oRes=null;
+		for (MClass oClass : fSystem.model().classes()) {
+			if (oClass.name().equals(nameClass)) {
+				oRes=oClass;
+				return oRes;
+			}
+		}
+		return oRes;
 	}
 
 	public void selectClasInCombo(JComboBox<MClass> cmb, String className) {
