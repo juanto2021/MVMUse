@@ -682,7 +682,10 @@ public class WizardMVMView extends JPanel implements View {
 					dW.setLocationRelativeTo(null);
 					dW.setVisible(true);
 					String commandWizard = dW.getCommandWizard();
-					doActionsWizardAssoc(commandWizard);
+					MAssociation oAssocPralWizard = dW.getAssocWizard();
+					if (commandWizard!="") {
+						doActionsWizardAssoc(oAssocPralWizard,commandWizard);
+					}
 				}
 			}
 		});
@@ -710,7 +713,7 @@ public class WizardMVMView extends JPanel implements View {
 		setSize(new Dimension(400, 300));
 
 	}
-	private void doActionsWizardAssoc(String commandWizard) {
+	private void doActionsWizardAssoc(MAssociation oAssocPralWizard, String commandWizard) {
 		System.out.println("getActionCommand " + commandWizard);
 		ArrayList<String> lNewObjects = new ArrayList<String>();
 		String[] partes = commandWizard.split("-");
@@ -761,13 +764,32 @@ public class WizardMVMView extends JPanel implements View {
 					System.out.println("Inserto link entre ["+objPral+"] [" + objLinkar+"]");
 
 					// Buscar nombre assoc y su objeto
-					MAssociation oAssoc = lAssocs.getSelectedValue();
+					//					MAssociation oAssoc = lAssocs.getSelectedValue();
 					// Buscar objetos
-					MObject oDes = findObjectByName(objPral);
-					MObject oOri = findObjectByName(objLinkar);
+					//					MObject oOri = findObjectByName(objPral);
+					//					MObject oDes = findObjectByName(objLinkar);
+					MObject oOri=null;
+					MObject oDes=null;
+					MObject o1 = findObjectByName(objPral);
+					MObject o2 = findObjectByName(objLinkar);
+					// Averiguar el orden correcto para oOri i oDes segun oAssocPralWizard
+					// oAssocPralWizard tiene fAssociactionsEnds
+					List<MAssociationEnd> oAsocEnds = oAssocPralWizard.associationEnds();
+					int nAssocEnds = oAsocEnds.size();
+					//					for(int na = 0;na<nAssocEnds;na++) {
+					int na=0;// Cogemos la primera finalizacion de la asociacion
+					MAssociationEnd oAssocEnd = oAsocEnds.get(na);
+					MClass oClassAssocEnd = oAssocEnd.cls();
+					if (oClassAssocEnd.name().equals(o1.cls().name())) {
+						oOri = o1;
+						oDes =	o2;	
+					}else {
+						oOri = o2;
+						oDes =	o1;	
+					}
 
 					MObject[] fParticipants = new MObject[] {oOri,oDes};
-					insertLink(oAssoc, fParticipants);
+					insertLink(oAssocPralWizard, fParticipants);
 				}
 				break;			    
 			default:
@@ -1033,12 +1055,15 @@ public class WizardMVMView extends JPanel implements View {
 							break;
 						}
 					}
+					MAssociation oAassocModel = findAssocByName(nomAssociation);
 					if (existAssocWizard) {
 						lLinksWizard=aw.getlLinks();
 					}else {
 						aw.setName(nomAssociation);
 						aw.setState("ko");
+						aw.setassocModel(oAassocModel);
 					}
+
 					// Si no esta, crea nueva assoc
 					// Si esta, la usa
 					System.out.println("cause ["+cause+"]");
@@ -1089,7 +1114,12 @@ public class WizardMVMView extends JPanel implements View {
 		}
 
 		System.out.println("Ya");
-		for (AssocWizard aw: lAssocsWizard) {
+		List<AssocWizard> lAssocsWizardPaso = new ArrayList<AssocWizard>();
+		for(AssocWizard oAssoc: lAssocsWizard) {
+			lAssocsWizardPaso.add(oAssoc);
+		}
+		lAssocsWizard.clear();
+		for (AssocWizard aw: lAssocsWizardPaso) {
 			System.out.println("aw ["+aw.getName()+"]");	
 			for (LinkWizard lw: aw.getlLinks()) {
 				int needed = lw.getNeeded();
@@ -1125,96 +1155,102 @@ public class WizardMVMView extends JPanel implements View {
 			}
 			//Aqui1
 			// Analisis de problemas a solucionar
-			analyzeProposals(mapObjects);
+			analyzeProposals(aw, mapObjects);
 		}
+		//		System.out.println("YA trato ["+lAssocsWizard.size()+"]");
 		return ok;
 	}
 	/** En base a la estructura de un objecto de la associacion, propone crear y/o linkar
 	 * dicho objeto a otros
 	 * 
 	 */
-	public void analyzeProposals(Map<String, List<String>> mapObjects) {
+	public void analyzeProposals(AssocWizard aw,Map<String, List<String>> mapObjects) {
 
+		//		List<AssocWizard> lAssocsWizardPaso = new ArrayList<AssocWizard>();
+		//		for(AssocWizard oAssoc: lAssocsWizard) {
+		//			lAssocsWizardPaso.add(oAssoc);
+		//		}
+		//		lAssocsWizard.clear();
 		// Veamos para cada assoc que links ha de cubrir
-		for (AssocWizard aw: lAssocsWizard) {
-			AssocWizard awNew = aw;
-			System.out.println("aw ["+aw.getName()+"]");	
-			List<LinkWizard> oLinks = aw.getlLinks();
-			List<LinkWizard> oNewLinks = new ArrayList<LinkWizard>();
+		//		for (AssocWizard aw: lAssocsWizardPaso) {
+		AssocWizard awNew = aw;
+		System.out.println("aw ["+aw.getName()+"]");	
+		List<LinkWizard> oLinks = aw.getlLinks();
+		List<LinkWizard> oNewLinks = new ArrayList<LinkWizard>();
 
-			for (LinkWizard lw: oLinks) {
-				List<String> lObjAsignar = new ArrayList<String>();
-				int needed = lw.getNeeded();
-				int cover = 0;
-				int pending=0;
-				int canAssig = 0;
-				int mustCreate = 0;
-				String objectNameToSolve = lw.getObject();// Object a solucionar
-				String nomClass = lw.getNomClass(); //Clase del objeto principal
-				String classNeeded = lw.getOfClass(); // Clase del objeto que se necesita
-				System.out.println("lw ["+objectNameToSolve+"] cause ["+lw.getCause()+"] necesita ["+needed+"] de la clase ["+classNeeded+"]");
-				// Buscar cuantos objetos necesarios estan disponibles
+		for (LinkWizard lw: oLinks) {
+			List<String> lObjAsignar = new ArrayList<String>();
+			int needed = lw.getNeeded();
+			int cover = 0;
+			int pending=0;
+			int canAssig = 0;
+			int mustCreate = 0;
+			String objectNameToSolve = lw.getObject();// Object a solucionar
+			String nomClass = lw.getNomClass(); //Clase del objeto principal
+			String classNeeded = lw.getOfClass(); // Clase del objeto que se necesita
+			System.out.println("lw ["+objectNameToSolve+"] cause ["+lw.getCause()+"] necesita ["+needed+"] de la clase ["+classNeeded+"]");
+			// Buscar cuantos objetos necesarios estan disponibles
 
-				String strAssig="";
-				for (Map.Entry<String, List<String>> entry : mapObjects.entrySet()) {
-					String className = (String) entry.getKey();
-					if (className.equals(classNeeded)){
-						List<String> lObjDisponibles = new ArrayList<String>();
-						lObjDisponibles = entry.getValue();
+			String strAssig="";
+			for (Map.Entry<String, List<String>> entry : mapObjects.entrySet()) {
+				String className = (String) entry.getKey();
+				if (className.equals(classNeeded)){
+					List<String> lObjDisponibles = new ArrayList<String>();
+					lObjDisponibles = entry.getValue();
 
-						for(String nameObject: lObjDisponibles) {
-							pending = needed - cover;
-							if (pending > 0 ) {
-								System.out.println("   Object ["+nameObject+"] ");
-								lObjAsignar.add(nameObject);
-								cover+=1;
-								canAssig+=1;
-								if (strAssig!="") {
-									strAssig+=",";
-								}
-								strAssig+=nameObject;
+					for(String nameObject: lObjDisponibles) {
+						pending = needed - cover;
+						if (pending > 0 ) {
+							System.out.println("   Object ["+nameObject+"] ");
+							lObjAsignar.add(nameObject);
+							cover+=1;
+							canAssig+=1;
+							if (strAssig!="") {
+								strAssig+=",";
 							}
+							strAssig+=nameObject;
 						}
 					}
 				}
-				mustCreate = needed - cover;
-				Map<String, String> mapActions = new HashMap<String, String>();
-				String linkAction="";
-				if (canAssig > 0) {
-					System.out.println("Para ["+objectNameToSolve+"] asignamos ["+canAssig+"] ["+strAssig+"] y queda pendiente ["+mustCreate+"]");
-					mapActions.put("A", strAssig);
-					linkAction=objectNameToSolve+":"+strAssig;
-				}
-
-				// Si queda algun objeto pendiente de asignar hemos de crearlo
-				if (mustCreate > 0 ) {
-					System.out.println("Para ["+objectNameToSolve+"] hemos de crear ["+mustCreate+"] objects de tipo ["+classNeeded+"]");
-					mapActions.put("C-"+mustCreate, classNeeded);
-					// Considerar calcular los nombres de los nuevos objectos para cambiar NEWS por dichos nombres
-					if (linkAction!="") {
-						linkAction+=",(NEWS)";
-					}else {
-						linkAction=objectNameToSolve+":(NEWS)";
-					}
-				}
-				if (linkAction!="") {
-					mapActions.put("I", linkAction);
-				}
-				// Insertamos acciones en lw
-				lw.setMapActions(mapActions);
-				System.out.println();
-				for (Map.Entry<String, String> entry : mapActions.entrySet()) {
-					String actionW =  entry.getKey();
-					String infoW = entry.getValue();
-					System.out.println("ActionW ["+actionW+"]");
-					System.out.println("InfoW   ["+infoW+"]");
-				}
-				oNewLinks.add(lw);
 			}
-			awNew.setlLinks(oNewLinks);
-			lAssocsWizard.remove(aw);
-			lAssocsWizard.add(awNew);
+			mustCreate = needed - cover;
+			Map<String, String> mapActions = new HashMap<String, String>();
+			String linkAction="";
+			if (canAssig > 0) {
+				System.out.println("Para ["+objectNameToSolve+"] asignamos ["+canAssig+"] ["+strAssig+"] y queda pendiente ["+mustCreate+"]");
+				mapActions.put("A", strAssig);
+				linkAction=objectNameToSolve+":"+strAssig;
+			}
+
+			// Si queda algun objeto pendiente de asignar hemos de crearlo
+			if (mustCreate > 0 ) {
+				System.out.println("Para ["+objectNameToSolve+"] hemos de crear ["+mustCreate+"] objects de tipo ["+classNeeded+"]");
+				mapActions.put("C-"+mustCreate, classNeeded);
+				// Considerar calcular los nombres de los nuevos objectos para cambiar NEWS por dichos nombres
+				if (linkAction!="") {
+					linkAction+=",(NEWS)";
+				}else {
+					linkAction=objectNameToSolve+":(NEWS)";
+				}
+			}
+			if (linkAction!="") {
+				mapActions.put("I", linkAction);
+			}
+			// Insertamos acciones en lw
+			lw.setMapActions(mapActions);
+			System.out.println();
+			for (Map.Entry<String, String> entry : mapActions.entrySet()) {
+				String actionW =  entry.getKey();
+				String infoW = entry.getValue();
+				System.out.println("ActionW ["+actionW+"]");
+				System.out.println("InfoW   ["+infoW+"]");
+			}
+			oNewLinks.add(lw);
 		}
+		awNew.setlLinks(oNewLinks);
+		//			lAssocsWizard.remove(aw);
+		lAssocsWizard.add(awNew);
+		//		}
 	}
 
 	public void setFrameName(String name) {
@@ -1267,8 +1303,8 @@ public class WizardMVMView extends JPanel implements View {
 
 	private DefaultListModel<MAssociation> loadListAssoc() {
 		DefaultListModel<MAssociation> ldefLModel = new DefaultListModel<MAssociation>();
-		for (MAssociation oClass : fSystem.model().associations()) {
-			ldefLModel.addElement(oClass);
+		for (MAssociation oAssoc : fSystem.model().associations()) {
+			ldefLModel.addElement(oAssoc);
 		}
 		return ldefLModel;
 	}
@@ -1685,6 +1721,18 @@ public class WizardMVMView extends JPanel implements View {
 				return oRes;
 			}
 		}
+		return oRes;
+	}
+
+	// Aqui1
+	private MAssociation findAssocByName(String nameAssoc) {
+		MAssociation oRes=null;
+		for (MAssociation oAssoc : fSystem.model().associations()) {
+			if (oAssoc.name().equals(nameAssoc)) {
+				oRes=oAssoc;
+				return oRes;
+			}
+		}		
 		return oRes;
 	}
 
