@@ -72,15 +72,18 @@ import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 
-import org.tzi.mvm.AssocWizard;
-import org.tzi.mvm.LinkWizard;
-import org.tzi.mvm.MVMWizardAssoc;
+//import org.tzi.mvm.AssocWizard;
+//import org.tzi.mvm.LinkWizard;
+//import org.tzi.mvm.MVMWizardAssoc;
 import org.tzi.use.config.Options;
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.gui.main.ModelBrowserSorting;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeEvent;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
 import org.tzi.use.gui.main.ViewFrame;
+import org.tzi.use.gui.mvm.AssocWizard;
+import org.tzi.use.gui.mvm.LinkWizard;
+import org.tzi.use.gui.mvm.MVMWizardAssoc;
 import org.tzi.use.gui.util.ExtendedJTable;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
@@ -123,12 +126,12 @@ import com.google.common.eventbus.Subscribe;
  */
 @SuppressWarnings("serial")
 public class WizardMVMView extends JPanel implements View {
-	//	private static final String NO_OBJECTS_AVAILABLE = "(No objects available.)";
 
 	private static final String NAMEFRAMEMVMDIAGRAM = "MVM";
 	private static final String NAMEFRAMEMVMWIZARD = "MVMWizard";
 	private MainWindow fMainWindow;
 	private WizardMVMView thisWizard;
+	private PrintWriter fLogWriter;
 	private Session fSession;
 	private MSystem fSystem;
 	private MObject fObject;
@@ -189,6 +192,7 @@ public class WizardMVMView extends JPanel implements View {
 	private JButton btnDeleteLink;	
 	private JButton btnShowClassInvariants;	
 	private JButton btnShowCheckStructure;
+	private JButton btnRefreshElements;
 
 	private boolean bNewObj;
 	private JTable fTable;
@@ -281,7 +285,7 @@ public class WizardMVMView extends JPanel implements View {
 		}
 	}
 
-	public WizardMVMView(MainWindow parent, Session session) {
+	public WizardMVMView(MainWindow parent, Session session, PrintWriter logWriter) {
 		super(new BorderLayout());
 		thisWizard=this;
 		fMainWindow = parent;
@@ -289,6 +293,7 @@ public class WizardMVMView extends JPanel implements View {
 		fSystem = session.system();
 		fSystem.registerRequiresAllDerivedValues();
 		fSystem.getEventBus().register(this);
+		fLogWriter=logWriter;
 		colorSoftGray=new Color(218,224,224);
 
 		searchObjDiagramAssociated();
@@ -330,7 +335,7 @@ public class WizardMVMView extends JPanel implements View {
 		lClass.setSelectedIndex(0);
 		oClass = lClass.getSelectedValue();
 		nomClass = oClass.name();
-		//Aqui5
+
 		lClass.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
 				oClass = lClass.getSelectedValue();
@@ -357,7 +362,6 @@ public class WizardMVMView extends JPanel implements View {
 		lObjects.setLayoutOrientation(JList.VERTICAL);
 		lObjects.setSelectedIndex(0);
 		nomObj = (String) lObjects.getSelectedValue();
-
 
 		lObjects.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
@@ -503,6 +507,23 @@ public class WizardMVMView extends JPanel implements View {
 		});
 
 		panel.add(lAssocs);
+		
+		//---
+		btnRefreshElements = new JButton("Refresh");
+		btnRefreshElements.setBounds(10, 310, 110, 25);
+		btnRefreshElements.setVerticalAlignment(SwingConstants.CENTER);
+		btnRefreshElements.setHorizontalAlignment(SwingConstants.CENTER);
+//		btnRefreshElements.setFont(new Font("Serif", Font.BOLD, 18));
+		btnRefreshElements.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				refreshComponents();
+			}
+		});
+		panel.add(btnRefreshElements);
+		
+		//---
+		
+		
 
 		lbAclass = new JLabel("Class");
 		lbAclass.setBounds(150, 215, 100, 25);
@@ -713,6 +734,23 @@ public class WizardMVMView extends JPanel implements View {
 		setSize(new Dimension(400, 300));
 
 	}
+	/**
+	 * Refresh elements
+	 */
+	public void refreshComponents() {
+		oClass = lClass.getSelectedValue();
+		lClass.setModel(loadListMClass());
+		lClass.setSelectedValue(oClass, true);
+		nomObj = (String) lObjects.getSelectedValue();
+		lObjects.setModel(loadListObjects(oClass.name()));
+		lObjects.setSelectedValue(nomObj, true);
+	}
+	
+	/**
+	 * Realiza las acciones propuestas en wizard
+	 * @param oAssocPralWizard
+	 * @param commandWizard
+	 */
 	private void doActionsWizardAssoc(MAssociation oAssocPralWizard, String commandWizard) {
 		System.out.println("getActionCommand " + commandWizard);
 		ArrayList<String> lNewObjects = new ArrayList<String>();
@@ -734,8 +772,10 @@ public class WizardMVMView extends JPanel implements View {
 					MClass oClassCreate = findMClassByName(classCrear);
 					saveObject(oClassCreate, nomObjNew);
 					System.out.println("Creo objeto ["+nomObjNew+"] [" + classCrear+"]");
-					// Guardar objeto en lNewObjects
+					fLogWriter.println("Creo objeto ["+nomObjNew+"] [" + classCrear+"]");
 					lNewObjects.add(nomObjNew);
+					cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
+					cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 				}
 
 				break;
@@ -762,22 +802,15 @@ public class WizardMVMView extends JPanel implements View {
 					String objLinkar = objsLinkar[nObj];
 
 					System.out.println("Inserto link entre ["+objPral+"] [" + objLinkar+"]");
-
-					// Buscar nombre assoc y su objeto
-					//					MAssociation oAssoc = lAssocs.getSelectedValue();
-					// Buscar objetos
-					//					MObject oOri = findObjectByName(objPral);
-					//					MObject oDes = findObjectByName(objLinkar);
+					
 					MObject oOri=null;
 					MObject oDes=null;
 					MObject o1 = findObjectByName(objPral);
 					MObject o2 = findObjectByName(objLinkar);
 					// Averiguar el orden correcto para oOri i oDes segun oAssocPralWizard
-					// oAssocPralWizard tiene fAssociactionsEnds
 					List<MAssociationEnd> oAsocEnds = oAssocPralWizard.associationEnds();
-					int nAssocEnds = oAsocEnds.size();
-					//					for(int na = 0;na<nAssocEnds;na++) {
-					int na=0;// Cogemos la primera finalizacion de la asociacion
+
+					int na=0;
 					MAssociationEnd oAssocEnd = oAsocEnds.get(na);
 					MClass oClassAssocEnd = oAssocEnd.cls();
 					if (oClassAssocEnd.name().equals(o1.cls().name())) {
@@ -790,11 +823,13 @@ public class WizardMVMView extends JPanel implements View {
 
 					MObject[] fParticipants = new MObject[] {oOri,oDes};
 					insertLink(oAssocPralWizard, fParticipants);
+					fLogWriter.println("Inserto link entre ["+oOri.name()+"] y [" + oDes.name()+"]");
 				}
 				break;			    
 			default:
 
 			}
+			setComposAssoc(oAssocPralWizard);
 		}
 	}
 	public String findNomProposed(String className) {
@@ -1248,9 +1283,7 @@ public class WizardMVMView extends JPanel implements View {
 			oNewLinks.add(lw);
 		}
 		awNew.setlLinks(oNewLinks);
-		//			lAssocsWizard.remove(aw);
 		lAssocsWizard.add(awNew);
-		//		}
 	}
 
 	public void setFrameName(String name) {
@@ -1332,7 +1365,7 @@ public class WizardMVMView extends JPanel implements View {
 			return;
 		}
 
-		// Si hay links, se anliazan los links y se muestra el primero
+		// Si hay links, se analizan los links y se muestra el primero
 		// Inicialmente supondremos que solo hay un link
 
 		for (MLink oLink:links) {

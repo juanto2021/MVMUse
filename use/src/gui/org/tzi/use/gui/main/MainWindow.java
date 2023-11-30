@@ -2391,7 +2391,7 @@ public class MainWindow extends JFrame {
 
 	public WizardMVMView showMVMWizard(String name) {
 		WizardMVMView opv = new WizardMVMView(MainWindow.this,
-				fSession);
+				fSession, fLogWriter);
 		ViewFrame f = new ViewFrame("MVM Wizard", opv,
 				"MVM_Wizard.png");
 		f.setName(name);
