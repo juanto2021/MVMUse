@@ -1415,8 +1415,29 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 	private void insertLink(MAssociation oAssoc) {
-		MObject oOri = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
-		MObject oDes = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
+//		MObject oOri = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
+//		MObject oDes = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
+		
+		MObject oOri=null;
+		MObject oDes=null;
+		MObject o1 = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
+		MObject o2 = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
+		
+		// Determinar orden de oOri y oDes
+		List<MAssociationEnd> oAsocEnds = oAssoc.associationEnds();
+
+		int na=0;
+		MAssociationEnd oAssocEnd = oAsocEnds.get(na);
+		MClass oClassAssocEnd = oAssocEnd.cls();
+		if (oClassAssocEnd.name().equals(o1.cls().name())) {
+			oOri = o1;
+			oDes =	o2;	
+		}else {
+			oOri = o2;
+			oDes =	o1;	
+		}
+
+		//----------------
 		MObject[] fParticipants = new MObject[] {oOri,oDes};
 		insertLink(oAssoc, fParticipants);
 	}
