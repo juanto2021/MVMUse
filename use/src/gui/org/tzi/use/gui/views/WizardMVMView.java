@@ -730,6 +730,8 @@ public class WizardMVMView extends JPanel implements View {
 					bNewObj=true;
 					MClass oClassCreate = findMClassByName(classCrear);
 					saveObject(oClassCreate, nomObjNew);
+					cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
+					cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 					System.out.println("Creo objeto ["+nomObjNew+"] [" + classCrear+"]");
 					// Guardar objeto en lNewObjects
 					lNewObjects.add(nomObjNew);
