@@ -14,7 +14,7 @@ class Pet
  end
  
 association BelongsTo between
-  Person[*]
+  Person[1]
   Pet[*]
 end 
  constraints
