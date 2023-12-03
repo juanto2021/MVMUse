@@ -71,10 +71,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-
-//import org.tzi.mvm.AssocWizard;
-//import org.tzi.mvm.LinkWizard;
-//import org.tzi.mvm.MVMWizardAssoc;
 import org.tzi.use.config.Options;
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.gui.main.ModelBrowserSorting;
@@ -507,23 +503,17 @@ public class WizardMVMView extends JPanel implements View {
 		});
 
 		panel.add(lAssocs);
-		
-		//---
+
 		btnRefreshElements = new JButton("Refresh");
 		btnRefreshElements.setBounds(10, 310, 110, 25);
 		btnRefreshElements.setVerticalAlignment(SwingConstants.CENTER);
 		btnRefreshElements.setHorizontalAlignment(SwingConstants.CENTER);
-//		btnRefreshElements.setFont(new Font("Serif", Font.BOLD, 18));
 		btnRefreshElements.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshComponents();
 			}
 		});
 		panel.add(btnRefreshElements);
-		
-		//---
-		
-		
 
 		lbAclass = new JLabel("Class");
 		lbAclass.setBounds(150, 215, 100, 25);
@@ -745,7 +735,7 @@ public class WizardMVMView extends JPanel implements View {
 		lObjects.setModel(loadListObjects(oClass.name()));
 		lObjects.setSelectedValue(nomObj, true);
 	}
-	
+
 	/**
 	 * Realiza las acciones propuestas en wizard
 	 * @param oAssocPralWizard
@@ -770,11 +760,13 @@ public class WizardMVMView extends JPanel implements View {
 					String nomObjNew=findNomProposed(classCrear);
 					bNewObj=true;
 					MClass oClassCreate = findMClassByName(classCrear);
+					// Inicializar objeto
+					//Aqui1
 					saveObject(oClassCreate, nomObjNew);
 					cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 					cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 					System.out.println("Creo objeto ["+nomObjNew+"] [" + classCrear+"]");
-					fLogWriter.println("Creo objeto ["+nomObjNew+"] [" + classCrear+"]");
+					fLogWriter.println("Create object ["+nomObjNew+"] [" + classCrear+"]");
 					lNewObjects.add(nomObjNew);
 					cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 					cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
@@ -803,8 +795,8 @@ public class WizardMVMView extends JPanel implements View {
 				for(int nObj=0;nObj<nObjs;nObj++) {
 					String objLinkar = objsLinkar[nObj];
 
-					System.out.println("Inserto link entre ["+objPral+"] [" + objLinkar+"]");
-					
+					System.out.println("Insert link entre ["+objPral+"] [" + objLinkar+"]");
+
 					MObject oOri=null;
 					MObject oDes=null;
 					MObject o1 = findObjectByName(objPral);
@@ -827,7 +819,26 @@ public class WizardMVMView extends JPanel implements View {
 					insertLink(oAssocPralWizard, fParticipants);
 					fLogWriter.println("Inserto link entre ["+oOri.name()+"] y [" + oDes.name()+"]");
 				}
-				break;			    
+				break;
+			case "D": // Delete object
+				// Hay que borrar objeto indicado en paramAction 
+				// Aqui7
+				int idxActual = lObjects.getSelectedIndex();
+				nomObj = paramAction;
+				deleteObject(nomObj);
+				int nObjects = lObjects.getModel().getSize();
+				if (nObjects>0) {
+					if (idxActual>nObjects) {
+						idxActual=nObjects;
+					}
+					lObjects.setSelectedIndex(idxActual);
+					nomObj = (String) lObjects.getSelectedValue();
+					selectObject( nomObj);
+				}else {
+					fTableModel.update();
+				}
+				//				refreshComponents();
+				break;
 			default:
 
 			}
@@ -861,6 +872,7 @@ public class WizardMVMView extends JPanel implements View {
 		nomObj = nomProposed;
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
+		selectObject( nomObj);
 	}
 	public boolean existObject(String name) {
 		boolean bRes=false;
@@ -1005,7 +1017,7 @@ public class WizardMVMView extends JPanel implements View {
 		StringWriter buffer = new StringWriter();
 		PrintWriter out = new PrintWriter(buffer);
 		boolean ok = fSession.system().state().checkStructure(out);
-		//--
+
 		boolean res=false;
 		// check all associations
 		boolean reportAllErrors = true;
@@ -1122,7 +1134,6 @@ public class WizardMVMView extends JPanel implements View {
 					lw.setCause(cause);
 					lw.setFullMessage(fullMessage);
 
-					//--
 					int multi = 0; 
 					int connectedTo=0; 
 					try {
@@ -1148,6 +1159,29 @@ public class WizardMVMView extends JPanel implements View {
 
 			}
 
+		}
+		// Aqui5
+		// En una pasada se han de ver los objetos que admiten una multiplicidad de * para que esten disponibles
+		// Se han de ver todas las asociaciones finales que hay y ver que objetos siempre estan disponibles 
+
+		for(AssocWizard oAssoc: lAssocsWizard) {
+			MAssociation oAssocModel = oAssoc.getassocModel();
+			List<MAssociationEnd> oAsoccEnds = oAssocModel.associationEnds();
+
+			MAssociationEnd oAssocEnd1 = oAsoccEnds.get(0);
+			MAssociationEnd oAssocEnd2 = oAsoccEnds.get(1);
+			// Si la primera tiene multi *, los objetos de la segunda debe ser disponible			
+			if (oAssocEnd1.multiplicity().equals("*")) {
+				// Buscamos objetos de la segunda
+				MClass oClassBuscar = oAssocEnd2.cls();
+				mapObjects=addAndFindObjectsIntoMap(mapObjects, oClassBuscar);
+			}
+			// Si la segunda tiene multi *, los objetos de la primera debe ser disponible			
+			if (oAssocEnd2.multiplicity().getRanges().get(0).toString().equals("*")) {
+				// Buscamos objetos de la primera
+				MClass oClassBuscar = oAssocEnd1.cls();
+				mapObjects=addAndFindObjectsIntoMap(mapObjects, oClassBuscar);
+			}
 		}
 
 		System.out.println("Ya");
@@ -1180,7 +1214,6 @@ public class WizardMVMView extends JPanel implements View {
 				}
 			}
 			// Revision de clases disponibles y objetos disponibles de cada una de las mismas
-			//Aqui3
 			for (Map.Entry<String, List<String>> entry : mapObjects.entrySet()) {
 				String className = (String) entry.getKey();
 				List<String> lObjDisponibles = new ArrayList<String>();
@@ -1190,12 +1223,34 @@ public class WizardMVMView extends JPanel implements View {
 					System.out.println("   Object ["+nameObject+"] ");
 				}
 			}
-			//Aqui1
 			// Analisis de problemas a solucionar
 			analyzeProposals(aw, mapObjects);
 		}
-		//		System.out.println("YA trato ["+lAssocsWizard.size()+"]");
 		return ok;
+	}
+	private Map<String, List<String>> addAndFindObjectsIntoMap(Map<String, List<String>> mapObjects, 
+			MClass oClassBuscar){
+		MSystemState state = fSystem.state();
+		Set<MObject> allObjects = state.allObjects();
+		for (MObject obj : allObjects) {
+			String objectName = obj.name();
+			String strClassName = oClassBuscar.name();
+			if (obj.cls().name().equals(strClassName)) {
+				List<String> lObjDisponibles = new ArrayList<String>();
+
+				if (mapObjects.containsKey(strClassName)) {
+					lObjDisponibles=mapObjects.get(strClassName);
+					if (!lObjDisponibles.contains(objectName)) {
+						lObjDisponibles.add(objectName);
+						mapObjects.replace(strClassName, lObjDisponibles);
+					}
+				}else{
+					lObjDisponibles.add(objectName);
+					mapObjects.put(strClassName, lObjDisponibles);
+				}
+			}
+		}
+		return mapObjects;
 	}
 	/** En base a la estructura de un objecto de la associacion, propone crear y/o linkar
 	 * dicho objeto a otros
@@ -1203,13 +1258,6 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	public void analyzeProposals(AssocWizard aw,Map<String, List<String>> mapObjects) {
 
-		//		List<AssocWizard> lAssocsWizardPaso = new ArrayList<AssocWizard>();
-		//		for(AssocWizard oAssoc: lAssocsWizard) {
-		//			lAssocsWizardPaso.add(oAssoc);
-		//		}
-		//		lAssocsWizard.clear();
-		// Veamos para cada assoc que links ha de cubrir
-		//		for (AssocWizard aw: lAssocsWizardPaso) {
 		AssocWizard awNew = aw;
 		System.out.println("aw ["+aw.getName()+"]");	
 		List<LinkWizard> oLinks = aw.getlLinks();
@@ -1417,14 +1465,11 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 	private void insertLink(MAssociation oAssoc) {
-//		MObject oOri = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
-//		MObject oDes = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
-		
 		MObject oOri=null;
 		MObject oDes=null;
 		MObject o1 = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
 		MObject o2 = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
-		
+
 		// Determinar orden de oOri y oDes
 		List<MAssociationEnd> oAsocEnds = oAssoc.associationEnds();
 
@@ -1439,7 +1484,6 @@ public class WizardMVMView extends JPanel implements View {
 			oDes =	o1;	
 		}
 
-		//----------------
 		MObject[] fParticipants = new MObject[] {oOri,oDes};
 		insertLink(oAssoc, fParticipants);
 	}
@@ -1611,17 +1655,29 @@ public class WizardMVMView extends JPanel implements View {
 		checkExistObjDiagram();
 
 		if (bNewObj) {
-			// Hacer copia de fValues
+			// Hacer copia de fValues siempre que la clase sea la misma
+			//			String nameClassAttributes = ((MAttribute) fAttributes[0]).
+
+			boolean sameClass=false;
+			if (fAttributes.size()>0) {
+				MAttribute attr1 = fAttributes.get(0);
+				if (attr1.owner().name().equals(oClass.name())) {
+					sameClass=true;
+				}			
+			}
+
 			String[] fValuesAnt = new String[fAttributes.size()];
-			for (int i = 0; i < fAttributes.size(); i++) {
-				fValuesAnt[i] = fValues[i];
+			if (sameClass) {
+				for (int i = 0; i < fAttributes.size(); i++) {
+					fValuesAnt[i] = fValues[i];
+				}
 			}
 			if (!existObject(nomObj)) {
 				createObject(oClass, nomObj);
 			}
 
 			selectObject( nomObj);
-			if (fValues.length == fValuesAnt.length) {
+			if (fValues.length == fValuesAnt.length && sameClass) {
 				for (int i = 0; i < fAttributes.size(); i++) {
 					fValues[i] = fValuesAnt[i];
 				}
@@ -1653,16 +1709,29 @@ public class WizardMVMView extends JPanel implements View {
 			if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 				odv.getDiagram().deleteObject(fObject);
 				odv.repaint();
-				idx=idx-1;
+				//				idx=idx-1;
 
 			}
 		}
 		state.deleteObject(fObject);
 		lObjects.setModel(loadListObjects(nomClass));
-		if (idx<0) idx=0;
-		if (idx>-1) {
+		//		if (idx<0) idx=0;
+		//		if (idx>-1) {
+		//			lObjects.setSelectedIndex(idx);
+		//			nomObj = (String) lObjects.getSelectedValue();
+		//		}else {
+		//			fTableModel.update();
+		//		}
+		int nObjects = lObjects.getModel().getSize();
+		if (nObjects>0) {
+			if (idx>nObjects-1) {
+				idx=nObjects-1;
+			}
 			lObjects.setSelectedIndex(idx);
 			nomObj = (String) lObjects.getSelectedValue();
+			selectObject( nomObj);
+		}else {
+			fTableModel.update();
 		}
 		setResClassInvariants();
 		setResCheckStructure();
