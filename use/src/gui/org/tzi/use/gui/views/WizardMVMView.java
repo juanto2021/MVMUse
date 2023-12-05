@@ -472,9 +472,15 @@ public class WizardMVMView extends JPanel implements View {
 		btnDeleteObject.setBounds(400, 160, 100, 25);
 		btnDeleteObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				deleteObject(nomObj);
-				cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
-				cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
+
+				int resp =JOptionPane.showConfirmDialog(null, "Are you sure to delete object ["+nomObj+"]?",
+						"Delete objects", JOptionPane.YES_NO_OPTION,
+						JOptionPane.QUESTION_MESSAGE);
+				if (resp==0) {
+					deleteObject(nomObj);
+					cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
+					cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
+				}
 			}
 		});
 		panel.add(btnDeleteObject);
@@ -578,17 +584,50 @@ public class WizardMVMView extends JPanel implements View {
 		cmbObjectOri = new JComboBox<MObject>();
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 		cmbObjectOri.setBounds(220, 245, 120, 25);
+		//Aqui1
+		cmbObjectOri.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				MObject oSel = (MObject) cmbObjectOri.getSelectedItem();
+				System.out.println("Busca extremo para ["+oSel.name()+"]");
+				MObject oRel = findAssocEnd(oSel);
+				if (oRel!=null) {
+					System.out.println("Le corresponde ["+oRel.name()+"]");
+					// Buscar y seleccionar oRel en cmbObjectDes
+					cmbObjectDes.setSelectedItem(oRel);
+				}else {
+					System.out.println("No tiene extremo");
+				}
+			}
+		});
 		panel.add(cmbObjectOri);
 
 		cmbObjectDes = new JComboBox<MObject>();
 		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 		cmbObjectDes.setBounds(350, 245, 120, 25);
+		//Aqui2
+		cmbObjectDes.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				MObject oSel = (MObject) cmbObjectDes.getSelectedItem();
+				System.out.println("Busca extremo para ["+oSel.name()+"]");
+				MObject oRel = findAssocEnd(oSel);
+				if (oRel!=null) {
+					System.out.println("Le corresponde ["+oRel.name()+"]");
+					// Buscar y seleccionar oRel en cmbObjectDes
+					cmbObjectDes.setSelectedItem(oRel);
+				}else {
+					System.out.println("No tiene extremo");
+				}
+			}
+		});
 		panel.add(cmbObjectDes);
 
 		cmbMultiOri = new JComboBox<String>(aMulti);
 		cmbMultiOri.setBounds(220, 275, 120, 25);
 		cmbMultiOri.setEditable(false);
 		cmbMultiOri.setVisible(false);
+
 		panel.add(cmbMultiOri);		
 
 		txMultiOri = new JTextField(20);
@@ -644,6 +683,10 @@ public class WizardMVMView extends JPanel implements View {
 		btnDeleteLink.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MAssociation oAssoc = lAssocs.getSelectedValue();
+				int resp =JOptionPane.showConfirmDialog(null, "Are you sure to delete link ["+oAssoc.name()+"]?",
+						"Delete Links", JOptionPane.YES_NO_OPTION,
+						JOptionPane.QUESTION_MESSAGE);					
+
 				deleteLink(oAssoc) ;
 			}
 		});
@@ -735,6 +778,26 @@ public class WizardMVMView extends JPanel implements View {
 		lObjects.setModel(loadListObjects(oClass.name()));
 		lObjects.setSelectedValue(nomObj, true);
 	}
+	private MObject findAssocEnd(MObject oFindAssoc) {
+		MObject objEnd=null;
+		MSystemState state = fSystem.state();
+		Set<MLink> oLinkSets=state.allLinks();
+		for (MLink oLink: oLinkSets) {
+			System.out.println("oLink ["+oLink.linkedObjects()+"]");
+			MLinkEnd oL0 = oLink.getLinkEnd(0);
+			MLinkEnd oL1 = oLink.getLinkEnd(1);
+			if(oL0.object().name().equals(oFindAssoc.name())&&
+					oL0.object().cls().name().equals(oFindAssoc.cls().name())) {
+				return oL1.object();
+			}
+			if(oL1.object().name().equals(oFindAssoc.name())&&
+					oL1.object().cls().name().equals(oFindAssoc.cls().name())) {
+				return oL0.object();
+			}				
+
+		}
+		return objEnd;
+	}
 
 	/**
 	 * Realiza las acciones propuestas en wizard
@@ -761,7 +824,6 @@ public class WizardMVMView extends JPanel implements View {
 					bNewObj=true;
 					MClass oClassCreate = findMClassByName(classCrear);
 					// Inicializar objeto
-					//Aqui1
 					saveObject(oClassCreate, nomObjNew);
 					cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 					cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
@@ -822,7 +884,7 @@ public class WizardMVMView extends JPanel implements View {
 				break;
 			case "D": // Delete object
 				// Hay que borrar objeto indicado en paramAction 
-				// Aqui7
+
 				int idxActual = lObjects.getSelectedIndex();
 				nomObj = paramAction;
 				deleteObject(nomObj);
@@ -1052,7 +1114,9 @@ public class WizardMVMView extends JPanel implements View {
 					String connectedNum="";
 					String connectedClass="";
 					String assoccEnd="";
-					String multiplicity="";		
+					String multiplicity="";	
+					MObject oObjectPral=null;
+					//Aqui6
 
 					fullMessage=linea;
 					String linea2 = linea.replaceFirst("of class","of class1");
@@ -1072,6 +1136,7 @@ public class WizardMVMView extends JPanel implements View {
 						if (parte.contains(":  Object")) {
 							String[] subPartes = parte.split("`");
 							nomAssocObject=subPartes[1];
+							oObjectPral = findObjectByName(nomAssocObject);
 						}else if (parte.contains("of class1")) {
 							String[] subPartes = parte.split("`");
 							nomAssocClass=subPartes[1];
@@ -1133,6 +1198,8 @@ public class WizardMVMView extends JPanel implements View {
 					lw.setMultiSpecified(multiplicity);
 					lw.setCause(cause);
 					lw.setFullMessage(fullMessage);
+					lw.setoMObject(oObjectPral);
+					//					oObjectPral
 
 					int multi = 0; 
 					int connectedTo=0; 
@@ -1143,6 +1210,8 @@ public class WizardMVMView extends JPanel implements View {
 						connectedTo=Integer.parseInt(lw.getConnectedTo()); 
 					}catch(Exception e) {}
 					int needed = multi-connectedTo;
+					if (needed < 0) 
+						needed=0;
 					lw.setNeeded(needed);
 
 					lLinksWizard.add(lw);
@@ -1160,7 +1229,7 @@ public class WizardMVMView extends JPanel implements View {
 			}
 
 		}
-		// Aqui5
+
 		// En una pasada se han de ver los objetos que admiten una multiplicidad de * para que esten disponibles
 		// Se han de ver todas las asociaciones finales que hay y ver que objetos siempre estan disponibles 
 
@@ -1849,7 +1918,7 @@ public class WizardMVMView extends JPanel implements View {
 		return oRes;
 	}
 
-	// Aqui1
+
 	private MAssociation findAssocByName(String nameAssoc) {
 		MAssociation oRes=null;
 		for (MAssociation oAssoc : fSystem.model().associations()) {

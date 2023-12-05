@@ -3,8 +3,11 @@ package org.tzi.use.gui.mvm;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.tzi.use.uml.sys.MObject;
+
 public class LinkWizard {
 	private String object;
+	private MObject oMObject;
 	private String nomClass;
 	private String connectedTo;
 	private String ofClass;
@@ -19,6 +22,7 @@ public class LinkWizard {
 	public LinkWizard() {
 		super();
 		this.object = "";
+		this.oMObject = null;
 		this.nomClass = "";
 		this.connectedTo = "";
 		this.ofClass = "";
@@ -30,11 +34,12 @@ public class LinkWizard {
 		this.mapActions = new HashMap<String, String>();
 	}
 
-	public LinkWizard(String object, String nomClass, String connectedTo, String ofClass,
+	public LinkWizard(String object, MObject oMObject,String nomClass, String connectedTo, String ofClass,
 			String assocEnd, String multiSpecified, String cause, String fullMessage, int needed,
 			Map<String, String> mapActions) {
 		super();
 		this.object = object;
+		this.oMObject = oMObject;
 		this.nomClass = nomClass;
 		this.connectedTo = connectedTo;
 		this.ofClass = ofClass;
@@ -49,9 +54,14 @@ public class LinkWizard {
 	public String getObject() {
 		return object;
 	}
-
 	public void setObject(String object) {
 		this.object = object;
+	}	
+	public MObject getoMObject() {
+		return oMObject;
+	}
+	public void setoMObject(MObject oMObject) {
+		this.oMObject = oMObject;
 	}
 	public String getNomClass() {
 		return nomClass;

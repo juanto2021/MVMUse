@@ -38,6 +38,7 @@ import javax.swing.table.JTableHeader;
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.gui.views.WizardMVMView;
 import org.tzi.use.uml.mm.MAssociation;
+import org.tzi.use.uml.sys.MObject;
 
 public class MVMWizardAssoc extends JDialog {
 
@@ -153,7 +154,7 @@ public class MVMWizardAssoc extends JDialog {
 				if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP ){
 					int row = tabAssocs.getSelectedRow();
 					showInfoAssocFromRow(row);
-//					showInfoLinkFromRow(0);
+					//					showInfoLinkFromRow(0);
 					tabLinks.setRowSelectionInterval(0, 0);
 					showInfoLinkFromRow(0);
 				}
@@ -276,7 +277,7 @@ public class MVMWizardAssoc extends JDialog {
 					if (button.isSelected()) {
 						commandWizard=button.getActionCommand();
 						//Aqui
-//						assocSelectWizard=null;
+						//						assocSelectWizard=null;
 					}
 				}
 				dispose();
@@ -307,7 +308,7 @@ public class MVMWizardAssoc extends JDialog {
 	public MAssociation getAssocWizard() {
 		return assocSelectWizard;
 	}
-	private String[][] createActionLinks(Map<String, String> mapActions) {
+	private String[][] createActionLinks(Map<String, String> mapActions, MObject objPral) {
 
 		// [x][y]
 		// [x]->Acciones
@@ -316,7 +317,7 @@ public class MVMWizardAssoc extends JDialog {
 		String strAction="";
 		String textAction="";
 		String strCommand="";
-		String strObjPral="";
+		String strObjPral=objPral.name();
 		for (Map.Entry<String, String> entry : mapActions.entrySet()) {
 
 			String actionW =  entry.getKey();
@@ -327,10 +328,10 @@ public class MVMWizardAssoc extends JDialog {
 			switch(pCar) {
 			case "A":
 				textAction = "Assign";
-//				if (strCommand!="") {
-//					strCommand+="|";
-//				}
-//				strCommand=strCommand+"A "+infoW;
+				//				if (strCommand!="") {
+				//					strCommand+="|";
+				//				}
+				//				strCommand=strCommand+"A "+infoW;
 				break;
 			case "C":
 				String sCar = actionW.substring(2,actionW.length());
@@ -346,11 +347,13 @@ public class MVMWizardAssoc extends JDialog {
 					strCommand+="-";
 				}
 				strCommand=strCommand+"I "+infoW;
-				String[] partes = infoW.split(":");
-				int nPartes = partes.length;
-				if (nPartes>0) {
-					strObjPral=partes[0];
-				}
+				//Provis------------------------
+				//				String[] partes = infoW.split(":");
+				//				int nPartes = partes.length;
+				//				if (nPartes>0) {
+				//					strObjPral=partes[0];
+				//				}
+				//				Provis------------------------
 				break;			    
 			default:
 
@@ -399,7 +402,9 @@ public class MVMWizardAssoc extends JDialog {
 	private void showPanelActionsLink(LinkWizard oLink) {
 		Map<String, String> mapActions = new HashMap<String, String>();
 		mapActions=oLink.getMapActions();
-		String actionLinks[][] = createActionLinks(mapActions);
+		// Aqui1
+		MObject objPral = oLink.getoMObject();
+		String actionLinks[][] = createActionLinks(mapActions,objPral);
 
 		pProposals = new JPanel();
 		BoxLayout layout = new BoxLayout(pProposals, BoxLayout.Y_AXIS);
@@ -410,15 +415,16 @@ public class MVMWizardAssoc extends JDialog {
 		for (int r=0;r<sizeActions;r++) {
 			String strAction=actionLinks[r][0];
 			String strCommand=actionLinks[r][1];
-			JRadioButton rb = new JRadioButton (strAction);
-			if (pVez) {
-				rb.setSelected(true);
-//				rb.setActionCommand(strCommand);
-				pVez=false;
+			if (strAction!="") {
+				JRadioButton rb = new JRadioButton (strAction);
+				if (pVez) {
+					rb.setSelected(true);
+					pVez=false;
+				}
+				rb.setActionCommand(strCommand);
+				pProposals.add(rb);
+				group.add(rb);	
 			}
-			rb.setActionCommand(strCommand);
-			pProposals.add(rb);
-			group.add(rb);		
 		}
 
 		String borderTitle = "Proposals ("+ actionLinks.length+")";
@@ -495,12 +501,12 @@ public class MVMWizardAssoc extends JDialog {
 		modelTabLinks = new DefaultTableModel();
 		String[] columns;
 		columns = new String[] {
-				"Object", "Class","Connectec To","Of Class", "Assoc End","Multi Specified"
+				"Object", "Class","Connectec To","Of Class", "Assoc End","Multi Specified","ObjPral"
 		};
 
 		ArrayList<LinkWizard> data = loadLinksAssoc(assoc);
 
-		Object[][] objects = new Object[data.size()][6];
+		Object[][] objects = new Object[data.size()][7];
 		for (int i=0;i<data.size();i++) {
 			objects[i][0]= data.get(i).getObject();
 			objects[i][1]= data.get(i).getNomClass();
@@ -508,11 +514,13 @@ public class MVMWizardAssoc extends JDialog {
 			objects[i][3]= data.get(i).getOfClass();
 			objects[i][4]= data.get(i).getAssocEnd();
 			objects[i][5]= data.get(i).getMultiSpecified();
+			objects[i][6]= data.get(i).getoMObject();
 		}
 
 
 		modelTabLinks = new DefaultTableModel(objects,columns);
 		tabLinks.setModel(modelTabLinks);
+		//		tabLinks.getColumnModel().getColumn(7).setPreferredWidth(0);
 		adjustWidthColumnsLinks();
 		tabLinks.repaint();
 		return;
