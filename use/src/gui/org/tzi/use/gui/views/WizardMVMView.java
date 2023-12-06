@@ -39,8 +39,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,6 +71,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
+
 import org.tzi.use.config.Options;
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.gui.main.ModelBrowserSorting;
@@ -83,7 +82,6 @@ import org.tzi.use.gui.mvm.AssocWizard;
 import org.tzi.use.gui.mvm.LinkWizard;
 import org.tzi.use.gui.mvm.MVMWizardAssoc;
 import org.tzi.use.gui.util.ExtendedJTable;
-import org.tzi.use.gui.views.View;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.QualifierInputView;
@@ -103,7 +101,6 @@ import org.tzi.use.uml.ocl.value.BooleanValue;
 import org.tzi.use.uml.ocl.value.Value;
 import org.tzi.use.uml.sys.MLink;
 import org.tzi.use.uml.sys.MLinkEnd;
-import org.tzi.use.uml.sys.MLinkSet;
 import org.tzi.use.uml.sys.MObject;
 import org.tzi.use.uml.sys.MObjectState;
 import org.tzi.use.uml.sys.MSystem;
@@ -113,7 +110,6 @@ import org.tzi.use.uml.sys.events.tags.SystemStateChangedEvent;
 import org.tzi.use.uml.sys.soil.MAttributeAssignmentStatement;
 import org.tzi.use.uml.sys.soil.MLinkDeletionStatement;
 import org.tzi.use.uml.sys.soil.MLinkInsertionStatement;
-import org.tzi.use.util.Log;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -131,7 +127,7 @@ public class WizardMVMView extends JPanel implements View {
 	private static final String NAMEFRAMEMVMDIAGRAM = "MVM";
 	private static final String NAMEFRAMEMVMWIZARD = "MVMWizard";
 	private MainWindow fMainWindow;
-	private WizardMVMView thisWizard;
+	//	private WizardMVMView thisWizard;
 	private PrintWriter fLogWriter;
 	private Session fSession;
 	private MSystem fSystem;
@@ -288,7 +284,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	public WizardMVMView(MainWindow parent, Session session, PrintWriter logWriter) {
 		super(new BorderLayout());
-		thisWizard=this;
+		//		thisWizard=this;
 		fMainWindow = parent;
 		fSession = session;
 		fSystem = session.system();
@@ -377,7 +373,7 @@ public class WizardMVMView extends JPanel implements View {
 		scrollPaneObj = new JScrollPane();
 		scrollPaneObj.setViewportView(lObjects);
 		scrollPaneObj.setBounds(110, 40, 90, 110);
-
+		// mas
 		btnNewObjectAuto = new JButton("+");
 		btnNewObjectAuto.setBounds(110, 160, 90, 25);
 
@@ -453,6 +449,8 @@ public class WizardMVMView extends JPanel implements View {
 				nomObj = txNewObject.getText();
 				oClass = lClass.getSelectedValue();
 				saveObject(oClass, nomObj);
+				setResClassInvariants();
+				setResCheckStructure();
 				bNewObj=false;
 				txNewObject.setEnabled(false);
 				selectObject(nomObj);
@@ -589,7 +587,7 @@ public class WizardMVMView extends JPanel implements View {
 		cmbObjectOri = new JComboBox<MObject>();
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 		cmbObjectOri.setBounds(220, 245, 120, 25);
-		//Aqui1
+
 		cmbObjectOri.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -610,7 +608,7 @@ public class WizardMVMView extends JPanel implements View {
 		cmbObjectDes = new JComboBox<MObject>();
 		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 		cmbObjectDes.setBounds(350, 245, 120, 25);
-		//Aqui2
+
 		cmbObjectDes.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -904,13 +902,15 @@ public class WizardMVMView extends JPanel implements View {
 				}else {
 					fTableModel.update();
 				}
-				//				refreshComponents();
+
 				break;
 			default:
 
 			}
 			setComposAssoc(oAssocPralWizard);
 		}
+		setResClassInvariants();
+		setResCheckStructure();
 	}
 	public String findNomProposed(String className) {
 		int numObj = 1;
@@ -932,7 +932,8 @@ public class WizardMVMView extends JPanel implements View {
 
 		bNewObj=true;
 		saveObject(oClass, nomProposed);
-
+		setResClassInvariants();
+		setResCheckStructure();
 		bNewObj=false;
 		txNewObject.setEnabled(false);
 		selectObject(nomProposed);
@@ -1076,168 +1077,19 @@ public class WizardMVMView extends JPanel implements View {
 
 		return todosOk;
 	}
-	
-//	private boolean checkStructure2() {
-//		boolean res=true;
-//		// check all associations
-//		boolean reportAllErrors=true;
-//		StringWriter buffer = new StringWriter();
-//		PrintWriter out = new PrintWriter(buffer);
-//		for (MAssociation assoc : fSystem.model().associations()) {
-//			res = fSession.system().state().checkStructure(assoc, out, reportAllErrors) && res;
-//			if (!reportAllErrors && !res) return false;
-//		}
-//		return res;
-//	}
 
-	private boolean checkStructure() {
-
-		Map<String, List<String>> mapObjects = new HashMap<String, List<String>>();
-
+	private void getErrorsEstructure() {
+		lAssocsWizard = new ArrayList<AssocWizard>();
 		StringWriter buffer = new StringWriter();
 		PrintWriter out = new PrintWriter(buffer);
-		boolean ok = fSession.system().state().checkStructure(out);
-
-		System.out.println("Total ["+ok+"]");
-		System.out.println("Totalout ["+buffer+"]");
-
-		lAssocsWizard = new ArrayList<AssocWizard>();
-
-		String msgRef = buffer.toString();
-		if (msgRef.contains("Multiplicity")) {
-
-			String msg = msgRef.replace("\r\n", "");
-			String[] lineas = msg.split("\\.");
-			int nLineas = lineas.length;
-			System.out.println("nLineas"+nLineas+"]");
-			for (int nLinea=0;nLinea<nLineas;nLinea++) {
-				String linea = lineas[nLinea];
-				System.out.println("Linea ["+linea+"]");
-				if (linea.contains("Multiplicity constraint violation")) {
-					String cause="";
-					String fullMessage="";
-					String nomAssociation="";
-					String nomAssocObject="";
-					String nomAssocClass="";
-					String connectedNum="";
-					String connectedClass="";
-					String assoccEnd="";
-					String multiplicity="";	
-					MObject oObjectPral=null;
-					//Aqui6
-
-					fullMessage=linea;
-					String linea2 = linea.replaceFirst("of class","of class1");
-					linea=linea2;
-					String[] partes = linea.split("'");
-					int nPartes = partes.length;
-					for (int nParte=0;nParte<nPartes;nParte++) {
-						String parte = partes[nParte];
-						System.out.println("Parte ["+parte+"]");
-						//Multiplicity constraint violation
-						if (parte.contains("Multiplicity constraint violation")) {
-							String[] subPartes = parte.split(":");
-							cause=subPartes[0]+"'";
-							String[] subPartes2 = parte.split("`");
-							nomAssociation=subPartes2[1];
-						}
-						if (parte.contains(":  Object")) {
-							String[] subPartes = parte.split("`");
-							nomAssocObject=subPartes[1];
-							oObjectPral = findObjectByName(nomAssocObject);
-						}else if (parte.contains("of class1")) {
-							String[] subPartes = parte.split("`");
-							nomAssocClass=subPartes[1];
-						}else if (parte.contains("objects of class")||parte.contains("object of class")) {
-							String[] subPartesSPC = parte.split(" ");
-							connectedNum = subPartesSPC[4];
-							String[] subPartes = parte.split("`");
-							connectedClass=subPartes[1];
-						}else if (parte.contains("at association end")) {
-							String[] subPartes = parte.split("`");
-							assoccEnd=subPartes[1];
-						}else if (parte.contains("but the multiplicity")) {
-							String[] subPartes = parte.split("`");
-							multiplicity=subPartes[1];
-						}
-					}
-
-					// Busca assoc en lista
-
-					List<LinkWizard> lLinksWizard = new ArrayList<LinkWizard>();
-
-					AssocWizard aw = new AssocWizard();
-					boolean existAssocWizard=false;
-					int indexAssoc=-1;
-					for(indexAssoc=0;indexAssoc<lAssocsWizard.size();indexAssoc++) {
-						AssocWizard awl = lAssocsWizard.get(indexAssoc);
-						if (awl.getName().equals(nomAssociation)) {
-							aw = awl;
-							existAssocWizard=true;
-							break;
-						}
-					}
-					MAssociation oAassocModel = findAssocByName(nomAssociation);
-					if (existAssocWizard) {
-						lLinksWizard=aw.getlLinks();
-					}else {
-						aw.setName(nomAssociation);
-						aw.setState("ko");
-						aw.setassocModel(oAassocModel);
-					}
-
-					// Si no esta, crea nueva assoc
-					// Si esta, la usa
-					System.out.println("cause ["+cause+"]");
-					System.out.println("nomAssociation  ["+ nomAssociation +"]");
-					System.out.println("nomAssocObject ["+nomAssocObject+"]");
-					System.out.println("nomAssocClass ["+nomAssocClass+"]");
-					System.out.println("connectedNum ["+connectedNum+"]");
-					System.out.println("connectedClass ["+connectedClass+"]");
-					System.out.println("assoccEnd ["+assoccEnd+"]");
-					System.out.println("multiplicity ["+multiplicity+"]");	
-					//				
-					LinkWizard lw = new LinkWizard();
-					lw.setObject(nomAssocObject);
-					lw.setNomClass(nomAssocClass);
-					lw.setConnectedTo(connectedNum);
-					lw.setOfClass(connectedClass);
-					lw.setAssocEnd(assoccEnd);
-					lw.setMultiSpecified(multiplicity);
-					lw.setCause(cause);
-					lw.setFullMessage(fullMessage);
-					lw.setoMObject(oObjectPral);
-					//					oObjectPral
-
-					int multi = 0; 
-					int connectedTo=0; 
-					try {
-						multi = Integer.parseInt(lw.getMultiSpecified()); 
-					}catch(Exception e) {}
-					try {
-						connectedTo=Integer.parseInt(lw.getConnectedTo()); 
-					}catch(Exception e) {}
-					int needed = multi-connectedTo;
-					if (needed < 0) 
-						needed=0;
-					lw.setNeeded(needed);
-
-					lLinksWizard.add(lw);
-
-					aw.setlLinks(lLinksWizard);
-
-					if (existAssocWizard) {
-						lAssocsWizard.remove(indexAssoc);
-						lAssocsWizard.add(aw);
-					}else {
-						lAssocsWizard.add(aw);
-					}
-				}
-
-			}
-
-		}
-
+		boolean reportAllErrors=true;
+		lAssocsWizard = fSession.system().state().checkStructureWithErrorsInfo( out, 
+				reportAllErrors);
+		return;
+	}
+	private boolean checkStructure() {
+		Map<String, List<String>> mapObjects = new HashMap<String, List<String>>();
+		getErrorsEstructure(); //Provis
 		// En una pasada se han de ver los objetos que admiten una multiplicidad de * para que esten disponibles
 		// Se han de ver todas las asociaciones finales que hay y ver que objetos siempre estan disponibles 
 
@@ -1303,6 +1155,230 @@ public class WizardMVMView extends JPanel implements View {
 			// Analisis de problemas a solucionar
 			analyzeProposals(aw, mapObjects);
 		}
+		boolean ok = true;
+		if (mapObjects.size()>0) ok=false;
+		return ok;
+	}
+
+	private boolean checkStructure_old() {
+
+		boolean ok = checkStructure();
+		//		return false;
+		// Provis ----------------------
+		//		List<AssocWizard> lAssocsWizard2=getErrorsEstructure(); //Provis
+		//		
+		//		Map<String, List<String>> mapObjects = new HashMap<String, List<String>>();
+		//
+		//		StringWriter buffer = new StringWriter();
+		//		PrintWriter out = new PrintWriter(buffer);
+		//		boolean ok = fSession.system().state().checkStructure(out);
+		//
+		//		System.out.println("Total ["+ok+"]");
+		//		System.out.println("Totalout ["+buffer+"]");
+		//
+		//		lAssocsWizard = new ArrayList<AssocWizard>();
+		//
+		//		String msgRef = buffer.toString();
+		//		if (msgRef.contains("Multiplicity")) {
+		//
+		//			String msg = msgRef.replace("\r\n", "");
+		//			String[] lineas = msg.split("\\.");
+		//			int nLineas = lineas.length;
+		//			System.out.println("nLineas"+nLineas+"]");
+		//			for (int nLinea=0;nLinea<nLineas;nLinea++) {
+		//				String linea = lineas[nLinea];
+		//				System.out.println("Linea ["+linea+"]");
+		//				if (linea.contains("Multiplicity constraint violation")) {
+		//					String cause="";
+		//					String fullMessage="";
+		//					String nomAssociation="";
+		//					String nomAssocObject="";
+		//					String nomAssocClass="";
+		//					String connectedNum="";
+		//					String connectedClass="";
+		//					String assoccEnd="";
+		//					String multiplicity="";	
+		//					MObject oObjectPral=null;
+		//					//Aqui6
+		//
+		//					fullMessage=linea;
+		//					String linea2 = linea.replaceFirst("of class","of class1");
+		//					linea=linea2;
+		//					String[] partes = linea.split("'");
+		//					int nPartes = partes.length;
+		//					for (int nParte=0;nParte<nPartes;nParte++) {
+		//						String parte = partes[nParte];
+		//						System.out.println("Parte ["+parte+"]");
+		//						//Multiplicity constraint violation
+		//						if (parte.contains("Multiplicity constraint violation")) {
+		//							String[] subPartes = parte.split(":");
+		//							cause=subPartes[0]+"'";
+		//							String[] subPartes2 = parte.split("`");
+		//							nomAssociation=subPartes2[1];
+		//						}
+		//						if (parte.contains(":  Object")) {
+		//							String[] subPartes = parte.split("`");
+		//							nomAssocObject=subPartes[1];
+		//							oObjectPral = findObjectByName(nomAssocObject);
+		//						}else if (parte.contains("of class1")) {
+		//							String[] subPartes = parte.split("`");
+		//							nomAssocClass=subPartes[1];
+		//						}else if (parte.contains("objects of class")||parte.contains("object of class")) {
+		//							String[] subPartesSPC = parte.split(" ");
+		//							connectedNum = subPartesSPC[4];
+		//							String[] subPartes = parte.split("`");
+		//							connectedClass=subPartes[1];
+		//						}else if (parte.contains("at association end")) {
+		//							String[] subPartes = parte.split("`");
+		//							assoccEnd=subPartes[1];
+		//						}else if (parte.contains("but the multiplicity")) {
+		//							String[] subPartes = parte.split("`");
+		//							multiplicity=subPartes[1];
+		//						}
+		//					}
+		//
+		//					// Busca assoc en lista
+		//
+		//					List<LinkWizard> lLinksWizard = new ArrayList<LinkWizard>();
+		//
+		//					AssocWizard aw = new AssocWizard();
+		//					boolean existAssocWizard=false;
+		//					int indexAssoc=-1;
+		//					for(indexAssoc=0;indexAssoc<lAssocsWizard.size();indexAssoc++) {
+		//						AssocWizard awl = lAssocsWizard.get(indexAssoc);
+		//						if (awl.getName().equals(nomAssociation)) {
+		//							aw = awl;
+		//							existAssocWizard=true;
+		//							break;
+		//						}
+		//					}
+		//					MAssociation oAassocModel = findAssocByName(nomAssociation);
+		//					if (existAssocWizard) {
+		//						lLinksWizard=aw.getlLinks();
+		//					}else {
+		//						aw.setName(nomAssociation);
+		//						aw.setState("ko");
+		//						aw.setassocModel(oAassocModel);
+		//					}
+		//
+		//					// Si no esta, crea nueva assoc
+		//					// Si esta, la usa
+		//					System.out.println("cause ["+cause+"]");
+		//					System.out.println("nomAssociation  ["+ nomAssociation +"]");
+		//					System.out.println("nomAssocObject ["+nomAssocObject+"]");
+		//					System.out.println("nomAssocClass ["+nomAssocClass+"]");
+		//					System.out.println("connectedNum ["+connectedNum+"]");
+		//					System.out.println("connectedClass ["+connectedClass+"]");
+		//					System.out.println("assoccEnd ["+assoccEnd+"]");
+		//					System.out.println("multiplicity ["+multiplicity+"]");	
+		//					//				
+		//					LinkWizard lw = new LinkWizard();
+		//					lw.setObject(nomAssocObject);
+		//					lw.setNomClass(nomAssocClass);
+		//					lw.setConnectedTo(connectedNum);
+		//					lw.setOfClass(connectedClass);
+		//					lw.setAssocEnd(assoccEnd);
+		//					lw.setMultiSpecified(multiplicity);
+		//					lw.setCause(cause);
+		//					lw.setFullMessage(fullMessage);
+		//					lw.setoMObject(oObjectPral);
+		//					//					oObjectPral
+		//
+		//					int multi = 0; 
+		//					int connectedTo=0; 
+		//					try {
+		//						multi = Integer.parseInt(lw.getMultiSpecified()); 
+		//					}catch(Exception e) {}
+		//					try {
+		//						connectedTo=Integer.parseInt(lw.getConnectedTo()); 
+		//					}catch(Exception e) {}
+		//					int needed = multi-connectedTo;
+		//					if (needed < 0) 
+		//						needed=0;
+		//					lw.setNeeded(needed);
+		//
+		//					lLinksWizard.add(lw);
+		//
+		//					aw.setlLinks(lLinksWizard);
+		//
+		//					if (existAssocWizard) {
+		//						lAssocsWizard.remove(indexAssoc);
+		//						lAssocsWizard.add(aw);
+		//					}else {
+		//						lAssocsWizard.add(aw);
+		//					}
+		//				}
+		//
+		//			}
+		//
+		//		}
+		//
+		//		// En una pasada se han de ver los objetos que admiten una multiplicidad de * para que esten disponibles
+		//		// Se han de ver todas las asociaciones finales que hay y ver que objetos siempre estan disponibles 
+		//
+		//		for(AssocWizard oAssoc: lAssocsWizard) {
+		//			MAssociation oAssocModel = oAssoc.getassocModel();
+		//			List<MAssociationEnd> oAsoccEnds = oAssocModel.associationEnds();
+		//
+		//			MAssociationEnd oAssocEnd1 = oAsoccEnds.get(0);
+		//			MAssociationEnd oAssocEnd2 = oAsoccEnds.get(1);
+		//			// Si la primera tiene multi *, los objetos de la segunda debe ser disponible			
+		//			if (oAssocEnd1.multiplicity().equals("*")) {
+		//				// Buscamos objetos de la segunda
+		//				MClass oClassBuscar = oAssocEnd2.cls();
+		//				mapObjects=addAndFindObjectsIntoMap(mapObjects, oClassBuscar);
+		//			}
+		//			// Si la segunda tiene multi *, los objetos de la primera debe ser disponible			
+		//			if (oAssocEnd2.multiplicity().getRanges().get(0).toString().equals("*")) {
+		//				// Buscamos objetos de la primera
+		//				MClass oClassBuscar = oAssocEnd1.cls();
+		//				mapObjects=addAndFindObjectsIntoMap(mapObjects, oClassBuscar);
+		//			}
+		//		}
+		//
+		//		System.out.println("Ya");
+		//		List<AssocWizard> lAssocsWizardPaso = new ArrayList<AssocWizard>();
+		//		for(AssocWizard oAssoc: lAssocsWizard) {
+		//			lAssocsWizardPaso.add(oAssoc);
+		//		}
+		//		lAssocsWizard.clear();
+		//		for (AssocWizard aw: lAssocsWizardPaso) {
+		//			System.out.println("aw ["+aw.getName()+"]");	
+		//			for (LinkWizard lw: aw.getlLinks()) {
+		//				int needed = lw.getNeeded();
+		//				String objectName = lw.getObject();
+		//				String nomClass = lw.getNomClass(); //Clase del objeto principal
+		//				String classOfName = lw.getOfClass(); // Clase del objeto que necesita
+		//				System.out.println("lw ["+objectName+"] cause ["+lw.getCause()+"] necesita ["+needed+"] de la clase ["+classOfName+"]");
+		//				// Pasada para ver los objetos disponibles por clase
+		//				if (needed>0) {
+		//					List lObjDisponibles = new ArrayList<String>();
+		//					// Si tiene alguna necesidad es que puede linkarse con otros objetos segun relacion
+		//					if (mapObjects.containsKey(nomClass)) {
+		//						lObjDisponibles=mapObjects.get(nomClass);
+		//						if (!lObjDisponibles.contains(objectName)) {
+		//							lObjDisponibles.add(objectName);
+		//						}
+		//					}else{
+		//						lObjDisponibles.add(objectName);
+		//						mapObjects.put(nomClass, lObjDisponibles);
+		//					}
+		//				}
+		//			}
+		//			// Revision de clases disponibles y objetos disponibles de cada una de las mismas
+		//			for (Map.Entry<String, List<String>> entry : mapObjects.entrySet()) {
+		//				String className = (String) entry.getKey();
+		//				List<String> lObjDisponibles = new ArrayList<String>();
+		//				lObjDisponibles = entry.getValue();
+		//				System.out.println("La clase ["+className+"] tiene disponibles:");
+		//				for(String nameObject: lObjDisponibles) {
+		//					System.out.println("   Object ["+nameObject+"] ");
+		//				}
+		//			}
+		//			// Analisis de problemas a solucionar
+		//			analyzeProposals(aw, mapObjects);
+		//		}
+		// Provis ----------------------
 		return ok;
 	}
 	private Map<String, List<String>> addAndFindObjectsIntoMap(Map<String, List<String>> mapObjects, 
@@ -1774,8 +1850,8 @@ public class WizardMVMView extends JPanel implements View {
 		if (!checkExistObjDiagram()) {
 			odvAssoc.forceStartLayoutThread();
 		}
-		setResClassInvariants();
-		setResCheckStructure();
+		//		setResClassInvariants();
+		//		setResCheckStructure();
 
 	}
 	private void deleteObject(String nomObjDel) {
