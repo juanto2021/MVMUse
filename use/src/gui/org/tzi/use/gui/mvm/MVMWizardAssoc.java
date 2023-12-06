@@ -36,7 +36,6 @@ import javax.swing.table.JTableHeader;
 //import org.tzi.mvm.AssocWizard;
 //import org.tzi.mvm.LinkWizard;
 import org.tzi.use.gui.main.MainWindow;
-import org.tzi.use.gui.views.WizardMVMView;
 import org.tzi.use.uml.mm.MAssociation;
 import org.tzi.use.uml.sys.MObject;
 

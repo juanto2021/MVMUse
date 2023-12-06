@@ -17,7 +17,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package org.tzi.use.gui.views;
+package org.tzi.use.gui.mvm;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -79,9 +79,6 @@ import org.tzi.use.gui.main.ModelBrowserSorting;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeEvent;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
 import org.tzi.use.gui.main.ViewFrame;
-import org.tzi.use.gui.mvm.AssocWizard;
-import org.tzi.use.gui.mvm.LinkWizard;
-import org.tzi.use.gui.mvm.MVMWizardAssoc;
 import org.tzi.use.gui.util.ExtendedJTable;
 import org.tzi.use.gui.views.View;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
