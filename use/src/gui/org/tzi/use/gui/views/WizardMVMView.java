@@ -1112,7 +1112,7 @@ public class WizardMVMView extends JPanel implements View {
 				mapObjects=addAndFindObjectsIntoMap(mapObjects, oClassBuscar);
 			}
 		}
-
+ 
 		System.out.println("Ya");
 		List<AssocWizard> lAssocsWizardPaso = new ArrayList<AssocWizard>();
 		for(AssocWizard oAssoc: lAssocsWizard) {
