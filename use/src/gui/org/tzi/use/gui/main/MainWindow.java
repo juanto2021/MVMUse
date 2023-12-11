@@ -90,7 +90,6 @@ import org.tzi.use.config.Options;
 import org.tzi.use.config.RecentItems;
 import org.tzi.use.config.RecentItems.RecentItemsObserver;
 import org.tzi.use.gui.main.runtime.IPluginActionExtensionPoint;
-import org.tzi.use.gui.views.WizardMVMView;
 import org.tzi.use.gui.util.ExtFileFilter;
 import org.tzi.use.gui.util.StatusBar;
 import org.tzi.use.gui.util.TextComponentWriter;
@@ -100,12 +99,12 @@ import org.tzi.use.gui.views.ClassExtentView;
 import org.tzi.use.gui.views.ClassInvariantView;
 import org.tzi.use.gui.views.CommandView;
 import org.tzi.use.gui.views.LinkCountView;
-
 import org.tzi.use.gui.views.ObjectCountView;
 import org.tzi.use.gui.views.ObjectPropertiesView;
 import org.tzi.use.gui.views.PrintableView;
 import org.tzi.use.gui.views.StateEvolutionView;
 import org.tzi.use.gui.views.View;
+import org.tzi.use.gui.views.WizardMVMView;
 import org.tzi.use.gui.views.diagrams.behavior.communicationdiagram.CommunicationDiagramView;
 import org.tzi.use.gui.views.diagrams.behavior.sequencediagram.SDScrollPane;
 import org.tzi.use.gui.views.diagrams.behavior.sequencediagram.SequenceDiagramView;
@@ -113,8 +112,6 @@ import org.tzi.use.gui.views.diagrams.behavior.shared.VisibleDataManager;
 import org.tzi.use.gui.views.diagrams.classdiagram.ClassDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.statemachine.StateMachineDiagramView;
-import org.tzi.use.kodkod.UseKodkodModelValidator;
-import org.tzi.use.kodkod.plugin.PluginModelFactory;
 import org.tzi.use.main.ChangeEvent;
 import org.tzi.use.main.ChangeListener;
 import org.tzi.use.main.Session;
@@ -1051,21 +1048,21 @@ public class MainWindow extends JFrame {
 			fTopSplitPane.setDividerLocation(0.75);
 	}
 	//Provis
-	//	public void createObject(String clsName) {
-	//		MClass objectClass = fSession.system().model().getClass(clsName);
-	//
-	//		if (objectClass == null) {
-	//			JOptionPane.showMessageDialog(
-	//					this, 
-	//					"No class named `" + clsName + "' defined in model.", 
-	//					"Error", 
-	//					JOptionPane.ERROR_MESSAGE);
-	//
-	//			return;
-	//		} 
-	//
-	//		createObject(objectClass, null);
-	//	}
+		public void createObject(String clsName) {
+			MClass objectClass = fSession.system().model().getClass(clsName);
+	
+			if (objectClass == null) {
+				JOptionPane.showMessageDialog(
+						this, 
+						"No class named `" + clsName + "' defined in model.", 
+						"Error", 
+						JOptionPane.ERROR_MESSAGE);
+	
+				return;
+			} 
+	
+			createObject(objectClass, null);
+		}
 
 	/**
 	 * Creates a new object. Keeps track of undo information and handles errors
