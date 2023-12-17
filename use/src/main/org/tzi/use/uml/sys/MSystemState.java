@@ -1813,10 +1813,8 @@ public final class MSystemState {
 		return checkStructure(out, true);
 	}
 	public List<AssocWizard> checkStructureWithErrorsInfo(PrintWriter out, boolean reportAllErrors) {
-		// INicializar estructura de errores
+		// Inicializar estructura de errores
 		List<AssocWizard> lAssocsWizard = new ArrayList<AssocWizard>();
-		//		Map<String, List<String>> mapObjects = new HashMap<String, List<String>>();
-
 		long start = System.currentTimeMillis();
 
 		boolean res = true;
@@ -1824,12 +1822,6 @@ public final class MSystemState {
 		out.flush();
 
 		updateDerivedValues(true);
-
-		// check the whole/part hierarchy
-		//		if (!checkWholePartLink(out)) {
-		//			if (!reportAllErrors) return false;
-		//			res = false;
-		//		}
 
 		// check all associations
 		for (MAssociation assoc : fSystem.model().associations()) {
@@ -1854,7 +1846,6 @@ public final class MSystemState {
 				aw.setassocModel(assoc);
 			}
 
-			//---
 			res = validateRedefines(assoc, out, reportAllErrors);
 
 			if (assoc.associationEnds().size() != 2) {
@@ -1866,8 +1857,6 @@ public final class MSystemState {
 				MAssociationEnd aend1 = it2.next();
 				MAssociationEnd aend2 = it2.next();
 
-				//				res = validateBinaryAssociations(out, assoc, aend1, aend2, reportAllErrors) && res;
-				//---
 				boolean valid = true;
 
 				// for each object of the association end's type get
@@ -1880,18 +1869,8 @@ public final class MSystemState {
 
 					if (linkedObjects.size() == 0 && !aend2.multiplicity().contains(0)) {
 						LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend1, aend2, obj, null);
-						int multi = 0; 
-						int connectedTo=0; 
-						try {
-							multi = Integer.parseInt(lw.getMultiSpecified()); 
-						}catch(Exception e) {}
-						try {
-							connectedTo=Integer.parseInt(lw.getConnectedTo()); 
-						}catch(Exception e) {}
-						int needed = multi-connectedTo;
-						if (needed < 0) 
-							needed=0;
-						lw.setNeeded(needed);
+
+						lw= calcNeeds(lw);
 
 						lLinksWizard.add(lw);
 
@@ -1902,33 +1881,15 @@ public final class MSystemState {
 							lAssocsWizard.add(aw);
 						}else {
 							lAssocsWizard.add(aw);
+							existAssocWizard=true;
 						}
 					}
 
 					for(Map.Entry<List<Value>, Set<MObject>> entry : linkedObjects.entrySet()) {
 						if (!aend2.multiplicity().contains(entry.getValue().size())) {
-							//							reportMultiplicityViolationTakeErrors(out, assoc, aend1, aend2, obj, entry);
-							//--
-							LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend1, aend2, obj, null);
-							//							if (!reportAllErrors) {
-							//								return false;
-							//							} else {
-							//								valid = false;
-							//								continue;
-							//							}
-							int multi = 0; 
-							int connectedTo=0; 
-							try {
-								multi = Integer.parseInt(lw.getMultiSpecified()); 
-							}catch(Exception e) {}
-							try {
-								connectedTo=Integer.parseInt(lw.getConnectedTo()); 
-							}catch(Exception e) {}
-							int needed = multi-connectedTo;
-							if (needed < 0) 
-								needed=0;
-							lw.setNeeded(needed);
 
+							LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend1, aend2, obj, null);
+							lw= calcNeeds(lw);
 							lLinksWizard.add(lw);
 
 							aw.setlLinks(lLinksWizard);
@@ -1938,8 +1899,9 @@ public final class MSystemState {
 								lAssocsWizard.add(aw);
 							}else {
 								lAssocsWizard.add(aw);
+								existAssocWizard=true;
 							}
-							//--
+
 							valid = false;
 						}
 
@@ -1948,18 +1910,9 @@ public final class MSystemState {
 								valid = false;
 						}
 					}
-
-					//					if (!reportAllErrors && !valid) {
-					//						return valid;
-					//					}
 				}
 				res=valid;
 
-				//---
-
-				//				if (!res && !reportAllErrors) return res;
-				//				
-				//				res = validateBinaryAssociations(out, assoc, aend2, aend1, reportAllErrors) && res;
 				valid = true;
 
 				// for each object of the association end's type get
@@ -1972,25 +1925,7 @@ public final class MSystemState {
 
 					if (linkedObjects.size() == 0 && !aend1.multiplicity().contains(0)) {
 						LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, null);
-						//						if (!reportAllErrors) {
-						//							return false;
-						//						} else {
-						//							valid = false;
-						//							continue;
-						//						}
-						int multi = 0; 
-						int connectedTo=0; 
-						try {
-							multi = Integer.parseInt(lw.getMultiSpecified()); 
-						}catch(Exception e) {}
-						try {
-							connectedTo=Integer.parseInt(lw.getConnectedTo()); 
-						}catch(Exception e) {}
-						int needed = multi-connectedTo;
-						if (needed < 0) 
-							needed=0;
-						lw.setNeeded(needed);
-
+						lw= calcNeeds(lw);
 						lLinksWizard.add(lw);
 
 						aw.setlLinks(lLinksWizard);
@@ -2000,44 +1935,24 @@ public final class MSystemState {
 							lAssocsWizard.add(aw);
 						}else {
 							lAssocsWizard.add(aw);
+							existAssocWizard=true;//Provis
 						}
 					}
 
 					for(Map.Entry<List<Value>, Set<MObject>> entry : linkedObjects.entrySet()) {
 						if (!aend1.multiplicity().contains(entry.getValue().size())) {
-							//							reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, entry);
-							//--
 							LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, null);
-							//							if (!reportAllErrors) {
-							//								return false;
-							//							} else {
-							//								valid = false;
-							//								continue;
-							//							}
-							int multi = 0; 
-							int connectedTo=0; 
-							try {
-								multi = Integer.parseInt(lw.getMultiSpecified()); 
-							}catch(Exception e) {}
-							try {
-								connectedTo=Integer.parseInt(lw.getConnectedTo()); 
-							}catch(Exception e) {}
-							int needed = multi-connectedTo;
-							if (needed < 0) 
-								needed=0;
-							lw.setNeeded(needed);
-
+							lw= calcNeeds(lw);
 							lLinksWizard.add(lw);
-
 							aw.setlLinks(lLinksWizard);
-
 							if (existAssocWizard) {
 								lAssocsWizard.remove(indexAssoc);
 								lAssocsWizard.add(aw);
 							}else {
 								lAssocsWizard.add(aw);
+								existAssocWizard=true;//Provis
 							}
-							//--
+
 							valid = false;
 						}
 
@@ -2046,16 +1961,9 @@ public final class MSystemState {
 								valid = false;
 						}
 					}
-
 				}
 
 				out.flush();
-				//---
-
-				//			if (!reportAllErrors && !res) return false;
-
-				//				return lAssocsWizard;
-
 			}
 
 			out.flush();
@@ -2066,6 +1974,21 @@ public final class MSystemState {
 			}
 		}
 		return lAssocsWizard;
+	}
+	private LinkWizard calcNeeds(LinkWizard lw) {
+		int multi = 0; 
+		int connectedTo=0; 
+		try {
+			multi = Integer.parseInt(lw.getMultiSpecified()); 
+		}catch(Exception e) {}
+		try {
+			connectedTo=Integer.parseInt(lw.getConnectedTo()); 
+		}catch(Exception e) {}
+		int needed = multi-connectedTo;
+		if (needed < 0) 
+			needed=0;
+		lw.setNeeded(needed);
+		return lw;
 	}
 	/**
 	 * Checks model inherent constraints, i.e., checks whether cardinalities of
@@ -2101,12 +2024,242 @@ public final class MSystemState {
 
 		return res;
 	}
+	public List<AssocWizard> checkStructureErrors(PrintWriter out, boolean reportAllErrors) {
+		List<AssocWizard> lAssocsWizard = new ArrayList<AssocWizard>();
+		long start = System.currentTimeMillis();
+
+		boolean res = true;
+		out.println("checking structure...");
+		out.flush();
+
+		updateDerivedValues(true);
+
+		// check the whole/part hierarchy
+		//		if (!checkWholePartLink(out)) {
+		//			if (!reportAllErrors) return false;
+		//			res = false;
+		//		}
+
+		// check all associations
+		for (MAssociation assoc : fSystem.model().associations()) {
+			//			res = checkStructure(assoc, out, reportAllErrors) && res;// Sustituyo
+
+			//--------------------------------------
+			//			boolean res = true;
+
+			List<LinkWizard> lLinksWizard = new ArrayList<LinkWizard>();
+			AssocWizard aw = new AssocWizard();
+			boolean existAssocWizard=false;
+			int indexAssoc=-1;
+			for(indexAssoc=0;indexAssoc<lAssocsWizard.size();indexAssoc++) {
+				AssocWizard awl = lAssocsWizard.get(indexAssoc);
+				if (awl.getName().equals(assoc.name())) {
+					aw = awl;
+					existAssocWizard=true;
+					break;
+				}
+			}
+			if (existAssocWizard) {
+				lLinksWizard=aw.getlLinks();
+			}else {
+				aw.setName(assoc.name());
+				aw.setState("ko");
+				aw.setassocModel(assoc);
+			}
+
+			res = validateRedefines(assoc, out, reportAllErrors);
+
+			if (assoc.associationEnds().size() != 2) {
+				// check for n-ary links
+				res = naryAssociationsAreValid(out, assoc, reportAllErrors) && res;
+			} else {
+				// check both association ends
+				Iterator<MAssociationEnd> it2 = assoc.associationEnds().iterator();
+				MAssociationEnd aend1 = it2.next();
+				MAssociationEnd aend2 = it2.next();
+
+				//				res = validateBinaryAssociationsTakeErrors(out, assoc, aend1, aend2, reportAllErrors) && res;
+				//-------------------------------------
+				boolean valid = true;
+
+				// for each object of the association end's type get
+				// the number of links in which the object participates
+				MClass cls = aend1.cls();
+				Set<MObject> objects = objectsOfClassAndSubClasses(cls);
+
+				for (MObject obj : objects) {
+					Map<List<Value>,Set<MObject>> linkedObjects = getLinkedObjects(obj, aend1, aend2);
+
+					if (linkedObjects.size() == 0 && !aend2.multiplicity().contains(0)) {
+						reportMultiplicityViolation(out, assoc, aend1, aend2, obj, null);
+						LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend1, aend2, obj, null);
+						System.out.println();
+						int multi = 0; 
+						int connectedTo=0; 
+						try {
+							multi = Integer.parseInt(lw.getMultiSpecified()); 
+						}catch(Exception e) {}
+						try {
+							connectedTo=Integer.parseInt(lw.getConnectedTo()); 
+						}catch(Exception e) {}
+						int needed = multi-connectedTo;
+						if (needed < 0) 
+							needed=0;
+						lw.setNeeded(needed);
+
+						lLinksWizard.add(lw);
+
+						aw.setlLinks(lLinksWizard);
+
+						if (existAssocWizard) {
+							lAssocsWizard.remove(indexAssoc);
+							lAssocsWizard.add(aw);
+						}else {
+							lAssocsWizard.add(aw);
+							existAssocWizard=true;//Provis
+						}
+					}
+
+					for(Map.Entry<List<Value>, Set<MObject>> entry : linkedObjects.entrySet()) {
+						if (!aend2.multiplicity().contains(entry.getValue().size())) {
+							reportMultiplicityViolation(out, assoc, aend1, aend2, obj, entry);
+							LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend1, aend2, obj, entry);
+							System.out.println();
+							int multi = 0; 
+							int connectedTo=0; 
+							try {
+								multi = Integer.parseInt(lw.getMultiSpecified()); 
+							}catch(Exception e) {}
+							try {
+								connectedTo=Integer.parseInt(lw.getConnectedTo()); 
+							}catch(Exception e) {}
+							int needed = multi-connectedTo;
+							if (needed < 0) 
+								needed=0;
+							lw.setNeeded(needed);
+
+							lLinksWizard.add(lw);
+
+							aw.setlLinks(lLinksWizard);
+
+							if (existAssocWizard) {
+								lAssocsWizard.remove(indexAssoc);
+								lAssocsWizard.add(aw);
+							}else {
+								lAssocsWizard.add(aw);
+								existAssocWizard=true;//Provis
+							}
+						}
+
+						if (!aend1.getSubsettedEnds().isEmpty()) {
+							if (!validateSubsets(out, obj, entry.getKey(), entry.getValue(), aend1)) valid = false;
+						}
+					}
+				}
+				//--------------------------------------
+
+
+
+				//				if (!res && !reportAllErrors) return res;
+
+				//				res = validateBinaryAssociationsTakeErrors(out, assoc, aend2, aend1, reportAllErrors) && res;
+				cls = aend2.cls();
+				objects = objectsOfClassAndSubClasses(cls);
+
+				for (MObject obj : objects) {
+					Map<List<Value>,Set<MObject>> linkedObjects = getLinkedObjects(obj, aend2, aend1);
+
+					if (linkedObjects.size() == 0 && !aend1.multiplicity().contains(0)) {
+						reportMultiplicityViolation(out, assoc, aend2, aend1, obj, null);
+						LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, null);
+						System.out.println();
+						int multi = 0; 
+						int connectedTo=0; 
+						try {
+							multi = Integer.parseInt(lw.getMultiSpecified()); 
+						}catch(Exception e) {}
+						try {
+							connectedTo=Integer.parseInt(lw.getConnectedTo()); 
+						}catch(Exception e) {}
+						int needed = multi-connectedTo;
+						if (needed < 0) 
+							needed=0;
+						lw.setNeeded(needed);
+
+						lLinksWizard.add(lw);
+
+						aw.setlLinks(lLinksWizard);
+
+						if (existAssocWizard) {
+							lAssocsWizard.remove(indexAssoc);
+							lAssocsWizard.add(aw);
+						}else {
+							lAssocsWizard.add(aw);
+							existAssocWizard=true;//Provis
+						}
+					}
+
+					for(Map.Entry<List<Value>, Set<MObject>> entry : linkedObjects.entrySet()) {
+						if (!aend1.multiplicity().contains(entry.getValue().size())) {
+							reportMultiplicityViolation(out, assoc, aend2, aend1, obj, entry);
+							LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, entry);
+							System.out.println();
+							int multi = 0; 
+							int connectedTo=0; 
+							try {
+								multi = Integer.parseInt(lw.getMultiSpecified()); 
+							}catch(Exception e) {}
+							try {
+								connectedTo=Integer.parseInt(lw.getConnectedTo()); 
+							}catch(Exception e) {}
+							int needed = multi-connectedTo;
+							if (needed < 0) 
+								needed=0;
+							lw.setNeeded(needed);
+
+							lLinksWizard.add(lw);
+
+							aw.setlLinks(lLinksWizard);
+
+							if (existAssocWizard) {
+								lAssocsWizard.remove(indexAssoc);
+								lAssocsWizard.add(aw);
+							}else {
+								lAssocsWizard.add(aw);
+								existAssocWizard=true;//Provis
+							}
+						}
+
+						if (!aend1.getSubsettedEnds().isEmpty()) {
+							if (!validateSubsets(out, obj, entry.getKey(), entry.getValue(), aend2)) valid = false;
+						}
+					}
+				}
+			}
+
+			out.flush();
+			//			return res;
+
+			//--------------------------------------			
+			//			if (!reportAllErrors && !res) return false;
+		}
+
+		out.flush();
+
+		if (!Options.testMode) {
+			long duration = System.currentTimeMillis() - start;
+			out.println(String.format("checked structure in %,dms.", duration));
+		}
+
+		return lAssocsWizard;
+	}
 
 	/**
 	 * Checks model checks whether cardinalities of
 	 * association links match their declaration of multiplicities.
 	 * Further, subsetting and redefine constraints are validated.
 	 */
+
 	public boolean checkStructure(MAssociation assoc, PrintWriter out, boolean reportAllErrors) {
 		boolean res = true;
 
@@ -2247,6 +2400,47 @@ public final class MSystemState {
 			if (!reportAllErrors && !valid) {
 				return valid;
 			}
+		}
+
+		return valid;
+	}
+	private boolean validateBinaryAssociationsTakeErrors(PrintWriter out, MAssociation assoc, 
+			MAssociationEnd aend1, MAssociationEnd aend2, boolean reportAllErrors) {
+		boolean valid = true;
+
+		// for each object of the association end's type get
+		// the number of links in which the object participates
+		MClass cls = aend1.cls();
+		Set<MObject> objects = objectsOfClassAndSubClasses(cls);
+
+		for (MObject obj : objects) {
+			Map<List<Value>,Set<MObject>> linkedObjects = getLinkedObjects(obj, aend1, aend2);
+
+			if (linkedObjects.size() == 0 && !aend2.multiplicity().contains(0)) {
+				reportMultiplicityViolation(out, assoc, aend1, aend2, obj, null);
+				//				if (!reportAllErrors) {
+				//					return false;
+				//				} else {
+				//					valid = false;
+				//					continue;
+				//				}
+			}
+
+			for(Map.Entry<List<Value>, Set<MObject>> entry : linkedObjects.entrySet()) {
+				if (!aend2.multiplicity().contains(entry.getValue().size())) {
+					reportMultiplicityViolation(out, assoc, aend1, aend2, obj, entry);
+					//					valid = false;
+				}
+
+				if (!aend1.getSubsettedEnds().isEmpty()) {
+					if (!validateSubsets(out, obj, entry.getKey(), entry.getValue(), aend1))
+						valid = false;
+				}
+			}
+
+			//			if (!reportAllErrors && !valid) {
+			//				return valid;
+			//			}
 		}
 
 		return valid;

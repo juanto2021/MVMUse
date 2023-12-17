@@ -1083,8 +1083,10 @@ public class WizardMVMView extends JPanel implements View {
 		StringWriter buffer = new StringWriter();
 		PrintWriter out = new PrintWriter(buffer);
 		boolean reportAllErrors=true;
-		lAssocsWizard = fSession.system().state().checkStructureWithErrorsInfo( out, 
-				reportAllErrors);
+//		lAssocsWizard = fSession.system().state().checkStructureWithErrorsInfo( out, 
+//				reportAllErrors);
+		lAssocsWizard = fSession.system().state().checkStructureErrors( out,reportAllErrors);
+//		checkStructureErrorsNew
 		return;
 	}
 	private boolean checkStructure() {
@@ -1100,7 +1102,7 @@ public class WizardMVMView extends JPanel implements View {
 			MAssociationEnd oAssocEnd1 = oAsoccEnds.get(0);
 			MAssociationEnd oAssocEnd2 = oAsoccEnds.get(1);
 			// Si la primera tiene multi *, los objetos de la segunda debe ser disponible			
-			if (oAssocEnd1.multiplicity().equals("*")) {
+			if (oAssocEnd1.multiplicity().getRanges().get(0).toString().equals("*")) {
 				// Buscamos objetos de la segunda
 				MClass oClassBuscar = oAssocEnd2.cls();
 				mapObjects=addAndFindObjectsIntoMap(mapObjects, oClassBuscar);
