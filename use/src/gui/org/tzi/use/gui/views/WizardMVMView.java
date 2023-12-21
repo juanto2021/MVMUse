@@ -88,6 +88,10 @@ import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
 import org.tzi.use.gui.main.ViewFrame;
 import org.tzi.use.gui.mvm.AssocWizard;
 import org.tzi.use.gui.mvm.LinkWizard;
+import org.tzi.use.gui.mvm.MVMAction;
+import org.tzi.use.gui.mvm.MVMLink;
+import org.tzi.use.gui.mvm.MVMObject;
+import org.tzi.use.gui.mvm.MVMWizardActions;
 import org.tzi.use.gui.mvm.MVMWizardAssoc;
 import org.tzi.use.gui.util.ExtendedJTable;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
@@ -346,7 +350,7 @@ public class WizardMVMView extends JPanel implements View {
 		lClass.setSelectedIndex(0);
 		oClass = lClass.getSelectedValue();
 		nomClass = oClass.name();
-//Aqui0
+		//Aqui0
 		lClass.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
 				if(lClass.getModel().getSize()>0) {
@@ -355,8 +359,6 @@ public class WizardMVMView extends JPanel implements View {
 						oClass = lClass.getModel().getElementAt(index);
 						System.out.println("Clic en: " + oClass);
 						lClass.setSelectedIndex(index);
-
-//						oClass = lClass.getSelectedValue();
 						nomClass = oClass.name();
 						lObjects.setModel(loadListObjects(nomClass));
 						lObjects.setSelectedIndex(0);
@@ -368,14 +370,6 @@ public class WizardMVMView extends JPanel implements View {
 				}
 			}
 		});
-//		lClass.addListSelectionListener(new ListSelectionListener() {
-//	            @Override
-//	            public void valueChanged(ListSelectionEvent e) {
-//	                System.out.println("Elemento seleccionado: " + lClass.getSelectedValue());
-//	            }
-//	        });
-		
-		
 
 		scrollPaneClass = new JScrollPane();
 		scrollPaneClass.setViewportView(lClass);
@@ -561,11 +555,27 @@ public class WizardMVMView extends JPanel implements View {
 		btnActions.setHorizontalAlignment(SwingConstants.CENTER);
 		btnActions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//				refreshComponents();
+			//Aqui1	
+			 List<MVMAction> lActions = new ArrayList<MVMAction>();
+			 List<MVMObject> lObjs = new ArrayList<MVMObject>();
+			 List<MVMLink> lLinks = new ArrayList<MVMLink>();	
+			 String sModel="animals";
+			 String sSourceUSE="C:\\prueba.use";
+				MVMWizardActions w = new MVMWizardActions(frame,lActions,lObjs, lLinks, sModel,sSourceUSE );
+
+				w.setSize(1008, 547);
+				w.setLocationRelativeTo(null);
+				w.setVisible(true);
+
+				List<MVMAction> lActionsRes=w.getListActions();
+				if (lActionsRes!=null) {
+					System.out.println(lActionsRes.size());
+					doActions(lActionsRes);
+				}
 			}
 		});
 		panel.add(btnActions);
-//Aqui4
+		//Aqui4
 		btnReset = new JButton("Reset");
 		btnReset.setBounds(10, 400, 110, 25);
 		btnReset.setVerticalAlignment(SwingConstants.CENTER);
@@ -573,16 +583,6 @@ public class WizardMVMView extends JPanel implements View {
 		btnReset.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				resetObjLinks();
-////				lClass = new JList<MClass>(loadListMClass());
-//				lClass = new JList<MClass>();
-//				lClass.setModel(loadListMClass());
-//				//loadListMClass()
-//				lClass.setSelectedIndex(0);
-////				lClass.setSelectedIndex(0);
-////				lClass.getActionListeners()[0].actionPerformed(new ActionEvent(lClass, ActionEvent.ACTION_PERFORMED, null));
-//				lClass.setSelectedIndex(0);
-//				oClass = lClass.getSelectedValue();
-//				nomClass = oClass.name();
 			}
 		});
 		panel.add(btnReset);
@@ -833,7 +833,7 @@ public class WizardMVMView extends JPanel implements View {
 		setSize(new Dimension(400, 300));
 
 	}
-//Aqui1
+	//Aqui1
 	private void resetObjLinks() {
 		for (MLink oLink: fSession.system().state().allLinks()) {
 			deleteLink(oLink);
@@ -846,31 +846,14 @@ public class WizardMVMView extends JPanel implements View {
 		for (MObject oObj : lObjs) {
 			deleteObject(oObj.name());
 		}
-		lClass = new JList<MClass>(loadListMClass());
+		lClass.setModel(loadListMClass());
 		lClass.setSelectedIndex(0);
-		lClass.getSelectionModel().setValueIsAdjusting(true);
-//		Timer timer = new Timer(2000, e -> {
-//			lClass.setSelectedIndex(0);
-//            // Notificar a los ListSelectionListeners
-//			lClass.getSelectionModel().setValueIsAdjusting(true);
-//			lClass.getSelectionModel().setValueIsAdjusting(false);
-//        });
-//        timer.setRepeats(false); // Ejecutar solo una vez
-//        timer.start();
-		
-		lAssocs = new JList<MAssociation>(loadListAssoc());
+		lAssocs.setModel(loadListAssoc());
 		lAssocs.setSelectedIndex(0);
 		DefaultComboBoxModel<MObject> cbmOri = new DefaultComboBoxModel<MObject>();
 		DefaultComboBoxModel<MObject> cbmDes = new DefaultComboBoxModel<MObject>();
 		cmbObjectOri.setModel(cbmOri);
 		cmbObjectDes.setModel(cbmDes);
-		
-		SwingUtilities.invokeLater(() -> {
-			lClass.setSelectedIndex(0);
-			lClass.ensureIndexIsVisible(0);
-		});
-		lClass.indexToLocation(0);
-		lClass.setSelectionInterval(0, 0);
 	}
 
 	private void TheoricReset() {
@@ -953,7 +936,18 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return objEnd;
 	}
-
+	/**
+	 * Do Actions (create objects & links)
+	 * @param lActionsRes
+	 */
+	private static void doActions(List<MVMAction> lActionsRes) {
+		int nActions = lActionsRes.size();
+		for (int nAction=0;nAction<nActions;nAction++) {
+			MVMAction oAction=lActionsRes.get(nAction);
+			System.out.println(oAction.getOrden()+" " + oAction.getTypeAction()+ " " + oAction.getParameters());
+		}
+	}
+	
 	/**
 	 * Realiza las acciones propuestas en wizard
 	 * @param oAssocPralWizard
@@ -1311,227 +1305,6 @@ public class WizardMVMView extends JPanel implements View {
 		return ok;
 	}
 
-//	private boolean checkStructure_old() {
-//
-//		boolean ok = checkStructure();
-//		//		return false;
-//		// Provis ----------------------
-//		//		List<AssocWizard> lAssocsWizard2=getErrorsEstructure(); //Provis
-//		//		
-//		//		Map<String, List<String>> mapObjects = new HashMap<String, List<String>>();
-//		//
-//		//		StringWriter buffer = new StringWriter();
-//		//		PrintWriter out = new PrintWriter(buffer);
-//		//		boolean ok = fSession.system().state().checkStructure(out);
-//		//
-//		//		System.out.println("Total ["+ok+"]");
-//		//		System.out.println("Totalout ["+buffer+"]");
-//		//
-//		//		lAssocsWizard = new ArrayList<AssocWizard>();
-//		//
-//		//		String msgRef = buffer.toString();
-//		//		if (msgRef.contains("Multiplicity")) {
-//		//
-//		//			String msg = msgRef.replace("\r\n", "");
-//		//			String[] lineas = msg.split("\\.");
-//		//			int nLineas = lineas.length;
-//		//			System.out.println("nLineas"+nLineas+"]");
-//		//			for (int nLinea=0;nLinea<nLineas;nLinea++) {
-//		//				String linea = lineas[nLinea];
-//		//				System.out.println("Linea ["+linea+"]");
-//		//				if (linea.contains("Multiplicity constraint violation")) {
-//		//					String cause="";
-//		//					String fullMessage="";
-//		//					String nomAssociation="";
-//		//					String nomAssocObject="";
-//		//					String nomAssocClass="";
-//		//					String connectedNum="";
-//		//					String connectedClass="";
-//		//					String assoccEnd="";
-//		//					String multiplicity="";	
-//		//					MObject oObjectPral=null;
-//		//					//Aqui6
-//		//
-//		//					fullMessage=linea;
-//		//					String linea2 = linea.replaceFirst("of class","of class1");
-//		//					linea=linea2;
-//		//					String[] partes = linea.split("'");
-//		//					int nPartes = partes.length;
-//		//					for (int nParte=0;nParte<nPartes;nParte++) {
-//		//						String parte = partes[nParte];
-//		//						System.out.println("Parte ["+parte+"]");
-//		//						//Multiplicity constraint violation
-//		//						if (parte.contains("Multiplicity constraint violation")) {
-//		//							String[] subPartes = parte.split(":");
-//		//							cause=subPartes[0]+"'";
-//		//							String[] subPartes2 = parte.split("`");
-//		//							nomAssociation=subPartes2[1];
-//		//						}
-//		//						if (parte.contains(":  Object")) {
-//		//							String[] subPartes = parte.split("`");
-//		//							nomAssocObject=subPartes[1];
-//		//							oObjectPral = findObjectByName(nomAssocObject);
-//		//						}else if (parte.contains("of class1")) {
-//		//							String[] subPartes = parte.split("`");
-//		//							nomAssocClass=subPartes[1];
-//		//						}else if (parte.contains("objects of class")||parte.contains("object of class")) {
-//		//							String[] subPartesSPC = parte.split(" ");
-//		//							connectedNum = subPartesSPC[4];
-//		//							String[] subPartes = parte.split("`");
-//		//							connectedClass=subPartes[1];
-//		//						}else if (parte.contains("at association end")) {
-//		//							String[] subPartes = parte.split("`");
-//		//							assoccEnd=subPartes[1];
-//		//						}else if (parte.contains("but the multiplicity")) {
-//		//							String[] subPartes = parte.split("`");
-//		//							multiplicity=subPartes[1];
-//		//						}
-//		//					}
-//		//
-//		//					// Busca assoc en lista
-//		//
-//		//					List<LinkWizard> lLinksWizard = new ArrayList<LinkWizard>();
-//		//
-//		//					AssocWizard aw = new AssocWizard();
-//		//					boolean existAssocWizard=false;
-//		//					int indexAssoc=-1;
-//		//					for(indexAssoc=0;indexAssoc<lAssocsWizard.size();indexAssoc++) {
-//		//						AssocWizard awl = lAssocsWizard.get(indexAssoc);
-//		//						if (awl.getName().equals(nomAssociation)) {
-//		//							aw = awl;
-//		//							existAssocWizard=true;
-//		//							break;
-//		//						}
-//		//					}
-//		//					MAssociation oAassocModel = findAssocByName(nomAssociation);
-//		//					if (existAssocWizard) {
-//		//						lLinksWizard=aw.getlLinks();
-//		//					}else {
-//		//						aw.setName(nomAssociation);
-//		//						aw.setState("ko");
-//		//						aw.setassocModel(oAassocModel);
-//		//					}
-//		//
-//		//					// Si no esta, crea nueva assoc
-//		//					// Si esta, la usa
-//		//					System.out.println("cause ["+cause+"]");
-//		//					System.out.println("nomAssociation  ["+ nomAssociation +"]");
-//		//					System.out.println("nomAssocObject ["+nomAssocObject+"]");
-//		//					System.out.println("nomAssocClass ["+nomAssocClass+"]");
-//		//					System.out.println("connectedNum ["+connectedNum+"]");
-//		//					System.out.println("connectedClass ["+connectedClass+"]");
-//		//					System.out.println("assoccEnd ["+assoccEnd+"]");
-//		//					System.out.println("multiplicity ["+multiplicity+"]");	
-//		//					//				
-//		//					LinkWizard lw = new LinkWizard();
-//		//					lw.setObject(nomAssocObject);
-//		//					lw.setNomClass(nomAssocClass);
-//		//					lw.setConnectedTo(connectedNum);
-//		//					lw.setOfClass(connectedClass);
-//		//					lw.setAssocEnd(assoccEnd);
-//		//					lw.setMultiSpecified(multiplicity);
-//		//					lw.setCause(cause);
-//		//					lw.setFullMessage(fullMessage);
-//		//					lw.setoMObject(oObjectPral);
-//		//					//					oObjectPral
-//		//
-//		//					int multi = 0; 
-//		//					int connectedTo=0; 
-//		//					try {
-//		//						multi = Integer.parseInt(lw.getMultiSpecified()); 
-//		//					}catch(Exception e) {}
-//		//					try {
-//		//						connectedTo=Integer.parseInt(lw.getConnectedTo()); 
-//		//					}catch(Exception e) {}
-//		//					int needed = multi-connectedTo;
-//		//					if (needed < 0) 
-//		//						needed=0;
-//		//					lw.setNeeded(needed);
-//		//
-//		//					lLinksWizard.add(lw);
-//		//
-//		//					aw.setlLinks(lLinksWizard);
-//		//
-//		//					if (existAssocWizard) {
-//		//						lAssocsWizard.remove(indexAssoc);
-//		//						lAssocsWizard.add(aw);
-//		//					}else {
-//		//						lAssocsWizard.add(aw);
-//		//					}
-//		//				}
-//		//
-//		//			}
-//		//
-//		//		}
-//		//
-//		//		// En una pasada se han de ver los objetos que admiten una multiplicidad de * para que esten disponibles
-//		//		// Se han de ver todas las asociaciones finales que hay y ver que objetos siempre estan disponibles 
-//		//
-//		//		for(AssocWizard oAssoc: lAssocsWizard) {
-//		//			MAssociation oAssocModel = oAssoc.getassocModel();
-//		//			List<MAssociationEnd> oAsoccEnds = oAssocModel.associationEnds();
-//		//
-//		//			MAssociationEnd oAssocEnd1 = oAsoccEnds.get(0);
-//		//			MAssociationEnd oAssocEnd2 = oAsoccEnds.get(1);
-//		//			// Si la primera tiene multi *, los objetos de la segunda debe ser disponible			
-//		//			if (oAssocEnd1.multiplicity().equals("*")) {
-//		//				// Buscamos objetos de la segunda
-//		//				MClass oClassBuscar = oAssocEnd2.cls();
-//		//				mapObjects=addAndFindObjectsIntoMap(mapObjects, oClassBuscar);
-//		//			}
-//		//			// Si la segunda tiene multi *, los objetos de la primera debe ser disponible			
-//		//			if (oAssocEnd2.multiplicity().getRanges().get(0).toString().equals("*")) {
-//		//				// Buscamos objetos de la primera
-//		//				MClass oClassBuscar = oAssocEnd1.cls();
-//		//				mapObjects=addAndFindObjectsIntoMap(mapObjects, oClassBuscar);
-//		//			}
-//		//		}
-//		//
-//		//		System.out.println("Ya");
-//		//		List<AssocWizard> lAssocsWizardPaso = new ArrayList<AssocWizard>();
-//		//		for(AssocWizard oAssoc: lAssocsWizard) {
-//		//			lAssocsWizardPaso.add(oAssoc);
-//		//		}
-//		//		lAssocsWizard.clear();
-//		//		for (AssocWizard aw: lAssocsWizardPaso) {
-//		//			System.out.println("aw ["+aw.getName()+"]");	
-//		//			for (LinkWizard lw: aw.getlLinks()) {
-//		//				int needed = lw.getNeeded();
-//		//				String objectName = lw.getObject();
-//		//				String nomClass = lw.getNomClass(); //Clase del objeto principal
-//		//				String classOfName = lw.getOfClass(); // Clase del objeto que necesita
-//		//				System.out.println("lw ["+objectName+"] cause ["+lw.getCause()+"] necesita ["+needed+"] de la clase ["+classOfName+"]");
-//		//				// Pasada para ver los objetos disponibles por clase
-//		//				if (needed>0) {
-//		//					List lObjDisponibles = new ArrayList<String>();
-//		//					// Si tiene alguna necesidad es que puede linkarse con otros objetos segun relacion
-//		//					if (mapObjects.containsKey(nomClass)) {
-//		//						lObjDisponibles=mapObjects.get(nomClass);
-//		//						if (!lObjDisponibles.contains(objectName)) {
-//		//							lObjDisponibles.add(objectName);
-//		//						}
-//		//					}else{
-//		//						lObjDisponibles.add(objectName);
-//		//						mapObjects.put(nomClass, lObjDisponibles);
-//		//					}
-//		//				}
-//		//			}
-//		//			// Revision de clases disponibles y objetos disponibles de cada una de las mismas
-//		//			for (Map.Entry<String, List<String>> entry : mapObjects.entrySet()) {
-//		//				String className = (String) entry.getKey();
-//		//				List<String> lObjDisponibles = new ArrayList<String>();
-//		//				lObjDisponibles = entry.getValue();
-//		//				System.out.println("La clase ["+className+"] tiene disponibles:");
-//		//				for(String nameObject: lObjDisponibles) {
-//		//					System.out.println("   Object ["+nameObject+"] ");
-//		//				}
-//		//			}
-//		//			// Analisis de problemas a solucionar
-//		//			analyzeProposals(aw, mapObjects);
-//		//		}
-//		// Provis ----------------------
-//		return ok;
-//	}
 	private Map<String, List<String>> addAndFindObjectsIntoMap(Map<String, List<String>> mapObjects, 
 			MClass oClassBuscar){
 		MSystemState state = fSystem.state();
@@ -1960,7 +1733,6 @@ public class WizardMVMView extends JPanel implements View {
 
 		if (bNewObj) {
 			// Hacer copia de fValues siempre que la clase sea la misma
-			//			String nameClassAttributes = ((MAttribute) fAttributes[0]).
 
 			boolean sameClass=false;
 			if (fAttributes.size()>0) {
@@ -2001,8 +1773,6 @@ public class WizardMVMView extends JPanel implements View {
 		if (!checkExistObjDiagram()) {
 			odvAssoc.forceStartLayoutThread();
 		}
-		//		setResClassInvariants();
-		//		setResCheckStructure();
 
 	}
 	private void deleteObject(String nomObjDel) {
