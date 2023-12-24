@@ -184,17 +184,17 @@ public class MVMWizardActions extends JDialog {
 
 		lbFileName.setBounds(col1, 15 + insets.top,150, lbHeight);
 		lbExtension.setBounds(col1+155, 40 + insets.top,40, lbHeight);
-		lbCreationDate.setBounds(col1+210, 15 + insets.top,150, lbHeight);
-		lbModificationDate.setBounds(col1+340, 15 + insets.top,150 + 50, lbHeight);
-		lbModel.setBounds(col1+468, 15 + insets.top,200, lbHeight);
-		lbSourceUSE.setBounds(col1+630, 15 + insets.top,200, lbHeight);
+		lbCreationDate.setBounds(col1+205, 15 + insets.top,150, lbHeight);
+		lbModificationDate.setBounds(col1+335, 15 + insets.top,150 + 50, lbHeight);
+		lbModel.setBounds(col1+463, 15 + insets.top,100, lbHeight);
+		lbSourceUSE.setBounds(col1+568, 15 + insets.top,200, lbHeight);
 		lbDescription.setBounds(col1, 75 + insets.top,200, lbHeight);
 
 		txFileName.setBounds(col1, 40 + insets.top,150, txHeight );
-		txCreationDate.setBounds(col1+210, 40 + insets.top,120, txHeight );
-		txModificationDate.setBounds(col1+340, 40 + insets.top,120, txHeight );
-		txModel.setBounds(col1+468, 40 + insets.top,154, txHeight );
-		txSourceUSE.setBounds(col1+630, 40 + insets.top,154, txHeight );
+		txCreationDate.setBounds(col1+205, 40 + insets.top,120, txHeight );
+		txModificationDate.setBounds(col1+335, 40 + insets.top,120, txHeight );
+		txModel.setBounds(col1+463, 40 + insets.top,100, txHeight );
+		txSourceUSE.setBounds(col1+568, 40 + insets.top,400, txHeight );
 		txDescription.setBounds(col1+80, 75 + insets.top,489, txHeight );
 
 		int filGroupTab1=140;
@@ -324,9 +324,19 @@ public class MVMWizardActions extends JDialog {
 		paneTabLinks = new JScrollPane(tabLinks);
 		paneTabLinks.setBounds(col1, filGroupTab2, 963, 140);
 		panel.add(paneTabLinks);
+		
+		btnOpen = new JButton("Open actions");
+		btnOpen.setBounds(866, 75, 110, 25);
+		btnOpen.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openFile();
+				showData();
+			}
+		});
+		panel.add(btnOpen);
 
 		btnFind = new JButton("Find actions");
-		btnFind.setBounds(866, 60, 110, 25);
+		btnFind.setBounds(866, 110, 110, 25);
 		btnFind.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MVMFindActions w = new MVMFindActions(frame, strLastFile);
@@ -347,18 +357,8 @@ public class MVMWizardActions extends JDialog {
 		});
 		panel.add(btnFind);
 
-		btnOpen = new JButton("Open actions");
-		btnOpen.setBounds(866, 60, 110, 25);
-		btnOpen.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				openFile();
-				showData();
-			}
-		});
-		panel.add(btnOpen);
-
 		btnSave = new JButton("Save actions");
-		btnSave.setBounds(866, 100, 110, 25);
+		btnSave.setBounds(866, 145, 110, 25);
 		btnSave.setEnabled(false);
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -498,8 +498,9 @@ public class MVMWizardActions extends JDialog {
 		int result = fileChooser.showOpenDialog(this);
 		if (result == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = fileChooser.getSelectedFile();
-			String nomFile = selectedFile.getAbsolutePath();
-			grPral = readMVMGroup(nomFile);
+			String nomFileSelected = selectedFile.getAbsolutePath();
+			grPral = readMVMGroup(nomFileSelected);
+			String nomFile = selectedFile.getName();
 			int indicePunto = nomFile.indexOf('.');
 			String parteIzquierda = indicePunto != -1 ? nomFile.substring(0, indicePunto) : nomFile;
 			strLastFile=parteIzquierda;

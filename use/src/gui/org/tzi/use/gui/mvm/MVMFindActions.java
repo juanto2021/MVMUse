@@ -75,8 +75,8 @@ public class MVMFindActions extends JDialog {
 
 		panel.setLayout(null);
 
-//		panel.add(lbLastFile);
-//		panel.add(txLastFile);
+		//		panel.add(lbLastFile);
+		//		panel.add(txLastFile);
 
 		Insets insets = panel.getInsets();
 
@@ -84,25 +84,25 @@ public class MVMFindActions extends JDialog {
 		int lbHeight=20;
 		//		int txHeight=20;
 
-		
+
 		lbLastFile.setBounds(col1, 332 + insets.top,150, lbHeight);
-		
+
 		txLastFile = new JTextField();
 		if (strLastFile!="") {
 			txLastFile.setText(strLastFile+".mva");
-//			txLastFile.setText("1234567890123456789012345678901234567890");
-			
+			//			txLastFile.setText("1234567890123456789012345678901234567890");
+
 		}
 		txLastFile.setBounds(col1+60, 332 + insets.top,150, lbHeight);
 		txLastFile.setEditable(false);
-//		txLastFile.setText("1234567890");
-		
+		//		txLastFile.setText("1234567890");
+
 		panel.add(lbLastFile);
 		panel.add(txLastFile);
 
 		modelTabActions = new DefaultTableModel();
 		tabActions = new JTable(modelTabActions);
-		
+
 
 		cargaDatos();
 
@@ -176,8 +176,8 @@ public class MVMFindActions extends JDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-								dispose(); //Provis
-//				System.exit(0);
+				dispose(); //Provis
+				//				System.exit(0);
 			}
 		});
 		btnCancel.setBounds(col1+710, 330 + insets.top, 110, 25);
@@ -185,6 +185,12 @@ public class MVMFindActions extends JDialog {
 		getContentPane().add(panel);
 
 		tabActions.setRowSelectionInterval(0, 0);// Provisionalmente seleccionamos primera fila
+		if (tabActions.getModel().getRowCount()>0) {
+			String nomfile = (String) tabActions.getValueAt(0, 0);
+			txLastFile.setText(nomfile);
+		}
+
+
 	}
 	private void prepareFileRes(String nomFile) {
 		nomFileRes=nomFile;

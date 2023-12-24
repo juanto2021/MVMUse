@@ -342,7 +342,9 @@ public class WizardMVMView extends JPanel implements View {
 
 		lbAttrs = new JLabel("Attributes");
 		lbAttrs.setBounds(245, 15, 60, 25);
-		panel.add(lbAttrs);			
+		panel.add(lbAttrs);	
+
+
 
 		lClass = new JList<MClass>(loadListMClass());
 		lClass.setBounds(10, 40, 90, 145);
@@ -833,6 +835,8 @@ public class WizardMVMView extends JPanel implements View {
 
 		setSize(new Dimension(400, 300));
 
+		resetObjLinks();
+
 	}
 
 	private void resetObjLinks() {
@@ -855,6 +859,9 @@ public class WizardMVMView extends JPanel implements View {
 		DefaultComboBoxModel<MObject> cbmDes = new DefaultComboBoxModel<MObject>();
 		cmbObjectOri.setModel(cbmOri);
 		cmbObjectDes.setModel(cbmDes);
+
+		// Clean Actions
+		lActions.clear();
 	}
 
 	private void TheoricReset() {
@@ -1071,13 +1078,8 @@ public class WizardMVMView extends JPanel implements View {
 				boolean error = false;
 				for (int i = 0; i < fAttributes.size(); ++i) {
 					MAttribute attribute = fAttributes.get(i);
-					//					String newValue = fValues[i];
-					//					String oldValue = fAttributeValueMap.get(attribute).toString();
 					MVMAttribute attrMVM = lAttrsMVM.get(i);
 					String value = attrMVM.getValue();
-
-					//					if (!newValue.equals(oldValue)) {
-
 					StringWriter errorOutput = new StringWriter();
 					Expression valueAsExpression = 
 							OCLCompiler.compileExpression(
@@ -1089,36 +1091,61 @@ public class WizardMVMView extends JPanel implements View {
 									fSystem.varBindings());
 
 					if (valueAsExpression == null) {
-						JOptionPane.showMessageDialog(
-								fMainWindow, 
-								errorOutput, 
-								"Error", 
-								JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(fMainWindow,errorOutput,"Error",JOptionPane.ERROR_MESSAGE);
 						error = true;
 						continue;
 					}
 
 					try {
 						fSystem.execute(
-								new MAttributeAssignmentStatement(
-										fObject, 
-										attribute, 
-										valueAsExpression));
+								new MAttributeAssignmentStatement(fObject,attribute,valueAsExpression));
 
 					} catch (MSystemException e) {
-						JOptionPane.showMessageDialog(
-								fMainWindow, 
-								e.getMessage(), 
-								"Error", 
-								JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(fMainWindow,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
 						error = true;
 					}
 				}					
-	
 				selectObject( nomObj);
 				applyChanges();
+				storeAction(oAction.getTypeAction(), oAction.getParameters());
+				//Probar lo siguiente
+				cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
+				cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
+				
 			}
 			List<MVMLink> lLinks = oAction.getlLinks();
+			for (MVMLink oLinkMVM: lLinks) {
+				String nomAssoc=oLinkMVM.getNomAssoc();
+				String end1Object=oLinkMVM.getEnd1Object();
+				String end2Object=oLinkMVM.getEnd2Object();
+
+				MObject oOri=null;
+				MObject oDes=null;
+
+				MObject o1 = findObjectByName(end1Object);
+				MObject o2 = findObjectByName(end2Object);
+				MAssociation oAssoc = findAssocByName(nomAssoc);
+				List<MAssociationEnd> oAsocEnds = oAssoc.associationEnds();
+				int na=0;
+				MAssociationEnd oAssocEnd = oAsocEnds.get(na);
+				MClass oClassAssocEnd = oAssocEnd.cls();
+				if (oClassAssocEnd.name().equals(o1.cls().name())) {
+					oOri = o1;
+					oDes =	o2;	
+				}else {
+					oOri = o2;
+					oDes =	o1;	
+				}			
+				cmbClassOri.setSelectedItem(oOri.cls());
+				cmbObjectOri.setSelectedItem(oOri);
+				cmbClassDes.setSelectedItem(oDes.cls());
+				cmbObjectDes.setSelectedItem(oDes);
+				insertLink(oAssoc);
+			}
+			setResClassInvariants();
+			setResCheckStructure();
+			bNewObj=false;
+			txNewObject.setEnabled(false);
 		}
 
 	}
@@ -1156,6 +1183,9 @@ public class WizardMVMView extends JPanel implements View {
 					lNewObjects.add(nomObjNew);
 					cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 					cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
+					// Aqui
+					//					storeAction("CO", "Creation object ["+nomObjNew+"] of ["+classCrear+"]");
+
 				}
 
 				break;
@@ -1205,6 +1235,8 @@ public class WizardMVMView extends JPanel implements View {
 					try {
 						insertLink(oAssocPralWizard, fParticipants);
 						fLogWriter.println("Inserto link entre ["+oOri.name()+"] y [" + oDes.name()+"]");
+						// Aqui
+						storeAction("CL", "Creation link ["+oClassAssocEnd.name()+"] - ["+oOri.name()+"]/["+oDes.name()+"]");
 					} catch (MSystemException e) {
 						e.printStackTrace();
 					}
@@ -1966,7 +1998,7 @@ public class WizardMVMView extends JPanel implements View {
 			odvAssoc.forceStartLayoutThread();
 		}
 		if (bNewObj) {
-			storeAction("CO", "Creation object ["+nomObj+" of ["+oClass.name()+"]");
+			storeAction("CO", "Creation object ["+nomObj+"] of ["+oClass.name()+"]");
 		}else {
 			storeAction("MA", "Modification object ["+nomObj+"] of ["+oClass.name()+"]");	
 		}
@@ -1983,6 +2015,10 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}
 		state.deleteObject(fObject);
+		//Aqui
+		storeAction("DO", "Delete object ["+nomObjDel+"] of ["+fObject.name()+"]");	
+
+		// Ojo porque si el objeto esta linkado tendriamos que eliminar el link
 		lObjects.setModel(loadListObjects(nomClass));
 
 		int nObjects = lObjects.getModel().getSize();
