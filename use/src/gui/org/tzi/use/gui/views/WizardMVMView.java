@@ -89,6 +89,7 @@ import org.tzi.use.gui.main.ViewFrame;
 import org.tzi.use.gui.mvm.AssocWizard;
 import org.tzi.use.gui.mvm.LinkWizard;
 import org.tzi.use.gui.mvm.MVMAction;
+import org.tzi.use.gui.mvm.MVMAttribute;
 import org.tzi.use.gui.mvm.MVMLink;
 import org.tzi.use.gui.mvm.MVMObject;
 import org.tzi.use.gui.mvm.MVMWizardActions;
@@ -226,6 +227,10 @@ public class WizardMVMView extends JPanel implements View {
 	private Color colorSoftGray;
 
 	private JInternalFrame[] allframes;
+	// To WizardActions
+	static List<MVMAction> lActions = new ArrayList<MVMAction>();
+	static List<MVMObject> lObjs = new ArrayList<MVMObject>();
+	static List<MVMLink> lLinks = new ArrayList<MVMLink>();
 
 	/**
 	 * The table model.
@@ -350,7 +355,7 @@ public class WizardMVMView extends JPanel implements View {
 		lClass.setSelectedIndex(0);
 		oClass = lClass.getSelectedValue();
 		nomClass = oClass.name();
-		//Aqui0
+
 		lClass.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
 				if(lClass.getModel().getSize()>0) {
@@ -481,6 +486,25 @@ public class WizardMVMView extends JPanel implements View {
 				selectObject(nomObj);
 				cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 				cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
+				//				lObjects.setSelectedIndex(selectObject( nomObj));// Provis
+				////				update();
+				//				lObjects.setSelectedIndex(0);
+				//				
+				//				
+				//				fTableModel.update();
+				//				fTable.setModel(fTableModel);
+				//				fTable.updateUI();
+				//				fTable.setPreferredScrollableViewportSize(new Dimension(250, 70));
+				////				fTable.up
+				//				fTable.repaint();
+				//				fTablePane.updateUI();
+				//				fTablePane.validate();
+				//				fTablePane.repaint();
+
+				lObjects.setModel(loadListObjects(oClass.name()));
+				lObjects.setSelectedIndex(selectObject(nomObj));
+
+				//				selectObject( nomObj);
 			}
 		});
 
@@ -555,12 +579,12 @@ public class WizardMVMView extends JPanel implements View {
 		btnActions.setHorizontalAlignment(SwingConstants.CENTER);
 		btnActions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-			//Aqui1	
-			 List<MVMAction> lActions = new ArrayList<MVMAction>();
-			 List<MVMObject> lObjs = new ArrayList<MVMObject>();
-			 List<MVMLink> lLinks = new ArrayList<MVMLink>();	
-			 String sModel="animals";
-			 String sSourceUSE="C:\\prueba.use";
+
+				//				List<MVMAction> lActions = new ArrayList<MVMAction>();
+				List<MVMObject> lObjs = getMVMObjects();
+				List<MVMLink> lLinks = getMVMLinks();	
+				String sModel=fSystem.model().name();
+				String sSourceUSE=fSystem.model().filename();
 				MVMWizardActions w = new MVMWizardActions(frame,lActions,lObjs, lLinks, sModel,sSourceUSE );
 
 				w.setSize(1008, 547);
@@ -575,7 +599,7 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 		panel.add(btnActions);
-		//Aqui4
+
 		btnReset = new JButton("Reset");
 		btnReset.setBounds(10, 400, 110, 25);
 		btnReset.setVerticalAlignment(SwingConstants.CENTER);
@@ -833,7 +857,7 @@ public class WizardMVMView extends JPanel implements View {
 		setSize(new Dimension(400, 300));
 
 	}
-	//Aqui1
+
 	private void resetObjLinks() {
 		for (MLink oLink: fSession.system().state().allLinks()) {
 			deleteLink(oLink);
@@ -859,7 +883,7 @@ public class WizardMVMView extends JPanel implements View {
 	private void TheoricReset() {
 		Path f = Options.getRecentFile("use");
 		if (f != null) {
-			//aqui1
+
 
 			//					fMainWindow.fLogPanel.clear();
 			//					showLogPanel();
@@ -937,6 +961,125 @@ public class WizardMVMView extends JPanel implements View {
 		return objEnd;
 	}
 	/**
+	 * Get objects in format MVM to wizard Actions
+	 */
+	private List<MVMObject> getMVMObjects() {
+		List<MVMObject> lObjs = new ArrayList<MVMObject>();
+		Set<MObject> allObjects = fSession.system().state().allObjects();
+		//		List<MObject> lObjs = new ArrayList<MObject>();
+		for (MObject oObj : allObjects) {
+			MVMObject obj = new MVMObject();
+			obj.setClassName(oObj.cls().name());
+			obj.setName(oObj.name());
+
+			//---
+
+			MObjectState objState = oObj.state(fSystem.state());
+			Map<MAttribute, Value> attrsMap = objState.attributeValueMap();
+			Collection<MAttribute> attributes = ModelBrowserSorting.getInstance().sortAttributes( attrsMap.keySet() );
+
+			attributes = Collections2.filter(attributes, new Predicate<MAttribute>() {
+				@Override
+				public boolean apply(MAttribute input) {
+					return !input.isDerived();
+				}
+			});
+
+			List<MAttribute> attrs = Lists.newArrayList(attributes);
+			String[]  valuesAttrs = new String[attrs.size()];
+			for (int i = 0; i < valuesAttrs.length; i++) {
+				valuesAttrs[i] = attrsMap.get(attrs.get(i)).toString();
+			}
+
+			List<MVMAttribute> lMVMAttrs = new ArrayList<MVMAttribute>();
+
+			for (int i = 0; i < valuesAttrs.length; i++) {
+				MVMAttribute attr1 = new MVMAttribute();
+				attr1.setName(((MAttribute)attrs.get(i)).name());
+				attr1.setValue(valuesAttrs[i]);
+				lMVMAttrs.add(attr1);
+			}
+			obj.setAttributes(lMVMAttrs);
+			//---
+
+			lObjs.add(obj);
+		}
+		return lObjs;
+	}
+	/**
+	 * Get links in format MVM to wizard Actions
+	 */
+	private List<MVMLink> getMVMLinks() {
+		List<MVMLink> lLinks = new ArrayList<MVMLink>();
+		// Aqui
+		for (MLink oLink: fSession.system().state().allLinks()) {
+			MLinkEnd oL0 = oLink.getLinkEnd(0);
+			MLinkEnd oL1 = oLink.getLinkEnd(1);
+
+			MVMLink link = new MVMLink();
+			link.setCodeLink(String.valueOf(lLinks.size()+1));
+			link.setNomAssoc(oLink.association().name());
+			link.setEnd1Class(oL0.object().cls().name());
+			link.setEnd1Object(oL0.object().name());
+			link.setEnd1Role(oL0.associationEnd().name());
+			link.setEnd2Class(oL1.object().cls().name());
+			link.setEnd2Object(oL1.object().name());
+			link.setEnd2Role(oL0.associationEnd().name());
+			lLinks.add(link);
+		}
+		return lLinks;
+	}
+	//Aqui3
+	private void storeAction(String strTypeAction, String strParam) {
+		MVMAction oAction = new MVMAction();
+		oAction.setTypeAction(strTypeAction);
+		oAction.setParameters(strParam);
+
+		// Obtiene coleccion de objectos existentes tras la accion
+		//		List<MVMObject> lObjs = new ArrayList<MVMObject>();
+		List<MVMObject> lObjs = getMVMObjects();
+		oAction.setlObjs(lObjs);
+
+		// Obtiene coleccion de links existentes tras la accion
+		//		List<MVMLink> lLinks = new ArrayList<MVMLink>();
+		List<MVMLink> lLinks = getMVMLinks();
+		// Aqui
+		//		for (MLink oLink: fSession.system().state().allLinks()) {
+		//			MLinkEnd oL0 = oLink.getLinkEnd(0);
+		//			MLinkEnd oL1 = oLink.getLinkEnd(1);
+		//
+		//			MVMLink link = new MVMLink();
+		//			link.setCodeLink(String.valueOf(lLinks.size()+1));
+		//			link.setNomAssoc(oLink.association().name());
+		//			link.setEnd1Class(oL0.object().cls().name());
+		//			link.setEnd1Object(oL0.object().name());
+		//			link.setEnd1Role(oL0.associationEnd().name());
+		//			link.setEnd2Class(oL1.object().cls().name());
+		//			link.setEnd2Object(oL1.object().name());
+		//			link.setEnd2Role(oL0.associationEnd().name());
+		//			lLinks.add(link);
+		//		}
+
+		oAction.setlLinks(lLinks);
+
+		// Cuenta las acciones existentes en la lista e incrementa una unidad
+		oAction.setOrden(lActions.size()+1);
+		// Inserta acción en lista de acciones
+		lActions.add(oAction);
+
+
+		//		for (MLink oLink: fSession.system().state().allLinks()) {
+		//			deleteLink(oLink);
+		//		}
+		//		Set<MObject> allObjects = fSession.system().state().allObjects();
+		//		List<MObject> lObjs = new ArrayList<MObject>();
+		//		for (MObject oObj : allObjects) {
+		//			lObjs.add(oObj);
+		//		}
+
+	}
+
+	/**
 	 * Do Actions (create objects & links)
 	 * @param lActionsRes
 	 */
@@ -947,7 +1090,7 @@ public class WizardMVMView extends JPanel implements View {
 			System.out.println(oAction.getOrden()+" " + oAction.getTypeAction()+ " " + oAction.getParameters());
 		}
 	}
-	
+
 	/**
 	 * Realiza las acciones propuestas en wizard
 	 * @param oAssocPralWizard
@@ -1562,10 +1705,21 @@ public class WizardMVMView extends JPanel implements View {
 		}
 
 		MObject[] fParticipants = new MObject[] {oOri,oDes};
-		insertLink(oAssoc, fParticipants);
+		try {
+			insertLink(oAssoc, fParticipants);
+			storeAction("CL", "Creation link ["+oClassAssocEnd.name()+"] - ["+oOri.name()+"]/["+oDes.name()+"]");
+		} catch (MSystemException e) {
+			JOptionPane.showMessageDialog(
+					fMainWindow, 
+					e.getMessage(), 
+					"Error", 
+					JOptionPane.ERROR_MESSAGE);
+		}
+
+
 	}
 
-	private void insertLink(MAssociation association, MObject[] objects) {
+	private void insertLink(MAssociation association, MObject[] objects) throws MSystemException {
 		if (association.hasQualifiedEnds()) {
 			QualifierInputView input = new QualifierInputView(fMainWindow, fSystem, association, objects);
 			input.setLocationRelativeTo(this);
@@ -1575,11 +1729,12 @@ public class WizardMVMView extends JPanel implements View {
 			try {
 				fSystem.execute(new MLinkInsertionStatement(association, objects, Collections.<List<Value>>emptyList()));
 			} catch (MSystemException e) {
-				JOptionPane.showMessageDialog(
-						fMainWindow, 
-						e.getMessage(), 
-						"Error", 
-						JOptionPane.ERROR_MESSAGE);
+				//				JOptionPane.showMessageDialog(
+				//						fMainWindow, 
+				//						e.getMessage(), 
+				//						"Error", 
+				//						JOptionPane.ERROR_MESSAGE);
+				throw new MSystemException(e.getMessage());
 			}
 		}
 		setResCheckStructure();
@@ -1727,6 +1882,7 @@ public class WizardMVMView extends JPanel implements View {
 			odvAssoc.forceStartLayoutThread();
 		}
 	}
+	//Aqui
 	private void saveObject(MClass oClass, String nomObj) {
 		// Verificamos existencia de ObjectDiagram MVM
 		checkExistObjDiagram();
@@ -1768,10 +1924,35 @@ public class WizardMVMView extends JPanel implements View {
 					}
 				}
 			}
+			// si es nuevo sed guarda action CO
+			//Aqui
+			//			storeAction("CO", "Creation object ["+nomObj+" of ["+oClass.name()+"]");
 		}
-		applyChanges();
+		//		fSystem.getEventBus().register(this);// provis
+		applyChanges();// Provis
+		//		fTable.updateUI();
+		//		fTableModel.update();
+		//		fTable.setModel(fTableModel);
+		//		
+		//		selectObject( nomObj);
+
+		//		selectObject( nomObj);// provis
+		//		lObjects.setSelectedIndex(selectObject( nomObj));// Provis
+		//		fTable.updateUI();
+		//		fTable.setUpdateSelectionOnSort(true);
+		//		lObjects.setSelectedIndex(0);
+		//		lObjects.setModel(loadListObjects(nomClass));
+		//		lObjects.setSelectedIndex(selectObject( nomObj));// Provis
+		//		fTable.repaint();
+		//		fTablePane.repaint();
+
 		if (!checkExistObjDiagram()) {
 			odvAssoc.forceStartLayoutThread();
+		}
+		if (bNewObj) {
+			storeAction("CO", "Creation object ["+nomObj+" of ["+oClass.name()+"]");
+		}else {
+			storeAction("MA", "Modification object ["+nomObj+"] of ["+oClass.name()+"]");	
 		}
 
 	}
@@ -1816,9 +1997,9 @@ public class WizardMVMView extends JPanel implements View {
 		if (!haveObject()) { 
 			return;
 		}
-
+		// No refresh? Aqui6
 		// Don't refresh after first change...
-		fSystem.getEventBus().unregister(this);
+		fSystem.getEventBus().unregister(this);// Provis
 		boolean error = false;
 
 		for (int i = 0; i < fValues.length; ++i) {

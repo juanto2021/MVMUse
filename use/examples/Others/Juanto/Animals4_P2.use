@@ -14,8 +14,8 @@ class Pet
  end
  
 association BelongsTo between
-  Person[1]
-  Pet[*]
+  Person[1] role OwnerOf
+  Pet[*] role BelongingTo
 end 
  constraints
 

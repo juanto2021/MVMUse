@@ -127,7 +127,7 @@ public class MVMWizardActions extends JDialog {
 		cargaDatos();
 
 		Path path = Paths.get("");
-		directoryName = path.toAbsolutePath().toString()+"/"+groupActionsFolder;
+		directoryName = path.toAbsolutePath().toString()+"\\"+groupActionsFolder;
 		//		strLastFile=directoryName+ "/gr1.mva";
 
 		txFileName = new JTextField();
@@ -430,8 +430,8 @@ public class MVMWizardActions extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				lActionsRes=null;
-				//				dispose(); //Provis
-				System.exit(0);
+								dispose(); //Provis
+//				System.exit(0);
 			}
 		});
 		btnCancel.setBounds(866, 470, 110, 25);
@@ -514,6 +514,7 @@ public class MVMWizardActions extends JDialog {
 			File selectedFile = fileChooser.getSelectedFile();
 			String nomFile = selectedFile.getAbsolutePath();
 			grPral = readMVMGroup(nomFile);
+			strLastFile=nomFile;
 		}
 	}
 	private void saveFile() {
@@ -525,7 +526,12 @@ public class MVMWizardActions extends JDialog {
 
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogTitle("File to save");   
-		fileChooser.setCurrentDirectory(new File(directoryName));
+//		fileChooser.setCurrentDirectory(new File(directoryName));
+		
+		
+		File directorioInicial = new File(directoryName);
+        fileChooser.setCurrentDirectory(directorioInicial);
+		
 		fileChooser.setSelectedFile(new File(nomFile));
 
 		int userSelection = fileChooser.showSaveDialog(frame);
@@ -535,6 +541,7 @@ public class MVMWizardActions extends JDialog {
 			try {
 				String nomFileSave = directoryName+"/"+nomFile;
 				writeMVMGroup(grPral,nomFileSave);
+				strLastFile=nomFile;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

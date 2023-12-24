@@ -64,7 +64,7 @@ public class MVMFindActions extends JDialog {
 		frame = new JFrame("Find Actions");
 		frame.setAlwaysOnTop(true);
 		frame.setModalExclusionType(ModalExclusionType.TOOLKIT_EXCLUDE);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//Provis
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//Provis
 		frame.setLocationRelativeTo(null);
 
 		Path path = Paths.get("");
@@ -163,8 +163,8 @@ public class MVMFindActions extends JDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//				dispose(); //Provis
-				System.exit(0);
+								dispose(); //Provis
+//				System.exit(0);
 			}
 		});
 		btnCancel.setBounds(col1+710, 330 + insets.top, 110, 25);
