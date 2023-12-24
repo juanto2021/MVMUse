@@ -108,7 +108,7 @@ public class MVMWizardActions extends JDialog {
 	String strExtension="mva";
 
 	public MVMWizardActions(JFrame fParent, List<MVMAction> pLActions, List<MVMObject> pLObjs, List<MVMLink> pLLinks,
-			String pModel,String pSourceUSE ) {
+			String pModel,String pSourceUSE, String pLastFile ) {
 		super(fParent, "Prototipo MVM Wizard Actions",ModalityType.APPLICATION_MODAL);
 		frame = new JFrame("Prototipo MVM Wizard Actions");
 		frame.setAlwaysOnTop(true);
@@ -123,6 +123,7 @@ public class MVMWizardActions extends JDialog {
 
 		sModel = pModel;
 		sSourceUSE = pSourceUSE;
+		strLastFile = pLastFile;
 
 		cargaDatos();
 
@@ -430,8 +431,8 @@ public class MVMWizardActions extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				lActionsRes=null;
-								dispose(); //Provis
-//				System.exit(0);
+				dispose(); //Provis
+				//				System.exit(0);
 			}
 		});
 		btnCancel.setBounds(866, 470, 110, 25);
@@ -440,17 +441,17 @@ public class MVMWizardActions extends JDialog {
 		getContentPane().add(panel);
 		showData();
 		//provis
-//		MVMFindActions w = new MVMFindActions(frame);
-//
-//		w.setSize(988, 410);
-//		w.setLocationRelativeTo(null);
-//		w.setVisible(true);
-//		String nomFileRes=w.getNomFile();
-//		if (nomFileRes!="") {
-//			String nomFile = directoryName+"/"+nomFileRes;
-//			grPral = readMVMGroup(nomFile);
-//			showData();
-//		}
+		//		MVMFindActions w = new MVMFindActions(frame);
+		//
+		//		w.setSize(988, 410);
+		//		w.setLocationRelativeTo(null);
+		//		w.setVisible(true);
+		//		String nomFileRes=w.getNomFile();
+		//		if (nomFileRes!="") {
+		//			String nomFile = directoryName+"/"+nomFileRes;
+		//			grPral = readMVMGroup(nomFile);
+		//			showData();
+		//		}
 
 	}
 
@@ -514,7 +515,10 @@ public class MVMWizardActions extends JDialog {
 			File selectedFile = fileChooser.getSelectedFile();
 			String nomFile = selectedFile.getAbsolutePath();
 			grPral = readMVMGroup(nomFile);
-			strLastFile=nomFile;
+			int indicePunto = nomFile.indexOf('.');
+			String parteIzquierda = indicePunto != -1 ? nomFile.substring(0, indicePunto) : nomFile;
+			strLastFile=parteIzquierda;
+			txFileName.setText(parteIzquierda);
 		}
 	}
 	private void saveFile() {
@@ -526,26 +530,63 @@ public class MVMWizardActions extends JDialog {
 
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogTitle("File to save");   
-//		fileChooser.setCurrentDirectory(new File(directoryName));
-		
-		
+
 		File directorioInicial = new File(directoryName);
-        fileChooser.setCurrentDirectory(directorioInicial);
-		
+		fileChooser.setCurrentDirectory(directorioInicial);
 		fileChooser.setSelectedFile(new File(nomFile));
 
-		int userSelection = fileChooser.showSaveDialog(frame);
+		//		int userSelection = fileChooser.showSaveDialog(frame);
+		//
+		//		if (userSelection == JFileChooser.APPROVE_OPTION) {
+		////			File fileToSave = fileChooser.getSelectedFile();
+		//			try {
+		//				String nomFileSave = directoryName+"/"+nomFile;
+		//				writeMVMGroup(grPral,nomFileSave);
+		//				int indicePunto = nomFile.indexOf('.');
+		//				String parteIzquierda = indicePunto != -1 ? nomFile.substring(0, indicePunto) : nomFile;
+		//				strLastFile=parteIzquierda;
+		//			} catch (Exception e) {
+		//				e.printStackTrace();
+		//			}
+		//		}
 
-		if (userSelection == JFileChooser.APPROVE_OPTION) {
-//			File fileToSave = fileChooser.getSelectedFile();
+		//----------------
+
+		int result = fileChooser.showSaveDialog(frame);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			File fileToSave = fileChooser.getSelectedFile();
+
+			// Comprobar si el archivo ya existe
+			if (fileToSave.exists()) {
+				int overwriteResult = JOptionPane.showConfirmDialog(frame,
+						"El archivo ya existe. ¿Deseas sobrescribirlo?",
+						"Confirmar Sobrescritura",
+						JOptionPane.YES_NO_OPTION);
+
+				if (overwriteResult != JOptionPane.YES_OPTION) {
+					// El usuario eligió no sobrescribir, salir sin guardar
+					return;
+				}
+			}
 			try {
-				String nomFileSave = directoryName+"/"+nomFile;
+//				fileToSave = fileChooser.getSelectedFile();
+				//    				String nomFileSave = directoryName+"/"+nomFile;
+				String nomFileSave = fileToSave.getAbsolutePath();
+				nomFile = fileToSave.getName();
 				writeMVMGroup(grPral,nomFileSave);
-				strLastFile=nomFile;
+				int indicePunto = nomFile.indexOf('.');
+				String parteIzquierda = indicePunto != -1 ? nomFile.substring(0, indicePunto) : nomFile;
+				strLastFile=parteIzquierda;
+				txFileName.setText(parteIzquierda);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+
 		}
+		//----------------
+
+
+
 	}
 	private void showDataAction(int nAction) {
 		loadListObjects(nAction);
@@ -708,6 +749,10 @@ public class MVMWizardActions extends JDialog {
 		return lActionsRes;
 	}
 
+	public String getLastFile() {
+		return strLastFile;
+	}
+
 	//	private void cargaDatosPrueba() {
 	//
 	//		List<MVMAction> lActions = new ArrayList<MVMAction>();
@@ -846,7 +891,7 @@ public class MVMWizardActions extends JDialog {
 	//	}
 	private void cargaDatos() {
 		Date date = new Date();
-		sFileName = "";
+		sFileName = strLastFile;
 		sCreationDate = date;
 		sModificationDate = date;
 		sDescription = "";

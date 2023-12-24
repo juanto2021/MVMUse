@@ -227,10 +227,11 @@ public class WizardMVMView extends JPanel implements View {
 	private Color colorSoftGray;
 
 	private JInternalFrame[] allframes;
-	// To WizardActions
+	// To MVMWizardActions
 	static List<MVMAction> lActions = new ArrayList<MVMAction>();
-	static List<MVMObject> lObjs = new ArrayList<MVMObject>();
-	static List<MVMLink> lLinks = new ArrayList<MVMLink>();
+	//	static List<MVMObject> lObjs = new ArrayList<MVMObject>();
+	//	static List<MVMLink> lLinks = new ArrayList<MVMLink>();
+	private String strLastFile="";
 
 	/**
 	 * The table model.
@@ -585,14 +586,17 @@ public class WizardMVMView extends JPanel implements View {
 				List<MVMLink> lLinks = getMVMLinks();	
 				String sModel=fSystem.model().name();
 				String sSourceUSE=fSystem.model().filename();
-				MVMWizardActions w = new MVMWizardActions(frame,lActions,lObjs, lLinks, sModel,sSourceUSE );
+				MVMWizardActions w = new MVMWizardActions(frame,lActions,lObjs, lLinks, sModel,sSourceUSE, strLastFile );
 
 				w.setSize(1008, 547);
 				w.setLocationRelativeTo(null);
-				w.setVisible(true);
+				w.setVisible(true);	
+
+				strLastFile=w.getLastFile();
 
 				List<MVMAction> lActionsRes=w.getListActions();
 				if (lActionsRes!=null) {
+					//					strLastFile=w.getLastFile();
 					System.out.println(lActionsRes.size());
 					doActions(lActionsRes);
 				}
