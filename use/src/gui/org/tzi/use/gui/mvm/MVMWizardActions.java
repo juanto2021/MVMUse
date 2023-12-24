@@ -98,7 +98,6 @@ public class MVMWizardActions extends JDialog {
 	private String strLastFile="";
 	private List<MVMAction> lActions = new ArrayList<MVMAction>();
 	private List<MVMObject> lObjsPral = new ArrayList<MVMObject>();
-	//	private List<MVMAttribute> lAttrsPral = new ArrayList<MVMAttribute>();
 	private List<MVMLink> lLinksPral = new ArrayList<MVMLink>();
 	private MVMGroupActions grPral = new MVMGroupActions();
 	private List<MVMAction> lActionsRes=null;
@@ -114,7 +113,6 @@ public class MVMWizardActions extends JDialog {
 		frame.setAlwaysOnTop(true);
 		frame.setModalExclusionType(ModalExclusionType.TOOLKIT_EXCLUDE);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//Provis
-		//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 
 		lActions=pLActions;
@@ -129,7 +127,6 @@ public class MVMWizardActions extends JDialog {
 
 		Path path = Paths.get("");
 		directoryName = path.toAbsolutePath().toString()+"\\"+groupActionsFolder;
-		//		strLastFile=directoryName+ "/gr1.mva";
 
 		txFileName = new JTextField();
 
@@ -255,8 +252,6 @@ public class MVMWizardActions extends JDialog {
 			}
 		});
 
-
-
 		paneTabActions = new JScrollPane(tabActions);
 		paneTabActions.setBounds(col1, filGroupTab1, 383, 140);
 		panel.add(paneTabActions);
@@ -334,7 +329,7 @@ public class MVMWizardActions extends JDialog {
 		btnFind.setBounds(866, 60, 110, 25);
 		btnFind.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				MVMFindActions w = new MVMFindActions(frame);
+				MVMFindActions w = new MVMFindActions(frame, strLastFile);
 
 				w.setSize(988, 410);
 				w.setLocationRelativeTo(null);
@@ -344,6 +339,9 @@ public class MVMWizardActions extends JDialog {
 					String nomFile = directoryName+"/"+nomFileRes;
 					grPral = readMVMGroup(nomFile);
 					showData();
+					int indicePunto = nomFileRes.indexOf('.');
+					String parteIzquierda = indicePunto != -1 ? nomFileRes.substring(0, indicePunto) : nomFileRes;
+					strLastFile=parteIzquierda;
 				}
 			}
 		});
@@ -440,19 +438,6 @@ public class MVMWizardActions extends JDialog {
 
 		getContentPane().add(panel);
 		showData();
-		//provis
-		//		MVMFindActions w = new MVMFindActions(frame);
-		//
-		//		w.setSize(988, 410);
-		//		w.setLocationRelativeTo(null);
-		//		w.setVisible(true);
-		//		String nomFileRes=w.getNomFile();
-		//		if (nomFileRes!="") {
-		//			String nomFile = directoryName+"/"+nomFileRes;
-		//			grPral = readMVMGroup(nomFile);
-		//			showData();
-		//		}
-
 	}
 
 	private void validateFileName() throws Exception{
@@ -535,23 +520,6 @@ public class MVMWizardActions extends JDialog {
 		fileChooser.setCurrentDirectory(directorioInicial);
 		fileChooser.setSelectedFile(new File(nomFile));
 
-		//		int userSelection = fileChooser.showSaveDialog(frame);
-		//
-		//		if (userSelection == JFileChooser.APPROVE_OPTION) {
-		////			File fileToSave = fileChooser.getSelectedFile();
-		//			try {
-		//				String nomFileSave = directoryName+"/"+nomFile;
-		//				writeMVMGroup(grPral,nomFileSave);
-		//				int indicePunto = nomFile.indexOf('.');
-		//				String parteIzquierda = indicePunto != -1 ? nomFile.substring(0, indicePunto) : nomFile;
-		//				strLastFile=parteIzquierda;
-		//			} catch (Exception e) {
-		//				e.printStackTrace();
-		//			}
-		//		}
-
-		//----------------
-
 		int result = fileChooser.showSaveDialog(frame);
 		if (result == JFileChooser.APPROVE_OPTION) {
 			File fileToSave = fileChooser.getSelectedFile();
@@ -564,13 +532,12 @@ public class MVMWizardActions extends JDialog {
 						JOptionPane.YES_NO_OPTION);
 
 				if (overwriteResult != JOptionPane.YES_OPTION) {
-					// El usuario eligió no sobrescribir, salir sin guardar
+					// El usuario eligio no sobrescribir, salir sin guardar
 					return;
 				}
 			}
 			try {
-//				fileToSave = fileChooser.getSelectedFile();
-				//    				String nomFileSave = directoryName+"/"+nomFile;
+
 				String nomFileSave = fileToSave.getAbsolutePath();
 				nomFile = fileToSave.getName();
 				writeMVMGroup(grPral,nomFileSave);
@@ -583,11 +550,11 @@ public class MVMWizardActions extends JDialog {
 			}
 
 		}
-		//----------------
-
-
-
 	}
+	/**
+	 * Show data by action
+	 * @param nAction
+	 */
 	private void showDataAction(int nAction) {
 		loadListObjects(nAction);
 		loadListAttrs(nAction,0);
@@ -604,6 +571,10 @@ public class MVMWizardActions extends JDialog {
 		}
 	}
 
+	/**
+	 * Load actions into table
+	 * @param lActions
+	 */
 	private void loadListActions(List<MVMAction> lActions) {
 		modelTabActions = new DefaultTableModel();
 
@@ -630,6 +601,10 @@ public class MVMWizardActions extends JDialog {
 		tabActions.repaint();
 		return;
 	}
+	/**
+	 * Load objects into table
+	 * @param nAction
+	 */
 	private void loadListObjects(int nAction) {
 		lObjsPral = new ArrayList<MVMObject>();
 
@@ -664,6 +639,11 @@ public class MVMWizardActions extends JDialog {
 		return;
 	}
 
+	/**
+	 * Load attributes by object and by action
+	 * @param nAction
+	 * @param nObj
+	 */
 	private void loadListAttrs(int nAction,int nObj) {
 		modelTabAttrs = new DefaultTableModel();
 
@@ -691,6 +671,10 @@ public class MVMWizardActions extends JDialog {
 		tabAttrs.repaint();
 		return;
 	}
+	/** 
+	 * Load links into table
+	 * @param nAction
+	 */
 	private void loadListLinks(int nAction) {
 		modelTabLinks = new DefaultTableModel();
 		String[] columns;
@@ -733,6 +717,9 @@ public class MVMWizardActions extends JDialog {
 		tabLinks.repaint();
 		return;
 	}
+	/**
+	 * Prepares list of actions to return for WizardMVMView
+	 */
 	private void prepareListActions() {
 		// Se ha de construir el grupo a devolver en base a la accion seleccionada
 		int nActionSel = tabActions.getSelectedRow();
@@ -745,10 +732,18 @@ public class MVMWizardActions extends JDialog {
 		return ;
 	}
 
+	/**
+	 * returns list of actions
+	 * @return
+	 */
 	public List<MVMAction> getListActions(){
 		return lActionsRes;
 	}
 
+	/**
+	 * returns last file used (only name without extension)
+	 * @return
+	 */
 	public String getLastFile() {
 		return strLastFile;
 	}
@@ -889,6 +884,10 @@ public class MVMWizardActions extends JDialog {
 	//		//		System.out.println(gr2.toString());
 	//
 	//	}
+
+	/**
+	 * Load data into group class
+	 */
 	private void cargaDatos() {
 		Date date = new Date();
 		sFileName = strLastFile;
@@ -905,6 +904,11 @@ public class MVMWizardActions extends JDialog {
 		grPral.setlActions(lActions);
 	}
 
+	/**
+	 * write data in JSON format
+	 * @param gr1
+	 * @param nomFile
+	 */
 	private void writeMVMGroup(MVMGroupActions gr1, String nomFile) {
 
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -915,6 +919,11 @@ public class MVMWizardActions extends JDialog {
 		}
 	}
 
+	/**
+	 * read data from JSON format
+	 * @param nomFile
+	 * @return
+	 */
 	private MVMGroupActions readMVMGroup(String nomFile) {
 		MVMGroupActions group = new MVMGroupActions();
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -935,18 +944,18 @@ public class MVMWizardActions extends JDialog {
 		return mapAsString.toString();
 	}
 
-	public void selectObject(String objName) {
-		JOptionPane.showMessageDialog(null,
-				"Actualizo1 atributos de objeto " + objName,
-				"Actualizo2 atributos de objeto",
-				JOptionPane.INFORMATION_MESSAGE);
-	}
-	public void selectAtttr(String attrName) {
-		JOptionPane.showMessageDialog(null,
-				"Actualizo1 valores de attr " + attrName,
-				"Actualizo2 valores de attr",
-				JOptionPane.INFORMATION_MESSAGE);
-	}
+	//	public void selectObject(String objName) {
+	//		JOptionPane.showMessageDialog(null,
+	//				"Actualizo1 atributos de objeto " + objName,
+	//				"Actualizo2 atributos de objeto",
+	//				JOptionPane.INFORMATION_MESSAGE);
+	//	}
+	//	public void selectAtttr(String attrName) {
+	//		JOptionPane.showMessageDialog(null,
+	//				"Actualizo1 valores de attr " + attrName,
+	//				"Actualizo2 valores de attr",
+	//				JOptionPane.INFORMATION_MESSAGE);
+	//	}
 }
 //class Draw extends JPanel {
 //	@Override

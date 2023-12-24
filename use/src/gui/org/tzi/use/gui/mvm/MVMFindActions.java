@@ -37,8 +37,8 @@ public class MVMFindActions extends JDialog {
 	private JFrame frame;
 	private JPanel panel;
 
-	private JLabel lbLastFile = new JLabel("Last file Name");
-	private JTextField txLastFile = new JTextField("gr1.mva");
+	private JLabel lbLastFile = new JLabel("File to load");
+	private JTextField txLastFile;
 
 	private JButton btnLoad;
 	private JButton btnCancel;
@@ -59,7 +59,7 @@ public class MVMFindActions extends JDialog {
 	private String nomFileRes="";
 
 
-	public MVMFindActions(JFrame fParent ) {
+	public MVMFindActions(JFrame fParent, String strLastFile ) {
 		super(fParent, "Find Actions",ModalityType.APPLICATION_MODAL);
 		frame = new JFrame("Find Actions");
 		frame.setAlwaysOnTop(true);
@@ -75,8 +75,8 @@ public class MVMFindActions extends JDialog {
 
 		panel.setLayout(null);
 
-		panel.add(lbLastFile);
-		panel.add(txLastFile);
+//		panel.add(lbLastFile);
+//		panel.add(txLastFile);
 
 		Insets insets = panel.getInsets();
 
@@ -84,12 +84,25 @@ public class MVMFindActions extends JDialog {
 		int lbHeight=20;
 		//		int txHeight=20;
 
+		
 		lbLastFile.setBounds(col1, 332 + insets.top,150, lbHeight);
-		txLastFile.setBounds(col1+90, 332 + insets.top,150, lbHeight);
+		
+		txLastFile = new JTextField();
+		if (strLastFile!="") {
+			txLastFile.setText(strLastFile+".mva");
+//			txLastFile.setText("1234567890123456789012345678901234567890");
+			
+		}
+		txLastFile.setBounds(col1+60, 332 + insets.top,150, lbHeight);
 		txLastFile.setEditable(false);
+//		txLastFile.setText("1234567890");
+		
+		panel.add(lbLastFile);
+		panel.add(txLastFile);
 
 		modelTabActions = new DefaultTableModel();
 		tabActions = new JTable(modelTabActions);
+		
 
 		cargaDatos();
 
@@ -171,7 +184,7 @@ public class MVMFindActions extends JDialog {
 		panel.add(btnCancel);
 		getContentPane().add(panel);
 
-		tabActions.setRowSelectionInterval(0, 0);// Prvisionalmente seleccionamos primera fila
+		tabActions.setRowSelectionInterval(0, 0);// Provisionalmente seleccionamos primera fila
 	}
 	private void prepareFileRes(String nomFile) {
 		nomFileRes=nomFile;
