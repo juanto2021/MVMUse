@@ -42,10 +42,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -839,6 +841,9 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 
+	/**
+	 * Delete all existing objects and links
+	 */
 	private void resetObjLinks() {
 		for (MLink oLink: fSession.system().state().allLinks()) {
 			deleteLink(oLink);
@@ -864,6 +869,9 @@ public class WizardMVMView extends JPanel implements View {
 		lActions.clear();
 	}
 
+	/**
+	 * Another kind of reset (pending)
+	 */
 	private void TheoricReset() {
 		Path f = Options.getRecentFile("use");
 		if (f != null) {
@@ -924,6 +932,11 @@ public class WizardMVMView extends JPanel implements View {
 		lObjects.setModel(loadListObjects(oClass.name()));
 		lObjects.setSelectedValue(nomObj, true);
 	}
+	/**
+	 * Searches for object corresponding to the end of an association
+	 * @param oFindAssoc
+	 * @return
+	 */
 	private MObject findAssocEnd(MObject oFindAssoc) {
 		MObject objEnd=null;
 		MSystemState state = fSystem.state();
@@ -1036,7 +1049,7 @@ public class WizardMVMView extends JPanel implements View {
 	 * Do Actions (create objects & links)
 	 * @param lActionsRes
 	 */
-	//Aqui
+
 	private void doActions(List<MVMAction> lActionsRes) {
 		resetObjLinks();
 		int nActions = lActionsRes.size();
@@ -1053,7 +1066,7 @@ public class WizardMVMView extends JPanel implements View {
 				String ClassObj = oObj.getClassName();
 				MClass oClassCreate = findMClassByName(ClassObj);
 
-				if (!existObject(nomObj)) {
+				if (!existObject(nomObj,ClassObj)) {
 					createObject(oClassCreate, nomObj);
 				}
 				MSystemState state = fSystem.state();
@@ -1111,7 +1124,7 @@ public class WizardMVMView extends JPanel implements View {
 				//Probar lo siguiente
 				cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 				cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
-				
+
 			}
 			List<MVMLink> lLinks = oAction.getlLinks();
 			for (MVMLink oLinkMVM: lLinks) {
@@ -1146,8 +1159,21 @@ public class WizardMVMView extends JPanel implements View {
 			setResCheckStructure();
 			bNewObj=false;
 			txNewObject.setEnabled(false);
-		}
+			// Despues de cargar todo se ha de seleccionar la primera clase y el primer objeto de dicha clase
 
+			if (lClass.getModel().getSize()>0) {
+				oClass = lClass.getModel().getElementAt(0);
+				System.out.println("Clic en: " + oClass);
+				lClass.setSelectedIndex(0);
+				nomClass = oClass.name();
+				lObjects.setModel(loadListObjects(nomClass));
+				lObjects.setSelectedIndex(0);
+				nomObj = (String) lObjects.getSelectedValue();
+				selectObject( nomObj);
+				txNewObject.setText(nomObj);
+				txNewObject.setEnabled(false);			
+			}
+		}
 	}
 
 	/**
@@ -1183,9 +1209,6 @@ public class WizardMVMView extends JPanel implements View {
 					lNewObjects.add(nomObjNew);
 					cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 					cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
-					// Aqui
-					//					storeAction("CO", "Creation object ["+nomObjNew+"] of ["+classCrear+"]");
-
 				}
 
 				break;
@@ -1270,19 +1293,28 @@ public class WizardMVMView extends JPanel implements View {
 		setResClassInvariants();
 		setResCheckStructure();
 	}
+	/**
+	 * Proposes a new object name of a class
+	 * @param className
+	 * @return
+	 */
 	public String findNomProposed(String className) {
 		int numObj = 1;
 		String nomProposed = className.toLowerCase() + numObj; 
 
 		// Averiguar si existe objeto o no en base a una iteracion
 
-		while(existObject(nomProposed)) {
+		while(existObject(nomProposed,className )) {
 			numObj+=1;
 			nomProposed = className.toLowerCase() + numObj; 
 		}
 		System.out.println("nomProposed [" + nomProposed+"]");
 		return nomProposed;
 	}
+
+	/**
+	 * Create a new object automatically
+	 */
 	public void newObjectAuto() {
 		oClass = lClass.getSelectedValue();
 		nomClass = oClass.name();
@@ -1301,13 +1333,18 @@ public class WizardMVMView extends JPanel implements View {
 		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 		selectObject( nomObj);
 	}
-	public boolean existObject(String name) {
+	/**
+	 * Checks the existence of an object
+	 * @param name
+	 * @return
+	 */
+	public boolean existObject(String name, String className) {
 		boolean bRes=false;
 		MSystemState state = fSystem.state();
 		Set<MObject> allObjects = state.allObjects();
 
 		for (MObject obj : allObjects) {
-			if (obj.name().equals(name)) {
+			if (obj.name().equals(name)&&obj.cls().name().equals(className)) {
 				bRes=true;
 				return bRes;
 			}
@@ -1316,6 +1353,9 @@ public class WizardMVMView extends JPanel implements View {
 		return bRes;
 	}
 
+	/**
+	 * Color button Check Structure according to checkstructure function
+	 */
 	public void setResCheckStructure() {
 		boolean bRes = checkStructure();
 		String sRes="OK";
@@ -1330,6 +1370,9 @@ public class WizardMVMView extends JPanel implements View {
 		}
 	}
 
+	/**
+	 * Color button State invariants according to check_inv_state() function
+	 */
 	public void setResClassInvariants() {
 		boolean bRes = check_inv_state();
 		String sRes="OK";
@@ -1350,6 +1393,9 @@ public class WizardMVMView extends JPanel implements View {
 		lbResClassInvariants.setOpaque(true);
 
 	}
+	/**
+	 * Show view ClassInvariantView
+	 */
 	public void showClassInvariantsState() {
 		ClassInvariantView civ = new ClassInvariantView(fMainWindow,
 				fSession.system());
@@ -1361,6 +1407,10 @@ public class WizardMVMView extends JPanel implements View {
 		c.add(civ, BorderLayout.CENTER);
 		fMainWindow.addNewViewFrame(f);
 	}
+	/**
+	 * Check status of invariants
+	 * @return
+	 */
 	public boolean check_inv_state() {
 		boolean bRes = false;
 
@@ -1437,6 +1487,9 @@ public class WizardMVMView extends JPanel implements View {
 		return todosOk;
 	}
 
+	/**
+	 * Gets information with structure check errors
+	 */
 	private void getErrorsEstructure() {
 		lAssocsWizard = new ArrayList<AssocWizard>();
 		StringWriter buffer = new StringWriter();
@@ -1445,6 +1498,10 @@ public class WizardMVMView extends JPanel implements View {
 		lAssocsWizard = fSession.system().state().checkStructureErrors( out,reportAllErrors);
 		return;
 	}
+	/**
+	 * Check structure
+	 * @return
+	 */
 	private boolean checkStructure() {
 		Map<String, List<String>> mapObjects = new HashMap<String, List<String>>();
 		getErrorsEstructure(); //Provis
@@ -1518,6 +1575,12 @@ public class WizardMVMView extends JPanel implements View {
 		return ok;
 	}
 
+	/**
+	 * Create map with objects available for each class
+	 * @param mapObjects
+	 * @param oClassBuscar
+	 * @return
+	 */
 	private Map<String, List<String>> addAndFindObjectsIntoMap(Map<String, List<String>> mapObjects, 
 			MClass oClassBuscar){
 		MSystemState state = fSystem.state();
@@ -1542,8 +1605,8 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return mapObjects;
 	}
-	/** En base a la estructura de un objecto de la associacion, propone crear y/o linkar
-	 * dicho objeto a otros
+	/** 
+	 * Based on the structure of an association object, it proposes to create and/or link said object to others
 	 * 
 	 */
 	public void analyzeProposals(AssocWizard aw,Map<String, List<String>> mapObjects) {
@@ -1626,17 +1689,32 @@ public class WizardMVMView extends JPanel implements View {
 		lAssocsWizard.add(awNew);
 	}
 
+	/**
+	 * Set frame name
+	 * @param name
+	 */
 	public void setFrameName(String name) {
 		frame.setName(name);
 	}
+
+	/**
+	 * Prepare class list
+	 * @return
+	 */
 	private DefaultListModel<MClass> loadListMClass() {
 		DefaultListModel<MClass> ldefLModel = new DefaultListModel<MClass>();
 		for (MClass oClass : fSystem.model().classes()) {
 			ldefLModel.addElement(oClass);
 		}
+		ldefLModel=sortDefaultListModelMClass(ldefLModel);
 		return ldefLModel;
 	}
 
+	/**
+	 * Prepare list of objects
+	 * @param nomClass
+	 * @return
+	 */
 	private DefaultListModel<String> loadListObjects(String nomClass) {
 		DefaultListModel<String> ldefLModel = new DefaultListModel<String>();
 		MSystemState state = fSystem.state();
@@ -1647,17 +1725,116 @@ public class WizardMVMView extends JPanel implements View {
 				ldefLModel.addElement(obj.name());
 			}
 		}
+		ldefLModel=sortDefaultListModelString(ldefLModel);
 		return ldefLModel;
 	}
+
+	/**
+	 * Sort list of strings
+	 * @param ldefLModel
+	 * @return
+	 */
+	private DefaultListModel<String> sortDefaultListModelString(DefaultListModel<String> ldefLModel) {
+		// Obtener elementos del modelo y ordenarlos
+		Vector<String> data = new Vector<>(ldefLModel.size());
+		for (int i = 0; i < ldefLModel.size(); i++) {
+			data.add(ldefLModel.getElementAt(i));
+		}
+		Collections.sort(data);
+
+		// Limpiar el modelo y agregar elementos ordenados
+		ldefLModel.clear();
+		for (String element : data) {
+			ldefLModel.addElement(element);
+		}
+		return ldefLModel;
+	}
+
+	/**
+	 * Sort list of MClass
+	 * @param ldefLModel
+	 * @return
+	 */
+	private DefaultListModel<MClass> sortDefaultListModelMClass(DefaultListModel<MClass> ldefLModel) {
+		// Obtener elementos del modelo y ordenarlos
+		Vector<MClass> data = new Vector<>(ldefLModel.size());
+		for (int i = 0; i < ldefLModel.size(); i++) {
+			data.add(ldefLModel.getElementAt(i));
+		}
+		Collections.sort(data);
+
+		// Limpiar el modelo y agregar elementos ordenados
+		ldefLModel.clear();
+		for (MClass element : data) {
+			ldefLModel.addElement(element);
+		}
+		return ldefLModel;
+	}
+
+	/**
+	 * Implements MObject comparator to classify
+	 * @author utopi
+	 *
+	 */
+	class MObjectComparator implements Comparator<MObject> {
+		@Override
+		public int compare(MObject o1, MObject o2) {
+			Comparator<String> stringComparator = Comparator.naturalOrder();
+			// Comparar por el valor
+			return stringComparator.compare(o1.name(), o2.name());
+		}
+	}
+
+	/**
+	 * Load combo of classes
+	 * @return
+	 */
 	private  DefaultComboBoxModel<MClass> loadComboClass() {
 		DefaultComboBoxModel<MClass> cbm = new DefaultComboBoxModel<MClass>();
 
 		for (MClass oClass : fSystem.model().classes()) {
 			cbm.addElement(oClass);
 		}
+
+		//---
+		List<MClass> data = new ArrayList<>();
+		for (int i = 0; i < cbm.getSize(); i++) {
+			data.add((MClass) cbm.getElementAt(i));
+		}
+
+		// Ordenar los elementos
+		Collections.sort(data, new MClassComparator());
+
+		// Limpiar el modelo y agregar elementos ordenados
+		cbm.removeAllElements();
+		for (MClass element : data) {
+			cbm.addElement(element);
+		}
+
+		//---
+
 		return cbm;
 	}
 
+	/**
+	 * Implements MClass comparator to classify
+	 * @author utopi
+	 *
+	 */
+	class MClassComparator implements Comparator<MClass> {
+		@Override
+		public int compare(MClass o1, MClass o2) {
+			Comparator<String> stringComparator = Comparator.naturalOrder();
+			// Comparar por el valor
+			return stringComparator.compare(o1.name(), o2.name());
+		}
+	}
+
+	/**
+	 * Load combo of objects
+	 * @param cmbClass
+	 * @return
+	 */
 	private  DefaultComboBoxModel<MObject> loadComboObjectMObject(JComboBox<MClass> cmbClass) {
 		DefaultComboBoxModel<MObject> cbm = new DefaultComboBoxModel<MObject>();
 		MClass oClass = (MClass) cmbClass.getItemAt(cmbClass.getSelectedIndex());
@@ -1670,9 +1847,27 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}
 
+		List<MObject> data = new ArrayList<>();
+		for (int i = 0; i < cbm.getSize(); i++) {
+			data.add((MObject) cbm.getElementAt(i));
+		}
+
+		// Ordenar los elementos
+		Collections.sort(data, new MObjectComparator());
+
+		// Limpiar el modelo y agregar elementos ordenados
+		cbm.removeAllElements();
+		for (MObject element : data) {
+			cbm.addElement(element);
+		}
+
 		return cbm;
 	}
 
+	/**
+	 * Load association list
+	 * @return
+	 */
 	private DefaultListModel<MAssociation> loadListAssoc() {
 		DefaultListModel<MAssociation> ldefLModel = new DefaultListModel<MAssociation>();
 		for (MAssociation oAssoc : fSystem.model().associations()) {
@@ -1680,6 +1875,11 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return ldefLModel;
 	}
+
+	/**
+	 * Select the components of an indicated association
+	 * @param oAssoc
+	 */
 	private void setComposAssoc(MAssociation oAssoc) {
 
 		Set<MLink> links = fSystem.state().linksOfAssociation(oAssoc).links();
@@ -1690,10 +1890,10 @@ public class WizardMVMView extends JPanel implements View {
 				String className=ma.cls().name();
 				switch(nLink){
 				case 0:
-					selectClasInCombo(cmbClassOri,className);
+					selectClassInCombo(cmbClassOri,className);
 					lbFromClass.setText(className);
 				case 1:
-					selectClasInCombo(cmbClassDes,className);
+					selectClassInCombo(cmbClassDes,className);
 					lbToClass.setText(className);
 				default:
 					// De momento no hacemos nada
@@ -1753,6 +1953,10 @@ public class WizardMVMView extends JPanel implements View {
 		System.out.println(oAssoc.name());
 
 	}
+	/**
+	 * Insert link in association
+	 * @param oAssoc
+	 */
 	private void insertLink(MAssociation oAssoc) {
 		MObject oOri=null;
 		MObject oDes=null;
@@ -1788,6 +1992,12 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 
+	/**
+	 * Insert link between selected objects
+	 * @param association
+	 * @param objects
+	 * @throws MSystemException
+	 */
 	private void insertLink(MAssociation association, MObject[] objects) throws MSystemException {
 		if (association.hasQualifiedEnds()) {
 			QualifierInputView input = new QualifierInputView(fMainWindow, fSystem, association, objects);
@@ -1803,6 +2013,11 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		setResCheckStructure();
 	}
+
+	/**
+	 * Remove link in association
+	 * @param oAssoc
+	 */
 	private void deleteLink(MAssociation oAssoc) {
 		// Averiguar el link del que se trata
 		MObject oOri = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
@@ -1844,6 +2059,10 @@ public class WizardMVMView extends JPanel implements View {
 		}
 
 	}
+	/**
+	 * Remove link 
+	 * @param link
+	 */
 	private void deleteLink(MLink link) {
 		try {
 			fSystem.execute(
@@ -1864,6 +2083,9 @@ public class WizardMVMView extends JPanel implements View {
 		setResCheckStructure();
 	}
 
+	/**
+	 * Search view of the associated diagram
+	 */
 	private void searchObjDiagramAssociated() {
 		odvAssoc = null; 
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
@@ -1876,6 +2098,9 @@ public class WizardMVMView extends JPanel implements View {
 		}
 	}
 
+	/**
+	 * Create object diagram
+	 */
 	private void createObjDiagram() {
 		NewObjectDiagramView odv = new NewObjectDiagramView(fMainWindow, fSession.system());
 		ViewFrame f = new ViewFrame("Object diagram", odv, "ObjectDiagram.gif");
@@ -1907,15 +2132,27 @@ public class WizardMVMView extends JPanel implements View {
 		tile();
 	}
 
+	/**
+	 * Init new object
+	 */
 	private void initNewObject() {
 		txNewObject.setText("");
 		txNewObject.setEnabled(true);
 		bNewObj=true;
 	}
 
+	/**
+	 * Cancel object modifications without save them
+	 * @param nomObj
+	 */
 	private void cancelObject(String nomObj) {
 		selectObject(nomObj);
 	}
+
+	/**
+	 * Check existence of object diagram
+	 * @return
+	 */
 	private boolean checkExistObjDiagram() {
 		boolean existDiagram=false;
 		// Ver frames
@@ -1936,6 +2173,11 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return existDiagram;
 	}
+	/**
+	 * Create an object
+	 * @param oClass
+	 * @param nomObj
+	 */
 	private void createObject(MClass oClass, String nomObj) {
 
 		checkExistObjDiagram();
@@ -1947,6 +2189,11 @@ public class WizardMVMView extends JPanel implements View {
 		}
 	}
 
+	/**
+	 * Save an object
+	 * @param oClass
+	 * @param nomObj
+	 */
 	private void saveObject(MClass oClass, String nomObj) {
 		// Verificamos existencia de ObjectDiagram MVM
 		checkExistObjDiagram();
@@ -1969,7 +2216,7 @@ public class WizardMVMView extends JPanel implements View {
 					fValuesAnt[i] = fValues[i];
 				}
 			}
-			if (!existObject(nomObj)) {
+			if (!existObject(nomObj, oClass.name())) {
 				createObject(oClass, nomObj);
 			}
 
@@ -2004,6 +2251,11 @@ public class WizardMVMView extends JPanel implements View {
 		}
 
 	}
+
+	/**
+	 * Delete an object
+	 * @param nomObjDel
+	 */
 	private void deleteObject(String nomObjDel) {
 		int idx = selectObject(nomObjDel);
 		MSystemState state = fSystem.state();
@@ -2015,7 +2267,6 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}
 		state.deleteObject(fObject);
-		//Aqui
 		storeAction("DO", "Delete object ["+nomObjDel+"] of ["+fObject.name()+"]");	
 
 		// Ojo porque si el objeto esta linkado tendriamos que eliminar el link
@@ -2104,6 +2355,10 @@ public class WizardMVMView extends JPanel implements View {
 		fSystem.getEventBus().register(this);
 	}
 
+	/**
+	 * Check existence of an object in the system
+	 * @return
+	 */
 	private boolean haveObject() {
 		return fObject != null && fObject.exists(fSystem.state());
 	}
@@ -2130,6 +2385,12 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return idx;
 	}
+
+	/**
+	 * Search for an object by name
+	 * @param nameObject
+	 * @return
+	 */
 	private MObject findObjectByName(String nameObject) {
 		MObject oRes=null;
 		MSystemState state = fSystem.state();
@@ -2137,6 +2398,11 @@ public class WizardMVMView extends JPanel implements View {
 		return oRes;
 	}
 
+	/**
+	 * Search for an class by name
+	 * @param nameClass
+	 * @return
+	 */
 	private MClass findMClassByName(String nameClass) {
 		MClass oRes=null;
 		for (MClass oClass : fSystem.model().classes()) {
@@ -2148,7 +2414,11 @@ public class WizardMVMView extends JPanel implements View {
 		return oRes;
 	}
 
-
+	/**
+	 * Search for an Association by name
+	 * @param nameAssoc
+	 * @return
+	 */
 	private MAssociation findAssocByName(String nameAssoc) {
 		MAssociation oRes=null;
 		for (MAssociation oAssoc : fSystem.model().associations()) {
@@ -2160,7 +2430,12 @@ public class WizardMVMView extends JPanel implements View {
 		return oRes;
 	}
 
-	public void selectClasInCombo(JComboBox<MClass> cmb, String className) {
+	/**
+	 * Select combo class
+	 * @param cmb
+	 * @param className
+	 */
+	public void selectClassInCombo(JComboBox<MClass> cmb, String className) {
 
 		// Buscar en lista
 		int nObjs= cmb.getModel().getSize();
@@ -2174,6 +2449,9 @@ public class WizardMVMView extends JPanel implements View {
 		return;
 	}
 
+	/**
+	 * Update table data model
+	 */
 	private void update() {
 		fTableModel.update();
 	}
@@ -2190,6 +2468,10 @@ public class WizardMVMView extends JPanel implements View {
 		fSystem.getEventBus().unregister(this);
 		fSystem.unregisterRequiresAllDerivedValues();
 	}
+
+	/**
+	 * Stack views
+	 */
 	private void tile() {
 		JDesktopPane fDesk = fMainWindow.getFdesk();
 		allframes = fMainWindow.sortInternalFrames(fDesk.getAllFrames());
@@ -2241,6 +2523,7 @@ public class WizardMVMView extends JPanel implements View {
 		//        return future.isCancelled();
 		return false;
 	}
+
 	private class EvalResult {
 		public final int index;
 		public final Value result;
@@ -2254,6 +2537,7 @@ public class WizardMVMView extends JPanel implements View {
 			this.duration = duration;
 		}
 	}
+
 	private class MyEvaluatorCallable implements Callable<EvalResult> {
 		final int index;
 		final MSystemState state;

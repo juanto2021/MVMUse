@@ -1,12 +1,9 @@
 package org.tzi.use.gui.mvm;
 import java.awt.Color;
-import java.awt.Dialog.ModalExclusionType;
-import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-//import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -18,7 +15,6 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,9 +29,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-//import org.tzi.mvm.AssocWizard;
-//import org.tzi.mvm.LinkWizard;
-import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.uml.mm.MAssociation;
 import org.tzi.use.uml.sys.MObject;
 
@@ -301,12 +294,27 @@ public class MVMWizardAssoc extends JDialog {
 		getContentPane().add(panel);
 	}
 
+	/**
+	 * Returns commands to be executed in the main Wizard
+	 * @return
+	 */
 	public String getCommandWizard() {
 		return commandWizard;
 	}
+
+	/**
+	 * Returns association
+	 * @return
+	 */
 	public MAssociation getAssocWizard() {
 		return assocSelectWizard;
 	}
+	/**
+	 * Create a collection of actions and links to carry out
+	 * @param mapActions
+	 * @param objPral
+	 * @return
+	 */
 	private String[][] createActionLinks(Map<String, String> mapActions, MObject objPral) {
 
 		// [x][y]
@@ -327,10 +335,6 @@ public class MVMWizardAssoc extends JDialog {
 			switch(pCar) {
 			case "A":
 				textAction = "Assign";
-				//				if (strCommand!="") {
-				//					strCommand+="|";
-				//				}
-				//				strCommand=strCommand+"A "+infoW;
 				break;
 			case "C":
 				String sCar = actionW.substring(2,actionW.length());
@@ -346,13 +350,6 @@ public class MVMWizardAssoc extends JDialog {
 					strCommand+="-";
 				}
 				strCommand=strCommand+"I "+infoW;
-				//Provis------------------------
-				//				String[] partes = infoW.split(":");
-				//				int nPartes = partes.length;
-				//				if (nPartes>0) {
-				//					strObjPral=partes[0];
-				//				}
-				//				Provis------------------------
 				break;			    
 			default:
 
@@ -366,11 +363,17 @@ public class MVMWizardAssoc extends JDialog {
 
 		actionLinks[0][0] = strAction;
 		actionLinks[0][1] = strCommand;
+
 		//strCommand
 		actionLinks[1][0] = "Delete "+strObjPral;
 		actionLinks[1][1] = "D "+strObjPral;
 		return actionLinks;
 	}
+
+	/**
+	 * Shows information about an association row
+	 * @param row
+	 */
 	private void showInfoAssocFromRow(int row) {
 		String nomAssoc= tabAssocs.getValueAt(row, 0).toString();
 
@@ -385,6 +388,10 @@ public class MVMWizardAssoc extends JDialog {
 		showInfoLink( oLink);
 	}
 
+	/**
+	 * Shows information about a link row
+	 * @param row
+	 */
 	private void showInfoLinkFromRow(int row) {
 		List<LinkWizard> lLinks = assocPral.getlLinks();
 		LinkWizard oLink = findInfoLink(lLinks,row);
@@ -393,15 +400,23 @@ public class MVMWizardAssoc extends JDialog {
 		showInfoLink( oLink);
 		showPanelActionsLink(oLink);
 	}
+
+	/**
+	 * Shows information about a link
+	 * @param oLink
+	 */
 	private void showInfoLink(LinkWizard oLink) {
 		txCause.setText(oLink.getCause());
 		txFullMessage.setText(oLink.getFullMessage());
 	}
 
+	/**
+	 * Shows actions and links panel
+	 * @param oLink
+	 */
 	private void showPanelActionsLink(LinkWizard oLink) {
 		Map<String, String> mapActions = new HashMap<String, String>();
 		mapActions=oLink.getMapActions();
-		// Aqui1
 		MObject objPral = oLink.getoMObject();
 		String actionLinks[][] = createActionLinks(mapActions,objPral);
 
@@ -436,6 +451,13 @@ public class MVMWizardAssoc extends JDialog {
 		panel.updateUI();
 
 	}
+
+	/**
+	 * Search information from a link
+	 * @param lLinks
+	 * @param row
+	 * @return
+	 */
 	private LinkWizard findInfoLink(List<LinkWizard> lLinks,int row) {
 		LinkWizard oLink = new LinkWizard();
 
@@ -453,6 +475,12 @@ public class MVMWizardAssoc extends JDialog {
 		return oLink;
 
 	}
+
+	/**
+	 * Search information from a association
+	 * @param assocRef
+	 * @return
+	 */
 	private AssocWizard findInfoAssoc(String assocRef) {
 		AssocWizard assoc = new AssocWizard();
 		// find row of Assoc
@@ -465,6 +493,10 @@ public class MVMWizardAssoc extends JDialog {
 		return assoc;
 
 	}
+
+	/**
+	 * Load associations table
+	 */
 	private void loadTableAssocs() {
 		modelTabAssocs = new DefaultTableModel();
 		String[] columns;
@@ -487,15 +519,30 @@ public class MVMWizardAssoc extends JDialog {
 		return;
 	}
 
+	/**
+	 * Load associations
+	 * @return
+	 */
 	private ArrayList<AssocWizard> loadAssocs(){
 		lAssocs = new ArrayList<AssocWizard>(lAssocsWizard);
 		return lAssocs;		
 	}
 
+	/**
+	 * Load links
+	 * @param assoc
+	 * @return
+	 */
+
 	private ArrayList<LinkWizard> loadLinksAssoc(AssocWizard assoc){
 		ArrayList<LinkWizard> lLinks = new ArrayList<LinkWizard>(assoc.getlLinks());
 		return lLinks;
 	}
+
+	/**
+	 * Load links table
+	 * @param assoc
+	 */
 	private void loadTableLinks(AssocWizard assoc) {
 		modelTabLinks = new DefaultTableModel();
 		String[] columns;
@@ -516,14 +563,16 @@ public class MVMWizardAssoc extends JDialog {
 			objects[i][6]= data.get(i).getoMObject();
 		}
 
-
 		modelTabLinks = new DefaultTableModel(objects,columns);
 		tabLinks.setModel(modelTabLinks);
-		//		tabLinks.getColumnModel().getColumn(7).setPreferredWidth(0);
 		adjustWidthColumnsLinks();
 		tabLinks.repaint();
 		return;
 	}
+
+	/**
+	 * Adjust size columns on association table
+	 */
 	private void adjustWidthColumnsAssocs(){
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment( JLabel.CENTER );
@@ -531,6 +580,10 @@ public class MVMWizardAssoc extends JDialog {
 		tabAssocs.getColumnModel().getColumn(1).setCellRenderer( centerRenderer );
 		tabAssocs.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
 	}
+
+	/**
+	 * Adjust size columns on links table
+	 */
 	private void adjustWidthColumnsLinks(){
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment( JLabel.CENTER );

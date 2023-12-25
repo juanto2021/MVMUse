@@ -93,7 +93,7 @@ public class MVMWizardActions extends JDialog {
 	private JButton btnOpen;
 	private JButton btnSave;
 	private JButton btnLoad;
-	private JButton btnCancel;
+	private JButton btnExis;
 
 	private String strLastFile="";
 	private List<MVMAction> lActions = new ArrayList<MVMAction>();
@@ -291,7 +291,7 @@ public class MVMWizardActions extends JDialog {
 		header.setBackground(Color.lightGray);
 		header.setVisible(true);
 
-		tabAttrs.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		tabAttrs.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 		tabAttrs.getColumnModel().getColumn(0).setPreferredWidth(120);
 		tabAttrs.getColumnModel().getColumn(1).setPreferredWidth(120);
 
@@ -324,7 +324,7 @@ public class MVMWizardActions extends JDialog {
 		paneTabLinks = new JScrollPane(tabLinks);
 		paneTabLinks.setBounds(col1, filGroupTab2, 963, 140);
 		panel.add(paneTabLinks);
-		
+
 		btnOpen = new JButton("Open actions");
 		btnOpen.setBounds(866, 75, 110, 25);
 		btnOpen.addActionListener(new ActionListener() {
@@ -339,7 +339,8 @@ public class MVMWizardActions extends JDialog {
 		btnFind.setBounds(866, 110, 110, 25);
 		btnFind.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				MVMFindActions w = new MVMFindActions(frame, strLastFile);
+				String modelRef=pModel;
+				MVMFindActions w = new MVMFindActions(frame, strLastFile, modelRef);
 
 				w.setSize(988, 410);
 				w.setLocationRelativeTo(null);
@@ -423,8 +424,8 @@ public class MVMWizardActions extends JDialog {
 		panel.add(btnLoad);
 
 
-		btnCancel = new JButton("Cancel");
-		btnCancel.addActionListener(new ActionListener() {
+		btnExis = new JButton("Exit");
+		btnExis.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -433,8 +434,8 @@ public class MVMWizardActions extends JDialog {
 				//				System.exit(0);
 			}
 		});
-		btnCancel.setBounds(866, 470, 110, 25);
-		panel.add(btnCancel);
+		btnExis.setBounds(866, 470, 110, 25);
+		panel.add(btnExis);
 
 		getContentPane().add(panel);
 		showData();
@@ -749,143 +750,6 @@ public class MVMWizardActions extends JDialog {
 		return strLastFile;
 	}
 
-	//	private void cargaDatosPrueba() {
-	//
-	//		List<MVMAction> lActions = new ArrayList<MVMAction>();
-	//
-	//		List<MVMObject> lObjs = new ArrayList<MVMObject>();
-	//		List<MVMLink> lLinks = new ArrayList<MVMLink>();		
-	//
-	//		//Objs---------
-	//		// Pet
-	//		MVMObject obj1 = new MVMObject();
-	//		obj1.setClassName("Pet");
-	//		obj1.setName("pet1");
-	//		// Objects
-	//		List<MVMAttribute> lAttrs = new ArrayList<MVMAttribute>();	
-	//		MVMAttribute attr1 = new MVMAttribute();
-	//		attr1.setName("name");
-	//		attr1.setValue("x1");
-	//		lAttrs.add(attr1);
-	//		MVMAttribute attr2 = new MVMAttribute();
-	//		attr2.setName("species");
-	//		attr2.setValue("x1");
-	//		lAttrs.add(attr2);
-	//		MVMAttribute attr3 = new MVMAttribute();
-	//		attr3.setName("weight");
-	//		attr3.setValue("10");
-	//		lAttrs.add(attr3);
-	//
-	//		obj1.setAttributes(lAttrs);
-	//
-	//		lObjs = new ArrayList<MVMObject>();
-	//		lObjs.add(obj1);
-	//
-	//		// Actions
-	//		// Action 1 - crea object pet1
-	//		MVMAction act1 = new MVMAction();
-	//		String parameters1="Create object ["+obj1.getName()+"]";
-	//		act1.setOrden(1);
-	//		act1.setTypeAction("CO");
-	//		act1.setParameters(parameters1);
-	//		act1.setlObjs(lObjs);
-	//		act1.setlLinks(lLinks);
-	//
-	//		lActions.add(act1);
-	//
-	//		// Person
-	//		MVMObject obj2 = new MVMObject();
-	//		obj2.setClassName("Person");
-	//		obj2.setName("person1");
-	//		// Objects
-	//		//		Map<String, String> mAttributtes2 = new HashMap<String, String>();
-	//		//		mAttributtes2.put("age", "15");
-	//		//		mAttributtes2.put("height", "120");
-	//		//		mAttributtes2.put("weight", "60");
-	//		//		String sAttributes2= convertWithIteration(mAttributtes2);
-	//		//		obj2.setAttributes(sAttributes2);
-	//
-	//		List<MVMAttribute> lAttrs2 = new ArrayList<MVMAttribute>();	
-	//		MVMAttribute attr21 = new MVMAttribute();
-	//		attr21.setName("age");
-	//		attr21.setValue("15");
-	//		lAttrs2.add(attr21);
-	//		MVMAttribute attr22 = new MVMAttribute();
-	//		attr22.setName("height");
-	//		attr22.setValue("120");
-	//		lAttrs2.add(attr22);
-	//		MVMAttribute attr23 = new MVMAttribute();
-	//		attr23.setName("weight");
-	//		attr23.setValue("60");
-	//		lAttrs2.add(attr23);
-	//		obj2.setAttributes(lAttrs2);
-	//
-	//		lObjs = new ArrayList<MVMObject>();
-	//		lObjs.add(obj1);
-	//		lObjs.add(obj2);
-	//
-	//		// Action 2 - crea object person1
-	//		MVMAction act2 = new MVMAction();
-	//		String parameters2="Create object ["+obj2.getName()+"]";
-	//		act2.setOrden(2);
-	//		act2.setTypeAction("CO");
-	//		act2.setParameters(parameters2);
-	//		act2.setlObjs(lObjs);
-	//		act2.setlLinks(lLinks);
-	//
-	//		lActions.add(act2);
-	//
-	//		//Links-----------------
-	//		MVMLink link1 = new MVMLink();
-	//		link1.setCodeLink("1");
-	//		link1.setNomAssoc("BelongsTo");
-	//		link1.setEnd1Class("Pet");
-	//		link1.setEnd1Object("person1");
-	//		link1.setEnd1Role("role1");
-	//		link1.setEnd2Class("Person");
-	//		link1.setEnd2Object("person1");
-	//		link1.setEnd2Role("role1");
-	//
-	//		lLinks = new ArrayList<MVMLink>();
-	//		lLinks.add(link1);
-	//
-	//		// Action 3 - crea link entre pet1 y person1
-	//		MVMAction act3 = new MVMAction();
-	//		String parameters3="Link between object ["+obj1.getName()+"] / ["+obj2.getName()+"]";
-	//		act3.setOrden(3);
-	//		act3.setTypeAction("CL");
-	//		act3.setParameters(parameters3);
-	//		act3.setlObjs(lObjs);
-	//		act3.setlLinks(lLinks);
-	//
-	//		lActions.add(act3);
-	//
-	//		Date date = new Date();
-	//		sFileName = "";
-	//		sCreationDate = date;
-	//		sModificationDate = date;
-	//		sModel = "Animals";
-	//		sDescription = "Descripcion de pruebas";
-	//		sSourceUSE="Animals4_P2.use";
-	//
-	//		// Group
-	//		MVMGroupActions gr1 = new MVMGroupActions();
-	//
-	//		gr1.setnameGroup(sFileName);
-	//		gr1.setCreationDate(sCreationDate);
-	//		gr1.setLastModifiedDate(sModificationDate);
-	//		gr1.setDescription(sDescription);
-	//		gr1.setModelName(sModel);
-	//		gr1.setSrcFileUSE(sSourceUSE);
-	//		gr1.setlActions(lActions);
-	//
-	//		String nomFile=strLastFile;
-	//		writeMVMGroup(gr1,nomFile);
-	//		//		MVMGroupActions gr2 = readMVMGroup(nomFile);
-	//		//		System.out.println(gr2.toString());
-	//
-	//	}
-
 	/**
 	 * Load data into group class
 	 */
@@ -906,7 +770,7 @@ public class MVMWizardActions extends JDialog {
 	}
 
 	/**
-	 * write data in JSON format
+	 * Write data in JSON format
 	 * @param gr1
 	 * @param nomFile
 	 */
@@ -921,7 +785,7 @@ public class MVMWizardActions extends JDialog {
 	}
 
 	/**
-	 * read data from JSON format
+	 * Read data from JSON format
 	 * @param nomFile
 	 * @return
 	 */
@@ -944,26 +808,4 @@ public class MVMWizardActions extends JDialog {
 		mapAsString.delete(mapAsString.length()-2, mapAsString.length()).append("}");
 		return mapAsString.toString();
 	}
-
-	//	public void selectObject(String objName) {
-	//		JOptionPane.showMessageDialog(null,
-	//				"Actualizo1 atributos de objeto " + objName,
-	//				"Actualizo2 atributos de objeto",
-	//				JOptionPane.INFORMATION_MESSAGE);
-	//	}
-	//	public void selectAtttr(String attrName) {
-	//		JOptionPane.showMessageDialog(null,
-	//				"Actualizo1 valores de attr " + attrName,
-	//				"Actualizo2 valores de attr",
-	//				JOptionPane.INFORMATION_MESSAGE);
-	//	}
 }
-//class Draw extends JPanel {
-//	@Override
-//	public void paintComponent(Graphics g)
-//	{
-//		g.setColor( Color.black );
-//		g.drawRect( 10, 10, 365, 160 );
-//
-//	}
-//}

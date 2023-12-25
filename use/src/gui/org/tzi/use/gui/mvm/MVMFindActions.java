@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -39,6 +40,7 @@ public class MVMFindActions extends JDialog {
 
 	private JLabel lbLastFile = new JLabel("File to load");
 	private JTextField txLastFile;
+	private JCheckBox chkFilterModel = new JCheckBox("Filter model");
 
 	private JButton btnLoad;
 	private JButton btnCancel;
@@ -49,17 +51,17 @@ public class MVMFindActions extends JDialog {
 
 	private DefaultTableModel modelTabActions;
 
-	//	private List<MVMAction> lActions = new ArrayList<MVMAction>();
 	List<Map.Entry<String, MVMGroupActions>> lActions;
 	Map<String, MVMGroupActions> mActions = new HashMap<>();
 
 	private String groupActionsFolder = "groupActions";
 	private String directoryName="";
-	//	private String strExtension="mva";
 	private String nomFileRes="";
+	private boolean filterMode=true;
+	private String modelRef="";
 
 
-	public MVMFindActions(JFrame fParent, String strLastFile ) {
+	public MVMFindActions(JFrame fParent, String strLastFile, String pModelRef ) {
 		super(fParent, "Find Actions",ModalityType.APPLICATION_MODAL);
 		frame = new JFrame("Find Actions");
 		frame.setAlwaysOnTop(true);
@@ -69,36 +71,45 @@ public class MVMFindActions extends JDialog {
 
 		Path path = Paths.get("");
 		directoryName = path.toAbsolutePath().toString()+"/"+groupActionsFolder;
+		modelRef=pModelRef;
 
 		panel = new JPanel();
 		frame.add(panel);
 
 		panel.setLayout(null);
 
-		//		panel.add(lbLastFile);
-		//		panel.add(txLastFile);
-
 		Insets insets = panel.getInsets();
 
 		int col1 = 15 + insets.left;
 		int lbHeight=20;
-		//		int txHeight=20;
-
 
 		lbLastFile.setBounds(col1, 332 + insets.top,150, lbHeight);
+
 
 		txLastFile = new JTextField();
 		if (strLastFile!="") {
 			txLastFile.setText(strLastFile+".mva");
-			//			txLastFile.setText("1234567890123456789012345678901234567890");
-
 		}
 		txLastFile.setBounds(col1+60, 332 + insets.top,150, lbHeight);
 		txLastFile.setEditable(false);
-		//		txLastFile.setText("1234567890");
+
+		chkFilterModel.setBounds(col1+400, 332 + insets.top,150, lbHeight);
+		chkFilterModel.setText("Filter model '"+ modelRef+"'");
+		chkFilterModel.setSelected(true);
+
+		chkFilterModel.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				filterMode=chkFilterModel.isSelected();
+				cargaDatos();
+				loadListActions();
+			}
+		});
+
 
 		panel.add(lbLastFile);
 		panel.add(txLastFile);
+		panel.add(chkFilterModel);
 
 		modelTabActions = new DefaultTableModel();
 		tabActions = new JTable(modelTabActions);
@@ -114,25 +125,7 @@ public class MVMFindActions extends JDialog {
 		header = tabActions.getTableHeader();
 		header.setBackground(Color.lightGray);
 		header.setVisible(true);
-
-		DefaultTableCellRenderer modelocentrar = new DefaultTableCellRenderer();
-		modelocentrar.setHorizontalAlignment(SwingConstants.CENTER);
-
-		tabActions.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		tabActions.getColumnModel().getColumn(0).setPreferredWidth(100);//File
-		tabActions.getColumnModel().getColumn(1).setPreferredWidth(150);//Desc
-		tabActions.getColumnModel().getColumn(2).setPreferredWidth(120);//creation date
-		tabActions.getColumnModel().getColumn(3).setPreferredWidth(120);// Modification date
-		tabActions.getColumnModel().getColumn(4).setPreferredWidth(120);// Model
-		tabActions.getColumnModel().getColumn(5).setPreferredWidth(150);// FIl2 USE
-		tabActions.getColumnModel().getColumn(6).setPreferredWidth(60);// Num Actions
-		tabActions.getColumnModel().getColumn(6).setCellRenderer(modelocentrar);
-
-		tabActions.getColumnModel().getColumn(7).setPreferredWidth(60);// Num objs
-		tabActions.getColumnModel().getColumn(7).setCellRenderer(modelocentrar);
-
-		tabActions.getColumnModel().getColumn(8).setPreferredWidth(60);// Num links
-		tabActions.getColumnModel().getColumn(8).setCellRenderer(modelocentrar);
+		columnAdjustment();
 
 		tabActions.setToolTipText("Double-clic to select");
 
@@ -184,21 +177,33 @@ public class MVMFindActions extends JDialog {
 		panel.add(btnCancel);
 		getContentPane().add(panel);
 
-		tabActions.setRowSelectionInterval(0, 0);// Provisionalmente seleccionamos primera fila
+		tabActions.setRowSelectionInterval(0, 0);// Select first row
 		if (tabActions.getModel().getRowCount()>0) {
 			String nomfile = (String) tabActions.getValueAt(0, 0);
 			txLastFile.setText(nomfile);
 		}
-
-
 	}
+
+	/**
+	 * Initialize variable nomFileRes to return to WizardActions
+	 * @param nomFile
+	 */
 	private void prepareFileRes(String nomFile) {
 		nomFileRes=nomFile;
 		return ;
 	}
+
+	/**
+	 * Return variable nomFileRes to WizardActions
+	 * @return
+	 */
 	public String getNomFile() {
 		return nomFileRes;
 	}
+
+	/**
+	 * Load actions list
+	 */
 	private void loadListActions() {
 		SimpleDateFormat date = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		modelTabActions = new DefaultTableModel();
@@ -212,10 +217,9 @@ public class MVMFindActions extends JDialog {
 		Object[][] data = new Object[nActions][9];
 		int nAction=0;
 		for (Map.Entry<String, MVMGroupActions> entry : lActions) {
+
 			MVMGroupActions group = (MVMGroupActions) entry.getValue();
 
-
-			String sFileName = group.getnameGroup();
 			Date dCreationDate = group.getCreationDate();
 			String strCreationDate = date.format(dCreationDate);
 			Date dModificationDate = group.getLastModifiedDate();
@@ -248,25 +252,45 @@ public class MVMFindActions extends JDialog {
 			data[nAction][6]=String.valueOf(nGroupActions);
 			data[nAction][7]=String.valueOf(nGroupObjs);
 			data[nAction][8]=String.valueOf(nGroupLinks);
-			//			data[nAction][5]=group.getlActions(getl)
-			//			data[nAction][5]=group.getDescription();
 			nAction++;  
 		}				
 
 		modelTabActions = new DefaultTableModel(data,columns);
 		tabActions.setModel(modelTabActions);
-		tabActions.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		tabActions.getColumnModel().getColumn(0).setPreferredWidth(20);
-		tabActions.getColumnModel().getColumn(1).setPreferredWidth(100);
-		tabActions.getColumnModel().getColumn(2).setPreferredWidth(100);
-		tabActions.getColumnModel().getColumn(3).setPreferredWidth(100);
-		tabActions.getColumnModel().getColumn(4).setPreferredWidth(100);
-		tabActions.getColumnModel().getColumn(5).setPreferredWidth(100);
-		tabActions.getColumnModel().getColumn(6).setPreferredWidth(100);
-		tabActions.getColumnModel().getColumn(7).setPreferredWidth(100);
-		tabActions.repaint();
+
+		columnAdjustment();
+
 		return;
 	}
+
+	/**
+	 * Adjust size columns
+	 */
+	private void columnAdjustment() {
+		DefaultTableCellRenderer modelocentrar = new DefaultTableCellRenderer();
+		modelocentrar.setHorizontalAlignment(SwingConstants.CENTER);
+
+		tabActions.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		tabActions.getColumnModel().getColumn(0).setPreferredWidth(100);//File
+		tabActions.getColumnModel().getColumn(1).setPreferredWidth(150);//Desc
+		tabActions.getColumnModel().getColumn(2).setPreferredWidth(120);//creation date
+		tabActions.getColumnModel().getColumn(3).setPreferredWidth(120);// Modification date
+		tabActions.getColumnModel().getColumn(4).setPreferredWidth(120);// Model
+		tabActions.getColumnModel().getColumn(5).setPreferredWidth(150);// FIl2 USE
+		tabActions.getColumnModel().getColumn(6).setPreferredWidth(60);// Num Actions
+		tabActions.getColumnModel().getColumn(6).setCellRenderer(modelocentrar);
+
+		tabActions.getColumnModel().getColumn(7).setPreferredWidth(60);// Num objs
+		tabActions.getColumnModel().getColumn(7).setCellRenderer(modelocentrar);
+
+		tabActions.getColumnModel().getColumn(8).setPreferredWidth(60);// Num links
+		tabActions.getColumnModel().getColumn(8).setCellRenderer(modelocentrar);
+		tabActions.repaint();
+	}
+
+	/**
+	 * Load data into lActions
+	 */
 	private void cargaDatos() {
 
 		mActions = new HashMap<>();
@@ -278,20 +302,28 @@ public class MVMFindActions extends JDialog {
 			String nomFile = listado[i];
 			String nomFileGroup = directoryName+"/"+nomFile;
 			MVMGroupActions group = readMVMGroup(nomFileGroup);
-			String descripcion=group.getDescription();
-			mActions.put(nomFile, group);
-			// Obtener la descripcion
-
+			String model = group.getModelName();
+			boolean guardar=true;
+			if (filterMode && !model.equals(modelRef)) {
+				guardar=false;
+			}
+			if (guardar) {
+				mActions.put(nomFile, group);
+			}
 		}
 
 		lActions = new ArrayList<>(mActions.entrySet());
 
 		// Ordenar la lista de entradas por clave
 		Collections.sort(lActions, Map.Entry.comparingByKey());
-
 	}
-	private MVMGroupActions readMVMGroup(String nomFile) {
 
+	/**
+	 * Read group of actions from file
+	 * @param nomFile
+	 * @return
+	 */
+	private MVMGroupActions readMVMGroup(String nomFile) {
 
 		MVMGroupActions group = new MVMGroupActions();
 		ObjectMapper objectMapper = new ObjectMapper();
