@@ -31,6 +31,11 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import org.tzi.use.main.Session;
+import org.tzi.use.uml.mm.MAssociation;
+import org.tzi.use.uml.mm.MClass;
+import org.tzi.use.uml.sys.MLink;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class MVMWizardActions extends JDialog {
@@ -93,21 +98,23 @@ public class MVMWizardActions extends JDialog {
 	private JButton btnOpen;
 	private JButton btnSave;
 	private JButton btnLoad;
-	private JButton btnExis;
+	private JButton btnExit;
 
 	private String strLastFile="";
 	private List<MVMAction> lActions = new ArrayList<MVMAction>();
 	private List<MVMObject> lObjsPral = new ArrayList<MVMObject>();
 	private List<MVMLink> lLinksPral = new ArrayList<MVMLink>();
 	private MVMGroupActions grPral = new MVMGroupActions();
+	private MVMGroupActions grPralAnt = new MVMGroupActions();
 	private List<MVMAction> lActionsRes=null;
+	private Session fSession;
 
 	private String groupActionsFolder = "groupActions";
 	String directoryName="";
 	String strExtension="mva";
 
 	public MVMWizardActions(JFrame fParent, List<MVMAction> pLActions, List<MVMObject> pLObjs, List<MVMLink> pLLinks,
-			String pModel,String pSourceUSE, String pLastFile ) {
+			String pModel,String pSourceUSE, String pLastFile , Session pSession) {
 		super(fParent, "Prototipo MVM Wizard Actions",ModalityType.APPLICATION_MODAL);
 		frame = new JFrame("Prototipo MVM Wizard Actions");
 		frame.setAlwaysOnTop(true);
@@ -122,6 +129,7 @@ public class MVMWizardActions extends JDialog {
 		sModel = pModel;
 		sSourceUSE = pSourceUSE;
 		strLastFile = pLastFile;
+		fSession=pSession;
 
 		cargaDatos();
 
@@ -183,18 +191,18 @@ public class MVMWizardActions extends JDialog {
 		int txHeight=20;
 
 		lbFileName.setBounds(col1, 15 + insets.top,150, lbHeight);
-		lbExtension.setBounds(col1+155, 40 + insets.top,40, lbHeight);
-		lbCreationDate.setBounds(col1+205, 15 + insets.top,150, lbHeight);
-		lbModificationDate.setBounds(col1+335, 15 + insets.top,150 + 50, lbHeight);
-		lbModel.setBounds(col1+463, 15 + insets.top,100, lbHeight);
-		lbSourceUSE.setBounds(col1+568, 15 + insets.top,200, lbHeight);
+		lbExtension.setBounds(col1+125, 40 + insets.top,40, lbHeight);
+		lbCreationDate.setBounds(col1+185, 15 + insets.top,150, lbHeight);
+		lbModificationDate.setBounds(col1+315, 15 + insets.top,150 + 50, lbHeight);
+		lbModel.setBounds(col1+445, 15 + insets.top,100, lbHeight);
+		lbSourceUSE.setBounds(col1+558, 15 + insets.top,200, lbHeight);
 		lbDescription.setBounds(col1, 75 + insets.top,200, lbHeight);
 
-		txFileName.setBounds(col1, 40 + insets.top,150, txHeight );
-		txCreationDate.setBounds(col1+205, 40 + insets.top,120, txHeight );
-		txModificationDate.setBounds(col1+335, 40 + insets.top,120, txHeight );
-		txModel.setBounds(col1+463, 40 + insets.top,100, txHeight );
-		txSourceUSE.setBounds(col1+568, 40 + insets.top,400, txHeight );
+		txFileName.setBounds(col1, 40 + insets.top,120, txHeight );
+		txCreationDate.setBounds(col1+185, 40 + insets.top,120, txHeight );
+		txModificationDate.setBounds(col1+315, 40 + insets.top,120, txHeight );
+		txModel.setBounds(col1+445, 40 + insets.top,102, txHeight );
+		txSourceUSE.setBounds(col1+558, 40 + insets.top,400, txHeight );
 		txDescription.setBounds(col1+80, 75 + insets.top,489, txHeight );
 
 		int filGroupTab1=140;
@@ -342,17 +350,24 @@ public class MVMWizardActions extends JDialog {
 				String modelRef=pModel;
 				MVMFindActions w = new MVMFindActions(frame, strLastFile, modelRef);
 
-				w.setSize(988, 410);
+				w.setSize(1068, 410);
 				w.setLocationRelativeTo(null);
 				w.setVisible(true);
 				String nomFileRes=w.getNomFile();
 				if (nomFileRes!="") {
 					String nomFile = directoryName+"/"+nomFileRes;
 					grPral = readMVMGroup(nomFile);
-					showData();
-					int indicePunto = nomFileRes.indexOf('.');
-					String parteIzquierda = indicePunto != -1 ? nomFileRes.substring(0, indicePunto) : nomFileRes;
-					strLastFile=parteIzquierda;
+					// Aqui
+					copyGrPralToGrPralAnt();
+
+					if (!debugsClassesAndAssociations(grPral)){
+						copyGrPralAntToGrPral();
+					}else {
+						showData();
+						int indicePunto = nomFileRes.indexOf('.');
+						String parteIzquierda = indicePunto != -1 ? nomFileRes.substring(0, indicePunto) : nomFileRes;
+						strLastFile=parteIzquierda;
+					}
 				}
 			}
 		});
@@ -424,8 +439,8 @@ public class MVMWizardActions extends JDialog {
 		panel.add(btnLoad);
 
 
-		btnExis = new JButton("Exit");
-		btnExis.addActionListener(new ActionListener() {
+		btnExit = new JButton("Exit");
+		btnExit.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -434,8 +449,8 @@ public class MVMWizardActions extends JDialog {
 				//				System.exit(0);
 			}
 		});
-		btnExis.setBounds(866, 470, 110, 25);
-		panel.add(btnExis);
+		btnExit.setBounds(866, 470, 110, 25);
+		panel.add(btnExit);
 
 		getContentPane().add(panel);
 		showData();
@@ -492,7 +507,8 @@ public class MVMWizardActions extends JDialog {
 	}
 
 	private void openFile() {
-
+		copyGrPralToGrPralAnt();
+		String strLastFileAnt = strLastFile;
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogTitle("File to open"); 
 		fileChooser.setCurrentDirectory(new File(directoryName));
@@ -501,13 +517,88 @@ public class MVMWizardActions extends JDialog {
 			File selectedFile = fileChooser.getSelectedFile();
 			String nomFileSelected = selectedFile.getAbsolutePath();
 			grPral = readMVMGroup(nomFileSelected);
+			String modelNew=grPral.getModelName();
 			String nomFile = selectedFile.getName();
 			int indicePunto = nomFile.indexOf('.');
-			String parteIzquierda = indicePunto != -1 ? nomFile.substring(0, indicePunto) : nomFile;
+			String parteIzquierda = indicePunto != -1 ? nomFile.substring(0, indicePunto) : nomFile;			
+			if (!modelNew.equals(strLastFileAnt)) {
+				int forceUse = JOptionPane.showConfirmDialog(frame,
+						"File ["+parteIzquierda+"] contains model ["+modelNew+"] diferent a model ["+sModel+"], Continuous?",
+						"The models do not match",
+						JOptionPane.YES_NO_OPTION);
+
+				if (forceUse != JOptionPane.YES_OPTION) {
+					copyGrPralAntToGrPral();
+					return;
+				}
+
+			}
+			//Aqui1
+			// Depuracion de existencia de clases en el modelo
+			if (!debugsClassesAndAssociations(grPral)){
+				copyGrPralAntToGrPral();
+				return;			
+			}
+
 			strLastFile=parteIzquierda;
 			txFileName.setText(parteIzquierda);
 		}
 	}
+
+	private boolean debugsClassesAndAssociations(MVMGroupActions group) {
+		boolean existAll=true;
+		boolean ok=true;
+		// Ver objetos y clases de cada objeto
+		List<MVMAction> listAct=grPral.getlActions();
+		int nActions = listAct.size();
+		MVMAction oAction=listAct.get(nActions-1);	
+		List<MVMObject> lObjs=oAction.getlObjs();
+		for (MVMObject oObj: lObjs) {
+			String className = oObj.getClassName();
+			// Comprobar existencia de la clase
+
+			boolean exist=false;
+			for (MClass oClass: fSession.system().model().classes()) {
+				if (oClass.name().equals(className)) {
+					exist=true;
+					break;
+				}
+			}
+			if (!exist) {
+				existAll=false;
+				ok=false;
+				String mensaje = "No class ["+className+"] exists in group ["+group.getnameGroup()+"]. Group cannot be loaded";
+				JOptionPane.showMessageDialog(null, mensaje, "inconsistency between groups",JOptionPane.INFORMATION_MESSAGE);
+				return ok;
+			}
+		}
+
+		// Ver asociaciones
+		List<MVMLink> lLinks = oAction.getlLinks();
+		for (MVMLink oMVMLink: lLinks) {
+			String linkName = oMVMLink.getNomAssoc();
+			boolean exist=false;
+			for (MAssociation oAssoc: fSession.system().model().associations()) {
+				if (oAssoc.name().equals(linkName)) {
+					exist=true;
+					break;
+				}
+			}
+
+			if (!exist) {
+				existAll=false;
+				ok=false;
+				String mensaje = "No Association ["+linkName+"] exists in group ["+group.getnameGroup()+"]. Group cannot be loaded";
+				JOptionPane.showMessageDialog(null, mensaje, "inconsistency between associations",JOptionPane.INFORMATION_MESSAGE);
+				return ok;
+			}
+		}
+		return ok;
+	}
+
+	/**
+	 * Save file
+	 */
 	private void saveFile() {
 		String nomGrupo=txFileName.getText();
 		String nomFile = nomGrupo+"."+strExtension;
@@ -767,6 +858,30 @@ public class MVMWizardActions extends JDialog {
 		grPral.setModelName(sModel);
 		grPral.setSrcFileUSE(sSourceUSE);
 		grPral.setlActions(lActions);
+
+		copyGrPralToGrPralAnt();
+	}
+
+	private void copyGrPralToGrPralAnt() {
+		grPralAnt = new MVMGroupActions();
+		grPralAnt.setnameGroup(grPral.getnameGroup());
+		grPralAnt.setCreationDate(grPral.getCreationDate());
+		grPralAnt.setLastModifiedDate(grPral.getLastModifiedDate());
+		grPralAnt.setDescription(grPral.getDescription());
+		grPralAnt.setModelName(grPral.getModelName());
+		grPralAnt.setSrcFileUSE(grPral.getSrcFileUSE());
+		grPralAnt.setlActions(grPral.getlActions());
+	}
+
+	private void copyGrPralAntToGrPral() {
+		grPral = new MVMGroupActions();
+		grPral.setnameGroup(grPralAnt.getnameGroup());
+		grPral.setCreationDate(grPralAnt.getCreationDate());
+		grPral.setLastModifiedDate(grPralAnt.getLastModifiedDate());
+		grPral.setDescription(grPralAnt.getDescription());
+		grPral.setModelName(grPralAnt.getModelName());
+		grPral.setSrcFileUSE(grPralAnt.getSrcFileUSE());
+		grPral.setlActions(grPralAnt.getlActions());
 	}
 
 	/**

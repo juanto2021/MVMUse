@@ -39,6 +39,7 @@ import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeEvent;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
 import org.tzi.use.gui.views.PrintableView;
 import org.tzi.use.gui.views.View;
+import org.tzi.use.gui.views.WizardMVMView;
 import org.tzi.use.uml.mm.MAssociation;
 import org.tzi.use.uml.mm.MAssociationClass;
 import org.tzi.use.uml.mm.MClass;
@@ -76,6 +77,12 @@ public class NewObjectDiagramView extends JPanel
 
     protected NewObjectDiagram fObjectDiagram;
     public static int viewcount = 0;
+    
+    //--
+	private static WizardMVMView wizardMVMView;
+	private boolean existWizard=false;
+    
+    //--
     
     public NewObjectDiagramView(MainWindow mainWindow, MSystem system) {
         fMainWindow = mainWindow;
@@ -280,6 +287,17 @@ public class NewObjectDiagramView extends JPanel
         }
         try {
 			fSystem.execute(sequence.simplify());
+			//Aqui
+			// Hacer llamada a wizard si existe y refresh
+			fMainWindow.checkExistObjDiagramAndWizard();
+			
+			if (fMainWindow.existWizard) {
+				if (fMainWindow.wizardMVMView!=null) {
+					// Se han de crear los objetos nuevos que se hayan creado
+					fMainWindow.wizardMVMView.refreshComponents();
+				}
+			}
+			
 		} catch (MSystemException e) {
 			JOptionPane.showMessageDialog(
 					fMainWindow, 

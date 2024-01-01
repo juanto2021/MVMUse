@@ -202,7 +202,7 @@ public class WizardMVMView extends JPanel implements View {
 	private JButton btnDeleteLink;	
 	private JButton btnShowClassInvariants;	
 	private JButton btnShowCheckStructure;
-	private JButton btnRefreshElements;
+	private JButton btnRefreshComponents;
 
 	private JButton btnActions;
 	private JButton btnReset;
@@ -543,16 +543,16 @@ public class WizardMVMView extends JPanel implements View {
 
 		panel.add(lAssocs);
 
-		btnRefreshElements = new JButton("Refresh");
-		btnRefreshElements.setBounds(10, 310, 110, 25);
-		btnRefreshElements.setVerticalAlignment(SwingConstants.CENTER);
-		btnRefreshElements.setHorizontalAlignment(SwingConstants.CENTER);
-		btnRefreshElements.addActionListener(new ActionListener() {
+		btnRefreshComponents = new JButton("Refresh");
+		btnRefreshComponents.setBounds(10, 310, 110, 25);
+		btnRefreshComponents.setVerticalAlignment(SwingConstants.CENTER);
+		btnRefreshComponents.setHorizontalAlignment(SwingConstants.CENTER);
+		btnRefreshComponents.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				refreshComponents();
 			}
 		});
-		panel.add(btnRefreshElements);
+		panel.add(btnRefreshComponents);
 
 		btnActions = new JButton("Actions");
 		btnActions.setBounds(10, 340, 110, 25);
@@ -564,7 +564,7 @@ public class WizardMVMView extends JPanel implements View {
 				List<MVMLink> lLinks = getMVMLinks();	
 				String sModel=fSystem.model().name();
 				String sSourceUSE=fSystem.model().filename();
-				MVMWizardActions w = new MVMWizardActions(frame,lActions,lObjs, lLinks, sModel,sSourceUSE, strLastFile );
+				MVMWizardActions w = new MVMWizardActions(frame,lActions,lObjs, lLinks, sModel,sSourceUSE, strLastFile, fSession );
 
 				w.setSize(1008, 547);
 				w.setLocationRelativeTo(null);
@@ -836,8 +836,8 @@ public class WizardMVMView extends JPanel implements View {
 		add(panel);
 
 		setSize(new Dimension(400, 300));
-
-		resetObjLinks();
+//Aqui
+//		resetObjLinks();
 
 	}
 
@@ -922,8 +922,8 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	/**
-	 * Refresh elements
-	 */
+	 * Refresh components
+	 */	
 	public void refreshComponents() {
 		oClass = lClass.getSelectedValue();
 		lClass.setModel(loadListMClass());
@@ -931,6 +931,18 @@ public class WizardMVMView extends JPanel implements View {
 		nomObj = (String) lObjects.getSelectedValue();
 		lObjects.setModel(loadListObjects(oClass.name()));
 		lObjects.setSelectedValue(nomObj, true);
+		//--
+		cmbClassOri.setModel(loadComboClass());
+		cmbClassDes.setModel(loadComboClass());
+
+		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
+		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
+		
+		lAssocs.setModel(loadListAssoc());
+		lAssocs.setSelectedIndex(0);
+		
+		//--
+		
 	}
 	/**
 	 * Searches for object corresponding to the end of an association
@@ -1716,6 +1728,7 @@ public class WizardMVMView extends JPanel implements View {
 	 * @return
 	 */
 	private DefaultListModel<String> loadListObjects(String nomClass) {
+		// Guardar lista de objetos antes de la carga para compararlos despues y si falta alguno crearlo 
 		DefaultListModel<String> ldefLModel = new DefaultListModel<String>();
 		MSystemState state = fSystem.state();
 		Set<MObject> allObjects = state.allObjects();

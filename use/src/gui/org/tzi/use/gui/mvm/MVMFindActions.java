@@ -121,7 +121,7 @@ public class MVMFindActions extends JDialog {
 		int filGroupTab1=10 + insets.top;
 
 		tabActions = new JTable(modelTabActions);
-		tabActions.setBounds(col1, filGroupTab1, 940, 300);
+		tabActions.setBounds(col1, filGroupTab1, 1020, 300);
 		header = tabActions.getTableHeader();
 		header.setBackground(Color.lightGray);
 		header.setVisible(true);
@@ -148,11 +148,11 @@ public class MVMFindActions extends JDialog {
 			}
 		});
 		paneTabActions = new JScrollPane(tabActions);
-		paneTabActions.setBounds(col1, filGroupTab1,943, 310);
+		paneTabActions.setBounds(col1, filGroupTab1,1023, 310);
 		panel.add(paneTabActions);
 
 		btnLoad = new JButton("Load action");
-		btnLoad.setBounds(col1+833, 330 + insets.top, 110, 25);
+		btnLoad.setBounds(col1+913, 330 + insets.top, 110, 25);
 
 		btnLoad.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -173,7 +173,7 @@ public class MVMFindActions extends JDialog {
 				//				System.exit(0);
 			}
 		});
-		btnCancel.setBounds(col1+710, 330 + insets.top, 110, 25);
+		btnCancel.setBounds(col1+790, 330 + insets.top, 110, 25);
 		panel.add(btnCancel);
 		getContentPane().add(panel);
 
@@ -271,19 +271,19 @@ public class MVMFindActions extends JDialog {
 		modelocentrar.setHorizontalAlignment(SwingConstants.CENTER);
 
 		tabActions.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		tabActions.getColumnModel().getColumn(0).setPreferredWidth(100);//File
-		tabActions.getColumnModel().getColumn(1).setPreferredWidth(150);//Desc
-		tabActions.getColumnModel().getColumn(2).setPreferredWidth(120);//creation date
-		tabActions.getColumnModel().getColumn(3).setPreferredWidth(120);// Modification date
-		tabActions.getColumnModel().getColumn(4).setPreferredWidth(120);// Model
-		tabActions.getColumnModel().getColumn(5).setPreferredWidth(150);// FIl2 USE
-		tabActions.getColumnModel().getColumn(6).setPreferredWidth(60);// Num Actions
+		tabActions.getColumnModel().getColumn(0).setPreferredWidth(60);//File
+		tabActions.getColumnModel().getColumn(1).setPreferredWidth(140);//Desc
+		tabActions.getColumnModel().getColumn(2).setPreferredWidth(105);//creation date
+		tabActions.getColumnModel().getColumn(3).setPreferredWidth(105);// Modification date
+		tabActions.getColumnModel().getColumn(4).setPreferredWidth(80);// Model
+		tabActions.getColumnModel().getColumn(5).setPreferredWidth(380);// FIl2 USE
+		tabActions.getColumnModel().getColumn(6).setPreferredWidth(50);// Num Actions
 		tabActions.getColumnModel().getColumn(6).setCellRenderer(modelocentrar);
 
-		tabActions.getColumnModel().getColumn(7).setPreferredWidth(60);// Num objs
+		tabActions.getColumnModel().getColumn(7).setPreferredWidth(50);// Num objs
 		tabActions.getColumnModel().getColumn(7).setCellRenderer(modelocentrar);
 
-		tabActions.getColumnModel().getColumn(8).setPreferredWidth(60);// Num links
+		tabActions.getColumnModel().getColumn(8).setPreferredWidth(50);// Num links
 		tabActions.getColumnModel().getColumn(8).setCellRenderer(modelocentrar);
 		tabActions.repaint();
 	}

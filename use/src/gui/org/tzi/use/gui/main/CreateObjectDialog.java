@@ -151,6 +151,8 @@ class CreateObjectDialog extends JDialog {
         CloseOnEscapeKeyListener ekl = new CloseOnEscapeKeyListener(this);
         addKeyListener(ekl);
         fTextObjectName.addKeyListener(ekl);
+        //Aqui
+        setModal(true);
     }
 
     private void closeDialog() {
@@ -180,6 +182,7 @@ class CreateObjectDialog extends JDialog {
         }
 
         fParent.createObject(cls, name);
+        // Ver si existe ya la vista de 
     }
 }
 

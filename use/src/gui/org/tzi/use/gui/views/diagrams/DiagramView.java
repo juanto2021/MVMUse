@@ -748,20 +748,20 @@ implements Printable {
 		}
 	}
 	public void forceStartLayoutThread() {
-		//        if (fOpt.isDoAutoLayout()) {//JG
-		fOpt.fDoAutoLayout=true;
-		fLayoutThread = new LayoutThread();
-		fLayoutThread.doLayout = true;
-		fLayoutThread.start();
-		//        }
+//		if (fOpt.isDoAutoLayout()) {//JG
+			fOpt.fDoAutoLayout=true;
+			fLayoutThread = new LayoutThread();
+			fLayoutThread.doLayout = true;
+			fLayoutThread.start();
+//		}
 	}
 	public void forceStopLayoutThread() {
-		//        if (fLayoutThread != null) {//JG
-		fLayoutThread.doLayout = false;
-		fLayoutThread.interrupt();
-		fLayoutThread = null;
-		fOpt.fDoAutoLayout=false;
-		//        }
+		if (fLayoutThread != null) {//JG
+			fLayoutThread.doLayout = false;
+			fLayoutThread.interrupt();
+			fLayoutThread = null;
+			fOpt.fDoAutoLayout=false;
+		}
 	}
 
 	public enum LayoutType {
