@@ -240,6 +240,8 @@ public class NewObjectDiagramView extends JPanel
     	try {
 			fSystem.execute(
 					new MLinkDeletionStatement(link));
+			refreshComponentsWizard();
+
 		} catch (MSystemException e) {
 			JOptionPane.showMessageDialog(
 					fMainWindow, 
@@ -260,6 +262,8 @@ public class NewObjectDiagramView extends JPanel
     	} else {
 	    	try {
 				fSystem.execute(new MLinkInsertionStatement(association, objects, Collections.<List<Value>>emptyList()));
+				refreshComponentsWizard();
+
 			} catch (MSystemException e) {
 				JOptionPane.showMessageDialog(
 						fMainWindow, 
@@ -287,16 +291,7 @@ public class NewObjectDiagramView extends JPanel
         }
         try {
 			fSystem.execute(sequence.simplify());
-			//Aqui
-			// Hacer llamada a wizard si existe y refresh
-			fMainWindow.checkExistObjDiagramAndWizard();
-			
-			if (fMainWindow.existWizard) {
-				if (fMainWindow.wizardMVMView!=null) {
-					// Se han de crear los objetos nuevos que se hayan creado
-					fMainWindow.wizardMVMView.refreshComponents();
-				}
-			}
+			refreshComponentsWizard();
 			
 		} catch (MSystemException e) {
 			JOptionPane.showMessageDialog(
@@ -307,6 +302,18 @@ public class NewObjectDiagramView extends JPanel
 		}
     }
 
+    private void refreshComponentsWizard() {
+		//Aqui
+		// Hacer llamada a wizard si existe y refresh
+		fMainWindow.checkExistObjDiagramAndWizard();
+		
+		if (fMainWindow.existWizard) {
+			if (fMainWindow.wizardMVMView!=null) {
+				// Se han de crear los objetos nuevos que se hayan creado
+				fMainWindow.wizardMVMView.refreshComponents();
+			}
+		}
+    }
     public MSystem system() {
         return fSystem;
     }

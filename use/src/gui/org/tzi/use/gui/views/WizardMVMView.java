@@ -339,11 +339,11 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lbClass);
 
 		lbObjects = new JLabel("Objects");
-		lbObjects.setBounds(110, 15, 60, 25);
+		lbObjects.setBounds(107, 15, 60, 25);
 		panel.add(lbObjects);	   
 
 		lbAttrs = new JLabel("Attributes");
-		lbAttrs.setBounds(245, 15, 60, 25);
+		lbAttrs.setBounds(205, 15, 60, 25);
 		panel.add(lbAttrs);	
 
 
@@ -382,7 +382,7 @@ public class WizardMVMView extends JPanel implements View {
 		modelObjects=loadListObjects(nomClass);
 
 		lObjects = new JList<String>( modelObjects );
-		lObjects.setBounds(110, 40, 90, 110);
+		lObjects.setBounds(107, 40, 90, 110);
 		lObjects.setBorder(BorderFactory.createLineBorder(Color.black));
 		lObjects.setLayoutOrientation(JList.VERTICAL);
 		lObjects.setSelectedIndex(0);
@@ -400,10 +400,10 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		scrollPaneObj = new JScrollPane();
 		scrollPaneObj.setViewportView(lObjects);
-		scrollPaneObj.setBounds(110, 40, 90, 110);
+		scrollPaneObj.setBounds(107, 40, 90, 110);
 		// masmas
 		btnNewObjectAuto = new JButton("+");
-		btnNewObjectAuto.setBounds(110, 160, 90, 25);
+		btnNewObjectAuto.setBounds(107, 160, 90, 25);
 
 		btnNewObjectAuto.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -418,10 +418,11 @@ public class WizardMVMView extends JPanel implements View {
 
 		fTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		fTablePane = new JScrollPane(fTable);
-		fTablePane.setBounds(210, 40, 180, 100);
+//		fTablePane.setBounds(210, 40, 180, 100);
+		fTablePane.setBounds(205, 40, 185, 80);
 
 		chkAutoLayout=new JCheckBox("Auto Layout");
-		chkAutoLayout.setBounds(210, 160, 160, 25);
+		chkAutoLayout.setBounds(205, 160, 160, 25);
 		chkAutoLayout.setSelected(true);
 		chkAutoLayout.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
@@ -443,7 +444,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lbObj);	
 
 		txNewObject = new JTextField(20);
-		txNewObject.setBounds(400, 40, 100, 25);
+		txNewObject.setBounds(400, 40, 95, 25);
 		txNewObject.setEnabled(false);
 		txNewObject.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent e) { //watch for key strokes
@@ -461,7 +462,7 @@ public class WizardMVMView extends JPanel implements View {
 		txNewObject.setText(nomObj);
 
 		btnCreateObject = new JButton("New Object");
-		btnCreateObject.setBounds(400, 70, 100, 25);
+		btnCreateObject.setBounds(400, 70, 95, 25);
 		btnCreateObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				initNewObject();
@@ -469,8 +470,9 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnCreateObject);
 
-		btnSaveObject = new JButton("Save Object");
-		btnSaveObject.setBounds(400, 100, 100, 25);
+		btnSaveObject = new JButton("Save Obj");
+//		btnSaveObject.setBounds(400, 100, 100, 25);
+		btnSaveObject.setBounds(205, 122, 90, 25);
 
 		btnSaveObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -491,8 +493,9 @@ public class WizardMVMView extends JPanel implements View {
 
 		panel.add(btnSaveObject);
 
-		btnCancelObject = new JButton("Cancel Object");
-		btnCancelObject.setBounds(400, 130, 100, 25);
+		btnCancelObject = new JButton("Cancel Obj");
+//		btnCancelObject.setBounds(400, 130, 100, 25);
+		btnCancelObject.setBounds(301, 122, 90, 25);
 
 		btnCancelObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -502,7 +505,8 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnCancelObject);
 
 		btnDeleteObject = new JButton("Delete Object");
-		btnDeleteObject.setBounds(400, 160, 100, 25);
+//		btnDeleteObject.setBounds(400, 160, 100, 25);
+		btnDeleteObject.setBounds(400, 122, 95, 25);
 		btnDeleteObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -523,16 +527,16 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lbAssoc);	
 
 		lbFrom = new JLabel("From");
-		lbFrom.setBounds(220, 190, 160, 25);
+		lbFrom.setBounds(205, 190, 160, 25);
 		panel.add(lbFrom);
 
 		lbTo = new JLabel("To");
-		lbTo.setBounds(350, 190, 160, 25);
+		lbTo.setBounds(335, 190, 160, 25);
 		panel.add(lbTo);
 
 		lAssocs = new JList<MAssociation>(loadListAssoc());
 
-		lAssocs.setBounds(10, 215, 110, 85);
+		lAssocs.setBounds(10, 215, 90, 85);
 		lAssocs.setBorder(BorderFactory.createLineBorder(Color.black));
 		lAssocs.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
@@ -544,7 +548,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lAssocs);
 
 		btnRefreshComponents = new JButton("Refresh");
-		btnRefreshComponents.setBounds(10, 310, 110, 25);
+		btnRefreshComponents.setBounds(10, 310, 90, 25);
 		btnRefreshComponents.setVerticalAlignment(SwingConstants.CENTER);
 		btnRefreshComponents.setHorizontalAlignment(SwingConstants.CENTER);
 		btnRefreshComponents.addActionListener(new ActionListener() {
@@ -555,7 +559,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnRefreshComponents);
 
 		btnActions = new JButton("Actions");
-		btnActions.setBounds(10, 340, 110, 25);
+		btnActions.setBounds(10, 340, 90, 25);
 		btnActions.setVerticalAlignment(SwingConstants.CENTER);
 		btnActions.setHorizontalAlignment(SwingConstants.CENTER);
 		btnActions.addActionListener(new ActionListener() {
@@ -582,7 +586,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnActions);
 
 		btnReset = new JButton("Reset");
-		btnReset.setBounds(10, 400, 110, 25);
+		btnReset.setBounds(10, 400, 90, 25);
 		btnReset.setVerticalAlignment(SwingConstants.CENTER);
 		btnReset.setHorizontalAlignment(SwingConstants.CENTER);
 		btnReset.addActionListener(new ActionListener() {
@@ -593,25 +597,25 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnReset);
 
 		lbAclass = new JLabel("Class");
-		lbAclass.setBounds(150, 215, 100, 25);
+		lbAclass.setBounds(135, 215, 100, 25);
 		panel.add(lbAclass);
 
 		lbAobject = new JLabel("Object");
-		lbAobject.setBounds(150, 245, 100, 25);
+		lbAobject.setBounds(135, 245, 100, 25);
 		panel.add(lbAobject);	
 
 		lbAmultiplicity = new JLabel("Multiplicity");
-		lbAmultiplicity.setBounds(150, 275, 100, 25);
+		lbAmultiplicity.setBounds(135, 275, 100, 25);
 		panel.add(lbAmultiplicity);
 
 		lbArole = new JLabel("Role");
-		lbArole.setBounds(150, 305, 100, 25);
+		lbArole.setBounds(135, 305, 100, 25);
 		panel.add(lbArole);
 
 		cmbClassOri = new JComboBox<MClass>();
 
 		cmbClassOri.setModel(loadComboClass());
-		cmbClassOri.setBounds(220, 215, 120, 25);
+		cmbClassOri.setBounds(205, 215, 120, 25);
 		cmbClassOri.addActionListener (new ActionListener () {
 			public void actionPerformed(ActionEvent e) {
 				cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
@@ -624,7 +628,7 @@ public class WizardMVMView extends JPanel implements View {
 		Border blackline = BorderFactory.createLineBorder(Color.black);
 
 		lbFromClass = new JLabel("");
-		lbFromClass.setBounds(220, 215, 120, 25);
+		lbFromClass.setBounds(205, 215, 120, 25);
 		lbFromClass.setBorder(blackline);
 		lbFromClass.setBackground(colorSoftGray);
 		lbFromClass.setHorizontalAlignment(SwingConstants.CENTER);
@@ -634,7 +638,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		cmbClassDes = new JComboBox<MClass>();
 		cmbClassDes.setModel(loadComboClass());
-		cmbClassDes.setBounds(350, 215, 120, 25);
+		cmbClassDes.setBounds(335, 215, 120, 25);
 		cmbClassDes.addActionListener (new ActionListener () {
 			public void actionPerformed(ActionEvent e) {
 				cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
@@ -645,7 +649,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(cmbClassDes);
 
 		lbToClass = new JLabel("");
-		lbToClass.setBounds(350, 215, 120, 25);
+		lbToClass.setBounds(335, 215, 120, 25);
 		lbToClass.setBorder(blackline);
 		lbToClass.setBackground(colorSoftGray);
 		lbToClass.setHorizontalAlignment(SwingConstants.CENTER);
@@ -654,7 +658,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		cmbObjectOri = new JComboBox<MObject>();
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
-		cmbObjectOri.setBounds(220, 245, 120, 25);
+		cmbObjectOri.setBounds(205, 245, 120, 25);
 
 		cmbObjectOri.addActionListener(new ActionListener() {
 			@Override
@@ -675,7 +679,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		cmbObjectDes = new JComboBox<MObject>();
 		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
-		cmbObjectDes.setBounds(350, 245, 120, 25);
+		cmbObjectDes.setBounds(335, 245, 120, 25);
 
 		cmbObjectDes.addActionListener(new ActionListener() {
 			@Override
@@ -695,14 +699,14 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(cmbObjectDes);
 
 		cmbMultiOri = new JComboBox<String>(aMulti);
-		cmbMultiOri.setBounds(220, 275, 120, 25);
+		cmbMultiOri.setBounds(205, 275, 120, 25);
 		cmbMultiOri.setEditable(false);
 		cmbMultiOri.setVisible(false);
 
 		panel.add(cmbMultiOri);		
 
 		txMultiOri = new JTextField(20);
-		txMultiOri.setBounds(220, 275, 120, 25);
+		txMultiOri.setBounds(205, 275, 120, 25);
 		txMultiOri.setBorder(blackline);
 		txMultiOri.setEditable(false);
 		txMultiOri.setBackground(colorSoftGray);
@@ -710,13 +714,13 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(txMultiOri);	
 
 		cmbMultiDes = new JComboBox<String>(aMulti);
-		cmbMultiDes.setBounds(350, 275, 120, 25);
+		cmbMultiDes.setBounds(335, 275, 120, 25);
 		cmbMultiDes.setEditable(false);
 		cmbMultiDes.setVisible(false);
 		panel.add(cmbMultiDes);		
 
 		txMultiDes = new JTextField(20);
-		txMultiDes.setBounds(350, 275, 120, 25);
+		txMultiDes.setBounds(335, 275, 120, 25);
 		txMultiDes.setBorder(blackline);
 		txMultiDes.setEditable(false);
 		txMultiDes.setBackground(colorSoftGray);
@@ -724,7 +728,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(txMultiDes);	
 
 		txOriAssocRole = new JTextField(20);
-		txOriAssocRole.setBounds(220, 305, 120, 25);
+		txOriAssocRole.setBounds(205, 305, 120, 25);
 		txOriAssocRole.setBorder(blackline);
 		txOriAssocRole.setEditable(false);
 		txOriAssocRole.setBackground(colorSoftGray);
@@ -732,7 +736,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(txOriAssocRole);	
 
 		txDesAssocRole = new JTextField(20);
-		txDesAssocRole.setBounds(350, 305, 120, 25);
+		txDesAssocRole.setBounds(335, 305, 120, 25);
 		txDesAssocRole.setBorder(blackline);
 		txDesAssocRole.setEditable(false);
 		txDesAssocRole.setBackground(colorSoftGray);
@@ -740,7 +744,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(txDesAssocRole);	
 
 		btnInsertLinkAssoc = new JButton("Insert link");
-		btnInsertLinkAssoc.setBounds(220, 340, 110, 25);
+		btnInsertLinkAssoc.setBounds(205, 340, 120, 25);
 		btnInsertLinkAssoc.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MAssociation oAssoc = lAssocs.getSelectedValue();
@@ -750,7 +754,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnInsertLinkAssoc);
 
 		btnDeleteLink = new JButton("Delete link");
-		btnDeleteLink.setBounds(350, 340, 120, 25);
+		btnDeleteLink.setBounds(335, 340, 120, 25);
 		btnDeleteLink.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MAssociation oAssoc = lAssocs.getSelectedValue();
@@ -765,11 +769,11 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnDeleteLink);
 
 		lbClassInvariants = new JLabel("State invariants");
-		lbClassInvariants.setBounds(220, 375, 120, 25);
+		lbClassInvariants.setBounds(205, 375, 120, 25);
 		panel.add(lbClassInvariants);
 
 		lbResClassInvariants = new JLabel("");
-		lbResClassInvariants.setBounds(350, 375, 120, 25);
+		lbResClassInvariants.setBounds(335, 375, 120, 25);
 		lbResClassInvariants.setBorder(blackline);
 		lbResClassInvariants.setVerticalAlignment(SwingConstants.CENTER);
 		lbResClassInvariants.setHorizontalAlignment(SwingConstants.CENTER);
@@ -778,7 +782,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lbResClassInvariants);
 
 		btnShowClassInvariants = new JButton("OK");
-		btnShowClassInvariants.setBounds(350, 375, 120, 25);
+		btnShowClassInvariants.setBounds(335, 375, 120, 25);
 		btnShowClassInvariants.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowClassInvariants.setHorizontalAlignment(SwingConstants.CENTER);
 		btnShowClassInvariants.setFont(new Font("Serif", Font.BOLD, 18));
@@ -790,11 +794,11 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnShowClassInvariants);
 
 		lbCheckStructure = new JLabel("Check Structure");
-		lbCheckStructure.setBounds(220, 410, 120, 25);
+		lbCheckStructure.setBounds(205, 410, 120, 25);
 		panel.add(lbCheckStructure);
 
 		btnShowCheckStructure = new JButton("OK");
-		btnShowCheckStructure.setBounds(350, 410, 120, 25);
+		btnShowCheckStructure.setBounds(335, 410, 120, 25);
 		btnShowCheckStructure.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowCheckStructure.setHorizontalAlignment(SwingConstants.CENTER);
 		btnShowCheckStructure.setFont(new Font("Serif", Font.BOLD, 18));
@@ -836,8 +840,6 @@ public class WizardMVMView extends JPanel implements View {
 		add(panel);
 
 		setSize(new Dimension(400, 300));
-//Aqui
-//		resetObjLinks();
 
 	}
 
@@ -925,23 +927,50 @@ public class WizardMVMView extends JPanel implements View {
 	 * Refresh components
 	 */	
 	public void refreshComponents() {
+//		txNewObject.setText("");
 		oClass = lClass.getSelectedValue();
 		lClass.setModel(loadListMClass());
 		lClass.setSelectedValue(oClass, true);
 		nomObj = (String) lObjects.getSelectedValue();
 		lObjects.setModel(loadListObjects(oClass.name()));
 		lObjects.setSelectedValue(nomObj, true);
-		//--
+		//Aqui poner nom object en ntex 
+		txNewObject.setText(nomObj);
+		txNewObject.setEnabled(false);
 		cmbClassOri.setModel(loadComboClass());
 		cmbClassDes.setModel(loadComboClass());
+	
+		lAssocs.setModel(loadListAssoc());
+		lAssocs.setSelectedIndex(0);
 
+		MAssociation oAssoc = lAssocs.getSelectedValue();
+		setComposAssoc(oAssoc);
+		
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 		
-		lAssocs.setModel(loadListAssoc());
-		lAssocs.setSelectedIndex(0);
+		setResClassInvariants();
+		setResCheckStructure();
 		
-		//--
+		// Reconstruir la lista de acciones
+		// se revisan los objetos y links actuales
+		// si el objeto ya existe no se hace nada
+		// Si el objeto no existe se añade a la lista de acciones al final
+		// Si el link ya existe no se hace nada
+		// Si el link no existe se añade a la lista de acciones al final
+		//...
+		// OJO, una vez revisados los objetos actuales, es posible que se haya borrado algun objeto o link y por tanto,
+		// se tenga que reflejar en la lista de acciones.
+		//
+		// Para ello, lo ideal es crear una lista de aciones existentes antes de su actualizacion
+		// Elemento Lista Anterior - Elemento en lista actual Accion
+		//        CL1-Obj1         -        CL1-Obj1          <No hacer nada>
+		//        CL1-Obj1         -        <No existe>       Crear accion delete object
+		//        <No existe>      -        CL2-Obj2          Crear accion create object CL2-Obj2
+		//        Link1            -        Link1             <No hacer nada>
+		//        Link1            -        <No existe>       Crear accion delete link
+		//        <No existe>      -        Link1             Crear accion create link
+		
 		
 	}
 	/**
@@ -1270,7 +1299,6 @@ public class WizardMVMView extends JPanel implements View {
 					try {
 						insertLink(oAssocPralWizard, fParticipants);
 						fLogWriter.println("Inserto link entre ["+oOri.name()+"] y [" + oDes.name()+"]");
-						// Aqui
 						storeAction("CL", "Creation link ["+oClassAssocEnd.name()+"] - ["+oOri.name()+"]/["+oDes.name()+"]");
 					} catch (MSystemException e) {
 						e.printStackTrace();
@@ -2176,6 +2204,15 @@ public class WizardMVMView extends JPanel implements View {
 			if (ifr.getName()!=null ) {
 				if (ifr.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 					existDiagram=true;
+					for (NewObjectDiagramView newObj: fMainWindow.getObjectDiagrams()) {
+						if (newObj.getDiagram().getName()==null) {
+							newObj.setName(NAMEFRAMEMVMDIAGRAM);
+						}
+						if (newObj.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+							odvAssoc = newObj.getDiagram();
+							break;
+						}
+					}
 					continue;
 				}	
 			}
@@ -2313,7 +2350,7 @@ public class WizardMVMView extends JPanel implements View {
 		if (!haveObject()) { 
 			return;
 		}
-		// No refresh? Aqui6
+		// No refresh? 
 		// Don't refresh after first change...
 		fSystem.getEventBus().unregister(this);// Provis
 		boolean error = false;
