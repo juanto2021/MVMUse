@@ -279,6 +279,9 @@ public class ObjectPropertiesView extends JPanel implements View {
         							fObject, 
         							attribute, 
         							valueAsExpression));
+        			// Aqui
+        			
+        			fMainWindow.wizardMVMView.storeAction("MA", "Modification object ["+fObject.name()+"] of ["+fObject.cls().name()+"]");
         			
         		} catch (MSystemException e) {
         			JOptionPane.showMessageDialog(

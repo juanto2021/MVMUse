@@ -272,7 +272,7 @@ public final class MSystem {
 	public EventContext getExecutionContext() {
 		return executionContext;
 	}
-	
+
 	public void registerPPCHandlerOverride(PPCHandler ppcHandlerOverride) {
 		fPPCHandlerOverride = ppcHandlerOverride;
 	}
@@ -326,7 +326,7 @@ public final class MSystem {
 			throw new MSystemException("An object with name `" + name + "' already exists.");
 
 		MObject obj = new MObjectImpl(cls, name);
-		
+
 		addObject(obj);
 		return obj;
 	}
@@ -354,14 +354,14 @@ public final class MSystem {
 					out.println(e.getMessage());
 				}
 			}
-			
+
 			if(invs.size() > 0){
 				fireClassInvariantsLoadedEvent(invs);
 			}
-			
+
 			if (doEcho) {
 				out.println("Added invariants:");
-				
+
 				if (invs.isEmpty()) {
 					out.println("(none)");
 				} else {
@@ -372,14 +372,14 @@ public final class MSystem {
 			}
 		}
 	}
-	
+
 	public void unloadInvariants(Set<String> invNames, PrintWriter out) {
 		Collection<MClassInvariant> invs = new LinkedList<MClassInvariant>();
 		for(String name : invNames){
 			MClassInvariant inv = fModel.removeClassInvariant(name);
 			if(inv == null){
 				out.println("Invariant " + StringUtil.inQuotes(name)
-						+ " does not exist or is an invariant of the original model. Ignoring.");
+				+ " does not exist or is an invariant of the original model. Ignoring.");
 			} else {
 				invs.add(inv);
 			}
@@ -389,7 +389,7 @@ public final class MSystem {
 			fireClassInvariantsUnloadedEvent(invs);
 		}
 	}
-	
+
 	/**
 	 * @see #setClassInvariantFlags(MClassInvariant, Boolean, Boolean)
 	 * @param disabled May be {@code null} for no change.
@@ -416,7 +416,7 @@ public final class MSystem {
 			fireClassInvariantChangeEvent(inv, negated.booleanValue() ? InvariantStateChange.NEGATED : InvariantStateChange.DENEGATED);
 		}
 	}
-	
+
 	/**
 	 * Evaluates all pre conditions of a called operation.
 	 * 
@@ -431,7 +431,7 @@ public final class MSystem {
 			operationCall.setPreConditionsCheckResult(Collections.<MPrePostCondition, Boolean> emptyMap());
 			return;
 		}
-		
+
 		Map<MPrePostCondition, Boolean> results = new LinkedHashMap<MPrePostCondition, Boolean>(preConditions.size());
 		operationCall.setPreConditionsCheckResult(results);
 
@@ -466,7 +466,7 @@ public final class MSystem {
 			operationCall.setPostConditionsCheckResult(Collections.<MPrePostCondition, Boolean> emptyMap());
 			return;
 		}
-		
+
 		LinkedHashMap<MPrePostCondition, Boolean> results = new LinkedHashMap<MPrePostCondition, Boolean>(postConditions.size());
 
 		VarBindings b = (operationCall.requiresVariableFrameInEnvironment() ? fVariableEnvironment.constructVarBindings() : ctx.varBindings());
@@ -650,7 +650,7 @@ public final class MSystem {
 			// Operation is not covered by the state machine
 			if (!psm.getProtocolStateMachine().handlesOperation(operationCall.getOperation()))
 				continue;
-			
+
 			Map<MRegion, Set<MTransition>> possibleTransitions = new LinkedHashMap<MRegion, Set<MTransition>>();
 			boolean validOperationCall = psm.validOperationCall(ctx, operationCall, possibleTransitions);
 
@@ -794,7 +794,7 @@ public final class MSystem {
 		result.appendEvent(fireTransition(psmI.getObject(), psmI.getProtocolStateMachine(), t));
 		state().updateDerivedValues(result.getStateDifference());
 	}
-	
+
 	/**
 	 * Tries to determine the states of the state machines
 	 * for the defined objects by evaluating the state invariants
@@ -803,17 +803,17 @@ public final class MSystem {
 	public void determineStates(PrintWriter out) {
 		for (MObject o : this.state().allObjects()) {
 			if (o.cls().getAllOwnedProtocolStateMachines().isEmpty()) continue;
-			
+
 			for (MProtocolStateMachineInstance psmI : o.state(this.state()).getProtocolStateMachinesInstances()) {
 				psmI.determineState(this.state(), out);
 				fireTransition(o, psmI.getProtocolStateMachine(), null);
 				state().updateDerivedValues();
 			}
 		}
-		
+
 		out.println("State determination finished.");
 	}
-	
+
 	/**
 	 * Evaluate and check all preconditions of an operation call. If any is not
 	 * fulfilled, an exception is raised. Before the exception is raised, the
@@ -914,7 +914,7 @@ public final class MSystem {
 		if (operation.hasResultType()) {
 			if (resultValue == null) {
 				throw new MSystemException("Result value of type " + inQuotes(operation.resultType()) + " required on exit of operation " + inQuotes(operation)
-						+ ".");
+				+ ".");
 
 				// result value has incompatible type
 			} else if (!resultValue.type().conformsTo(operation.resultType())) {
@@ -928,7 +928,7 @@ public final class MSystem {
 			if (resultValue != null) {
 				Log.out().println(
 						"Warning: Result value " + inQuotes(resultValue) + " is ignored, since operation " + inQuotes(operation)
-								+ " is not defined to return a value.");
+						+ " is not defined to return a value.");
 			}
 		}
 	}
@@ -997,7 +997,7 @@ public final class MSystem {
 		result.prependToInverseStatement(new MObjectDestructionStatement(newObject.value()));
 
 		result.appendEvent(fireObjectCreated(newObject));
-		
+
 		state().updateDerivedValues(result.getStateDifference());
 
 		return newObject;
@@ -1176,10 +1176,10 @@ public final class MSystem {
 		result.prependToInverseStatement(new MLinkInsertionStatement(association, wrappedParticipants, wrappedQualifier));
 
 		state().updateDerivedValues(result.getStateDifference());
-		
+
 		LinkDeletedEvent e = new LinkDeletedEvent(executionContext, link);
 		result.appendEvent(e);
-		
+
 		getEventBus().post(e);
 	}
 
@@ -1205,7 +1205,7 @@ public final class MSystem {
 
 		result.appendEvent(fireObjectCreated(newLinkObject));
 		result.appendEvent(fireLinkInserted(newLinkObject));
-		
+
 		state().updateDerivedValues(result.getStateDifference());
 
 		return newLinkObject;
@@ -1404,7 +1404,7 @@ public final class MSystem {
 		context.setIsUndo(true);
 
 		StatementEvaluationResult result = execute(inverseStatement, context, false, false, true);
-		
+
 		return result;
 	}
 
@@ -1614,13 +1614,13 @@ public final class MSystem {
 	 */
 	ObjectCreatedEvent fireObjectCreated(MObject object) {
 		if (object instanceof MLink) return null;
-		
+
 		ObjectCreatedEvent objectCreatedEvent = new ObjectCreatedEvent(executionContext, object);
-        getEventBus().post(objectCreatedEvent);
-        
-        return objectCreatedEvent;
+		getEventBus().post(objectCreatedEvent);
+
+		return objectCreatedEvent;
 	}
-	
+
 	/**
 	 * @param object
 	 * @return
@@ -1630,7 +1630,7 @@ public final class MSystem {
 		getEventBus().post(event);
 		return event;
 	}
-		
+
 	LinkDeletedEvent fireLinkDeleted(MLink link) {
 		LinkDeletedEvent event = new LinkDeletedEvent(executionContext, link);
 		getEventBus().post(event);
@@ -1645,7 +1645,7 @@ public final class MSystem {
 		getEventBus().post(event);
 		return event;
 	}
-	
+
 	AttributeAssignedEvent fireAttributeAssigned(MObject object, MAttribute attribute,
 			Value value) {
 		AttributeAssignedEvent e = new AttributeAssignedEvent(executionContext, object, attribute, value);
@@ -1658,44 +1658,44 @@ public final class MSystem {
 		getEventBus().post(e);
 		return e;
 	}
-	
+
 	OperationExitedEvent fireOperationExited(MOperationCall operationCall) {
 		OperationExitedEvent e = new OperationExitedEvent(executionContext, operationCall);
 		getEventBus().post(e);
 		return e;
 	}
-	
+
 	TransitionEvent fireTransition(MObject source, MStateMachine stateMachine, MTransition transition) {
 		TransitionEvent e = new TransitionEvent(executionContext, source, stateMachine, transition);
 		getEventBus().post(e);
 		return e;
 	}
-	
+
 	ClassInvariantsLoadedEvent fireClassInvariantsLoadedEvent(Collection<MClassInvariant> invariants) {
 		ClassInvariantsLoadedEvent e = new ClassInvariantsLoadedEvent(executionContext, invariants);
 		getEventBus().post(e);
 		return e;
 	}
-	
+
 	ClassInvariantsUnloadedEvent fireClassInvariantsUnloadedEvent(Collection<MClassInvariant> invariants) {
 		ClassInvariantsUnloadedEvent e = new ClassInvariantsUnloadedEvent(executionContext, invariants);
 		getEventBus().post(e);
 		return e;
 	}
-	
+
 	ClassInvariantChangedEvent fireClassInvariantChangeEvent(MClassInvariant invariant, InvariantStateChange change){
 		ClassInvariantChangedEvent e = new ClassInvariantChangedEvent(executionContext, invariant, change);
 		getEventBus().post(e);
 		return e;
 	}
-	
+
 	/**
 	 * @param objectState
 	 * @throws MSystemException 
 	 */
 	public void restoreObject(MObjectState objectState) throws MSystemException {
 		fCurrentState.restoreObject(objectState);
-        fireObjectCreated(objectState.object());
+		fireObjectCreated(objectState.object());
 	}
 
 	/**
@@ -1703,6 +1703,6 @@ public final class MSystem {
 	 */
 	public void restoreLink(MLink link) {
 		fCurrentState.insertLink(link);
-        fireLinkInserted(link);
+		fireLinkInserted(link);
 	}
 }

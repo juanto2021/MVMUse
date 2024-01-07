@@ -357,7 +357,6 @@ public class MVMWizardActions extends JDialog {
 				if (nomFileRes!="") {
 					String nomFile = directoryName+"/"+nomFileRes;
 					grPral = readMVMGroup(nomFile);
-					// Aqui
 					copyGrPralToGrPralAnt();
 
 					if (!debugsClassesAndAssociations(grPral)){
@@ -533,7 +532,6 @@ public class MVMWizardActions extends JDialog {
 				}
 
 			}
-			//Aqui1
 			// Depuracion de existencia de clases en el modelo
 			if (!debugsClassesAndAssociations(grPral)){
 				copyGrPralAntToGrPral();

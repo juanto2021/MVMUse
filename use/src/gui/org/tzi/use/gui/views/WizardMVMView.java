@@ -418,7 +418,6 @@ public class WizardMVMView extends JPanel implements View {
 
 		fTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		fTablePane = new JScrollPane(fTable);
-//		fTablePane.setBounds(210, 40, 180, 100);
 		fTablePane.setBounds(205, 40, 185, 80);
 
 		chkAutoLayout=new JCheckBox("Auto Layout");
@@ -471,7 +470,6 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnCreateObject);
 
 		btnSaveObject = new JButton("Save Obj");
-//		btnSaveObject.setBounds(400, 100, 100, 25);
 		btnSaveObject.setBounds(205, 122, 90, 25);
 
 		btnSaveObject.addActionListener(new ActionListener() {
@@ -494,7 +492,6 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnSaveObject);
 
 		btnCancelObject = new JButton("Cancel Obj");
-//		btnCancelObject.setBounds(400, 130, 100, 25);
 		btnCancelObject.setBounds(301, 122, 90, 25);
 
 		btnCancelObject.addActionListener(new ActionListener() {
@@ -505,11 +502,9 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnCancelObject);
 
 		btnDeleteObject = new JButton("Delete Object");
-//		btnDeleteObject.setBounds(400, 160, 100, 25);
 		btnDeleteObject.setBounds(400, 122, 95, 25);
 		btnDeleteObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
 				int resp =JOptionPane.showConfirmDialog(null, "Are you sure to delete object ["+nomObj+"]?",
 						"Delete objects", JOptionPane.YES_NO_OPTION,
 						JOptionPane.QUESTION_MESSAGE);
@@ -668,7 +663,6 @@ public class WizardMVMView extends JPanel implements View {
 				MObject oRel = findAssocEnd(oSel);
 				if (oRel!=null) {
 					System.out.println("Le corresponde ["+oRel.name()+"]");
-					// Buscar y seleccionar oRel en cmbObjectDes
 					cmbObjectDes.setSelectedItem(oRel);
 				}else {
 					System.out.println("No tiene extremo");
@@ -689,7 +683,6 @@ public class WizardMVMView extends JPanel implements View {
 				MObject oRel = findAssocEnd(oSel);
 				if (oRel!=null) {
 					System.out.println("Le corresponde ["+oRel.name()+"]");
-					// Buscar y seleccionar oRel en cmbObjectDes
 					cmbObjectDes.setSelectedItem(oRel);
 				}else {
 					System.out.println("No tiene extremo");
@@ -927,51 +920,213 @@ public class WizardMVMView extends JPanel implements View {
 	 * Refresh components
 	 */	
 	public void refreshComponents() {
-//		txNewObject.setText("");
-		oClass = lClass.getSelectedValue();
 		lClass.setModel(loadListMClass());
-		lClass.setSelectedValue(oClass, true);
+		lClass.setSelectedIndex(0);
+		oClass = lClass.getSelectedValue();
+		nomClass = oClass.name();
+		lObjects.setModel(loadListObjects(nomClass));
+		lObjects.setSelectedIndex(0);
 		nomObj = (String) lObjects.getSelectedValue();
-		lObjects.setModel(loadListObjects(oClass.name()));
-		lObjects.setSelectedValue(nomObj, true);
-		//Aqui poner nom object en ntex 
+		selectObject( nomObj);
 		txNewObject.setText(nomObj);
 		txNewObject.setEnabled(false);
 		cmbClassOri.setModel(loadComboClass());
 		cmbClassDes.setModel(loadComboClass());
-	
+
 		lAssocs.setModel(loadListAssoc());
 		lAssocs.setSelectedIndex(0);
 
 		MAssociation oAssoc = lAssocs.getSelectedValue();
 		setComposAssoc(oAssoc);
-		
+
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
-		
+
 		setResClassInvariants();
 		setResCheckStructure();
-		
+
 		// Reconstruir la lista de acciones
-		// se revisan los objetos y links actuales
-		// si el objeto ya existe no se hace nada
-		// Si el objeto no existe se añade a la lista de acciones al final
-		// Si el link ya existe no se hace nada
-		// Si el link no existe se añade a la lista de acciones al final
-		//...
-		// OJO, una vez revisados los objetos actuales, es posible que se haya borrado algun objeto o link y por tanto,
-		// se tenga que reflejar en la lista de acciones.
-		//
-		// Para ello, lo ideal es crear una lista de aciones existentes antes de su actualizacion
-		// Elemento Lista Anterior - Elemento en lista actual Accion
-		//        CL1-Obj1         -        CL1-Obj1          <No hacer nada>
-		//        CL1-Obj1         -        <No existe>       Crear accion delete object
-		//        <No existe>      -        CL2-Obj2          Crear accion create object CL2-Obj2
-		//        Link1            -        Link1             <No hacer nada>
-		//        Link1            -        <No existe>       Crear accion delete link
-		//        <No existe>      -        Link1             Crear accion create link
-		
-		
+		// Array de objetos existentes antes
+		int nFilasObj=0;
+		int nColumnasObj=2;
+		int nFilasLink=0;
+		int nColumnasLink=2;
+		int nActions = lActions.size();
+		//--------
+		//-- OBJ's
+		//--------
+		List<MVMObject> lMVMObjs = new ArrayList<MVMObject>();
+		List<MVMLink> lMVMLinks = new ArrayList<MVMLink>();
+		if (nActions>0) {
+			MVMAction oAction = lActions.get(nActions-1);
+			lMVMObjs = oAction.getlObjs();
+			lMVMLinks = oAction.getlLinks();
+			nFilasObj=lMVMObjs.size();	
+			nFilasLink=lMVMLinks.size();
+		}
+
+		String[][] objsActual = new String[nFilasObj][nColumnasObj];
+		// Inicializa objsActual con los objetos actuales
+		int nMVMObj=0;
+		for (MVMObject oMVMObj: lMVMObjs) {
+			String strObj = oMVMObj.getClassName()+":"+oMVMObj.getName();
+			objsActual[nMVMObj][0]=strObj;
+			objsActual[nMVMObj][1]="0";
+			nMVMObj++;
+		}
+		List<MObject> lObjsACrear = new ArrayList<MObject>();
+		Set<MObject> allObjects = fSession.system().state().allObjects();
+		for (MObject oObj : allObjects) {
+			String strObjCmp=oObj.cls().name()+":"+oObj.name();
+			// Ver si es un objeto ya existente
+			boolean exist=false;
+			for (int nf=0;nf<nFilasObj;nf++) {
+				String strObjActual=objsActual[nf][0];
+				//				if ((objsActual[nf][0]).equals(strObjCmp)) {
+				if (strObjActual.equals(strObjCmp)) {
+					objsActual[nf][1]="1";
+					//-----------------------------------------------------------------
+					// Ver si los valores de los atributos son iguales o han cambiado
+					// Atributos del sistema
+					MObjectState objState = oObj.state(fSystem.state());
+					Map<MAttribute, Value> attrsMap = objState.attributeValueMap();
+					Collection<MAttribute> attributes = ModelBrowserSorting.getInstance().sortAttributes( attrsMap.keySet() );
+					List<MAttribute> attrs = Lists.newArrayList(attributes);
+					String[]  valuesAttrs = new String[attrs.size()];
+					for (int i = 0; i < valuesAttrs.length; i++) {
+						valuesAttrs[i] = attrsMap.get(attrs.get(i)).toString();
+					}
+					// Atributos del objeto MVM
+					List<MVMAttribute> lMVMAttrs = new ArrayList<MVMAttribute>();
+					for (MVMObject oMVMObj: lMVMObjs) {
+						if(oMVMObj.getName().equals(oObj.name())&&oMVMObj.getClassName().equals(oObj.cls().name())) {
+							lMVMAttrs = oMVMObj.getAttributes();
+						}
+					}
+					// Comparar atributos entre si y si hay diferencia, giardar en storeaction MA
+					for (int na=0;na<attrs.size();na++) {
+						MAttribute attr=attrs.get(na);
+						for(MVMAttribute oMVMAttr:lMVMAttrs) {
+							String attrNameSys=attr.name();
+							String attrNameMVM=oMVMAttr.getName();
+							if(attrNameSys.equals(attrNameMVM)) {
+
+								String valueSYS=attrsMap.get(attr).toString();
+								String valueMVM=oMVMAttr.getValue();
+
+								if(!valueSYS.equals(valueMVM)) {
+									storeAction("MA", "Modification object ["+oObj.name()+"] of ["+oObj.cls().name()+"]");
+									System.out.println("attr ["+attrNameSys+"] sys["
+											+valueSYS+"] MVM["+valueMVM+"]");	
+
+								}
+							}
+						}
+					}
+
+					exist=true;
+					break;
+				}
+			}
+			if (!exist) {
+				// Si no existe lo guardamos para crear posteriormente
+				lObjsACrear.add(oObj);
+			}
+		}
+		// Vemos si hay algun objeto que ya no exista y lo borramos
+		for (int nf=0;nf<nFilasObj;nf++) {
+			if ((objsActual[nf][1]).equals("0")) {
+				String[] partes = objsActual[nf][0].split(":");
+				String objClass=partes[0];
+				String objName=partes[1];
+				System.out.println("Borro ["+objsActual[nf][0]+"]");
+				storeAction("DO", "Delete object ["+objName+"] of ["+objClass+"]");	
+			}
+		}
+		// Vemos si hay algun objeto que se tenga que crear
+		for (MObject oObj: lObjsACrear) {
+			System.out.println("Creo ["+oObj.name()+"]");
+			String objClass=oObj.cls().name();
+			String objName=oObj.name();
+			storeAction("CO", "Creation object ["+objName+"] of ["+objClass+"]");
+		}
+
+		//--------
+		//-- Link's
+		//--------
+
+		String[][] linksActual = new String[nFilasLink][nColumnasLink];
+		// Inicializa objsActual con los objetos actuales
+		int nMVMLink=0;
+		for (MVMLink oMVMLink: lMVMLinks) {
+			String strLink = oMVMLink.getNomAssoc()+":"
+					+oMVMLink.getEnd1Class()+":"+oMVMLink.getEnd1Object()
+					+":"+oMVMLink.getEnd2Class()+":"+oMVMLink.getEnd2Object();
+			linksActual[nMVMLink][0]=strLink;
+			linksActual[nMVMLink][1]="0";
+			nMVMLink++;
+		}
+		List<MLink> lLinksACrear = new ArrayList<MLink>();
+		for (MLink oLink: fSession.system().state().allLinks()) {
+			boolean exist=false;
+
+			String cls1 = oLink.getLinkEnd(0).object().cls().name();
+			String obj1 = oLink.getLinkEnd(0).object().name();
+			String cls2 = oLink.getLinkEnd(1).object().cls().name();
+			String obj2 = oLink.getLinkEnd(1).object().name();
+			String strLinkCmp = oLink.association().name()+":"
+					+cls1+":"+obj1+":"
+					+cls2+":"+obj2;
+			for (int nf=0;nf<nFilasLink;nf++) {
+				String strActual = linksActual[nf][0];
+				if ((strActual).equals(strLinkCmp)) {
+					linksActual[nf][1]="1";
+					exist=true;
+					break;
+				}
+			}
+			if (!exist) {
+				// Si no existe lo guardamos para crear posteriormente
+				lLinksACrear.add(oLink);
+			}
+		}
+		// Vemos si hay algun link que ya no exista y lo borramos
+		for (int nf=0;nf<nFilasLink;nf++) {
+			if ((linksActual[nf][1]).equals("0")) {
+				String strActual = linksActual[nf][0];
+				String[] partes = strActual.split(":");
+				String strAsocc=partes[0];
+				String obj1=partes[2];
+				String obj2=partes[4];
+				System.out.println("Borro ["+linksActual[nf][0]+"]");
+				storeAction("DL", "Delete link ["+strAsocc+"] - ["+obj1+"]/["+obj2+"]");
+			}
+		}
+		// Vemos si hay algun objeto que se tenga que crear
+		for (MLink oLink: lLinksACrear) {
+			System.out.println("Creo en actions ["+oLink.association().name()+"]");
+			String obj1 = oLink.getLinkEnd(0).object().name();
+			String obj2 = oLink.getLinkEnd(1).object().name();
+			MObject o1 = findObjectByName(obj1);
+			MObject o2 = findObjectByName(obj2);
+			MObject oOri=null;
+			MObject oDes=null;
+
+			// Determinar orden de oOri y oDes
+			List<MAssociationEnd> oAsocEnds = oAssoc.associationEnds();
+
+			int na=0;
+			MAssociationEnd oAssocEnd = oAsocEnds.get(na);
+			MClass oClassAssocEnd = oAssocEnd.cls();
+			if (oClassAssocEnd.name().equals(o1.cls().name())) {
+				oOri = o1;
+				oDes =	o2;	
+			}else {
+				oOri = o2;
+				oDes =	o1;	
+			}
+			storeAction("CL", "Creation link ["+oClassAssocEnd.name()+"] - ["+oOri.name()+"]/["+oDes.name()+"]");
+		}
 	}
 	/**
 	 * Searches for object corresponding to the end of an association
@@ -994,7 +1149,6 @@ public class WizardMVMView extends JPanel implements View {
 					oL1.object().cls().name().equals(oFindAssoc.cls().name())) {
 				return oL0.object();
 			}				
-
 		}
 		return objEnd;
 	}
@@ -1067,7 +1221,7 @@ public class WizardMVMView extends JPanel implements View {
 	 * @param strTypeAction
 	 * @param strParam
 	 */
-	private void storeAction(String strTypeAction, String strParam) {
+	public void storeAction(String strTypeAction, String strParam) {
 		MVMAction oAction = new MVMAction();
 		oAction.setTypeAction(strTypeAction);
 		oAction.setParameters(strParam);
@@ -1094,10 +1248,6 @@ public class WizardMVMView extends JPanel implements View {
 	private void doActions(List<MVMAction> lActionsRes) {
 		resetObjLinks();
 		int nActions = lActionsRes.size();
-		//		for (int nAction=0;nAction<nActions;nAction++) {
-		//			MVMAction oAction=lActionsRes.get(nAction);
-		//			System.out.println(oAction.getOrden()+" " + oAction.getTypeAction()+ " " + oAction.getParameters());
-		//		}
 		// En realidad, las acciones a realizar son la creacion de objetos y de links
 		if (nActions>0) {
 			MVMAction oAction=lActionsRes.get(nActions-1);	
@@ -1161,8 +1311,9 @@ public class WizardMVMView extends JPanel implements View {
 				}					
 				selectObject( nomObj);
 				applyChanges();
-				storeAction(oAction.getTypeAction(), oAction.getParameters());
-				//Probar lo siguiente
+				String strTypeAction="CO";
+				String strParameters="Creation object ["+nomObj+"] of ["+ClassObj+"]";
+				storeAction(strTypeAction, strParameters);
 				cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 				cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 
@@ -1194,7 +1345,8 @@ public class WizardMVMView extends JPanel implements View {
 				cmbObjectOri.setSelectedItem(oOri);
 				cmbClassDes.setSelectedItem(oDes.cls());
 				cmbObjectDes.setSelectedItem(oDes);
-				insertLink(oAssoc);
+
+				insertLink(oAssoc,o1,o2);
 			}
 			setResClassInvariants();
 			setResCheckStructure();
@@ -1837,7 +1989,6 @@ public class WizardMVMView extends JPanel implements View {
 			cbm.addElement(oClass);
 		}
 
-		//---
 		List<MClass> data = new ArrayList<>();
 		for (int i = 0; i < cbm.getSize(); i++) {
 			data.add((MClass) cbm.getElementAt(i));
@@ -1851,8 +2002,6 @@ public class WizardMVMView extends JPanel implements View {
 		for (MClass element : data) {
 			cbm.addElement(element);
 		}
-
-		//---
 
 		return cbm;
 	}
@@ -1998,11 +2147,9 @@ public class WizardMVMView extends JPanel implements View {
 	 * Insert link in association
 	 * @param oAssoc
 	 */
-	private void insertLink(MAssociation oAssoc) {
+	private void insertLink(MAssociation oAssoc,MObject o1, MObject o2) {
 		MObject oOri=null;
 		MObject oDes=null;
-		MObject o1 = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
-		MObject o2 = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
 
 		// Determinar orden de oOri y oDes
 		List<MAssociationEnd> oAsocEnds = oAssoc.associationEnds();
@@ -2030,7 +2177,16 @@ public class WizardMVMView extends JPanel implements View {
 					JOptionPane.ERROR_MESSAGE);
 		}
 
+	}
+	/**
+	 * Insert link in association
+	 * @param oAssoc
+	 */
 
+	private void insertLink(MAssociation oAssoc) {
+		MObject o1 = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
+		MObject o2 = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
+		insertLink( oAssoc, o1,  o2);
 	}
 
 	/**
@@ -2054,7 +2210,6 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		setResCheckStructure();
 	}
-
 	/**
 	 * Remove link in association
 	 * @param oAssoc
@@ -2063,10 +2218,18 @@ public class WizardMVMView extends JPanel implements View {
 		// Averiguar el link del que se trata
 		MObject oOri = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
 		MObject oDes = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
+		deleteLink(oAssoc, oOri, oDes);
+	}
+
+	/**
+	 * Remove link in association
+	 * @param oAssoc
+	 */
+	private void deleteLink(MAssociation oAssoc, MObject oOri, MObject oDes) {
 
 		MLink oLinkTOdel=null;
 		Set<MLink> links = fSystem.state().linksOfAssociation(oAssoc).links();
-		// Inicialmente suponderemos que solo hay un link
+		// Inicialmente supondremos que solo hay un link
 
 		for (MLink oLink:links) {
 			System.out.println(oLink.linkedObjects());
@@ -2104,10 +2267,14 @@ public class WizardMVMView extends JPanel implements View {
 	 * Remove link 
 	 * @param link
 	 */
-	private void deleteLink(MLink link) {
+	private void deleteLink(MLink oLink) {
 		try {
 			fSystem.execute(
-					new MLinkDeletionStatement(link));
+					new MLinkDeletionStatement(oLink));
+			String obj1 = oLink.getLinkEnd(0).object().name();
+			String obj2 = oLink.getLinkEnd(1).object().name();
+
+			storeAction("DL", "Delete link ["+oLink.association().name()+"] - ["+obj1+"]/["+obj2+"]");
 		} catch (MSystemException e) {
 			JOptionPane.showMessageDialog(
 					fMainWindow, 
@@ -2311,6 +2478,11 @@ public class WizardMVMView extends JPanel implements View {
 		MSystemState state = fSystem.state();
 		// Localizar diagrama y ver si se puede actualizar
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
+			// Si es nulo se le pone NAMEFRAMEMVMDIAGRAM
+			//Aqui
+			if (odv.getDiagram().getName()==null) {
+				odv.setName(NAMEFRAMEMVMDIAGRAM);
+			}
 			if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 				odv.getDiagram().deleteObject(fObject);
 				odv.repaint();

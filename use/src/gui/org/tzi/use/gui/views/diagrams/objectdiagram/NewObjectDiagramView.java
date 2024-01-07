@@ -70,174 +70,174 @@ import com.google.common.eventbus.Subscribe;
  */
 @SuppressWarnings("serial")
 public class NewObjectDiagramView extends JPanel 
-  implements View, PrintableView, SortChangeListener {
+implements View, PrintableView, SortChangeListener {
 
-    protected final MSystem fSystem;
-    protected final MainWindow fMainWindow;
+	protected final MSystem fSystem;
+	protected final MainWindow fMainWindow;
 
-    protected NewObjectDiagram fObjectDiagram;
-    public static int viewcount = 0;
-    
-    //--
+	protected NewObjectDiagram fObjectDiagram;
+	public static int viewcount = 0;
+
+	//--
 	private static WizardMVMView wizardMVMView;
 	private boolean existWizard=false;
-    
-    //--
-    
-    public NewObjectDiagramView(MainWindow mainWindow, MSystem system) {
-        fMainWindow = mainWindow;
-        fSystem = system;
-        
-        fSystem.registerRequiresAllDerivedValues();
-        ModelBrowserSorting.getInstance().addSortChangeListener( this );
-        fSystem.getEventBus().register(this);
 
-        setLayout(new BorderLayout());
+	//--
 
-        this.setFocusable(true);
-        
-        initDiagram(false, null);
-    }
+	public NewObjectDiagramView(MainWindow mainWindow, MSystem system) {
+		fMainWindow = mainWindow;
+		fSystem = system;
 
-    public void initDiagram(boolean loadDefaultLayout, ObjDiagramOptions opt) {
-    	if (opt == null)
+		fSystem.registerRequiresAllDerivedValues();
+		ModelBrowserSorting.getInstance().addSortChangeListener( this );
+		fSystem.getEventBus().register(this);
+
+		setLayout(new BorderLayout());
+
+		this.setFocusable(true);
+
+		initDiagram(false, null);
+	}
+
+	public void initDiagram(boolean loadDefaultLayout, ObjDiagramOptions opt) {
+		if (opt == null)
 			fObjectDiagram = new NewObjectDiagram( this, fMainWindow.logWriter());
 		else
 			fObjectDiagram = new NewObjectDiagram( this, fMainWindow.logWriter(), new ObjDiagramOptions(opt));
-		
+
 		fObjectDiagram.setStatusBar(fMainWindow.statusBar());
 		this.removeAll();
-        add( new JScrollPane(fObjectDiagram) );
-        initState();
+		add( new JScrollPane(fObjectDiagram) );
+		initState();
 	}
-    
-    /**
-     * Returns the model browser.
-     */
-    public ModelBrowser getModelBrowser() {
-        return fMainWindow.getModelBrowser();
-    }
-    
-    /**
-     * The managed diagram
-     * @return
-     */
-    public NewObjectDiagram getDiagram() {
-    	return this.fObjectDiagram;
-    }
-    
-    /**
-     * Determines if this is the selected view.
-     * @return <code>true</code> if it is the selected view, otherwise
-     * <code>false</false>
-     */
-    public boolean isSelectedView() {
-        if ( fMainWindow.getSelectedView() != null ) {
-            return fMainWindow.getSelectedView().equals( this );
-        } 
-        return false;
-    }
-    
-    
-    /**
-     * Does a full update of the view.
-     */
-    private void initState() {        
-        for (MObject obj : fSystem.state().allObjects()) {
-            fObjectDiagram.addObject(obj);
-        }
 
-        for (MLink link : fSystem.state().allLinks()) {
-            fObjectDiagram.addLink(link);
-        }
-        
-        fObjectDiagram.initialize();
-        viewcount++;
-    }
-    
-    @Subscribe
-    public void onTransition(TransitionEvent e) {
-    	fObjectDiagram.updateObject(e.getSource());
-    	fObjectDiagram.invalidateContent(true);
-    }
-    
-    @Subscribe
-    public void onObjectCeated(ObjectCreatedEvent e) {
-    	if (e.getCreatedObject() instanceof MLink) {
-    		return;
-    	}
+	/**
+	 * Returns the model browser.
+	 */
+	public ModelBrowser getModelBrowser() {
+		return fMainWindow.getModelBrowser();
+	}
 
-    	fObjectDiagram.addObject(e.getCreatedObject());
-    	fObjectDiagram.invalidateContent(true);
-    }
-    
-    @Subscribe
-    public void onObjectDestroyed(ObjectDestroyedEvent e) {
-    	if (e.getDestroyedObject() instanceof MLink) {
-    		return;
-    	}
-    	
-    	fObjectDiagram.deleteObject(e.getDestroyedObject());
-    	fObjectDiagram.invalidateContent(true);
-    }
-    
-    @Subscribe
-    public void onAttributeAssigned(AttributeAssignedEvent e) {
-    	fObjectDiagram.updateObject(e.getObject());
-    	fObjectDiagram.invalidateContent(true);
-    }
-    
-    @Subscribe
-    public void onLinkCeated(LinkInsertedEvent e) {
-    	if (e.getAssociation() instanceof MAssociationClass) {
-    		fObjectDiagram.addObject((MLinkObject)e.getLink());	
-    	}
-    	fObjectDiagram.addLink(e.getLink());
-    	fObjectDiagram.invalidateContent(true);
-    }
-    
-    @Subscribe
-    public void onLinkDeleted(LinkDeletedEvent e) {
-    	if (e.getAssociation() instanceof MAssociationClass) {
-    		fObjectDiagram.deleteObject((MLinkObject)e.getLink());
-    	}
-    	
-    	fObjectDiagram.deleteLink(e.getLink());
-    	fObjectDiagram.invalidateContent(true);
-    }
-    
-    /**
-     * After the occurence of an event the view is updated.
-     */
-    @Override
+	/**
+	 * The managed diagram
+	 * @return
+	 */
+	public NewObjectDiagram getDiagram() {
+		return this.fObjectDiagram;
+	}
+
+	/**
+	 * Determines if this is the selected view.
+	 * @return <code>true</code> if it is the selected view, otherwise
+	 * <code>false</false>
+	 */
+	public boolean isSelectedView() {
+		if ( fMainWindow.getSelectedView() != null ) {
+			return fMainWindow.getSelectedView().equals( this );
+		} 
+		return false;
+	}
+
+
+	/**
+	 * Does a full update of the view.
+	 */
+	private void initState() {        
+		for (MObject obj : fSystem.state().allObjects()) {
+			fObjectDiagram.addObject(obj);
+		}
+
+		for (MLink link : fSystem.state().allLinks()) {
+			fObjectDiagram.addLink(link);
+		}
+
+		fObjectDiagram.initialize();
+		viewcount++;
+	}
+
+	@Subscribe
+	public void onTransition(TransitionEvent e) {
+		fObjectDiagram.updateObject(e.getSource());
+		fObjectDiagram.invalidateContent(true);
+	}
+
+	@Subscribe
+	public void onObjectCeated(ObjectCreatedEvent e) {
+		if (e.getCreatedObject() instanceof MLink) {
+			return;
+		}
+
+		fObjectDiagram.addObject(e.getCreatedObject());
+		fObjectDiagram.invalidateContent(true);
+	}
+
+	@Subscribe
+	public void onObjectDestroyed(ObjectDestroyedEvent e) {
+		if (e.getDestroyedObject() instanceof MLink) {
+			return;
+		}
+
+		fObjectDiagram.deleteObject(e.getDestroyedObject());
+		fObjectDiagram.invalidateContent(true);
+	}
+
+	@Subscribe
+	public void onAttributeAssigned(AttributeAssignedEvent e) {
+		fObjectDiagram.updateObject(e.getObject());
+		fObjectDiagram.invalidateContent(true);
+	}
+
+	@Subscribe
+	public void onLinkCeated(LinkInsertedEvent e) {
+		if (e.getAssociation() instanceof MAssociationClass) {
+			fObjectDiagram.addObject((MLinkObject)e.getLink());	
+		}
+		fObjectDiagram.addLink(e.getLink());
+		fObjectDiagram.invalidateContent(true);
+	}
+
+	@Subscribe
+	public void onLinkDeleted(LinkDeletedEvent e) {
+		if (e.getAssociation() instanceof MAssociationClass) {
+			fObjectDiagram.deleteObject((MLinkObject)e.getLink());
+		}
+
+		fObjectDiagram.deleteLink(e.getLink());
+		fObjectDiagram.invalidateContent(true);
+	}
+
+	/**
+	 * After the occurence of an event the view is updated.
+	 */
+	@Override
 	public void stateChanged( SortChangeEvent e ) {
-        fObjectDiagram.invalidateContent(true);
-    }
+		fObjectDiagram.invalidateContent(true);
+	}
 
-    /**
-     * Returns the set of all associations that exist between the
-     * specified classes. 
-     *
-     * @return Set(MAssociation) 
-     */
-    Set<MAssociation> getAllAssociationsBetweenClasses(Set<MClass> classes) {
-        return fSystem.model().getAllAssociationsBetweenClasses(classes);
-    }
+	/**
+	 * Returns the set of all associations that exist between the
+	 * specified classes. 
+	 *
+	 * @return Set(MAssociation) 
+	 */
+	Set<MAssociation> getAllAssociationsBetweenClasses(Set<MClass> classes) {
+		return fSystem.model().getAllAssociationsBetweenClasses(classes);
+	}
 
-    /**
-     * Returns true if there is a link of the specified association
-     * connecting the given set of objects.
-     */
-    Set<MLink> linksBetweenObjects(MAssociation assoc, MObject[] objects) {
-        return fSystem.state().linkBetweenObjects(assoc, Arrays.asList(objects));
-    }
+	/**
+	 * Returns true if there is a link of the specified association
+	 * connecting the given set of objects.
+	 */
+	Set<MLink> linksBetweenObjects(MAssociation assoc, MObject[] objects) {
+		return fSystem.state().linkBetweenObjects(assoc, Arrays.asList(objects));
+	}
 
-    /**
-     * Executes a command for deleting a link between selected 
-     * objects.
-     */
-    void deleteLink(MLink link) {
-    	try {
+	/**
+	 * Executes a command for deleting a link between selected 
+	 * objects.
+	 */
+	void deleteLink(MLink link) {
+		try {
 			fSystem.execute(
 					new MLinkDeletionStatement(link));
 			refreshComponentsWizard();
@@ -249,18 +249,18 @@ public class NewObjectDiagramView extends JPanel
 					"Error", 
 					JOptionPane.ERROR_MESSAGE);
 		}
-    }
-    
-    /**
-     * Executes a command for inserting a new link.
-     */
-    void insertLink(MAssociation association, MObject[] objects) {
-    	if (association.hasQualifiedEnds()) {
-    		QualifierInputView input = new QualifierInputView(fMainWindow, fSystem, association, objects);
-    		input.setLocationRelativeTo(this);
-    		input.setVisible(true);
-    	} else {
-	    	try {
+	}
+
+	/**
+	 * Executes a command for inserting a new link.
+	 */
+	void insertLink(MAssociation association, MObject[] objects) {
+		if (association.hasQualifiedEnds()) {
+			QualifierInputView input = new QualifierInputView(fMainWindow, fSystem, association, objects);
+			input.setLocationRelativeTo(this);
+			input.setVisible(true);
+		} else {
+			try {
 				fSystem.execute(new MLinkInsertionStatement(association, objects, Collections.<List<Value>>emptyList()));
 				refreshComponentsWizard();
 
@@ -271,28 +271,28 @@ public class NewObjectDiagramView extends JPanel
 						"Error", 
 						JOptionPane.ERROR_MESSAGE);
 			}
-    	}
-    }
+		}
+	}
 
-    
-    /**
-     * Executes a command for deleting selected objects.
-     */
-    void deleteObjects(Set<MObject> objects) {
-        MSequenceStatement sequence = new MSequenceStatement();
-        
-        for (MObject obj : objects) {
-        	sequence.appendStatement(
-        			new MObjectDestructionStatement(obj.value()));
-        }
-        
-        if (sequence.isEmpty()) {
-        	return;
-        }
-        try {
+
+	/**
+	 * Executes a command for deleting selected objects.
+	 */
+	void deleteObjects(Set<MObject> objects) {
+		MSequenceStatement sequence = new MSequenceStatement();
+
+		for (MObject obj : objects) {
+			sequence.appendStatement(
+					new MObjectDestructionStatement(obj.value()));
+		}
+
+		if (sequence.isEmpty()) {
+			return;
+		}
+		try {
 			fSystem.execute(sequence.simplify());
 			refreshComponentsWizard();
-			
+
 		} catch (MSystemException e) {
 			JOptionPane.showMessageDialog(
 					fMainWindow, 
@@ -300,53 +300,52 @@ public class NewObjectDiagramView extends JPanel
 					"Error", 
 					JOptionPane.ERROR_MESSAGE);
 		}
-    }
+	}
 
-    private void refreshComponentsWizard() {
-		//Aqui
+	private void refreshComponentsWizard() {
 		// Hacer llamada a wizard si existe y refresh
 		fMainWindow.checkExistObjDiagramAndWizard();
-		
+
 		if (fMainWindow.existWizard) {
 			if (fMainWindow.wizardMVMView!=null) {
 				// Se han de crear los objetos nuevos que se hayan creado
 				fMainWindow.wizardMVMView.refreshComponents();
 			}
 		}
-    }
-    public MSystem system() {
-        return fSystem;
-    }
+	}
+	public MSystem system() {
+		return fSystem;
+	}
 
-    /**
-     * Detaches the view from its model.
-     */
-    @Override
+	/**
+	 * Detaches the view from its model.
+	 */
+	@Override
 	public void detachModel() {
-        fSystem.getEventBus().unregister(this);
-        ModelBrowserSorting.getInstance().removeSortChangeListener( this );
-        fSystem.unregisterRequiresAllDerivedValues();
-        viewcount--;
-    }
+		fSystem.getEventBus().unregister(this);
+		ModelBrowserSorting.getInstance().removeSortChangeListener( this );
+		fSystem.unregisterRequiresAllDerivedValues();
+		viewcount--;
+	}
 
-    void createObject(String clsName) {
-        fMainWindow.createObject(clsName);
-    }
+	void createObject(String clsName) {
+		fMainWindow.createObject(clsName);
+	}
 
-    @Override
+	@Override
 	public void printView(PageFormat pf) {
-        fObjectDiagram.printDiagram(pf, "Object diagram" );
-    }
+		fObjectDiagram.printDiagram(pf, "Object diagram" );
+	}
 
-    @Override
+	@Override
 	public void export( Graphics2D g ) {
-    	JComponent toExport = fObjectDiagram;
-        
-    	boolean oldDb = toExport.isDoubleBuffered();
-    	toExport.setDoubleBuffered(false);
-    	toExport.paint(g);
-    	toExport.setDoubleBuffered(oldDb);
-    }
+		JComponent toExport = fObjectDiagram;
+
+		boolean oldDb = toExport.isDoubleBuffered();
+		toExport.setDoubleBuffered(false);
+		toExport.paint(g);
+		toExport.setDoubleBuffered(oldDb);
+	}
 
 	@Override
 	public float getContentHeight() {

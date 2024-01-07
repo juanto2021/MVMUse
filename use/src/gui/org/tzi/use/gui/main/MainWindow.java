@@ -196,7 +196,7 @@ public class MainWindow extends JFrame {
 	private static final String NAMEFRAMEMVMWIZARD = "MVMWizard";
 	private static ViewFrame frameWizard;
 	public static WizardMVMView wizardMVMView;
-	
+
 	public boolean existDiagram=false;
 	public boolean existWizard=false;
 
@@ -1052,22 +1052,22 @@ public class MainWindow extends JFrame {
 		if (loc / (fTopSplitPane.getHeight() - fTopSplitPane.getDividerSize()) > 0.95)
 			fTopSplitPane.setDividerLocation(0.75);
 	}
-	//Provis
-		public void createObject(String clsName) {
-			MClass objectClass = fSession.system().model().getClass(clsName);
-	
-			if (objectClass == null) {
-				JOptionPane.showMessageDialog(
-						this, 
-						"No class named `" + clsName + "' defined in model.", 
-						"Error", 
-						JOptionPane.ERROR_MESSAGE);
-	
-				return;
-			} 
-	
-			createObject(objectClass, null);
-		}
+
+	public void createObject(String clsName) {
+		MClass objectClass = fSession.system().model().getClass(clsName);
+
+		if (objectClass == null) {
+			JOptionPane.showMessageDialog(
+					this, 
+					"No class named `" + clsName + "' defined in model.", 
+					"Error", 
+					JOptionPane.ERROR_MESSAGE);
+
+			return;
+		} 
+
+		createObject(objectClass, null);
+	}
 
 	/**
 	 * Creates a new object. Keeps track of undo information and handles errors
@@ -1605,6 +1605,14 @@ public class MainWindow extends JFrame {
 			try {
 				fSession.system().undoLastStatement();
 				setUndoRedoButtons();
+
+				checkExistObjDiagramAndWizard();
+				if (existWizard) {
+					if (wizardMVMView!=null) {
+						// Se han de crear los objetos nuevos que se hayan creado
+						wizardMVMView.refreshComponents();
+					}
+				}
 			} catch (MSystemException ex) {
 				JOptionPane.showMessageDialog(
 						MainWindow.this, 
@@ -1654,6 +1662,13 @@ public class MainWindow extends JFrame {
 				system.redoStatement();
 
 				setUndoRedoButtons();
+				checkExistObjDiagramAndWizard();
+				if (existWizard) {
+					if (wizardMVMView!=null) {
+						// Se han de crear los objetos nuevos que se hayan creado
+						wizardMVMView.refreshComponents();
+					}
+				}
 
 			} catch (MSystemException ex) {
 				JOptionPane.showMessageDialog(
@@ -1672,14 +1687,11 @@ public class MainWindow extends JFrame {
 		ActionStateCreateObject() {
 			super("Create object...");
 		}
-//Aqui
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// Guardar lista de objetos antes de la creación de ninguno de ellos para luego crear por comparacion el resto
-//			Set<MObject> allObjectsBefore = fSession.system().state().allObjects();
 			CreateObjectDialog dlg = new CreateObjectDialog(fSession, MainWindow.this);
 			dlg.setVisible(true);
-//			dlg.setModal(true);
 			// Si existe wizard, se ha de hacer un refresh
 			checkExistObjDiagramAndWizard();
 			if (existWizard) {
@@ -1976,19 +1988,6 @@ public class MainWindow extends JFrame {
 	public void checkExistObjDiagramAndWizard() {
 		existDiagram=false;
 		existWizard=false; 
-		//		// Ver frames
-		//		JDesktopPane fDesk = getFdesk();
-		//		JInternalFrame[] allframes = fDesk.getAllFrames();
-		//
-		//		for (JInternalFrame ifr: allframes) {
-		//			if (ifr.getName()!=null ) {
-		//				if (ifr.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
-		//					existDiagram=true;
-		//					continue;
-		//				}	
-		//			}
-		//		}
-
 		//		Ver frames
 		JDesktopPane fDesk = getFdesk();
 		JInternalFrame[] allframes = fDesk.getAllFrames();
@@ -2005,10 +2004,6 @@ public class MainWindow extends JFrame {
 				}	
 			}
 		}
-
-		//		if (!existDiagram) {
-		//			createObjDiagram();
-		//		}
 		return;
 	}
 	private void createObjDiagram() {
@@ -2108,7 +2103,7 @@ public class MainWindow extends JFrame {
 		String commandName = "";
 		ActionEvent ev = new ActionEvent(this, uniqueId, commandName);
 		fActionViewTile.actionPerformed(ev);
-		
+
 	}
 
 	/**
@@ -2355,9 +2350,6 @@ public class MainWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent ev) {
 			// How many frames do we have?
-//			sortInternalFrames(JInternalFrame[] allframes)
-			//Aqui
-//			JInternalFrame[] allframes = fDesk.getAllFrames();
 			JInternalFrame[] allframes = sortInternalFrames(fDesk.getAllFrames());
 			int count = allframes.length;
 			if (count == 0)
@@ -2432,7 +2424,6 @@ public class MainWindow extends JFrame {
 	}
 
 	public WizardMVMView showMVMWizard(String name) {
-		// Aqui
 		// Abrir vista si no hay ninguna creada previamente
 		WizardMVMView opv = new WizardMVMView(MainWindow.this,
 				fSession, fLogWriter);
@@ -2508,8 +2499,4 @@ public class MainWindow extends JFrame {
 	private Icon getIcon(String name) {
 		return new ImageIcon(Options.getIconPath(name).toString());
 	}
-	//	public void doActionViewTile() {
-	//		ActionViewTile fActionViewTileMVM = new ActionViewTile();
-	//		System.out.println("lanza doActionViewTile");
-	//	}
 }
