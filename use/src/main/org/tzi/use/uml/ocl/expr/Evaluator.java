@@ -158,7 +158,7 @@ public final class Evaluator {
         Value res = null;
         try {
         	//---
-        	System.out.println("Evaluator.eval expr: " + expr);
+//        	System.out.println("Evaluator.eval expr: " + expr);
         	//---
             res = expr.eval(fEvalContext);
         } catch (StackOverflowError ex) {
