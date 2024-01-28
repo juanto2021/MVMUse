@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -90,6 +91,7 @@ import org.tzi.use.gui.mvm.LinkWizard;
 import org.tzi.use.gui.mvm.MVMAction;
 import org.tzi.use.gui.mvm.MVMAttribute;
 import org.tzi.use.gui.mvm.MVMLink;
+import org.tzi.use.gui.mvm.MVMObjCheckState;
 import org.tzi.use.gui.mvm.MVMObject;
 import org.tzi.use.gui.mvm.MVMWizardActions;
 import org.tzi.use.gui.mvm.MVMWizardAssoc;
@@ -240,6 +242,8 @@ public class WizardMVMView extends JPanel implements View {
 	// To MVMWizardActions
 	static List<MVMAction> lActions = new ArrayList<MVMAction>();
 	private String strLastFile="";
+	
+//	private Map<MVMObject, Map<String, Boolean>> mapObjects;
 
 	/**
 	 * The table model.
@@ -787,7 +791,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lbResClassInvariants);
 
 		btnShowClassInvariants = new JButton("OK");
-		btnShowClassInvariants.setBounds(300, 375, 80, 25);
+		btnShowClassInvariants.setBounds(300, 375, 65, 25);
 		btnShowClassInvariants.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowClassInvariants.setHorizontalAlignment(SwingConstants.CENTER);
 		btnShowClassInvariants.setFont(new Font("Serif", Font.BOLD, 18));
@@ -797,12 +801,12 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 		panel.add(btnShowClassInvariants);
-		//Aqui
-		btnShowIndividuals = new JButton("Chk OBJs");
-		btnShowIndividuals.setBounds(390, 375, 80, 25);
+
+		btnShowIndividuals = new JButton("OBJs");
+		btnShowIndividuals.setBounds(375, 375, 80, 25);
 		btnShowIndividuals.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowIndividuals.setHorizontalAlignment(SwingConstants.CENTER);
-		btnShowIndividuals.setFont(new Font("Serif", Font.BOLD, 18));
+		btnShowIndividuals.setFont(new Font("Serif", Font.BOLD, 14));
 		btnShowIndividuals.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				check_inv_state_individual();
@@ -815,7 +819,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lbCheckStructure);
 
 		btnShowCheckStructure = new JButton("OK");
-		btnShowCheckStructure.setBounds(335, 410, 120, 25);
+		btnShowCheckStructure.setBounds(300, 410, 155, 25);
 		btnShowCheckStructure.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowCheckStructure.setHorizontalAlignment(SwingConstants.CENTER);
 		btnShowCheckStructure.setFont(new Font("Serif", Font.BOLD, 18));
@@ -1609,11 +1613,15 @@ public class WizardMVMView extends JPanel implements View {
 			lbResClassInvariants.setBackground(Color.red);
 			btnShowClassInvariants.setForeground(Color.white);
 			btnShowClassInvariants.setBackground(Color.red);
+			btnShowIndividuals.setForeground(Color.white);
+			btnShowIndividuals.setBackground(Color.red);
 		}else {
 			lbResClassInvariants.setForeground(Color.black);
 			lbResClassInvariants.setBackground(Color.green);
 			btnShowClassInvariants.setForeground(Color.black);
 			btnShowClassInvariants.setBackground(Color.green);
+			btnShowIndividuals.setForeground(Color.black);
+			btnShowIndividuals.setBackground(Color.green);
 		}
 		lbResClassInvariants.setOpaque(true);
 
@@ -1714,13 +1722,14 @@ public class WizardMVMView extends JPanel implements View {
 		return todosOk;
 	}
 	// Analyze every object in individual way
-	//Aqui
+
 	public void check_inv_state_individual() {
 
 
 
 
-		Map<MObject, Map<MClassInvariant, Boolean>> mapaObjsInvState = new HashMap<>();
+		Map<MVMObject, Map<MClassInvariant, Boolean>> mapObjects = new HashMap<>();
+//		mapObjects = new HashMap<>();
 		// Ver los objetos existentes en la actualidad.
 		// Tal vez la ultima acción es un buen punto de partida
 		int nActions = lActions.size();
@@ -1806,6 +1815,10 @@ public class WizardMVMView extends JPanel implements View {
 			System.out.println("   Resultado para ["+nomObj+"]");
 			boolean todosOk=true;
 			System.out.println("   --------------------");
+			//---
+			// Crear un mapa interno para el objeto 1
+			Map<MClassInvariant, Boolean> mapInvsObj = new HashMap<>();
+			//---
 			for (EvalResult res : fValues) {
 				Boolean boolRes=  ((BooleanValue)res.result).value();
 
@@ -1813,9 +1826,33 @@ public class WizardMVMView extends JPanel implements View {
 				MClassInvariant inv = fClassInvariants[res.index];
 				Value resultado = res.result;
 				System.out.println("   res.index ["+res.index+"] ["+inv.name()+"] result ["+resultado+"]");
+				mapInvsObj.put(inv, boolRes);
 			}
+			mapObjects.put(oObj, mapInvsObj);
 			System.out.println("                 Res Total para ["+nomObj+"] ok["+todosOk+"]");
+			// Crear mapobjects
+			//Aqui
+			//---
+			
+////			mapObjects = new HashMap<>();
+//			// Ver carga de mapObjects
+//			
+//			//---
+//			TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
+//			MVMObjCheckState w = new MVMObjCheckState(frame,mapaOrdenado );
+//			w.setSize(1038, 432);
+//			w.setLocationRelativeTo(null);
+//			w.setVisible(true);
 		}
+//		mapObjects = new HashMap<>();
+		// Ver carga de mapObjects
+		
+		//---
+		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
+		MVMObjCheckState w = new MVMObjCheckState(frame,mapaOrdenado );
+		w.setSize(1038, 432);
+		w.setLocationRelativeTo(null);
+		w.setVisible(true);
 
 		for(int indexAction=0; indexAction<nActions;indexAction++) {
 			lActions.add(indexAction, lActionsBck.get(indexAction));
