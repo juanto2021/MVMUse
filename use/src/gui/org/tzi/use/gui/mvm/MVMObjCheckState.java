@@ -84,6 +84,7 @@ public class MVMObjCheckState extends JDialog {
 	private JScrollPane paneTabAttrs;
 
 	private JButton btnExit;
+	private JButton btnCompareExpr;
 
 	private Map<MVMObject, Map<MClassInvariant, Boolean>> mapObjects;
 	private boolean checkAllObjs=true;
@@ -405,11 +406,34 @@ public class MVMObjCheckState extends JDialog {
 		});
 		btnExit.setBounds(900, 355, 110, 25);
 		panel.add(btnExit);
+		
+		btnCompareExpr = new JButton("Compare Expr");
+		btnCompareExpr.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				compareExprInvs();
+			}
+		});
+		btnCompareExpr.setBounds(560, filGroupTab1+60, 150, 25);
+		panel.add(btnCompareExpr);
 
 		getContentPane().add(panel);
 
 	}
-
+	private void compareExprInvs() {
+		System.out.println("Compara expresiones");
+		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
+		int rowObject = tabObjects.getSelectedRow();
+		String oCompareName = (String) tabObjects.getValueAt(rowObject, 0);
+		String oCompareClass = (String) tabObjects.getValueAt(rowObject, 1);
+		MVMCompareExprInvs w = new MVMCompareExprInvs(frame,mapaOrdenado, rowObject,oCompareName, oCompareClass);
+		w.setSize(888, 340);
+		w.setLocationRelativeTo(null);
+		w.setResizable(false);
+		w.setVisible(true);
+		
+	}
 	private void showExprInv(int nInv) {
 		System.out.println("nInv ["+nInv+"]");
 		MClassInvariant strInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
