@@ -32,19 +32,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,7 +96,6 @@ import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.QualifierInputView;
 import org.tzi.use.main.Session;
 import org.tzi.use.parser.ocl.OCLCompiler;
-import org.tzi.use.parser.use.USECompiler;
 import org.tzi.use.uml.mm.MAssociation;
 import org.tzi.use.uml.mm.MAssociationEnd;
 import org.tzi.use.uml.mm.MAttribute;
@@ -109,22 +103,11 @@ import org.tzi.use.uml.mm.MClass;
 import org.tzi.use.uml.mm.MClassInvariant;
 import org.tzi.use.uml.mm.MModel;
 import org.tzi.use.uml.mm.MMultiplicity;
-import org.tzi.use.uml.mm.ModelFactory;
-import org.tzi.use.uml.ocl.expr.EvalContext;
 import org.tzi.use.uml.ocl.expr.Evaluator;
-import org.tzi.use.uml.ocl.expr.ExpForAll;
-import org.tzi.use.uml.ocl.expr.ExpStdOp;
 import org.tzi.use.uml.ocl.expr.Expression;
 import org.tzi.use.uml.ocl.expr.MultiplicityViolationException;
-import org.tzi.use.uml.ocl.expr.SimpleEvalContext;
-import org.tzi.use.uml.ocl.expr.VarDeclList;
-import org.tzi.use.uml.ocl.type.Type;
 import org.tzi.use.uml.ocl.value.BooleanValue;
-import org.tzi.use.uml.ocl.value.CollectionValue;
-import org.tzi.use.uml.ocl.value.ObjectValue;
-import org.tzi.use.uml.ocl.value.SetValue;
 import org.tzi.use.uml.ocl.value.Value;
-import org.tzi.use.uml.ocl.value.VarBindings;
 import org.tzi.use.uml.sys.MLink;
 import org.tzi.use.uml.sys.MLinkEnd;
 import org.tzi.use.uml.sys.MObject;
@@ -208,6 +191,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	private JButton btnCreateObject;
 	private JButton btnNewObjectAuto;
+	private JButton btnNewObjectSampleAuto;
 	private JButton btnDeleteObject;
 	private JButton btnSaveObject;
 	private JButton btnCancelObject;
@@ -419,7 +403,7 @@ public class WizardMVMView extends JPanel implements View {
 		scrollPaneObj.setBounds(107, 40, 90, 110);
 		// masmas
 		btnNewObjectAuto = new JButton("+");
-		btnNewObjectAuto.setBounds(107, 160, 90, 25);
+		btnNewObjectAuto.setBounds(107, 160, 40, 25);
 
 		btnNewObjectAuto.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -427,6 +411,16 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 		panel.add(btnNewObjectAuto);
+		// masmas
+		btnNewObjectSampleAuto = new JButton("S");
+		btnNewObjectSampleAuto.setBounds(150, 160, 45, 25);
+
+		btnNewObjectSampleAuto.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				newObjectSampleAuto();
+			}
+		});
+		panel.add(btnNewObjectSampleAuto);
 
 		fTableModel = new TableModel();
 		fTable = new ExtendedJTable(fTableModel);
@@ -1561,6 +1555,17 @@ public class WizardMVMView extends JPanel implements View {
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 		selectObject( nomObj);
+	}
+	public void newObjectSampleAuto() {
+		System.out.println("Un obj por cda clase");
+		int nElems=lClass.getModel().getSize();
+		for(int nElem=0;nElem<nElems;nElem++) {
+			MClass oClass=lClass.getModel().getElementAt(nElem);
+			System.out.println("Creo elemento para ["+oClass.name()+"]");
+			lClass.setSelectedIndex(nElem);
+			newObjectAuto();
+			System.out.println("Creado para ["+oClass.name()+"]");
+		}
 	}
 	/**
 	 * Checks the existence of an object
