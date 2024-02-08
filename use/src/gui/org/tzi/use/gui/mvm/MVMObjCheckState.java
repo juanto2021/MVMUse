@@ -510,7 +510,8 @@ public class MVMObjCheckState extends JDialog {
 
 		String[] columns;
 		columns = new String[] {
-				"Object", "Class", "State"
+				//Aqui
+				"Object", "Class", "Satisfied "
 		};
 
 		if (mapObjects.size()>0) {
@@ -617,8 +618,9 @@ public class MVMObjCheckState extends JDialog {
 		//		String oCompareClass = (String) tabObjects.getValueAt(nObject, 1);
 		modeltabInvs = new DefaultTableModel();
 		String[] columns;
+		//Aqui
 		columns = new String[] {
-				"Inv", "State"
+				"Inv", "Satisfied "
 		};
 
 		if (mapObjects.size()>0) {

@@ -51,6 +51,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RunnableFuture;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -82,6 +83,8 @@ import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeEvent;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
 import org.tzi.use.gui.main.ViewFrame;
 import org.tzi.use.gui.mvm.AssocWizard;
+import org.tzi.use.gui.mvm.EvaluatorMVM;
+import org.tzi.use.gui.mvm.ExpressionMVM;
 import org.tzi.use.gui.mvm.LinkWizard;
 import org.tzi.use.gui.mvm.MVMAction;
 import org.tzi.use.gui.mvm.MVMAttribute;
@@ -1675,7 +1678,11 @@ public class WizardMVMView extends JPanel implements View {
 				continue;
 			}
 			MyEvaluatorCallable cb = new MyEvaluatorCallable(fSystem.state(), i, fClassInvariants[i]);
-			futures.add(ecs.submit(cb));
+			//---
+			//Aqui
+//			Future<EvalResult> f = ecs.submit(cb);
+			//---
+					futures.add(ecs.submit(cb));
 		}
 
 		for (int i = 0; i < fClassInvariants.length && !isCancelled(); i++) {
@@ -2943,13 +2950,15 @@ public class WizardMVMView extends JPanel implements View {
 		public EvalResult call() throws Exception {
 			if (isCancelled()) return null;
 
-			Evaluator eval = new Evaluator();
+			EvaluatorMVM eval = new EvaluatorMVM();
 			Value v = null;
 			String message = null;
 			long start = System.currentTimeMillis();
 
 			try {
-				v = eval.eval(inv.flaggedExpression(), state);
+				ExpressionMVM expression = (ExpressionMVM) ExpressionMVM.convertExpToExpMVM(inv.flaggedExpression());
+//				v = eval.eval(inv.flaggedExpression(), state);
+				v = eval.eval(expression, state);
 			} catch (MultiplicityViolationException e) {
 				message = e.getMessage();
 			}

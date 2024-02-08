@@ -259,7 +259,7 @@ public class MVMCompareExprInvs extends JDialog {
 		modeltabInvs = new DefaultTableModel();
 		String[] columns;
 		columns = new String[] {
-				"Inv", "Expr", "State"
+				"Inv", "Expr", "Satisfied"
 		};
 
 		if (mapObjects.size()>0) {
