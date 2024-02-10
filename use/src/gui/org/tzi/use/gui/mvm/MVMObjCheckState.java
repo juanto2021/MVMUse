@@ -122,7 +122,7 @@ public class MVMObjCheckState extends JDialog {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					System.out.println("Seleccionado (obj): " + ((JRadioButton) e.getItem()).getText());
+//					System.out.println("Seleccionado (obj): " + ((JRadioButton) e.getItem()).getText());
 					String strCmp=((JRadioButton) e.getItem()).getText();
 					switch (strCmp) {
 					case "All":
@@ -180,7 +180,7 @@ public class MVMObjCheckState extends JDialog {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					System.out.println("Seleccionado (inv): " + ((JRadioButton) e.getItem()).getText());
+//					System.out.println("Seleccionado (inv): " + ((JRadioButton) e.getItem()).getText());
 					String strCmp=((JRadioButton) e.getItem()).getText();
 					switch (strCmp) {
 					case "All":
@@ -422,7 +422,7 @@ public class MVMObjCheckState extends JDialog {
 
 	}
 	private void compareExprInvs() {
-		System.out.println("Compara expresiones");
+//		System.out.println("Compara expresiones");
 		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
 		int rowObject = tabObjects.getSelectedRow();
 		String oCompareName = (String) tabObjects.getValueAt(rowObject, 0);
@@ -435,7 +435,7 @@ public class MVMObjCheckState extends JDialog {
 		
 	}
 	private void showExprInv(int nInv) {
-		System.out.println("nInv ["+nInv+"]");
+//		System.out.println("nInv ["+nInv+"]");
 		MClassInvariant strInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
 		String texto = (String) strInv.bodyExpression().toString();
 		//		taExprInv.setText(strInv.name());
@@ -503,7 +503,7 @@ public class MVMObjCheckState extends JDialog {
 	 */
 
 	private void loadTabObjects() {
-		System.out.println("   stateObj [" + stateObj+"]");
+//		System.out.println("   stateObj [" + stateObj+"]");
 		//		boolean allObjsOk=true;
 
 		modelTabObjects = new DefaultTableModel();
@@ -532,7 +532,7 @@ public class MVMObjCheckState extends JDialog {
 				for (Map.Entry<MClassInvariant, Boolean> innerEntry : innerMap.entrySet()) {
 					MClassInvariant inv = innerEntry.getKey();
 					Boolean value = innerEntry.getValue();
-					System.out.println("   " + inv + ": " + value);
+//					System.out.println("   " + inv + ": " + value);
 					if (value==false) {
 						allOk=false;
 						if (checkAllObjs) {
@@ -542,7 +542,7 @@ public class MVMObjCheckState extends JDialog {
 						break;
 					}
 				}
-				System.out.println("Object ["+oObjKey.getName()+"] ["+allOk+"]");
+//				System.out.println("Object ["+oObjKey.getName()+"] ["+allOk+"]");
 				boolean saveData=false;
 				switch (stateObj) {
 				case ALL:
@@ -612,7 +612,7 @@ public class MVMObjCheckState extends JDialog {
 	 * Load invs table
 	 */
 	private void loadListInvs(int nObject) {
-		System.out.println("   stateInv [" + stateInv+"]");
+//		System.out.println("   stateInv [" + stateInv+"]");
 
 		//		String oCompareName = (String) tabObjects.getValueAt(nObject, 0);
 		//		String oCompareClass = (String) tabObjects.getValueAt(nObject, 1);
@@ -669,7 +669,7 @@ public class MVMObjCheckState extends JDialog {
 							data[nInv][1]=value;
 							nInv++;	
 						}
-						System.out.println("   " + inv + ": " + value);
+//						System.out.println("   " + inv + ": " + value);
 					}
 
 					// Resize data result
