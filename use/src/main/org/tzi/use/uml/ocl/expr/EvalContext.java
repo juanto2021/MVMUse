@@ -98,7 +98,7 @@ public class EvalContext {
     /**
      * Pops the last added variable binding from the binding stack.
      */
-    void popVarBinding() {
+    public void popVarBinding() {
         fVarBindings.pop();
     }
     

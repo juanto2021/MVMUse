@@ -51,7 +51,6 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.RunnableFuture;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -83,8 +82,6 @@ import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeEvent;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
 import org.tzi.use.gui.main.ViewFrame;
 import org.tzi.use.gui.mvm.AssocWizard;
-import org.tzi.use.gui.mvm.EvaluatorMVM;
-import org.tzi.use.gui.mvm.ExpressionMVM;
 import org.tzi.use.gui.mvm.LinkWizard;
 import org.tzi.use.gui.mvm.MVMAction;
 import org.tzi.use.gui.mvm.MVMAttribute;
@@ -106,11 +103,18 @@ import org.tzi.use.uml.mm.MClass;
 import org.tzi.use.uml.mm.MClassInvariant;
 import org.tzi.use.uml.mm.MModel;
 import org.tzi.use.uml.mm.MMultiplicity;
-import org.tzi.use.uml.ocl.expr.Evaluator;
+import org.tzi.use.uml.ocl.expr.EvalContext;
+import org.tzi.use.uml.ocl.expr.ExpForAll;
+import org.tzi.use.uml.ocl.expr.ExpStdOp;
 import org.tzi.use.uml.ocl.expr.Expression;
 import org.tzi.use.uml.ocl.expr.MultiplicityViolationException;
+import org.tzi.use.uml.ocl.expr.SimpleEvalContext;
+import org.tzi.use.uml.ocl.expr.VarDeclList;
 import org.tzi.use.uml.ocl.value.BooleanValue;
+import org.tzi.use.uml.ocl.value.CollectionValue;
+import org.tzi.use.uml.ocl.value.UndefinedValue;
 import org.tzi.use.uml.ocl.value.Value;
+import org.tzi.use.uml.ocl.value.VarBindings;
 import org.tzi.use.uml.sys.MLink;
 import org.tzi.use.uml.sys.MLinkEnd;
 import org.tzi.use.uml.sys.MObject;
@@ -229,8 +233,16 @@ public class WizardMVMView extends JPanel implements View {
 	// To MVMWizardActions
 	static List<MVMAction> lActions = new ArrayList<MVMAction>();
 	private String strLastFile="";
-	
-//	private Map<MVMObject, Map<String, Boolean>> mapObjects;
+
+	private Map<MVMObject, Map<MClassInvariant, Boolean>> mapObjects;
+
+	//---
+	private boolean fEnableEvalTree = false;
+	private EvalContext fEvalContext;
+	protected Expression fRangeExp;
+	protected VarDeclList fElemVarDecls;
+	protected Expression fQueryExp;
+	//---
 
 	/**
 	 * The table model.
@@ -586,7 +598,6 @@ public class WizardMVMView extends JPanel implements View {
 
 				List<MVMAction> lActionsRes=w.getListActions();
 				if (lActionsRes!=null) {
-					//					System.out.println(lActionsRes.size());
 					doActions(lActionsRes);
 				}
 			}
@@ -672,10 +683,8 @@ public class WizardMVMView extends JPanel implements View {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				MObject oSel = (MObject) cmbObjectOri.getSelectedItem();
-				//				System.out.println("Busca extremo para ["+oSel.name()+"]");
 				MObject oRel = findAssocEnd(oSel);
 				if (oRel!=null) {
-					//					System.out.println("Le corresponde ["+oRel.name()+"]");
 					cmbObjectDes.setSelectedItem(oRel);
 				}else {
 					System.out.println("["+oSel.name()+"] No tiene extremo");
@@ -692,10 +701,8 @@ public class WizardMVMView extends JPanel implements View {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				MObject oSel = (MObject) cmbObjectDes.getSelectedItem();
-				//				System.out.println("Busca extremo para ["+oSel.name()+"]");
 				MObject oRel = findAssocEnd(oSel);
 				if (oRel!=null) {
-					//					System.out.println("Le corresponde ["+oRel.name()+"]");
 					cmbObjectDes.setSelectedItem(oRel);
 				}else {
 					System.out.println("["+oSel.name()+"] No tiene extremo");
@@ -888,58 +895,6 @@ public class WizardMVMView extends JPanel implements View {
 		lActions.clear();
 	}
 
-	//	/**
-	//	 * Another kind of reset (pending)
-	//	 */
-	//	private void TheoricReset() {
-	//		Path f = Options.getRecentFile("use");
-	//		if (f != null) {
-	//
-	//
-	//			//					fMainWindow.fLogPanel.clear();
-	//			//					showLogPanel();
-	//
-	//			fLogWriter.println("compiling specification " + f.toString() + "...");
-	//
-	//			MModel model = null;
-	//			try (InputStream iStream = Files.newInputStream(f)) {
-	//				model = USECompiler.compileSpecification(iStream, f.toAbsolutePath().toString(),
-	//						fLogWriter, new ModelFactory());
-	//				fLogWriter.println("done.");
-	//			} catch (IOException ex) {
-	//				fLogWriter.println("File `" + f.toAbsolutePath().toString() + "' not found.");
-	//			}
-	//
-	//			final MSystem system;
-	//			if (model != null) {
-	//				fLogWriter.println(model.getStats());
-	//				// create system
-	//				system = new MSystem(model);
-	//			} else {
-	//				system = null;
-	//			}
-	//
-	//			// set new system (may be null if compilation failed)
-	//			//			SwingUtilities.invokeLater(new Runnable() {
-	//			//				@Override
-	//			//				public void run() {
-	//			//					fSession.setSystem(system);
-	//			//				}
-	//			//			});
-	//			fSession.reset();
-	//			System.out.println(fSession.system().state().allObjects());
-	//			//
-	//			//			if (system != null) {
-	//			//				Options.getRecentFiles().push(f.toString());
-	//			//				Options.setLastDirectory(f.getParent());
-	//			//				//						return true;
-	//			//			} else {
-	//			//				//						return false;
-	//			//			}
-	//			//				}
-	//		}
-	//	}
-
 	/**
 	 * Refresh components
 	 */	
@@ -1009,7 +964,6 @@ public class WizardMVMView extends JPanel implements View {
 				//				if ((objsActual[nf][0]).equals(strObjCmp)) {
 				if (strObjActual.equals(strObjCmp)) {
 					objsActual[nf][1]="1";
-					//-----------------------------------------------------------------
 					// Ver si los valores de los atributos son iguales o han cambiado
 					// Atributos del sistema
 					MObjectState objState = oObj.state(fSystem.state());
@@ -1040,9 +994,6 @@ public class WizardMVMView extends JPanel implements View {
 
 								if(!valueSYS.equals(valueMVM)) {
 									storeAction("MA", "Modification object ["+oObj.name()+"] of ["+oObj.cls().name()+"]");
-									//									System.out.println("attr ["+attrNameSys+"] sys["
-									//											+valueSYS+"] MVM["+valueMVM+"]");	
-
 								}
 							}
 						}
@@ -1063,21 +1014,17 @@ public class WizardMVMView extends JPanel implements View {
 				String[] partes = objsActual[nf][0].split(":");
 				String objClass=partes[0];
 				String objName=partes[1];
-				//				System.out.println("Borro ["+objsActual[nf][0]+"]");
 				storeAction("DO", "Delete object ["+objName+"] of ["+objClass+"]");	
 			}
 		}
 		// Vemos si hay algun objeto que se tenga que crear
 		for (MObject oObj: lObjsACrear) {
-			//			System.out.println("Creo ["+oObj.name()+"]");
 			String objClass=oObj.cls().name();
 			String objName=oObj.name();
 			storeAction("CO", "Creation object ["+objName+"] of ["+objClass+"]");
 		}
 
-		//--------
 		//-- Link's
-		//--------
 
 		String[][] linksActual = new String[nFilasLink][nColumnasLink];
 		// Inicializa objsActual con los objetos actuales
@@ -1122,13 +1069,11 @@ public class WizardMVMView extends JPanel implements View {
 				String strAsocc=partes[0];
 				String obj1=partes[2];
 				String obj2=partes[4];
-				//				System.out.println("Borro ["+linksActual[nf][0]+"]");
 				storeAction("DL", "Delete link ["+strAsocc+"] - ["+obj1+"]/["+obj2+"]");
 			}
 		}
 		// Vemos si hay algun objeto que se tenga que crear
 		for (MLink oLink: lLinksACrear) {
-			//			System.out.println("Creo en actions ["+oLink.association().name()+"]");
 			String obj1 = oLink.getLinkEnd(0).object().name();
 			String obj2 = oLink.getLinkEnd(1).object().name();
 			MObject o1 = findObjectByName(obj1);
@@ -1162,7 +1107,6 @@ public class WizardMVMView extends JPanel implements View {
 		MSystemState state = fSystem.state();
 		Set<MLink> oLinkSets=state.allLinks();
 		for (MLink oLink: oLinkSets) {
-			//			System.out.println("oLink ["+oLink.linkedObjects()+"]");
 			MLinkEnd oL0 = oLink.getLinkEnd(0);
 			MLinkEnd oL1 = oLink.getLinkEnd(1);
 			if(oL0.object().name().equals(oFindAssoc.name())&&
@@ -1392,7 +1336,6 @@ public class WizardMVMView extends JPanel implements View {
 
 			if (lClass.getModel().getSize()>0) {
 				oClass = lClass.getModel().getElementAt(0);
-				//				System.out.println("Clic en: " + oClass);
 				lClass.setSelectedIndex(0);
 				nomClass = oClass.name();
 				lObjects.setModel(loadListObjects(nomClass));
@@ -1411,7 +1354,6 @@ public class WizardMVMView extends JPanel implements View {
 	 * @param commandWizard
 	 */
 	private void doActionsWizardAssoc(MAssociation oAssocPralWizard, String commandWizard) {
-		//		System.out.println("getActionCommand " + commandWizard);
 		ArrayList<String> lNewObjects = new ArrayList<String>();
 		String[] partes = commandWizard.split("-");
 		int nPartes = partes.length;
@@ -1484,7 +1426,7 @@ public class WizardMVMView extends JPanel implements View {
 					MObject[] fParticipants = new MObject[] {oOri,oDes};
 					try {
 						insertLink(oAssocPralWizard, fParticipants);
-						fLogWriter.println("Inserto link entre ["+oOri.name()+"] y [" + oDes.name()+"]");
+						fLogWriter.println("Insert link between ["+oOri.name()+"] y [" + oDes.name()+"]");
 						storeAction("CL", "Creation link ["+oClassAssocEnd.name()+"] - ["+oOri.name()+"]/["+oDes.name()+"]");
 					} catch (MSystemException e) {
 						e.printStackTrace();
@@ -1560,14 +1502,14 @@ public class WizardMVMView extends JPanel implements View {
 		selectObject( nomObj);
 	}
 	public void newObjectSampleAuto() {
-		System.out.println("Un obj por cda clase");
+//		System.out.println("Un obj por cda clase");
 		int nElems=lClass.getModel().getSize();
 		for(int nElem=0;nElem<nElems;nElem++) {
 			MClass oClass=lClass.getModel().getElementAt(nElem);
-			System.out.println("Creo elemento para ["+oClass.name()+"]");
+//			System.out.println("Creo elemento para ["+oClass.name()+"]");
 			lClass.setSelectedIndex(nElem);
 			newObjectAuto();
-			System.out.println("Creado para ["+oClass.name()+"]");
+//			System.out.println("Creado para ["+oClass.name()+"]");
 		}
 	}
 	/**
@@ -1654,7 +1596,9 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	public boolean check_inv_state() {
 		boolean bRes = false;
-
+		//---
+		mapObjects = new HashMap<>();
+		//---
 		MModel fModel = fSystem.model();
 		int n = fModel.classInvariants().size();
 		MClassInvariant[] fClassInvariants = new MClassInvariant[0];
@@ -1678,11 +1622,7 @@ public class WizardMVMView extends JPanel implements View {
 				continue;
 			}
 			MyEvaluatorCallable cb = new MyEvaluatorCallable(fSystem.state(), i, fClassInvariants[i]);
-			//---
-			//Aqui
-//			Future<EvalResult> f = ecs.submit(cb);
-			//---
-					futures.add(ecs.submit(cb));
+			futures.add(ecs.submit(cb));
 		}
 
 		for (int i = 0; i < fClassInvariants.length && !isCancelled(); i++) {
@@ -1719,31 +1659,39 @@ public class WizardMVMView extends JPanel implements View {
 			f.cancel(true);
 		}
 		boolean todosOk=true;
-		System.out.println("--------------------");
+//		System.out.println("--------------------");
 		for (EvalResult res : fValues) {
 			Boolean boolRes=  ((BooleanValue)res.result).value();
 
 			if (boolRes.equals(false)) todosOk=false;
 			MClassInvariant inv = fClassInvariants[res.index];
 			Value resultado = res.result;
-			System.out.println("res.index ["+res.index+"] ["+inv.name()+"] result ["+resultado+"]");
+//			System.out.println("res.index ["+res.index+"] ["+inv.name()+"] result ["+resultado+"]");
 		}
-		System.out.println("todosOk ["+todosOk+"]");
+//		System.out.println("todosOk ["+todosOk+"]");
 		executor.shutdown();
 
 		return todosOk;
 	}
 	// Analyze every object in individual way
-
+	//Aqui
 	public void check_inv_state_individual() {
+		boolean bRes = check_inv_state();
+		// Ver carga de mapObjects
 
-
-
-
+		//---
+		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
+		MVMObjCheckState w = new MVMObjCheckState(frame,mapaOrdenado );
+		w.setSize(1038, 432);
+		w.setLocationRelativeTo(null);
+		w.setVisible(true);
+	}
+	public void check_inv_state_individual_old() {
+		// Llamar a check_inv_state
 		Map<MVMObject, Map<MClassInvariant, Boolean>> mapObjects = new HashMap<>();
-//		mapObjects = new HashMap<>();
+		//		mapObjects = new HashMap<>();
 		// Ver los objetos existentes en la actualidad.
-		// Tal vez la ultima acción es un buen punto de partida
+		// Tal vez la ultima accion es un buen punto de partida
 		int nActions = lActions.size();
 		// Hacer una copia de lActions para luego poder restaurarla
 		List<MVMAction> lActionsBck = new ArrayList<MVMAction>();
@@ -1760,7 +1708,7 @@ public class WizardMVMView extends JPanel implements View {
 			String nomObj=oObj.getName();
 			String ClassObj = oObj.getClassName();
 			createObjectAccordingMVMObject(oObj, true);			
-			System.out.println("Trato ["+nomObj+"]");
+//			System.out.println("Trato ["+nomObj+"]");
 
 
 			boolean bRes = false;
@@ -1824,9 +1772,9 @@ public class WizardMVMView extends JPanel implements View {
 			for (Future<EvalResult> f : futures) {
 				f.cancel(true);
 			}
-			System.out.println("   Resultado para ["+nomObj+"]");
+//			System.out.println("   Resultado para ["+nomObj+"]");
 			boolean todosOk=true;
-			System.out.println("   --------------------");
+//			System.out.println("   --------------------");
 			//---
 			// Crear un mapa interno para el objeto 1
 			Map<MClassInvariant, Boolean> mapInvsObj = new HashMap<>();
@@ -1837,28 +1785,14 @@ public class WizardMVMView extends JPanel implements View {
 				if (boolRes.equals(false)) todosOk=false;
 				MClassInvariant inv = fClassInvariants[res.index];
 				Value resultado = res.result;
-				System.out.println("   res.index ["+res.index+"] ["+inv.name()+"] result ["+resultado+"]");
+//				System.out.println("   res.index ["+res.index+"] ["+inv.name()+"] result ["+resultado+"]");
 				mapInvsObj.put(inv, boolRes);
 			}
 			mapObjects.put(oObj, mapInvsObj);
-			System.out.println("                 Res Total para ["+nomObj+"] ok["+todosOk+"]");
-			// Crear mapobjects
-			//Aqui
-			//---
-			
-////			mapObjects = new HashMap<>();
-//			// Ver carga de mapObjects
-//			
-//			//---
-//			TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
-//			MVMObjCheckState w = new MVMObjCheckState(frame,mapaOrdenado );
-//			w.setSize(1038, 432);
-//			w.setLocationRelativeTo(null);
-//			w.setVisible(true);
+//			System.out.println("                 Res Total para ["+nomObj+"] ok["+todosOk+"]");
 		}
-//		mapObjects = new HashMap<>();
 		// Ver carga de mapObjects
-		
+
 		//---
 		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
 		MVMObjCheckState w = new MVMObjCheckState(frame,mapaOrdenado );
@@ -1920,7 +1854,6 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		lAssocsWizard.clear();
 		for (AssocWizard aw: lAssocsWizardPaso) {
-			//			System.out.println("aw ["+aw.getName()+"]");	
 			for (LinkWizard lw: aw.getlLinks()) {
 				int needed = lw.getNeeded();
 				String objectName = lw.getObject();
@@ -1987,7 +1920,6 @@ public class WizardMVMView extends JPanel implements View {
 	public void analyzeProposals(AssocWizard aw,Map<String, List<String>> mapObjects) {
 
 		AssocWizard awNew = aw;
-		//		System.out.println("aw ["+aw.getName()+"]");	
 		List<LinkWizard> oLinks = aw.getlLinks();
 		List<LinkWizard> oNewLinks = new ArrayList<LinkWizard>();
 
@@ -2280,13 +2212,9 @@ public class WizardMVMView extends JPanel implements View {
 
 				int nLinkEnd=0;
 				for(MLinkEnd oMlinkEnd: oLink.linkEnds()) {
-					//					System.out.println(oMlinkEnd.object().name());
 					MAssociationEnd oMAssociationEnd=oMlinkEnd.associationEnd();
-					//					System.out.println(oMAssociationEnd.name());
-
 					MMultiplicity oMMultiplicity=oMAssociationEnd.multiplicity();
 
-					//					System.out.println(oMMultiplicity.toString());
 					switch(nLinkEnd){
 					case 0:
 						oOri=oMlinkEnd.object();
@@ -2315,8 +2243,6 @@ public class WizardMVMView extends JPanel implements View {
 
 			}
 		}
-		//		System.out.println(oAssoc.name());
-
 	}
 	/**
 	 * Insert link in association
@@ -2433,7 +2359,6 @@ public class WizardMVMView extends JPanel implements View {
 		}
 
 		if(oLinkTOdel!=null) {
-			//			System.out.println("Borra ["+oLinkTOdel.toString()+"]");
 			deleteLink(oLinkTOdel);
 		}
 
@@ -2591,7 +2516,6 @@ public class WizardMVMView extends JPanel implements View {
 		checkExistObjDiagram();
 
 		if (bNewObj) {
-			//			System.out.println("Creando obj ["+nomObj+"] of ["+oClass.name()+"]");
 			// Hacer copia de fValues siempre que la clase sea la misma
 
 			boolean sameClass=false;
@@ -2631,7 +2555,7 @@ public class WizardMVMView extends JPanel implements View {
 		}else {
 			//			System.out.println("Modificando obj ["+nomObj+"] of ["+oClass.name()+"]");
 		}
-		applyChanges();// Provis
+		applyChanges();
 
 		if (!checkExistObjDiagram()) {
 			odvAssoc.forceStartLayoutThread();
@@ -2654,7 +2578,7 @@ public class WizardMVMView extends JPanel implements View {
 		// Localizar diagrama y ver si se puede actualizar
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
 			// Si es nulo se le pone NAMEFRAMEMVMDIAGRAM
-			//Aqui
+
 			if (odv.getDiagram().getName()==null) {
 				odv.setName(NAMEFRAMEMVMDIAGRAM);
 			}
@@ -2699,7 +2623,7 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		// No refresh? 
 		// Don't refresh after first change...
-		fSystem.getEventBus().unregister(this);// Provis
+		fSystem.getEventBus().unregister(this);
 		boolean error = false;
 
 		for (int i = 0; i < fValues.length; ++i) {
@@ -2917,7 +2841,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 	public final boolean isCancelled() {
-		//        return future.isCancelled();
+		//		return future.isCancelled();
 		return false;
 	}
 
@@ -2950,15 +2874,46 @@ public class WizardMVMView extends JPanel implements View {
 		public EvalResult call() throws Exception {
 			if (isCancelled()) return null;
 
-			EvaluatorMVM eval = new EvaluatorMVM();
 			Value v = null;
 			String message = null;
 			long start = System.currentTimeMillis();
 
 			try {
-				ExpressionMVM expression = (ExpressionMVM) ExpressionMVM.convertExpToExpMVM(inv.flaggedExpression());
-//				v = eval.eval(inv.flaggedExpression(), state);
-				v = eval.eval(expression, state);
+				Expression expr = inv.flaggedExpression();
+//				System.out.println("Para inv ["+inv.name()+"]");
+
+				MSystemState preState=state;
+				MSystemState postState=state;
+				VarBindings bindings=new VarBindings();
+
+				fEnableEvalTree = true;
+				fEvalContext = new SimpleEvalContext(preState, postState, bindings);
+				EvalContext ctx=fEvalContext;
+
+				Class<? extends Expression> cl = expr.getClass(); 
+
+				VarDeclList elemVarDecls=null;
+				Expression rangeExp=null;
+				Expression queryExp=null;
+				Expression exp;
+				String simpleName = cl.getSimpleName();
+				if (simpleName.equals("ExpForAll")) {
+					ExpForAll exp2 = (ExpForAll) expr;
+					elemVarDecls=exp2.getVariableDeclarations();
+					fElemVarDecls=elemVarDecls;
+					rangeExp=exp2.getRangeExpression();
+					queryExp=exp2.getQueryExpression();
+					fQueryExp=queryExp;
+					exp = (ExpForAll) expr;
+				}else {
+					exp = (ExpStdOp) expr;
+					System.out.println("   NO ExpForAll [" + exp.name() + "]");
+				}
+
+				fRangeExp=rangeExp;
+				// Hay que obtener estructura con resultados de cada objeto
+				v=evalExistsOrForAllMVM(ctx, false,inv);;
+
 			} catch (MultiplicityViolationException e) {
 				message = e.getMessage();
 			}
@@ -2966,5 +2921,125 @@ public class WizardMVMView extends JPanel implements View {
 			return new EvalResult(index, v, message, System.currentTimeMillis() - start);
 		}
 	}
+	//-- INTENTO
+	protected Value evalExistsOrForAllMVM(EvalContext ctx, boolean doExists, MClassInvariant inv) {
+		Value v = fRangeExp.eval(ctx);
+		if (v.isUndefined())
+			return UndefinedValue.instance;
+		CollectionValue rangeVal = (CollectionValue) v;
+
+		// we need recursion for the permutation of assignments of
+		// range values to all element variables.
+		boolean res = evalExistsOrForAll0MVM(0, rangeVal, ctx, doExists, inv);
+
+		//		System.out.println("      rangeVal ["+rangeVal+"] res["+res+"]");
+		return BooleanValue.get(res);
+	}
+	private boolean evalExistsOrForAll0MVM(int nesting,
+			CollectionValue rangeVal, EvalContext ctx, boolean doExists, MClassInvariant inv) {
+		// loop over range elements
+		boolean res = !doExists;
+
+		for (Value elemVal : rangeVal) {
+			//			System.out.println("     ** Evaluando elemVal ["+elemVal+"]");
+			// Localizar MVMObj en lActions
+			MVMObject oMVMObj = new MVMObject();
+			int nActions = lActions.size();
+
+			if (nActions<1) break;
+
+			//			boolean existMVM=false;
+			MVMAction oAction=lActions.get(nActions-1);	
+			List<MVMObject> lObjs=oAction.getlObjs();
+			for (MVMObject oObj: lObjs) {
+				String nomElemVal=elemVal.toString();
+				if (oObj.getName().equals(nomElemVal)) {
+					oMVMObj=oObj;
+					//					existMVM=true;
+					break;
+				}
+			}
+
+			// bind element variable to range element, if variable was
+			// declared
+			if (!fElemVarDecls.isEmpty())
+				ctx.pushVarBinding(fElemVarDecls.varDecl(nesting).name(),
+						elemVal);
+
+			if (!fElemVarDecls.isEmpty() && nesting < fElemVarDecls.size() - 1) {
+				// call recursively to iterate over range while
+				// assigning each value to each element variable
+				// eventually
+				if (res != doExists) {
+					res = evalExistsOrForAll0MVM(nesting + 1, rangeVal, ctx,
+							doExists, inv);
+//					System.out.println("      Evaluando elemVal ["+elemVal+"] hay fElemVarDecls res ["+res+"] ");
+				}else if (ctx.isEnableEvalTree()) {
+					// don't change the result value when expression is true
+					// (exists) or
+					// false (forAll) and continue iteration
+//					System.out.println("      Evaluando elemVal ["+elemVal+"] fEnableEvalTree ["+fEnableEvalTree+"] ");
+					evalExistsOrForAll0MVM(nesting + 1, rangeVal, ctx, doExists, inv);
+
+				}else {
+					if (!fElemVarDecls.isEmpty())
+						ctx.popVarBinding();
+//					System.out.println("      Evaluando elemVal ["+elemVal+"] !fElemVarDecls.isEmpty()");
+					break;
+				}
+			} else {
+				// evaluate predicate expression
+				Value queryVal = fQueryExp.eval(ctx);
+
+//				System.out.println("      Evaluando elemVal ["+elemVal+"] queryVal ["+queryVal+"] ");
+				Boolean boolRes = ((BooleanValue)queryVal).value();
+				// Localizar el mapa de objetos en mapObjects
+				Map<MClassInvariant, Boolean> mapInvsObj = new HashMap<>();
+				if(mapObjects.containsKey(oMVMObj)) {
+					mapInvsObj=mapObjects.get(oMVMObj);
+					if(mapInvsObj.containsKey(inv)) {
+						mapInvsObj.replace(inv, boolRes);
+					}else {
+						mapInvsObj.put(inv, boolRes);
+					}
+
+					mapObjects.replace(oMVMObj, mapInvsObj);
+				}else {
+					mapInvsObj.put(inv, boolRes);
+					mapObjects.put(oMVMObj, mapInvsObj);
+				}
+
+				// undefined query values default to false
+				if (queryVal.isUndefined())
+					queryVal = BooleanValue.FALSE;
+
+				// don't change the result value when expression is true
+				// (exists) or
+				// false (forAll) and continue iteration
+				if (res != doExists && ((BooleanValue) queryVal).value() == doExists)
+					res = doExists;
+				else if (!ctx.isEnableEvalTree() &&  ((BooleanValue) queryVal).value() == doExists) {
+					if (!fElemVarDecls.isEmpty()) {
+						if  (ctx.varBindings().iterator().hasNext()) {
+							ctx.popVarBinding();
+						}
+						//						ctx.popVarBinding();//Provis
+					}
+					//					break;//Provis
+				}
+
+			}
+
+			if (!fElemVarDecls.isEmpty()) {
+				if  (ctx.varBindings().iterator().hasNext()) {
+					ctx.popVarBinding();
+				}
+				//				ctx.popVarBinding();//Provis
+			}
+		}
+
+		return res;
+	}
+
 }
 

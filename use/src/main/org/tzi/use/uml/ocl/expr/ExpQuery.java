@@ -173,10 +173,10 @@ public abstract class ExpQuery extends Expression {
 
         // we need recursion for the permutation of assignments of
         // range values to all element variables.
-        System.out.println("rangeVal ["+rangeVal+"] ");
+//        System.out.println("rangeVal ["+rangeVal+"] ");
         boolean res = evalExistsOrForAll0(0, rangeVal, ctx, doExists);
         
-        System.out.println("rangeVal ["+rangeVal+"] res["+res+"]");
+//        System.out.println("rangeVal ["+rangeVal+"] res["+res+"]");
         return BooleanValue.get(res);
     }
 
@@ -186,7 +186,7 @@ public abstract class ExpQuery extends Expression {
         boolean res = !doExists;
         
         for (Value elemVal : rangeVal) {
-        	System.out.println("Evaluando elemVal ["+elemVal+"] ");
+//        	System.out.println("Evaluando elemVal ["+elemVal+"] ");
             // bind element variable to range element, if variable was
             // declared
             if (!fElemVarDecls.isEmpty())
@@ -213,7 +213,7 @@ public abstract class ExpQuery extends Expression {
             } else {
                 // evaluate predicate expression
                 Value queryVal = fQueryExp.eval(ctx);
-                System.out.println("queryVal ["+queryVal+"] ");
+//                System.out.println("queryVal ["+queryVal+"] ");
                 // undefined query values default to false
                 if (queryVal.isUndefined())
                     queryVal = BooleanValue.FALSE;

@@ -102,7 +102,7 @@ public class EvalNode {
     	this.width = nodeWidth;
     }
 
-    void addChild(EvalNode n) {
+    public void addChild(EvalNode n) {
         if (fChildren == null)
             fChildren = new ArrayList<EvalNode>();
         fChildren.add(n);

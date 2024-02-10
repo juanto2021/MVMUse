@@ -2542,14 +2542,14 @@ public final class MSystemState {
 					+"  ";
 		}
 		//---
-		System.out.println("cause ["+cause+"]");
-		System.out.println("nomAssociation  ["+ nomAssociation +"]");
-		System.out.println("nomAssocObject ["+nomAssocObject+"]");
-		System.out.println("nomAssocClass ["+nomAssocClass+"]");
-		System.out.println("connectedNum ["+connectedNum+"]");
-		System.out.println("connectedClass ["+connectedClass+"]");
-		System.out.println("assoccEnd ["+assoccEnd+"]");
-		System.out.println("multiplicity ["+multiplicity+"]");
+//		System.out.println("cause ["+cause+"]");
+//		System.out.println("nomAssociation  ["+ nomAssociation +"]");
+//		System.out.println("nomAssocObject ["+nomAssocObject+"]");
+//		System.out.println("nomAssocClass ["+nomAssocClass+"]");
+//		System.out.println("connectedNum ["+connectedNum+"]");
+//		System.out.println("connectedClass ["+connectedClass+"]");
+//		System.out.println("assoccEnd ["+assoccEnd+"]");
+//		System.out.println("multiplicity ["+multiplicity+"]");
 
 		LinkWizard lw = new LinkWizard();
 		lw.setObject(nomAssocObject);
