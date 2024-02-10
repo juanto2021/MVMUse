@@ -153,7 +153,7 @@ public class WizardMVMView extends JPanel implements View {
 	private JPanel panel;
 
 	private DefaultListModel<String> modelObjects;
-	private DefaultTableModel modelTabAttrs;
+//	private DefaultTableModel modelTabAttrs;
 
 	private JLabel lbClass;
 	private JLabel lbObjects;
@@ -212,7 +212,7 @@ public class WizardMVMView extends JPanel implements View {
 	private JButton btnActions;
 	private JButton btnReset;
 
-	private WizardMVMView thisWizard;
+//	private WizardMVMView thisWizard;
 	private boolean bNewObj;
 	private JTable fTable;
 	private JScrollPane fTablePane;
@@ -319,7 +319,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	public WizardMVMView(MainWindow parent, Session session, PrintWriter logWriter) {
 		super(new BorderLayout());
-		thisWizard=this;
+//		thisWizard=this;
 		fMainWindow = parent;
 		fSession = session;
 		fSystem = session.system();
@@ -347,7 +347,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.setLayout(null);
 
 		modelObjects = new DefaultListModel<>();
-		modelTabAttrs = new DefaultTableModel();
+//		modelTabAttrs = new DefaultTableModel();
 
 		lbClass = new JLabel("Class");
 		lbClass.setBounds(10, 15, 60, 25);
@@ -376,7 +376,6 @@ public class WizardMVMView extends JPanel implements View {
 					int index = lClass.locationToIndex(evt.getPoint());
 					if (index != -1) {
 						oClass = lClass.getModel().getElementAt(index);
-						//						System.out.println("Clic en: " + oClass);
 						lClass.setSelectedIndex(index);
 						nomClass = oClass.name();
 						lObjects.setModel(loadListObjects(nomClass));
@@ -774,8 +773,10 @@ public class WizardMVMView extends JPanel implements View {
 				int resp =JOptionPane.showConfirmDialog(null, "Are you sure to delete link ["+oAssoc.name()+"]?",
 						"Delete Links", JOptionPane.YES_NO_OPTION,
 						JOptionPane.QUESTION_MESSAGE);					
-
-				deleteLink(oAssoc) ;
+				if (resp==0) {
+					deleteLink(oAssoc) ;
+				}
+				
 			}
 		});
 
