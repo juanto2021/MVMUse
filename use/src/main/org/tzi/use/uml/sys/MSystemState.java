@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -46,6 +47,7 @@ import org.tzi.use.uml.mm.MAssociationEnd;
 import org.tzi.use.uml.mm.MAttribute;
 import org.tzi.use.uml.mm.MClass;
 import org.tzi.use.uml.mm.MClassInvariant;
+import org.tzi.use.uml.mm.MMultiplicity;
 import org.tzi.use.uml.mm.MNavigableElement;
 import org.tzi.use.uml.ocl.expr.EvalContext;
 import org.tzi.use.uml.ocl.expr.Evaluator;
@@ -2165,26 +2167,45 @@ public final class MSystemState {
 				//				res = validateBinaryAssociationsTakeErrors(out, assoc, aend2, aend1, reportAllErrors) && res;
 				cls = aend2.cls();
 				objects = objectsOfClassAndSubClasses(cls);
-
+				//Aqui no pasa
 				for (MObject obj : objects) {
 					Map<List<Value>,Set<MObject>> linkedObjects = getLinkedObjects(obj, aend2, aend1);
-
-					if (linkedObjects.size() == 0 && !aend1.multiplicity().contains(0)) {
+					MMultiplicity mm = aend1.multiplicity();
+					//					if (linkedObjects.size() == 0 && !aend1.multiplicity().contains(0)) {//Provis
+					if (linkedObjects.size() == 0 && !aend1.multiplicity().equals(0)) {
 						reportMultiplicityViolation(out, assoc, aend2, aend1, obj, null);
 						LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, null);
 						System.out.println();
 						int multi = 0; 
+						int minMulti=0;
+						int maxMulti=0;
 						int connectedTo=0; 
+						String strMulti = lw.getMultiSpecified();
 						try {
-							multi = Integer.parseInt(lw.getMultiSpecified()); 
-						}catch(Exception e) {}
+							if (strMulti.contains("..")) {
+								int posicion = strMulti.indexOf("..");
+								minMulti=Integer.parseInt(strMulti.substring(0, posicion));
+								multi=minMulti;
+								maxMulti=Integer.parseInt(strMulti.substring(posicion+2));
+							}else {
+								multi = Integer.parseInt(strMulti); 
+								minMulti=multi;
+								maxMulti=multi;
+							}
+						}catch(Exception e) {
+							System.out.println(e.getMessage());
+						}
 						try {
 							connectedTo=Integer.parseInt(lw.getConnectedTo()); 
 						}catch(Exception e) {}
 						int needed = multi-connectedTo;
+						int disponibility = maxMulti-connectedTo;
 						if (needed < 0) 
 							needed=0;
+						if (disponibility < 0) 
+							disponibility=0;
 						lw.setNeeded(needed);
+						lw.setDisponibility(disponibility);
 
 						lLinksWizard.add(lw);
 
@@ -2205,17 +2226,36 @@ public final class MSystemState {
 							LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, entry);
 							System.out.println();
 							int multi = 0; 
+							int minMulti=0;
+							int maxMulti=0;
 							int connectedTo=0; 
+							String strMulti = lw.getMultiSpecified();
 							try {
-								multi = Integer.parseInt(lw.getMultiSpecified()); 
-							}catch(Exception e) {}
+								if (strMulti.contains("..")) {
+									int posicion = strMulti.indexOf("..");
+									minMulti=Integer.parseInt(strMulti.substring(0, posicion));
+									multi=minMulti;
+									maxMulti=Integer.parseInt(strMulti.substring(posicion+2));
+								}else {
+									multi = Integer.parseInt(strMulti); 
+									minMulti=multi;
+									maxMulti=multi;
+								}
+							}catch(Exception e) {
+								System.out.println(e.getMessage());
+							}
 							try {
 								connectedTo=Integer.parseInt(lw.getConnectedTo()); 
 							}catch(Exception e) {}
 							int needed = multi-connectedTo;
+							int disponibility = maxMulti-connectedTo;
 							if (needed < 0) 
 								needed=0;
+							if (disponibility < 0) 
+								disponibility=0;
 							lw.setNeeded(needed);
+							lw.setDisponibility(disponibility);
+							//							lw.setNeeded(needed);
 
 							lLinksWizard.add(lw);
 
@@ -2542,14 +2582,14 @@ public final class MSystemState {
 					+"  ";
 		}
 		//---
-//		System.out.println("cause ["+cause+"]");
-//		System.out.println("nomAssociation  ["+ nomAssociation +"]");
-//		System.out.println("nomAssocObject ["+nomAssocObject+"]");
-//		System.out.println("nomAssocClass ["+nomAssocClass+"]");
-//		System.out.println("connectedNum ["+connectedNum+"]");
-//		System.out.println("connectedClass ["+connectedClass+"]");
-//		System.out.println("assoccEnd ["+assoccEnd+"]");
-//		System.out.println("multiplicity ["+multiplicity+"]");
+		//		System.out.println("cause ["+cause+"]");
+		//		System.out.println("nomAssociation  ["+ nomAssociation +"]");
+		//		System.out.println("nomAssocObject ["+nomAssocObject+"]");
+		//		System.out.println("nomAssocClass ["+nomAssocClass+"]");
+		//		System.out.println("connectedNum ["+connectedNum+"]");
+		//		System.out.println("connectedClass ["+connectedClass+"]");
+		//		System.out.println("assoccEnd ["+assoccEnd+"]");
+		//		System.out.println("multiplicity ["+multiplicity+"]");
 
 		LinkWizard lw = new LinkWizard();
 		lw.setObject(nomAssocObject);

@@ -16,6 +16,7 @@ public class LinkWizard {
 	private String cause;
 	private String fullMessage;
 	private int needed;
+	private int disponibility;
 	private Map<String, String> mapActions;
 	
 
@@ -31,12 +32,13 @@ public class LinkWizard {
 		this.cause = "";
 		this.fullMessage = "";
 		this.needed = 0;
+		this.disponibility = 0;
 		this.mapActions = new HashMap<String, String>();
 	}
 
 	public LinkWizard(String object, MObject oMObject,String nomClass, String connectedTo, String ofClass,
 			String assocEnd, String multiSpecified, String cause, String fullMessage, int needed,
-			Map<String, String> mapActions) {
+			int disponibility,Map<String, String> mapActions) {
 		super();
 		this.object = object;
 		this.oMObject = oMObject;
@@ -48,6 +50,7 @@ public class LinkWizard {
 		this.cause = cause;
 		this.fullMessage = fullMessage;	
 		this.needed = needed;
+		this.disponibility = disponibility;
 		this.mapActions = mapActions;
 	}
 
@@ -116,6 +119,14 @@ public class LinkWizard {
 	
 	public void setNeeded(int needed) {
 		this.needed = needed;
+	}
+
+	public int getDisponibility() {
+		return disponibility;
+	}	
+	
+	public void setDisponibility(int disponibility) {
+		this.disponibility = disponibility;
 	}
 
 	public Map<String, String> getMapActions() {
