@@ -318,6 +318,7 @@ public class WizardMVMView extends JPanel implements View {
 	public WizardMVMView(MainWindow parent, Session session, PrintWriter logWriter) {
 		super(new BorderLayout());
 		//		thisWizard=this;
+		lActions = new ArrayList<MVMAction>();
 		fMainWindow = parent;
 		fSession = session;
 		fSystem = session.system();
@@ -611,6 +612,7 @@ public class WizardMVMView extends JPanel implements View {
 
 				w.setSize(1008, 547);
 				w.setLocationRelativeTo(null);
+				w.setResizable(false);
 				w.setVisible(true);	
 
 				strLastFile=w.getLastFile();
@@ -659,20 +661,24 @@ public class WizardMVMView extends JPanel implements View {
 				cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 			}
 		});
-		cmbClassOri.setEnabled(false);
-		cmbClassOri.setVisible(false);
+//		cmbClassOri.setEnabled(false);//Provis
+//		cmbClassOri.setVisible(false);//Provis
+		cmbClassOri.setEnabled(true);
+		cmbClassOri.setVisible(true);
 		panel.add(cmbClassOri);
 
+		// Lo siguiente es provisional -------------------------------------------------
 		Border blackline = BorderFactory.createLineBorder(Color.black);
-
-		lbFromClass = new JLabel("");
-		lbFromClass.setBounds(205, 215, 120, 25);
-		lbFromClass.setBorder(blackline);
-		lbFromClass.setBackground(colorSoftGray);
-		lbFromClass.setHorizontalAlignment(SwingConstants.CENTER);
-		lbFromClass.setOpaque(true);
-
-		panel.add(lbFromClass);
+//
+//		lbFromClass = new JLabel("");
+//		lbFromClass.setBounds(205, 215, 120, 25);
+//		lbFromClass.setBorder(blackline);
+//		lbFromClass.setBackground(colorSoftGray);
+//		lbFromClass.setHorizontalAlignment(SwingConstants.CENTER);
+//		lbFromClass.setOpaque(true);
+//
+//		panel.add(lbFromClass);
+		//------------------------------------------------------------------------------
 
 		cmbClassDes = new JComboBox<MClass>();
 		cmbClassDes.setModel(loadComboClass());
@@ -682,17 +688,19 @@ public class WizardMVMView extends JPanel implements View {
 				cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 			}
 		});
-		cmbClassDes.setEnabled(false);
-		cmbClassDes.setVisible(false);
+//		cmbClassDes.setEnabled(false);
+//		cmbClassDes.setVisible(false);
+		cmbClassDes.setEnabled(true);
+		cmbClassDes.setVisible(true);
 		panel.add(cmbClassDes);
 
-		lbToClass = new JLabel("");
-		lbToClass.setBounds(335, 215, 120, 25);
-		lbToClass.setBorder(blackline);
-		lbToClass.setBackground(colorSoftGray);
-		lbToClass.setHorizontalAlignment(SwingConstants.CENTER);
-		lbToClass.setOpaque(true);
-		panel.add(lbToClass);
+//		lbToClass = new JLabel("");
+//		lbToClass.setBounds(335, 215, 120, 25);
+//		lbToClass.setBorder(blackline);
+//		lbToClass.setBackground(colorSoftGray);
+//		lbToClass.setHorizontalAlignment(SwingConstants.CENTER);
+//		lbToClass.setOpaque(true);
+//		panel.add(lbToClass);
 
 		cmbObjectOri = new JComboBox<MObject>();
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
@@ -706,7 +714,7 @@ public class WizardMVMView extends JPanel implements View {
 				if (oRel!=null) {
 					cmbObjectDes.setSelectedItem(oRel);
 				}else {
-					System.out.println("["+oSel.name()+"] No tiene extremo");
+//					System.out.println("["+oSel.name()+"] No tiene extremo");
 				}
 			}
 		});
@@ -724,7 +732,7 @@ public class WizardMVMView extends JPanel implements View {
 				if (oRel!=null) {
 					cmbObjectDes.setSelectedItem(oRel);
 				}else {
-					System.out.println("["+oSel.name()+"] No tiene extremo");
+//					System.out.println("["+oSel.name()+"] No tiene extremo");
 				}
 			}
 		});
@@ -855,6 +863,7 @@ public class WizardMVMView extends JPanel implements View {
 					MVMWizardAssoc dW= new MVMWizardAssoc(frame,lAssocsWizard);
 					dW.setSize(910,490);
 					dW.setLocationRelativeTo(null);
+					dW.setResizable(false);
 					dW.setVisible(true);
 					String commandWizard = dW.getCommandWizard();
 					MAssociation oAssocPralWizard = dW.getAssocWizard();
@@ -1716,6 +1725,7 @@ public class WizardMVMView extends JPanel implements View {
 		MVMObjCheckState w = new MVMObjCheckState(frame,mapaOrdenado );
 		w.setSize(1038, 432);
 		w.setLocationRelativeTo(null);
+		w.setResizable(false);
 		w.setVisible(true);
 	}
 	public void check_inv_state_individual_old() {
@@ -2132,7 +2142,7 @@ public class WizardMVMView extends JPanel implements View {
 		// Sort the elements
 		Collections.sort(data, new MClassComparator());
 
-		// Clean the model and add ordered elements
+		// Clean the ComboBoxModel and add ordered elements
 		cbm.removeAllElements();
 		for (MClass element : data) {
 			cbm.addElement(element);
@@ -2216,10 +2226,10 @@ public class WizardMVMView extends JPanel implements View {
 				switch(nLink){
 				case 0:
 					selectClassInCombo(cmbClassOri,className);
-					lbFromClass.setText(className);
+//					lbFromClass.setText(className);//Provis
 				case 1:
 					selectClassInCombo(cmbClassDes,className);
-					lbToClass.setText(className);
+//					lbToClass.setText(className);
 				default:
 					// Do nothing
 					break;
@@ -2250,7 +2260,7 @@ public class WizardMVMView extends JPanel implements View {
 						cmbObjectOri.setSelectedItem(oOri);
 						cmbMultiOri.setSelectedItem(oMMultiplicity.toString());
 						txMultiOri.setText(oMMultiplicity.toString());
-						lbFromClass.setText(oOri.cls().name());
+//						lbFromClass.setText(oOri.cls().name());//Provis
 						break;
 					case 1:
 						oDes=oMlinkEnd.object();
@@ -2259,7 +2269,7 @@ public class WizardMVMView extends JPanel implements View {
 						cmbObjectDes.setSelectedItem(oDes);
 						cmbMultiDes.setSelectedItem(oMMultiplicity.toString());
 						txMultiDes.setText(oMMultiplicity.toString());
-						lbToClass.setText(oDes.cls().name());
+//						lbToClass.setText(oDes.cls().name());//Provis
 						break;
 					default:
 						// Do nothing
