@@ -220,7 +220,7 @@ public class MVMObjCheckState extends JDialog {
 		panelGroupInv.add(rbInvAll);
 		panelGroupInv.add(rbInvOk);
 		panelGroupInv.add(rbInvKo);
-		TitledBorder titledBorderInv = new TitledBorder("Options Objects");
+		TitledBorder titledBorderInv = new TitledBorder("Options Invariants");
 		panelGroupInv.setBorder(titledBorderInv);
 
 		modelTabObjects = new DefaultTableModel();
@@ -407,7 +407,7 @@ public class MVMObjCheckState extends JDialog {
 		btnExit.setBounds(900, 355, 110, 25);
 		panel.add(btnExit);
 		
-		btnCompareExpr = new JButton("Compare Expr");
+		btnCompareExpr = new JButton("Show Expressions");
 		btnCompareExpr.addActionListener(new ActionListener() {
 
 			@Override

@@ -495,7 +495,7 @@ public class WizardMVMView extends JPanel implements View {
 		nomObj = (String) lObjects.getSelectedValue();
 		txNewObject.setText(nomObj);
 
-		btnCreateObject = new JButton("New Object");
+		btnCreateObject = new JButton("New Obj");
 		btnCreateObject.setBounds(400, 70, 95, 25);
 		btnCreateObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -546,7 +546,7 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnCancelObject);
 
-		btnDeleteObject = new JButton("Delete Object");
+		btnDeleteObject = new JButton("Delete Obj");
 		btnDeleteObject.setBounds(400, 122, 95, 25);
 		btnDeleteObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

@@ -176,11 +176,12 @@ public class MVMFindActions extends JDialog {
 		btnCancel.setBounds(col1+790, 330 + insets.top, 110, 25);
 		panel.add(btnCancel);
 		getContentPane().add(panel);
-
-		tabActions.setRowSelectionInterval(0, 0);// Select first row
+		// Aqui
+		//		tabActions.setRowSelectionInterval(0, 0);// Select first row // Provis
 		if (tabActions.getModel().getRowCount()>0) {
 			String nomfile = (String) tabActions.getValueAt(0, 0);
 			txLastFile.setText(nomfile);
+			tabActions.setRowSelectionInterval(0, 0);// Select first row
 		}
 	}
 
@@ -298,7 +299,7 @@ public class MVMFindActions extends JDialog {
 		File carpeta = new File(directoryName);
 		String[] listado = carpeta.list();
 		for (int i=0; i< listado.length; i++) {
-			System.out.println(listado[i]);
+			//			System.out.println(listado[i]);
 			String nomFile = listado[i];
 			String nomFileGroup = directoryName+"/"+nomFile;
 			MVMGroupActions group = readMVMGroup(nomFileGroup);
