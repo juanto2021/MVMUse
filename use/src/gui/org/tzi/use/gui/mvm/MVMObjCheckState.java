@@ -104,8 +104,8 @@ public class MVMObjCheckState extends JDialog {
 	private StatesInv stateInv=StatesInv.ALL;
 
 	public MVMObjCheckState(JFrame fParent, Map<MVMObject, Map<MClassInvariant, Boolean>> pMapObjects ) {
-		super(fParent, "MVM Check Objects State",ModalityType.APPLICATION_MODAL);
-		frame = new JFrame("MVM Check Objects State");
+		super(fParent, "MVM Check Objects Satisfiability",ModalityType.APPLICATION_MODAL);
+		frame = new JFrame("MVM Check Objects Satisfiability");
 		frame.setAlwaysOnTop(true);
 		frame.setModalExclusionType(ModalExclusionType.TOOLKIT_EXCLUDE);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//Provis
