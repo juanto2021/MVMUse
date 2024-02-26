@@ -75,8 +75,8 @@ public class MVMCompareExprInvs extends JDialog {
 			int pRowObject, 
 			String pCompareName, 
 			String pCompareClass) {
-		super(fParent, "MVM Compare invs expressions",ModalityType.APPLICATION_MODAL);
-		frame = new JFrame("MVM Compare invs expressions");
+		super(fParent, "MVM Show invs expressions",ModalityType.APPLICATION_MODAL);
+		frame = new JFrame("MVM Show invs expressions");
 		frame.setAlwaysOnTop(true);
 		frame.setModalExclusionType(ModalExclusionType.TOOLKIT_EXCLUDE);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//Provis

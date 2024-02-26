@@ -2127,7 +2127,7 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	private  DefaultComboBoxModel<MClass> loadComboClass() {
 		DefaultComboBoxModel<MClass> cbm = new DefaultComboBoxModel<MClass>();
-		//Aqui
+
 		for (MClass oClass : fSystem.model().classes()) {
 			if (!oClass.isAbstract()) {
 				cbm.addElement(oClass);
@@ -2641,6 +2641,8 @@ public class WizardMVMView extends JPanel implements View {
 			lObjects.setSelectedIndex(idx);
 			nomObj = (String) lObjects.getSelectedValue();
 			selectObject( nomObj);
+			// Aqui
+			txNewObject.setText(nomObj);
 		}else {
 			fTableModel.update();
 		}
