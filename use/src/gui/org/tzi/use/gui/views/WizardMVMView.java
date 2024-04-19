@@ -815,7 +815,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lbClassInvariants);
 
 		lbResClassInvariants = new JLabel("");
-		lbResClassInvariants.setBounds(335, 375, 120, 25);
+		lbResClassInvariants.setBounds(325, 375, 120, 25);
 		lbResClassInvariants.setBorder(blackline);
 		lbResClassInvariants.setVerticalAlignment(SwingConstants.CENTER);
 		lbResClassInvariants.setHorizontalAlignment(SwingConstants.CENTER);
@@ -823,11 +823,11 @@ public class WizardMVMView extends JPanel implements View {
 		lbResClassInvariants.setVisible(false);
 		panel.add(lbResClassInvariants);
 
-		btnShowClassInvariants = new JButton("OK");
-		btnShowClassInvariants.setBounds(300, 375, 65, 25);
+		btnShowClassInvariants = new JButton("");// Before empty 'OK'
+		btnShowClassInvariants.setBounds(295, 375, 90, 25);//65
 		btnShowClassInvariants.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowClassInvariants.setHorizontalAlignment(SwingConstants.CENTER);
-		btnShowClassInvariants.setFont(new Font("Serif", Font.BOLD, 18));
+		btnShowClassInvariants.setFont(new Font("Serif", Font.BOLD, 13));//18
 		btnShowClassInvariants.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				showClassInvariantsState();
@@ -836,10 +836,11 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnShowClassInvariants);
 
 		btnShowIndividuals = new JButton("OBJs");
-		btnShowIndividuals.setBounds(375, 375, 80, 25);
+//		btnShowIndividuals.setBounds(375, 375, 80, 25);
+		btnShowIndividuals.setBounds(385, 375, 70, 25);
 		btnShowIndividuals.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowIndividuals.setHorizontalAlignment(SwingConstants.CENTER);
-		btnShowIndividuals.setFont(new Font("Serif", Font.BOLD, 14));
+		btnShowIndividuals.setFont(new Font("Serif", Font.BOLD, 13));
 		btnShowIndividuals.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				check_inv_state_individual();
@@ -847,15 +848,15 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnShowIndividuals);
 
-		lbCheckStructure = new JLabel("Check Structure");
+		lbCheckStructure = new JLabel("Multiplicities");
 		lbCheckStructure.setBounds(205, 410, 120, 25);
 		panel.add(lbCheckStructure);
 
-		btnShowCheckStructure = new JButton("OK");
+		btnShowCheckStructure = new JButton("");// Before empty 'OK'
 		btnShowCheckStructure.setBounds(300, 410, 155, 25);
 		btnShowCheckStructure.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowCheckStructure.setHorizontalAlignment(SwingConstants.CENTER);
-		btnShowCheckStructure.setFont(new Font("Serif", Font.BOLD, 18));
+		btnShowCheckStructure.setFont(new Font("Serif", Font.BOLD, 13));
 		btnShowCheckStructure.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				boolean ok=checkStructure();
@@ -1580,8 +1581,8 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	public void setResCheckStructure() {
 		boolean bRes = checkStructure();
-		String sRes="OK";
-		if (!bRes) sRes="KO";
+		String sRes="Correct";
+		if (!bRes) sRes="Incorrect";
 		btnShowCheckStructure.setText(sRes);
 		if(!bRes) {
 			btnShowCheckStructure.setForeground(Color.white);
@@ -1597,8 +1598,8 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	public void setResClassInvariants() {
 		boolean bRes = check_inv_state();
-		String sRes="OK";
-		if (!bRes) sRes="KO";
+		String sRes="Correct";
+		if (!bRes) sRes="Incorrect";
 		lbResClassInvariants.setText(sRes);
 		btnShowClassInvariants.setText(sRes);
 		if(!bRes) {

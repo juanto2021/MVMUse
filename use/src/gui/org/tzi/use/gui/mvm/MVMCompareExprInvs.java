@@ -136,7 +136,7 @@ public class MVMCompareExprInvs extends JDialog {
 		panelGroupInv.add(rbInvAll);
 		panelGroupInv.add(rbInvOk);
 		panelGroupInv.add(rbInvKo);
-		TitledBorder titledBorderInv = new TitledBorder("Options Invs");
+		TitledBorder titledBorderInv = new TitledBorder("Filter invariants");
 		panelGroupInv.setBorder(titledBorderInv);
 
 		modeltabInvs = new DefaultTableModel();
@@ -157,7 +157,7 @@ public class MVMCompareExprInvs extends JDialog {
 		panelGroupInv.setBounds(col1 ,filGroupTab1, 160, 60);
 		panel.add(panelGroupInv);
 
-		lbInvs = new JLabel("Invs");
+		lbInvs = new JLabel("Invariants");
 		lbInvs.setBounds(col1, filGroupTab2-30, 300, 25);
 		Font newFont = new Font(lbInvs.getFont().getName(), Font.BOLD, 18);
 		lbInvs.setFont(newFont);
@@ -259,7 +259,7 @@ public class MVMCompareExprInvs extends JDialog {
 		modeltabInvs = new DefaultTableModel();
 		String[] columns;
 		columns = new String[] {
-				"Inv", "Expr", "Satisfied"
+				"Invariant", "Body", "Satisfied"
 		};
 
 		if (mapObjects.size()>0) {

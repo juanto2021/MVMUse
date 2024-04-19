@@ -279,7 +279,7 @@ public class MVMWizardAssoc extends JDialog {
 		btnApply.setBounds(630, 310+HEIGHT_TABLE, 120, 25);
 		panel.add(btnApply);
 
-		btnExit = new JButton("Salir");
+		btnExit = new JButton("Exit");
 		btnExit.addActionListener(new ActionListener() {
 
 			@Override
@@ -547,7 +547,7 @@ public class MVMWizardAssoc extends JDialog {
 		modelTabLinks = new DefaultTableModel();
 		String[] columns;
 		columns = new String[] {
-				"Object", "Class","Connectec To","Of Class", "Assoc End","Multi Specified","ObjPral"
+				"Object", "Class","Connected To","Of Class", "Assoc End","Multi Specified","ObjPral"
 		};
 
 		ArrayList<LinkWizard> data = loadLinksAssoc(assoc);

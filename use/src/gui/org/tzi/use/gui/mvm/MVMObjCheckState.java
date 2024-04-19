@@ -167,7 +167,7 @@ public class MVMObjCheckState extends JDialog {
 		panelGroupObj.add(rbObjAll);
 		panelGroupObj.add(rbObjOk);
 		panelGroupObj.add(rbObjKo);
-		TitledBorder titledBorderObj = new TitledBorder("Options Objects");
+		TitledBorder titledBorderObj = new TitledBorder("Filter Objects");
 		panelGroupObj.setBorder(titledBorderObj);
 
 		// Invs options
@@ -220,7 +220,7 @@ public class MVMObjCheckState extends JDialog {
 		panelGroupInv.add(rbInvAll);
 		panelGroupInv.add(rbInvOk);
 		panelGroupInv.add(rbInvKo);
-		TitledBorder titledBorderInv = new TitledBorder("Options Invariants");
+		TitledBorder titledBorderInv = new TitledBorder("Filter Invariants");
 		panelGroupInv.setBorder(titledBorderInv);
 
 		modelTabObjects = new DefaultTableModel();
@@ -256,7 +256,7 @@ public class MVMObjCheckState extends JDialog {
 		lbObjects.setFont(newFont);
 		panel.add(lbObjects);	
 
-		lbInvs = new JLabel("Invs");
+		lbInvs = new JLabel("Invariants");
 		lbInvs.setBounds(col1+320, filGroupTab2-30, 150, 25);
 		lbInvs.setFont(newFont);
 		panel.add(lbInvs);	
@@ -378,8 +378,8 @@ public class MVMObjCheckState extends JDialog {
 		panel.add(paneTabAttrs);
 
 
-		lbExprInv = new JLabel("Expr Inv.");
-		lbExprInv.setBounds(col1, 270 + insets.top, 150, 25);
+		lbExprInv = new JLabel("Invariant body");
+		lbExprInv.setBounds(col1, 270 + insets.top, 250, 25);
 		lbExprInv.setFont(newFont);
 		panel.add(lbExprInv);	
 
@@ -620,7 +620,7 @@ public class MVMObjCheckState extends JDialog {
 		String[] columns;
 		//Aqui
 		columns = new String[] {
-				"Inv", "Satisfied "
+				"Invariant", "Satisfied "
 		};
 
 		if (mapObjects.size()>0) {
