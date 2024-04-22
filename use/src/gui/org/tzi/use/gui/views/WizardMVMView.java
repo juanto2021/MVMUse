@@ -67,6 +67,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -212,6 +213,14 @@ public class WizardMVMView extends JPanel implements View {
 	private JButton btnActions;
 	private JButton btnReset;
 
+	//----------------------------------------
+	private JPanel espacioVertical = new JPanel();
+	private JSeparator separator1 = new JSeparator();
+	private JSeparator separator2 = new JSeparator();
+
+//	espacioVertical.setPreferredSize(new Dimension(10, 10));
+	//----------------------------------------
+	
 	//	private WizardMVMView thisWizard;
 	private boolean bNewObj;
 	private JTable fTable;
@@ -456,7 +465,8 @@ public class WizardMVMView extends JPanel implements View {
 		fTablePane.setBounds(205, 40, 185, 80);
 
 		chkAutoLayout=new JCheckBox("Auto Layout");
-		chkAutoLayout.setBounds(205, 160, 160, 25);
+//		chkAutoLayout.setBounds(205, 160, 160, 25);
+		chkAutoLayout.setBounds(205, 160, 90, 25);
 		chkAutoLayout.setSelected(true);
 		chkAutoLayout.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
@@ -561,6 +571,17 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 		panel.add(btnDeleteObject);
+		
+		//JG-----------------------
+//		espacioVertical.setPreferredSize(new Dimension(10, 10));
+//		espacioVertical.setBounds(10, 150, 300, 10);
+//		
+//		panel.add(espacioVertical);
+		//---
+		separator1.setOrientation(SwingConstants.HORIZONTAL);
+		separator1.setBounds(10, 190, 486, 10);
+		panel.add(separator1);
+		//JG-----------------------		
 
 		lbAssoc = new JLabel("Association");
 		lbAssoc.setBounds(10, 190, 160, 25);
@@ -588,7 +609,8 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lAssocs);
 
 		btnRefreshComponents = new JButton("Refresh");
-		btnRefreshComponents.setBounds(10, 310, 90, 25);
+//		btnRefreshComponents.setBounds(10, 310, 90, 25);// old
+		btnRefreshComponents.setBounds(301, 160, 90, 25);
 		btnRefreshComponents.setVerticalAlignment(SwingConstants.CENTER);
 		btnRefreshComponents.setHorizontalAlignment(SwingConstants.CENTER);
 		btnRefreshComponents.addActionListener(new ActionListener() {
@@ -598,8 +620,13 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnRefreshComponents);
 
+		// Aqui separator
+		separator2.setOrientation(SwingConstants.HORIZONTAL);
+		separator2.setBounds(10, 375, 486, 10);
+		panel.add(separator2);
+		
 		btnActions = new JButton("Actions");
-		btnActions.setBounds(10, 340, 90, 25);
+		btnActions.setBounds(10, 385, 90, 60);
 		btnActions.setVerticalAlignment(SwingConstants.CENTER);
 		btnActions.setHorizontalAlignment(SwingConstants.CENTER);
 		btnActions.addActionListener(new ActionListener() {
@@ -626,7 +653,8 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnActions);
 
 		btnReset = new JButton("Reset");
-		btnReset.setBounds(10, 400, 90, 25);
+//		btnReset.setBounds(10, 400, 90, 25);
+		btnReset.setBounds(400, 160, 95, 25);		
 		btnReset.setVerticalAlignment(SwingConstants.CENTER);
 		btnReset.setHorizontalAlignment(SwingConstants.CENTER);
 		btnReset.addActionListener(new ActionListener() {
@@ -811,11 +839,11 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnDeleteLink);
 
 		lbClassInvariants = new JLabel("State invariants");
-		lbClassInvariants.setBounds(205, 375, 120, 25);
+		lbClassInvariants.setBounds(205, 385, 120, 25);
 		panel.add(lbClassInvariants);
 
 		lbResClassInvariants = new JLabel("");
-		lbResClassInvariants.setBounds(325, 375, 120, 25);
+		lbResClassInvariants.setBounds(325, 385, 120, 25);
 		lbResClassInvariants.setBorder(blackline);
 		lbResClassInvariants.setVerticalAlignment(SwingConstants.CENTER);
 		lbResClassInvariants.setHorizontalAlignment(SwingConstants.CENTER);
@@ -824,7 +852,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lbResClassInvariants);
 
 		btnShowClassInvariants = new JButton("");// Before empty 'OK'
-		btnShowClassInvariants.setBounds(295, 375, 90, 25);//65
+		btnShowClassInvariants.setBounds(295, 385, 90, 25);//65
 		btnShowClassInvariants.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowClassInvariants.setHorizontalAlignment(SwingConstants.CENTER);
 		btnShowClassInvariants.setFont(new Font("Serif", Font.BOLD, 13));//18
@@ -837,7 +865,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		btnShowIndividuals = new JButton("OBJs");
 //		btnShowIndividuals.setBounds(375, 375, 80, 25);
-		btnShowIndividuals.setBounds(385, 375, 70, 25);
+		btnShowIndividuals.setBounds(385, 385, 70, 25);
 		btnShowIndividuals.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowIndividuals.setHorizontalAlignment(SwingConstants.CENTER);
 		btnShowIndividuals.setFont(new Font("Serif", Font.BOLD, 13));
@@ -849,11 +877,11 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnShowIndividuals);
 
 		lbCheckStructure = new JLabel("Multiplicities");
-		lbCheckStructure.setBounds(205, 410, 120, 25);
+		lbCheckStructure.setBounds(205, 420, 120, 25);
 		panel.add(lbCheckStructure);
 
 		btnShowCheckStructure = new JButton("");// Before empty 'OK'
-		btnShowCheckStructure.setBounds(300, 410, 155, 25);
+		btnShowCheckStructure.setBounds(300, 420, 155, 25);
 		btnShowCheckStructure.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowCheckStructure.setHorizontalAlignment(SwingConstants.CENTER);
 		btnShowCheckStructure.setFont(new Font("Serif", Font.BOLD, 13));
