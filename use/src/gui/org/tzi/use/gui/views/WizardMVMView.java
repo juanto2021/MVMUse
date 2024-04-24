@@ -356,7 +356,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		modelObjects = new DefaultListModel<>();
 
-		lbClass = new JLabel("Class");
+		lbClass = new JLabel("Classes");
 		lbClass.setBounds(10, 15, 60, 25);
 		panel.add(lbClass);
 
@@ -437,7 +437,10 @@ public class WizardMVMView extends JPanel implements View {
 		scrollPaneObj.setBounds(107, 40, 90, 110);
 		// masmas
 		btnNewObjectAuto = new JButton("+");
+		Font newFont = new Font(btnNewObjectAuto.getFont().getName(), Font.BOLD, 10);
+		btnNewObjectAuto.setFont(newFont);
 		btnNewObjectAuto.setBounds(107, 160, 40, 25);
+		btnNewObjectAuto.setToolTipText("add an object of selected class");
 
 		btnNewObjectAuto.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -446,8 +449,10 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnNewObjectAuto);
 		// masmas
-		btnNewObjectSampleAuto = new JButton("S");
-		btnNewObjectSampleAuto.setBounds(150, 160, 45, 25);
+//		btnNewObjectSampleAuto = new JButton("S");
+		btnNewObjectSampleAuto = new JButton("Fill");
+		btnNewObjectSampleAuto.setBounds(150, 160, 46, 25);
+		btnNewObjectSampleAuto.setToolTipText("add an object of each class");
 
 		btnNewObjectSampleAuto.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

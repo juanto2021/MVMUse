@@ -75,8 +75,8 @@ public class MVMCompareExprInvs extends JDialog {
 			int pRowObject, 
 			String pCompareName, 
 			String pCompareClass) {
-		super(fParent, "MVM Show invs expressions",ModalityType.APPLICATION_MODAL);
-		frame = new JFrame("MVM Show invs expressions");
+		super(fParent, "MVM Show Invariants Bodies",ModalityType.APPLICATION_MODAL);
+		frame = new JFrame("MVM Show Invariants Bodies");
 		frame.setAlwaysOnTop(true);
 		frame.setModalExclusionType(ModalExclusionType.TOOLKIT_EXCLUDE);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//Provis
@@ -89,8 +89,8 @@ public class MVMCompareExprInvs extends JDialog {
 		// Invs options
 		rbInvAll = new JRadioButton("All");
 		rbInvAll.setSelected(true);
-		rbInvOk = new JRadioButton("Ok");
-		rbInvKo = new JRadioButton("Ko");
+		rbInvOk = new JRadioButton("Correct");
+		rbInvKo = new JRadioButton("Incorrect");
 
 		ItemListener itemListenerInv = new ItemListener() {
 			@Override
@@ -102,10 +102,10 @@ public class MVMCompareExprInvs extends JDialog {
 					case "All":
 						stateInv=StatesInv.ALL;
 						break;
-					case "Ok":
+					case "Correct":
 						stateInv=StatesInv.OK;
 						break;
-					case "Ko":
+					case "Incorrect":
 						stateInv=StatesInv.KO;
 						break;
 					default:
@@ -154,7 +154,7 @@ public class MVMCompareExprInvs extends JDialog {
 		int filGroupTab1=20;
 		int filGroupTab2=120;
 
-		panelGroupInv.setBounds(col1 ,filGroupTab1, 160, 60);
+		panelGroupInv.setBounds(col1 ,filGroupTab1, 200, 60);
 		panel.add(panelGroupInv);
 
 		lbInvs = new JLabel("Invariants");

@@ -268,8 +268,6 @@ public class MVMWizardAssoc extends JDialog {
 
 					if (button.isSelected()) {
 						commandWizard=button.getActionCommand();
-						//Aqui
-						//						assocSelectWizard=null;
 					}
 				}
 				dispose();
@@ -547,9 +545,10 @@ public class MVMWizardAssoc extends JDialog {
 		modelTabLinks = new DefaultTableModel();
 		String[] columns;
 		columns = new String[] {
-				"Object", "Class","Connected To","Of Class", "Assoc End","Multi Specified","ObjPral"
+//				"Object", "Class","Connected To","Of Class", "Assoc End","Multiplicity","ObjPral"// Provis
+				"Object", "Class","Connected To","Of Class", "Assoc End","Multiplicity"
 		};
-
+//Aqui
 		ArrayList<LinkWizard> data = loadLinksAssoc(assoc);
 
 		Object[][] objects = new Object[data.size()][7];
@@ -560,7 +559,7 @@ public class MVMWizardAssoc extends JDialog {
 			objects[i][3]= data.get(i).getOfClass();
 			objects[i][4]= data.get(i).getAssocEnd();
 			objects[i][5]= data.get(i).getMultiSpecified();
-			objects[i][6]= data.get(i).getoMObject();
+//			objects[i][6]= data.get(i).getoMObject();//Provis
 		}
 
 		modelTabLinks = new DefaultTableModel(objects,columns);

@@ -115,8 +115,8 @@ public class MVMObjCheckState extends JDialog {
 		// Objs options
 		rbObjAll = new JRadioButton("All");
 		rbObjAll.setSelected(true);
-		rbObjOk = new JRadioButton("Ok");
-		rbObjKo = new JRadioButton("Ko");
+		rbObjOk = new JRadioButton("Correct");
+		rbObjKo = new JRadioButton("Incorrect");
 
 		ItemListener itemListenerObj = new ItemListener() {
 			@Override
@@ -128,10 +128,10 @@ public class MVMObjCheckState extends JDialog {
 					case "All":
 						stateObj=StatesObj.ALL;
 						break;
-					case "Ok":
+					case "Correct":
 						stateObj=StatesObj.OK;
 						break;
-					case "Ko":
+					case "Incorrect":
 						stateObj=StatesObj.KO;
 						break;
 					default:
@@ -173,8 +173,8 @@ public class MVMObjCheckState extends JDialog {
 		// Invs options
 		rbInvAll = new JRadioButton("All");
 		rbInvAll.setSelected(true);
-		rbInvOk = new JRadioButton("Ok");
-		rbInvKo = new JRadioButton("Ko");
+		rbInvOk = new JRadioButton("Correct");
+		rbInvKo = new JRadioButton("Incorrect");
 
 		ItemListener itemListenerInv = new ItemListener() {
 			@Override
@@ -186,10 +186,10 @@ public class MVMObjCheckState extends JDialog {
 					case "All":
 						stateInv=StatesInv.ALL;
 						break;
-					case "Ok":
+					case "Correct":
 						stateInv=StatesInv.OK;
 						break;
-					case "Ko":
+					case "Incorrect":
 						stateInv=StatesInv.KO;
 						break;
 					default:
@@ -244,8 +244,11 @@ public class MVMObjCheckState extends JDialog {
 		int filGroupTab1=20;
 		int filGroupTab2=120;
 
-		panelGroupObj.setBounds(col1 ,filGroupTab1, 150, 60);
-		panelGroupInv.setBounds(col1+320 ,filGroupTab1, 150, 60);
+//		panelGroupObj.setBounds(col1 ,filGroupTab1, 150, 60);
+//		panelGroupInv.setBounds(col1+320 ,filGroupTab1, 150, 60);
+		
+		panelGroupObj.setBounds(col1 ,filGroupTab1, 200, 60);
+		panelGroupInv.setBounds(col1+320 ,filGroupTab1, 200, 60);
 
 		panel.add(panelGroupObj);
 		panel.add(panelGroupInv);
@@ -267,7 +270,7 @@ public class MVMObjCheckState extends JDialog {
 		panel.add(lbAttrs);	
 
 		lbIndicator = new JLabel("");
-		newFont = new Font(lbIndicator.getFont().getName(), Font.BOLD, 24);
+		newFont = new Font(lbIndicator.getFont().getName(), Font.BOLD, 20);
 		lbIndicator.setFont(newFont);
 		lbIndicator.setForeground(Color.WHITE);
 		lbIndicator.setBackground(Color.GREEN);
@@ -275,7 +278,9 @@ public class MVMObjCheckState extends JDialog {
 		Border border = BorderFactory.createLineBorder(Color.BLACK, 2);
 		pIndicator = new JPanel();
 		pIndicator = new JPanel(new GridBagLayout());
-		pIndicator.setBounds(col1+160 ,filGroupTab1+7, 51, 51);
+
+//		pIndicator.setBounds(col1+160 ,filGroupTab1+7, 100, 51);
+		pIndicator.setBounds(col1+210 ,filGroupTab1+7, 100, 51);
 		pIndicator.setBorder(border);
 
 		pIndicator.setBackground(Color.BLUE);
@@ -407,7 +412,8 @@ public class MVMObjCheckState extends JDialog {
 		btnExit.setBounds(900, 355, 110, 25);
 		panel.add(btnExit);
 		
-		btnCompareExpr = new JButton("Show Expressions");
+//		btnCompareExpr = new JButton("Show Expressions");
+		btnCompareExpr = new JButton("Body Expressions");
 		btnCompareExpr.addActionListener(new ActionListener() {
 
 			@Override
@@ -597,10 +603,10 @@ public class MVMObjCheckState extends JDialog {
 		if (stateObj==stateObj.ALL) {
 			if (allObjsOk) {
 				pIndicator.setBackground(Color.GREEN);
-				lbIndicator.setText("OK");
+				lbIndicator.setText("Correct");
 			}else {
 				pIndicator.setBackground(Color.RED);
-				lbIndicator.setText("KO");
+				lbIndicator.setText("Incorrect");
 			}
 
 		}
