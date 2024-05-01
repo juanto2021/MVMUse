@@ -156,6 +156,11 @@ public class WizardMVMView extends JPanel implements View {
 	private DefaultListModel<String> modelObjects;
 	//	private DefaultTableModel modelTabAttrs;
 
+	// Titles block
+	private JLabel lbTitleElements;
+	private JLabel lbTitleAssociations;
+	private JLabel lbTitleActions;
+	
 	private JLabel lbClass;
 	private JLabel lbObjects;
 	private JLabel lbAttrs;
@@ -215,6 +220,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	//----------------------------------------
 	private JPanel espacioVertical = new JPanel();
+	private JSeparator separator0 = new JSeparator();
 	private JSeparator separator1 = new JSeparator();
 	private JSeparator separator2 = new JSeparator();
 
@@ -355,20 +361,32 @@ public class WizardMVMView extends JPanel implements View {
 		panel.setLayout(null);
 
 		modelObjects = new DefaultListModel<>();
+		
+		separator0.setOrientation(SwingConstants.HORIZONTAL);
+		separator0.setBounds(100, 12, 486, 10);
+		panel.add(separator0);
+
+		lbTitleElements = new JLabel("Elements");
+		lbTitleElements.setBounds(10, 0, 100, 25);
+		Font titleFont = new Font(lbTitleElements.getFont().getName(), Font.BOLD, 18);
+		lbTitleElements.setFont(titleFont);
+		panel.add(lbTitleElements);
 
 		lbClass = new JLabel("Classes");
-		lbClass.setBounds(10, 15, 60, 25);
+		Font boldFont = new Font(lbClass.getFont().getName(), Font.BOLD, 11);
+		lbClass.setBounds(10, 18, 60, 25);
+		lbClass.setFont(boldFont);
 		panel.add(lbClass);
 
 		lbObjects = new JLabel("Objects");
-		lbObjects.setBounds(107, 15, 60, 25);
+		lbObjects.setBounds(107, 18, 60, 25);
+		lbObjects.setFont(boldFont);
 		panel.add(lbObjects);	   
 
 		lbAttrs = new JLabel("Attributes");
-		lbAttrs.setBounds(205, 15, 60, 25);
+		lbAttrs.setBounds(205, 18, 60, 25);
+		lbAttrs.setFont(boldFont);
 		panel.add(lbAttrs);	
-
-
 
 		lClass = new JList<MClass>(loadListMClass());
 		lClass.setBounds(10, 40, 90, 145);
@@ -489,7 +507,8 @@ public class WizardMVMView extends JPanel implements View {
 		selectObject(nomObj);
 
 		lbObj = new JLabel("Object");
-		lbObj.setBounds(400, 15, 160, 25);
+		lbObj.setBounds(400, 18, 160, 25);
+		lbObj.setFont(boldFont);
 		panel.add(lbObj);	
 
 		txNewObject = new JTextField(20);
@@ -584,20 +603,29 @@ public class WizardMVMView extends JPanel implements View {
 //		panel.add(espacioVertical);
 		//---
 		separator1.setOrientation(SwingConstants.HORIZONTAL);
-		separator1.setBounds(10, 190, 486, 10);
+		separator1.setBounds(127, 195, 459, 10);
 		panel.add(separator1);
+		
+		lbTitleAssociations = new JLabel("Associations");
+		lbTitleAssociations.setBounds(10, 183, 200, 25);
+		lbTitleAssociations.setFont(titleFont);
+		panel.add(lbTitleAssociations);
 		//JG-----------------------		
 
-		lbAssoc = new JLabel("Association");
-		lbAssoc.setBounds(10, 190, 160, 25);
-		panel.add(lbAssoc);	
-
+//		lbAssoc = new JLabel("Association");
+//		lbAssoc.setBounds(10, 190, 160, 25);
+//		panel.add(lbAssoc);	
+		
+		
 		lbFrom = new JLabel("From");
-		lbFrom.setBounds(205, 190, 160, 25);
+//		Font boldFont = new Font(lbFrom.getFont().getName(), Font.BOLD, 11);
+		lbFrom.setBounds(205, 192, 160, 25);
+		lbFrom.setFont(boldFont);
 		panel.add(lbFrom);
 
 		lbTo = new JLabel("To");
-		lbTo.setBounds(335, 190, 160, 25);
+		lbTo.setBounds(335, 192, 160, 25);
+		lbTo.setFont(boldFont);
 		panel.add(lbTo);
 
 		lAssocs = new JList<MAssociation>(loadListAssoc());
@@ -627,11 +655,16 @@ public class WizardMVMView extends JPanel implements View {
 
 		// Aqui separator
 		separator2.setOrientation(SwingConstants.HORIZONTAL);
-		separator2.setBounds(10, 375, 486, 10);
+		separator2.setBounds(84, 375, 502, 10);
 		panel.add(separator2);
 		
+		lbTitleActions = new JLabel("Actions");
+		lbTitleActions.setBounds(10, 360, 400, 25);
+		lbTitleActions.setFont(titleFont);
+		panel.add(lbTitleActions);
+		
 		btnActions = new JButton("Actions");
-		btnActions.setBounds(10, 385, 90, 60);
+		btnActions.setBounds(10, 384, 90, 60);
 		btnActions.setVerticalAlignment(SwingConstants.CENTER);
 		btnActions.setHorizontalAlignment(SwingConstants.CENTER);
 		btnActions.addActionListener(new ActionListener() {
@@ -671,18 +704,22 @@ public class WizardMVMView extends JPanel implements View {
 
 		lbAclass = new JLabel("Class");
 		lbAclass.setBounds(135, 215, 100, 25);
+		lbAclass.setFont(boldFont);
 		panel.add(lbAclass);
 
 		lbAobject = new JLabel("Object");
 		lbAobject.setBounds(135, 245, 100, 25);
+		lbAobject.setFont(boldFont);
 		panel.add(lbAobject);	
 
 		lbAmultiplicity = new JLabel("Multiplicity");
 		lbAmultiplicity.setBounds(135, 275, 100, 25);
+		lbAmultiplicity.setFont(boldFont);
 		panel.add(lbAmultiplicity);
 
 		lbArole = new JLabel("Role");
 		lbArole.setBounds(135, 305, 100, 25);
+		lbArole.setFont(boldFont);
 		panel.add(lbArole);
 
 		cmbClassOri = new JComboBox<MClass>();
