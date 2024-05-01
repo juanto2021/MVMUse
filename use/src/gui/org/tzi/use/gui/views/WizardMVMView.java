@@ -455,9 +455,9 @@ public class WizardMVMView extends JPanel implements View {
 		scrollPaneObj.setBounds(107, 40, 90, 110);
 		// masmas
 		btnNewObjectAuto = new JButton("+");
-		Font newFont = new Font(btnNewObjectAuto.getFont().getName(), Font.BOLD, 10);
+		Font newFont = new Font(btnNewObjectAuto.getFont().getName(), Font.BOLD, 9);
 		btnNewObjectAuto.setFont(newFont);
-		btnNewObjectAuto.setBounds(107, 160, 40, 25);
+		btnNewObjectAuto.setBounds(106, 160, 39, 25);
 		btnNewObjectAuto.setToolTipText("add an object of selected class");
 
 		btnNewObjectAuto.addActionListener(new ActionListener() {
@@ -469,7 +469,9 @@ public class WizardMVMView extends JPanel implements View {
 		// masmas
 //		btnNewObjectSampleAuto = new JButton("S");
 		btnNewObjectSampleAuto = new JButton("Fill");
-		btnNewObjectSampleAuto.setBounds(150, 160, 46, 25);
+		Font newFontFill = new Font(btnNewObjectAuto.getFont().getName(), Font.BOLD, 9);
+		btnNewObjectSampleAuto.setFont(newFontFill);
+		btnNewObjectSampleAuto.setBounds(145, 160, 53, 25);
 		btnNewObjectSampleAuto.setToolTipText("add an object of each class");
 
 		btnNewObjectSampleAuto.addActionListener(new ActionListener() {
