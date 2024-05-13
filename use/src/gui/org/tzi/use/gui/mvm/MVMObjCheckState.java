@@ -11,6 +11,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -34,7 +40,14 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import org.tzi.use.config.Options;
+import org.tzi.use.gui.views.WizardMVMView;
+import org.tzi.use.main.Session;
+import org.tzi.use.parser.use.USECompiler;
 import org.tzi.use.uml.mm.MClassInvariant;
+import org.tzi.use.uml.mm.MModel;
+import org.tzi.use.uml.mm.ModelFactory;
+import org.tzi.use.uml.sys.MSystem;
 
 public class MVMObjCheckState extends JDialog {
 
@@ -45,6 +58,7 @@ public class MVMObjCheckState extends JDialog {
 
 	private JFrame frame;
 	private JPanel panel;
+	private Session fSession;
 
 	private DefaultTableModel modelTabObjects;
 	private DefaultTableModel modelTabAttrs;
@@ -85,6 +99,7 @@ public class MVMObjCheckState extends JDialog {
 
 	private JButton btnExit;
 	private JButton btnCompareExpr;
+	private JButton btnAnalyze;;
 
 	private Map<MVMObject, Map<MClassInvariant, Boolean>> mapObjects;
 	private boolean checkAllObjs=true;
@@ -103,14 +118,31 @@ public class MVMObjCheckState extends JDialog {
 	}
 	private StatesInv stateInv=StatesInv.ALL;
 
-	public MVMObjCheckState(JFrame fParent, Map<MVMObject, Map<MClassInvariant, Boolean>> pMapObjects ) {
-		super(fParent, "MVM Check Objects Satisfiability",ModalityType.APPLICATION_MODAL);
+	private WizardMVMView thisMVMView;
+
+	private List<MVMAction> lActions;
+
+	//	public MVMObjCheckState(JFrame fParent, Map<MVMObject, 
+	//			Map<MClassInvariant, 
+	//			Boolean>> pMapObjects,
+	//			Session pSession,
+	//			WizardMVMView pThisMVMView) {
+	public MVMObjCheckState(WizardMVMView pThisMVMView, 
+			Map<MVMObject,Map<MClassInvariant,Boolean>> pMapObjects,
+			Session pSession,
+			List<MVMAction> pLactions) {	
+		//		super(fParent, "MVM Check Objects Satisfiability",ModalityType.APPLICATION_MODAL);
+		super(pThisMVMView.frame, "MVM Check Objects Satisfiability",ModalityType.APPLICATION_MODAL);
 		frame = new JFrame("MVM Check Objects Satisfiability");
 		frame.setAlwaysOnTop(true);
 		frame.setModalExclusionType(ModalExclusionType.TOOLKIT_EXCLUDE);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//Provis
 		frame.setLocationRelativeTo(null);
 		mapObjects = pMapObjects;
+		fSession=pSession;
+		thisMVMView=pThisMVMView;
+		lActions=pLactions;
+
 
 		// Objs options
 		rbObjAll = new JRadioButton("All");
@@ -122,7 +154,7 @@ public class MVMObjCheckState extends JDialog {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-//					System.out.println("Seleccionado (obj): " + ((JRadioButton) e.getItem()).getText());
+					//					System.out.println("Seleccionado (obj): " + ((JRadioButton) e.getItem()).getText());
 					String strCmp=((JRadioButton) e.getItem()).getText();
 					switch (strCmp) {
 					case "All":
@@ -180,7 +212,7 @@ public class MVMObjCheckState extends JDialog {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-//					System.out.println("Seleccionado (inv): " + ((JRadioButton) e.getItem()).getText());
+					//					System.out.println("Seleccionado (inv): " + ((JRadioButton) e.getItem()).getText());
 					String strCmp=((JRadioButton) e.getItem()).getText();
 					switch (strCmp) {
 					case "All":
@@ -244,9 +276,9 @@ public class MVMObjCheckState extends JDialog {
 		int filGroupTab1=20;
 		int filGroupTab2=120;
 
-//		panelGroupObj.setBounds(col1 ,filGroupTab1, 150, 60);
-//		panelGroupInv.setBounds(col1+320 ,filGroupTab1, 150, 60);
-		
+		//		panelGroupObj.setBounds(col1 ,filGroupTab1, 150, 60);
+		//		panelGroupInv.setBounds(col1+320 ,filGroupTab1, 150, 60);
+
 		panelGroupObj.setBounds(col1 ,filGroupTab1, 200, 60);
 		panelGroupInv.setBounds(col1+320 ,filGroupTab1, 200, 60);
 
@@ -279,7 +311,7 @@ public class MVMObjCheckState extends JDialog {
 		pIndicator = new JPanel();
 		pIndicator = new JPanel(new GridBagLayout());
 
-//		pIndicator.setBounds(col1+160 ,filGroupTab1+7, 100, 51);
+		//		pIndicator.setBounds(col1+160 ,filGroupTab1+7, 100, 51);
 		pIndicator.setBounds(col1+210 ,filGroupTab1+7, 100, 51);
 		pIndicator.setBorder(border);
 
@@ -411,8 +443,41 @@ public class MVMObjCheckState extends JDialog {
 		});
 		btnExit.setBounds(900, 355, 110, 25);
 		panel.add(btnExit);
-		
-//		btnCompareExpr = new JButton("Show Expressions");
+
+		btnAnalyze = new JButton("Analyze");
+		btnAnalyze.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				allObjsOk=true;
+				analyze(); //Provis
+				//				System.exit(0);
+				boolean res=allObjsOk;
+				loadTabObjects();
+				putColorObjs();
+				loadListInvs(0);
+				putColorInvs();
+				loadListAttrs(0);
+				//---
+
+				if(tabObjects.getModel().getRowCount()>0) {
+					tabObjects.setRowSelectionInterval(0, 0);
+				}
+
+
+				if(tabInvs.getModel().getRowCount()>0) {
+					tabInvs.setRowSelectionInterval(0, 0);
+					showExprInv(0);
+
+				}
+				showIndicator();
+				//---				
+			}
+		});
+		btnAnalyze.setBounds(10, 400, 110, 80);
+		panel.add(btnAnalyze);
+
+		//		btnCompareExpr = new JButton("Show Expressions");
 		btnCompareExpr = new JButton("Body Expressions");
 		btnCompareExpr.addActionListener(new ActionListener() {
 
@@ -427,8 +492,66 @@ public class MVMObjCheckState extends JDialog {
 		getContentPane().add(panel);
 
 	}
+	//Aqui
+	private void analyze() {
+
+		// Ver contenido de modelo
+		// Obtener contenido de otro fichero
+		String dir = System.getProperty("user.dir");
+		System.out.println("Directorio actual: " + dir);
+		MSystem system=fSession.system();
+		MModel model = fSession.system().model();
+		String filename =model.filename();
+		System.out.println("Model name "+ model.name());
+		System.out.println("Model filename "+ filename);
+		File file = new File(filename);
+
+		String directory = file.getParent();
+		String fileNameExt = file.getName();
+
+		System.out.println("Directorio: " + directory);
+		System.out.println("Nombre de archivo: " + fileNameExt);
+
+
+		try {
+			FileInputStream specStreamNew;
+			String newFilename="";
+			if (filename.indexOf("Animals4_P2_v2")>0) {
+				newFilename=filename;
+			}else {
+				newFilename=filename.replace("Animals4_P2", "Animals4_P2_v2");
+			}
+
+			specStreamNew = new FileInputStream(newFilename);
+			MModel newModel = USECompiler.compileSpecification(specStreamNew,
+					newFilename, new PrintWriter(System.err),
+					new ModelFactory());		
+			System.out.println("new Model name "+ newModel.name());
+			System.out.println("new Model filename "+ newModel.filename());
+			system = new MSystem(newModel);
+			fSession.setSystem(system);
+			thisMVMView.putSession(fSession);
+
+			// Hay que rehacer mapObjects de MVMView
+
+			List<MVMAction> lActionsCheck=new ArrayList<MVMAction>();
+			int nActions = lActions.size();
+			for (int nAction=0;nAction<nActions;nAction++) {
+				MVMAction oAction=lActions.get(nActions-1);
+				lActionsCheck.add(nAction, oAction);
+			}
+			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
+			System.out.println("cambiado");
+
+
+		} catch (FileNotFoundException e) {
+
+			e.printStackTrace();
+		}
+
+	}
 	private void compareExprInvs() {
-//		System.out.println("Compara expresiones");
+		//		System.out.println("Compara expresiones");
 		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
 		int rowObject = tabObjects.getSelectedRow();
 		String oCompareName = (String) tabObjects.getValueAt(rowObject, 0);
@@ -438,10 +561,10 @@ public class MVMObjCheckState extends JDialog {
 		w.setLocationRelativeTo(null);
 		w.setResizable(false);
 		w.setVisible(true);
-		
+
 	}
 	private void showExprInv(int nInv) {
-//		System.out.println("nInv ["+nInv+"]");
+		//		System.out.println("nInv ["+nInv+"]");
 		MClassInvariant strInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
 		String texto = (String) strInv.bodyExpression().toString();
 		//		taExprInv.setText(strInv.name());
@@ -509,8 +632,8 @@ public class MVMObjCheckState extends JDialog {
 	 */
 
 	private void loadTabObjects() {
-//		System.out.println("   stateObj [" + stateObj+"]");
-		//		boolean allObjsOk=true;
+		//		System.out.println("   stateObj [" + stateObj+"]");
+		//				boolean allObjsOk=true;//Provis
 
 		modelTabObjects = new DefaultTableModel();
 
@@ -538,7 +661,7 @@ public class MVMObjCheckState extends JDialog {
 				for (Map.Entry<MClassInvariant, Boolean> innerEntry : innerMap.entrySet()) {
 					MClassInvariant inv = innerEntry.getKey();
 					Boolean value = innerEntry.getValue();
-//					System.out.println("   " + inv + ": " + value);
+					//					System.out.println("   " + inv + ": " + value);
 					if (value==false) {
 						allOk=false;
 						if (checkAllObjs) {
@@ -548,7 +671,7 @@ public class MVMObjCheckState extends JDialog {
 						break;
 					}
 				}
-//				System.out.println("Object ["+oObjKey.getName()+"] ["+allOk+"]");
+				//				System.out.println("Object ["+oObjKey.getName()+"] ["+allOk+"]");
 				boolean saveData=false;
 				switch (stateObj) {
 				case ALL:
@@ -600,6 +723,22 @@ public class MVMObjCheckState extends JDialog {
 		putColorObjs();
 
 		tabObjects.repaint();
+		showIndicator();
+		//		if (stateObj==stateObj.ALL) {
+		//			if (allObjsOk) {
+		//				pIndicator.setBackground(Color.GREEN);
+		//				lbIndicator.setText("Correct");
+		//			}else {
+		//				pIndicator.setBackground(Color.RED);
+		//				lbIndicator.setText("Incorrect");
+		//			}
+		//
+		//		}
+		checkAllObjs=false;
+		return;
+	}
+
+	private void showIndicator() {
 		if (stateObj==stateObj.ALL) {
 			if (allObjsOk) {
 				pIndicator.setBackground(Color.GREEN);
@@ -610,15 +749,12 @@ public class MVMObjCheckState extends JDialog {
 			}
 
 		}
-		checkAllObjs=false;
-		return;
 	}
-
 	/**
 	 * Load invs table
 	 */
 	private void loadListInvs(int nObject) {
-//		System.out.println("   stateInv [" + stateInv+"]");
+		//		System.out.println("   stateInv [" + stateInv+"]");
 
 		//		String oCompareName = (String) tabObjects.getValueAt(nObject, 0);
 		//		String oCompareClass = (String) tabObjects.getValueAt(nObject, 1);
@@ -675,7 +811,7 @@ public class MVMObjCheckState extends JDialog {
 							data[nInv][1]=value;
 							nInv++;	
 						}
-//						System.out.println("   " + inv + ": " + value);
+						//						System.out.println("   " + inv + ": " + value);
 					}
 
 					// Resize data result
