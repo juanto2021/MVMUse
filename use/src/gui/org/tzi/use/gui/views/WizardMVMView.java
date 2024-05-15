@@ -23,6 +23,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -74,7 +75,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
 
 import org.tzi.use.config.Options;
 import org.tzi.use.gui.main.MainWindow;
@@ -141,9 +141,9 @@ import com.google.common.eventbus.Subscribe;
 @SuppressWarnings("serial")
 public class WizardMVMView extends JPanel implements View {
 
-	private static final String NAMEFRAMEMVMDIAGRAM = "MVM";
-	private static final String NAMEFRAMEMVMWIZARD = "MVMWizard";
-	private MainWindow fMainWindow;
+	public static final String NAMEFRAMEMVMDIAGRAM = "MVM";
+	public static final String NAMEFRAMEMVMWIZARD = "MVMWizard";
+	public MainWindow fMainWindow;
 	//	private WizardMVMView thisWizard;
 	private PrintWriter fLogWriter;
 	private Session fSession;
@@ -661,7 +661,6 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnRefreshComponents);
 
-		// Aqui separator
 		separator2.setOrientation(SwingConstants.HORIZONTAL);
 		separator2.setBounds(84, 375, 502, 10);
 		panel.add(separator2);
@@ -922,7 +921,36 @@ public class WizardMVMView extends JPanel implements View {
 		btnShowIndividuals.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				check_inv_state_individual();
+				// Si ha desaparecido la vista volver a mostrarla AQUI
+
+				//--------------- bueno
+				boolean existDiagram=false;
+				boolean existWizard=false; 
+				//		Ver frames
+				JDesktopPane fDesk = fMainWindow.getFdesk();
+				JInternalFrame[] allframes = fDesk.getAllFrames();
+				for (JInternalFrame ifr: allframes) {
+					if (ifr.getName()==null&&ifr.getTitle().equals("Object diagram")){
+						ifr.setName(NAMEFRAMEMVMDIAGRAM);
+					}
+					if (ifr.getName()!=null){
+						if (ifr.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+							existDiagram=true;
+						}
+						if (ifr.getName().equals(NAMEFRAMEMVMWIZARD)) {
+							existWizard=true;
+						}	
+					}
+				}
+				if (!existWizard) {
+					fMainWindow.showMVMWizard(NAMEFRAMEMVMWIZARD);
+				}
+				if (!existDiagram) {
+					createObjDiagram();
+				}
 			}
+			//---------------
+
 		});
 		panel.add(btnShowIndividuals);
 
@@ -980,12 +1008,9 @@ public class WizardMVMView extends JPanel implements View {
 
 		//--------- provis AQUI
 		// Llamar a fill
-		newObjectSampleAuto();
-		//		//para layout
-		//		odvAssoc.forceStopLayoutThread();	
-		// llamar a check objects
-		check_inv_state_individual();
-
+		//				newObjectSampleAuto();
+		//				check_inv_state_individual();
+		//---provis
 	}
 
 	/**
@@ -1762,7 +1787,7 @@ public class WizardMVMView extends JPanel implements View {
 			if(!fClassInvariants[i].isActive()){
 				continue;
 			}
-			System.out.println("fSystem.state() ["+fSystem.state().name()+"]");
+			//			System.out.println("fSystem.state() ["+fSystem.state().name()+"]");
 			MyEvaluatorCallable cb = new MyEvaluatorCallable(fSystem.state(), i, fClassInvariants[i]);
 			futures.add(ecs.submit(cb));
 		}
@@ -1826,10 +1851,12 @@ public class WizardMVMView extends JPanel implements View {
 		List<MVMAction> lActionsCheck=lActions;
 		MVMObjCheckState w = new MVMObjCheckState(thisMVMView,mapaOrdenado, fSession, lActionsCheck);
 		//		w.setSize(1038, 432);
-		w.setSize(1038, 600);//provis
+		w.setSize(1038, 820);//provis
 		w.setLocationRelativeTo(null);
 		w.setResizable(false);
 		w.setVisible(true);
+		// Aqui
+		// Comprobar si existen las vistas de MVMWizard y de objetos y si no recrearlas
 	}
 	//	public void check_inv_state_individual_old() {
 	//		Map<MVMObject, Map<MClassInvariant, Boolean>> mapObjects = new HashMap<>();
@@ -2550,7 +2577,7 @@ public class WizardMVMView extends JPanel implements View {
 	/**
 	 * Create object diagram
 	 */
-	private void createObjDiagram() {
+	public void createObjDiagram() {
 		NewObjectDiagramView odv = new NewObjectDiagramView(fMainWindow, fSession.system());
 		ViewFrame f = new ViewFrame("Object diagram", odv, "ObjectDiagram.gif");
 		f.setName(NAMEFRAMEMVMDIAGRAM);
@@ -2577,6 +2604,7 @@ public class WizardMVMView extends JPanel implements View {
 		fMainWindow.addNewViewFrame(f);
 		fMainWindow.getObjectDiagrams().add(odv);
 		odvAssoc = odv.getDiagram();
+		odvAssoc.forceStartLayoutThread();
 
 		tile();
 	}
@@ -2970,17 +2998,19 @@ public class WizardMVMView extends JPanel implements View {
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols && ((i * cols) + j < count); j++) {
 				JInternalFrame f = allframes[(i * cols) + j];
-
-				if (f.isIcon() && !f.isClosed()) {
-					try {
-						f.setIcon(false);
-					} catch (PropertyVetoException ex) {
-						// ignored
+				if (f!=null) {//Provis
+					if (f.isIcon() && !f.isClosed()) {
+						try {
+							f.setIcon(false);
+						} catch (PropertyVetoException ex) {
+							// ignored
+						}
 					}
+					fDesk.getDesktopManager().resizeFrame(f, x, y, w, h);
+					x += w;
+
 				}
-				fDesk.getDesktopManager().resizeFrame(f, x, y, w, h);
-				x += w;
-			}
+			}//Provis
 			y += h; // start the next row
 			x = 0;
 		}

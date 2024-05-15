@@ -1,5 +1,16 @@
 package org.tzi.use.gui.graphlayout;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.tzi.use.graph.DirectedEdge;
 import org.tzi.use.graph.DirectedGraph;
 import org.tzi.use.gui.views.diagrams.Layoutable;
@@ -11,9 +22,6 @@ import org.tzi.use.uml.mm.MAggregationKind;
 import org.tzi.use.uml.mm.MAssociationClass;
 import org.tzi.use.uml.mm.MAssociationClassImpl;
 import org.tzi.use.uml.sys.MLinkObject;
-
-import javax.swing.*;
-import java.util.*;
 
 
 public class AllLayoutTypes<N extends Layoutable> {
