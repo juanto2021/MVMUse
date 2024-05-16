@@ -639,7 +639,7 @@ public class MVMObjCheckState extends JDialog {
 				if (contentNew!="") {
 					testNewBodyInv();
 				}
-				
+
 			}
 		});
 
@@ -733,20 +733,29 @@ public class MVMObjCheckState extends JDialog {
 		int nInv = tabInvs.getSelectedRow();
 		prepareContentNew();
 		saveWorkFile(contentNew);
-		
+
 		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
-		boolean bRes=ChangeContextSession(workFile);
-		if (bRes) {
-		// Almacena resultado de la invariante deseada
-		MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
-		String texto = (String) oInv.bodyExpression().toString();
-		boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
-		showIndicatorAlt(stateInv);
+		String msgError=verifyContentModel(workFile);
+		if (msgError.equals("")) {
+			boolean bRes=ChangeContextSession(workFile);
+			if (bRes) {
+				// Almacena resultado de la invariante deseada
+				MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+				String texto = (String) oInv.bodyExpression().toString();
+				boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
+				showIndicatorAlt(stateInv);
+			}else {
+				JOptionPane.showMessageDialog(null, msgError, "Error", JOptionPane.ERROR_MESSAGE);
+				// poner label con  error
+			}
+			// Restablece fichero original
+			bRes=ChangeContextSession(fileNameModelInicial);		
 		}else {
-			JOptionPane.showMessageDialog(null, "Model no viable", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, msgError, "Error", JOptionPane.ERROR_MESSAGE);
+			// poner label con  error
 		}
-		// Restablece fichero original
-		bRes=ChangeContextSession(fileNameModelInicial);
+
+
 	}
 	private void prepareContentNew() {
 		String newBody=taExprInvNew.getText();
@@ -1230,6 +1239,32 @@ public class MVMObjCheckState extends JDialog {
 	}
 
 	//--------------------------
+	private String verifyContentModel(String fileName){
+		boolean bRes=true;
+		String msgError="";
+
+		try {
+			FileInputStream specStreamNew;
+			PrintWriter pw=new PrintWriter(System.err);
+			specStreamNew = new FileInputStream(fileName);
+			//			MModel newModel = USECompiler.compileSpecification(specStreamNew,
+			//					fileName, new PrintWriter(System.err),
+			//					new ModelFactory());
+			MModel newModel = USECompiler.compileSpecification(specStreamNew,
+					fileName, pw,
+					new ModelFactory());
+			if (newModel==null) {
+				msgError="Model no viable";;
+				bRes=false;
+			}
+		}catch (Exception e) {
+			//			e.printStackTrace();
+			//			JOptionPane.showMessageDialog(null, e.getMessage(), "Model no viable", JOptionPane.ERROR_MESSAGE);
+			msgError=e.getMessage();
+			bRes=false;
+		}
+		return msgError;
+	}
 	private boolean ChangeContextSession(String fileName){
 		boolean bRes=true;
 		try {
@@ -1237,12 +1272,52 @@ public class MVMObjCheckState extends JDialog {
 			MSystem system=fSession.system();
 			MModel model = fSession.system().model();
 			FileInputStream specStreamNew;
-//			String newFilename="";
-//			if (filename.indexOf("Animals4_P2_v2")>0) {
-//				newFilename=filename;
-//			}else {
-//				newFilename=filename.replace("Animals4_P2", "Animals4_P2_v2");
-//			}
+			//			String newFilename="";
+			//			if (filename.indexOf("Animals4_P2_v2")>0) {
+			//				newFilename=filename;
+			//			}else {
+			//				newFilename=filename.replace("Animals4_P2", "Animals4_P2_v2");
+			//			}
+			String msgError=verifyContentModel(fileName);
+			if(msgError.equals("")) {
+				specStreamNew = new FileInputStream(fileName);
+				MModel newModel = USECompiler.compileSpecification(specStreamNew,
+						fileName, new PrintWriter(System.err),
+						new ModelFactory());		
+				System.out.println("new Model name "+ newModel.name());
+				System.out.println("new Model filename "+ newModel.filename());
+				system = new MSystem(newModel);
+
+				fSession.setSystem(system);
+				thisMVMView.putSession(fSession);
+
+				List<MVMAction> lActionsCheck=new ArrayList<MVMAction>();
+				int nActions = lActions.size();
+				for (int nAction=0;nAction<nActions;nAction++) {
+					MVMAction oAction=lActions.get(nActions-1);
+					lActionsCheck.add(nAction, oAction);
+				}
+				// Hay que rehacer mapObjects de MVMView
+				mapObjects = thisMVMView.getMapObjects(lActionsCheck);
+				System.out.println("cambiado");
+				loadTabObjects();
+				putColorObjs();
+				loadListInvs(0);
+				putColorInvs();
+				loadListAttrs(0);
+
+				if(tabObjects.getModel().getRowCount()>0) {
+					tabObjects.setRowSelectionInterval(0, 0);
+				}
+
+				if(tabInvs.getModel().getRowCount()>0) {
+					tabInvs.setRowSelectionInterval(0, 0);
+					showExprInv(0);
+				}else {
+					JOptionPane.showMessageDialog(null, msgError, "Model no viable", JOptionPane.ERROR_MESSAGE);
+					bRes=false;
+				}
+			}
 
 			specStreamNew = new FileInputStream(fileName);
 			MModel newModel = USECompiler.compileSpecification(specStreamNew,
@@ -1278,10 +1353,10 @@ public class MVMObjCheckState extends JDialog {
 				tabInvs.setRowSelectionInterval(0, 0);
 				showExprInv(0);
 			}
-//			showIndicator();
+			//			showIndicator();
 
 		} catch (Exception e) {
-//			e.printStackTrace();
+			//			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Model no viable", JOptionPane.ERROR_MESSAGE);
 			bRes=false;
 		}
