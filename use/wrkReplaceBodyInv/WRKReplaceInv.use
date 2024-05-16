@@ -20,7 +20,7 @@ end
  constraints
 
 context Person inv validGreaterThanAge:
-  valor0 de validGreaterThanAge   
+  (self.age >4)   
   
 context Person inv validSmallerThanNegAge:
   self.age < 8     
