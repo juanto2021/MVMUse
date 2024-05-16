@@ -1,9 +1,7 @@
 package org.tzi.use.gui.mvm;
 
-import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -11,11 +9,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 //---
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 //---
 import java.io.BufferedWriter;
 import java.io.File;
@@ -638,7 +636,10 @@ public class MVMObjCheckState extends JDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				testNewBodyInv();
+				if (contentNew!="") {
+					testNewBodyInv();
+				}
+				
 			}
 		});
 
@@ -729,9 +730,23 @@ public class MVMObjCheckState extends JDialog {
 
 	}
 	private void testNewBodyInv() {
+		int nInv = tabInvs.getSelectedRow();
 		prepareContentNew();
 		saveWorkFile(contentNew);
-		showIndicatorAlt(false);
+		
+		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
+		boolean bRes=ChangeContextSession(workFile);
+		if (bRes) {
+		// Almacena resultado de la invariante deseada
+		MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+		String texto = (String) oInv.bodyExpression().toString();
+		boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
+		showIndicatorAlt(stateInv);
+		}else {
+			JOptionPane.showMessageDialog(null, "Model no viable", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		// Restablece fichero original
+		bRes=ChangeContextSession(fileNameModelInicial);
 	}
 	private void prepareContentNew() {
 		String newBody=taExprInvNew.getText();
@@ -1035,7 +1050,9 @@ public class MVMObjCheckState extends JDialog {
 	}
 	private void showAlternative(String strAlt) {
 		taExprInvNew.setText(strAlt);
-		testNewBodyInv();
+		if (contentNew!="") {
+			testNewBodyInv();
+		}
 	}
 	//Aqui
 	//--------------------------
@@ -1213,6 +1230,63 @@ public class MVMObjCheckState extends JDialog {
 	}
 
 	//--------------------------
+	private boolean ChangeContextSession(String fileName){
+		boolean bRes=true;
+		try {
+			allObjsOk=true;
+			MSystem system=fSession.system();
+			MModel model = fSession.system().model();
+			FileInputStream specStreamNew;
+//			String newFilename="";
+//			if (filename.indexOf("Animals4_P2_v2")>0) {
+//				newFilename=filename;
+//			}else {
+//				newFilename=filename.replace("Animals4_P2", "Animals4_P2_v2");
+//			}
+
+			specStreamNew = new FileInputStream(fileName);
+			MModel newModel = USECompiler.compileSpecification(specStreamNew,
+					fileName, new PrintWriter(System.err),
+					new ModelFactory());		
+			System.out.println("new Model name "+ newModel.name());
+			System.out.println("new Model filename "+ newModel.filename());
+			system = new MSystem(newModel);
+
+			fSession.setSystem(system);
+			thisMVMView.putSession(fSession);
+
+			List<MVMAction> lActionsCheck=new ArrayList<MVMAction>();
+			int nActions = lActions.size();
+			for (int nAction=0;nAction<nActions;nAction++) {
+				MVMAction oAction=lActions.get(nActions-1);
+				lActionsCheck.add(nAction, oAction);
+			}
+			// Hay que rehacer mapObjects de MVMView
+			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
+			System.out.println("cambiado");
+			loadTabObjects();
+			putColorObjs();
+			loadListInvs(0);
+			putColorInvs();
+			loadListAttrs(0);
+
+			if(tabObjects.getModel().getRowCount()>0) {
+				tabObjects.setRowSelectionInterval(0, 0);
+			}
+
+			if(tabInvs.getModel().getRowCount()>0) {
+				tabInvs.setRowSelectionInterval(0, 0);
+				showExprInv(0);
+			}
+//			showIndicator();
+
+		} catch (Exception e) {
+//			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Model no viable", JOptionPane.ERROR_MESSAGE);
+			bRes=false;
+		}
+		return bRes;
+	}
 	private void analyze() {
 
 		// Ver contenido de modelo
