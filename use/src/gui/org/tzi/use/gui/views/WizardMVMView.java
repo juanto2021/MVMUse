@@ -1008,8 +1008,10 @@ public class WizardMVMView extends JPanel implements View {
 
 		//--------- provis AQUI
 		// Llamar a fill
-		//				newObjectSampleAuto();
-		//				check_inv_state_individual();
+//						newObjectSampleAuto();
+//						newObjectSampleAuto();
+//						newObjectSampleAuto();
+//						check_inv_state_individual();
 		//---provis
 	}
 
@@ -1046,7 +1048,8 @@ public class WizardMVMView extends JPanel implements View {
 			lActions=pLactions;
 		}
 		refreshComponents();
-		return mapObjects;
+		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
+		return mapaOrdenado;
 	}
 	/**
 	 * Refresh components
