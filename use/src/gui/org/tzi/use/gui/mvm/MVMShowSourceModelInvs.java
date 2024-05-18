@@ -25,6 +25,7 @@ public class MVMShowSourceModelInvs extends JDialog {
 	private JPanel pProposals;
 	private JScrollPane pScrollProposals ;	
 
+	private JButton btnReloadNewContent;
 	private JButton btnExit;
 	
 	private JLabel lbModelOri = new JLabel("Actual");
@@ -39,6 +40,7 @@ public class MVMShowSourceModelInvs extends JDialog {
 	private int ROW_TA = 20;
 	
 	private String contentNew="";
+	private String contentNewOri="";
 
 //	public MVMShowSourceModelInvs(JFrame fParent, Map<MVMObject, 
 //			Map<String, Boolean>> pMapObjects, 
@@ -52,6 +54,8 @@ public class MVMShowSourceModelInvs extends JDialog {
 		frame.setModalExclusionType(ModalExclusionType.TOOLKIT_EXCLUDE);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//Provis
 		frame.setLocationRelativeTo(null);
+		
+		contentNewOri=sourceNew;
 
 		panel = new JPanel();
 		frame.add(panel);
@@ -78,6 +82,23 @@ public class MVMShowSourceModelInvs extends JDialog {
 		taModelNew.setBorder(border);
 		taModelNew.setText(sourceNew);
 		panel.add(taModelNew);
+		
+		btnReloadNewContent = new JButton("Reload newContent");
+		btnReloadNewContent.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				taModelNew.setText(contentNewOri);
+				//				lActionsRes=null;
+//				contentNew=taModelNew.getText();
+//								dispose(); //Provis
+//				System.exit(0);
+			}
+		});
+//		btnReloadNewContent.setBounds(WIDTH_TA*2+10-270, ROW_TA+HEIGHT_TA+30, 140, 25);
+		btnReloadNewContent.setBounds(15, ROW_TA+HEIGHT_TA+30, 140, 25);
+		panel.add(btnReloadNewContent);
+		
 		
 		btnExit = new JButton("Exit");
 		btnExit.addActionListener(new ActionListener() {

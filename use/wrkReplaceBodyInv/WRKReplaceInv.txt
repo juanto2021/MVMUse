@@ -20,7 +20,8 @@ end
  constraints
 
 context Person inv validGreaterThanAge:
-  self.age > 0   
+  --< Modify by MVM [self.age > 3]
+self.age > 0   
   
 context Person inv validSmallerThanNegAge:
   self.age < 8     

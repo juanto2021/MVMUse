@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -110,6 +111,7 @@ public class MVMObjCheckState extends JDialog {
 	private JLabel lbIndicator;
 	private JLabel lbIndicatorAlt;
 	private JLabel lbext;
+	private JLabel lbViability;
 
 	private JPanel pIndicator = new JPanel();
 	private JPanel pIndicatorAlt = new JPanel();
@@ -392,7 +394,6 @@ public class MVMObjCheckState extends JDialog {
 		lbIndicatorAlt.setForeground(Color.WHITE);
 		lbIndicatorAlt.setBackground(Color.GREEN);
 
-		//		Border border = BorderFactory.createLineBorder(Color.BLACK);
 		pIndicatorAlt = new JPanel();
 		pIndicatorAlt = new JPanel(new GridBagLayout());
 		pIndicatorAlt.setBounds(col1+210 ,filGroupTab3+320, 100, 25);
@@ -593,13 +594,20 @@ public class MVMObjCheckState extends JDialog {
 			public void focusGained(FocusEvent e) {
 				// Metodo llamado cuando el JTextArea obtiene el foco
 				System.out.println("El JTextArea ha obtenido el foco.");
+				//Aqui
+				lbIndicatorAlt.setText("???");
+				lbIndicatorAlt.setForeground(Color.RED);	
+				pIndicatorAlt.setBackground(Color.WHITE);
 			}
 
 			@Override
 			public void focusLost(FocusEvent e) {
 				// Metodo llamado cuando el JTextArea pierde el foco
 				System.out.println("El JTextArea ha perdido el foco.");
-				saveWorkFile(contentNew);	
+				//				saveWorkFile(contentNew);//provis
+				if (contentNew!="") {
+					testNewBodyInv();
+				}
 			}
 		});
 
@@ -613,6 +621,10 @@ public class MVMObjCheckState extends JDialog {
 		lbFileName = new JLabel("File Name");
 		lbFileName.setBounds(col1, filGroupTab3+440,150, 20);
 		panel.add(lbFileName);	
+
+		lbViability = new JLabel("viability");
+		lbViability.setBounds(col1+440, filGroupTab3+320,500, 20);
+		panel.add(lbViability);	
 
 		lbDIRWRK = new JLabel("Work Directory: "+dirWkr);
 		lbDIRWRK.setBounds(col1+60, filGroupTab3+440,450, 20);
@@ -721,7 +733,7 @@ public class MVMObjCheckState extends JDialog {
 			prepareContentNew();
 			saveWorkFile(contentNew);
 		}
-
+		testNewBodyInv();//Provis
 	}
 	private void reloadComponentsModel() {
 		int nObj = tabObjects.getSelectedRow();
@@ -745,6 +757,13 @@ public class MVMObjCheckState extends JDialog {
 			showExprInv(nInvAnt);
 		}
 	}
+	private void showViability(String msgError) {
+		lbViability.setForeground(Color.BLACK);
+		if(!msgError.equals("")) {
+			lbViability.setForeground(Color.RED);
+		}
+		lbViability.setText(msgError);
+	}
 	private void testNewBodyInv() {
 		int nInv = tabInvs.getSelectedRow();
 		int nInvAnt=nInv;
@@ -755,6 +774,7 @@ public class MVMObjCheckState extends JDialog {
 
 		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
 		String msgError=verifyContentModel(workFile);
+		showViability(msgError);
 		if (msgError.equals("")) {
 			boolean bRes=ChangeContextSession(workFile);
 			// Restablecer nInv
@@ -762,15 +782,16 @@ public class MVMObjCheckState extends JDialog {
 
 			if (bRes) {
 				// Almacena resultado de la invariante deseada
-				MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
-				String texto = (String) oInv.bodyExpression().toString();
-				boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
-				showIndicatorAlt(stateInv);
+				if (nInv>-1) {
+					MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+					String texto = (String) oInv.bodyExpression().toString();
+					boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
+					showIndicatorAlt(stateInv);
+				}
 			}else {
-				JOptionPane.showMessageDialog(null, msgError, "Error", JOptionPane.ERROR_MESSAGE);
-				// poner label con  error
+				showIndicatorAlt(false);
 			}
-			// Restablece fichero original
+			// Restablece fichero original aqui
 			bRes=ChangeContextSession(fileNameModelInicial);	
 			// Restablecer nInv
 			nInv=nInvAnt;
@@ -779,9 +800,8 @@ public class MVMObjCheckState extends JDialog {
 				loadListAttrs(nObjAnt);
 			}
 		}else {
-			JOptionPane.showMessageDialog(null, msgError, "Error", JOptionPane.ERROR_MESSAGE);
-			// poner label con  error
 			// Restablecer nInv
+			showIndicatorAlt(false);
 			nInv=nInvAnt;
 			if (tabInvs.getModel().getRowCount()>0) {
 				tabInvs.setRowSelectionInterval(nInv, nInv);
@@ -795,13 +815,16 @@ public class MVMObjCheckState extends JDialog {
 		String newBody=taExprInvNew.getText();
 		String sourceNew=contentFile;
 		int nInv = tabInvs.getSelectedRow();
-		if(listInv.size()>0) {
+		if(listInv.size()>0 && nInv>-1) {
 			MVMDefInv oInv = listInv.get(nInv);
 			int iniBodyExpr=oInv.getIniBodyExpression();
 			int finBodyExpr=oInv.getFinBodyExpression();
 			String strLeft=contentFile.substring(0,iniBodyExpr);
 			String strRight=contentFile.substring(finBodyExpr, contentFile.length());
-			sourceNew=strLeft + newBody+  strRight;
+			String strChange=contentFile.substring(iniBodyExpr, finBodyExpr);
+			//			String strModified="--<<< Modify by MVM ["+strChange+"] <<<\r\n-->>>\r\n" +newBody+"\r\n-->>>\r\n";
+			String strModified="--< Modify by MVM ["+strChange+"]\r\n" +newBody; // Simple
+			sourceNew=strLeft + strModified.trim() + strRight;
 		}
 		contentNew=sourceNew;
 
@@ -1069,8 +1092,6 @@ public class MVMObjCheckState extends JDialog {
 			}
 		}
 
-
-
 		TreeMap<String, String> mapSorted = new TreeMap<>(mapAlternatives);
 		return mapSorted;
 	}
@@ -1322,19 +1343,20 @@ public class MVMObjCheckState extends JDialog {
 
 		try {
 			FileInputStream specStreamNew;
-			PrintWriter pw=new PrintWriter(System.err);
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter pw=new PrintWriter(stringWriter);
 			specStreamNew = new FileInputStream(fileName);
 
 			MModel newModel = USECompiler.compileSpecification(specStreamNew,
 					fileName, pw,
 					new ModelFactory());
+			String contenido = stringWriter.toString();
 			if (newModel==null) {
-				msgError="Model no viable";;
+				String error = contenido.replace(fileName+":", "");
+				msgError="Model no viable !!! ["+error+"]";
 				bRes=false;
 			}
 		}catch (Exception e) {
-			//			e.printStackTrace();
-			//			JOptionPane.showMessageDialog(null, e.getMessage(), "Model no viable", JOptionPane.ERROR_MESSAGE);
 			msgError=e.getMessage();
 			bRes=false;
 		}
@@ -1349,6 +1371,7 @@ public class MVMObjCheckState extends JDialog {
 			FileInputStream specStreamNew;
 
 			String msgError=verifyContentModel(fileName);
+			showViability(msgError);
 			if(msgError.equals("")) {
 				specStreamNew = new FileInputStream(fileName);
 				MModel newModel = USECompiler.compileSpecification(specStreamNew,
@@ -1373,7 +1396,6 @@ public class MVMObjCheckState extends JDialog {
 
 				reloadComponentsModel();
 			}else {
-				JOptionPane.showMessageDialog(null, msgError, "Model no viable", JOptionPane.ERROR_MESSAGE);
 				bRes=false;
 			}
 
@@ -1400,8 +1422,6 @@ public class MVMObjCheckState extends JDialog {
 
 			reloadComponentsModel();
 		} catch (Exception e) {
-
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Model no viable", JOptionPane.ERROR_MESSAGE);
 			bRes=false;
 		}
 		return bRes;
@@ -1424,7 +1444,6 @@ public class MVMObjCheckState extends JDialog {
 
 		System.out.println("Directorio: " + directory);
 		System.out.println("Nombre de archivo: " + fileNameExt);
-
 
 		try {
 			FileInputStream specStreamNew;
@@ -1651,9 +1670,11 @@ public class MVMObjCheckState extends JDialog {
 	private void showIndicatorAlt(boolean stateInv) {
 		if (stateInv) {
 			pIndicatorAlt.setBackground(Color.GREEN);
+			lbIndicatorAlt.setForeground(Color.WHITE);
 			lbIndicatorAlt.setText("Correct");
 		}else {
 			pIndicatorAlt.setBackground(Color.RED);
+			lbIndicatorAlt.setForeground(Color.WHITE);
 			lbIndicatorAlt.setText("Incorrect");
 		}
 	}
@@ -1715,7 +1736,6 @@ public class MVMObjCheckState extends JDialog {
 							data[nInv][1]=value;
 							nInv++;	
 						}
-
 					}
 
 					// Resize data result

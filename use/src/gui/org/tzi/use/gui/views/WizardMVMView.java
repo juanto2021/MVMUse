@@ -1047,7 +1047,7 @@ public class WizardMVMView extends JPanel implements View {
 			doActions(pLactions);
 			lActions=pLactions;
 		}
-		refreshComponents();
+//		refreshComponents();// Provis
 		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
 		return mapaOrdenado;
 	}
@@ -1858,6 +1858,7 @@ public class WizardMVMView extends JPanel implements View {
 		w.setLocationRelativeTo(null);
 		w.setResizable(false);
 		w.setVisible(true);
+		refreshComponents();// Provis
 		// Aqui
 		// Comprobar si existen las vistas de MVMWizard y de objetos y si no recrearlas
 	}
