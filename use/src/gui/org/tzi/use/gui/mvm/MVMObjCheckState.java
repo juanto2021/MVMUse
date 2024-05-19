@@ -1,5 +1,6 @@
 package org.tzi.use.gui.mvm;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
@@ -36,7 +37,9 @@ import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -48,13 +51,18 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 
 import org.tzi.use.gui.mvm.MVMInterpreteParser.InvDeclarationContext;
 import org.tzi.use.gui.mvm.MVMInterpreteParser.LineInvContext;
@@ -143,6 +151,12 @@ public class MVMObjCheckState extends JDialog {
 	private boolean checkAllObjs=true;
 	private boolean allObjsOk=true;
 
+	private JTable tableAlt;
+	private TableColumn colOpAlt;
+	private TableColumn colBodyInv;
+	private TableColumn colStateInv;	
+	private JScrollPane scrollPaneTableAlt;
+
 	private String strExtension="use";
 	private String strExtensionProperties="properties";
 	private String directoryName="";
@@ -213,7 +227,8 @@ public class MVMObjCheckState extends JDialog {
 		lActions=pLactions;
 		listInv= new ArrayList<MVMDefInv>();
 
-		MSystem system=fSession.system();
+//		MSystem system=fSession.system();
+		
 		fModel = fSession.system().model();
 		fileName =fModel.filename();
 		fileNameModelInicial=fModel.filename();
@@ -221,6 +236,8 @@ public class MVMObjCheckState extends JDialog {
 		Path path = Paths.get("");
 		directoryName = path.toAbsolutePath().toString();
 		dirWkr=(directoryName+"/"+dirWrkReplaceBodyInv).replace("\\", "/");
+
+		analyze_Model();
 
 		// Objs options
 		rbObjAll = new JRadioButton("All");
@@ -388,7 +405,6 @@ public class MVMObjCheckState extends JDialog {
 
 		panel.add(pIndicator);
 
-		//---
 		lbIndicatorAlt = new JLabel("");
 		lbIndicatorAlt.setFont(fontTitles2);
 		lbIndicatorAlt.setForeground(Color.WHITE);
@@ -447,7 +463,6 @@ public class MVMObjCheckState extends JDialog {
 				if(tabObjects.getModel().getRowCount()>0) {
 					tabObjects.setRowSelectionInterval(nObj, nObj);
 				}
-
 			}
 		});
 
@@ -559,6 +574,16 @@ public class MVMObjCheckState extends JDialog {
 		pScrollProposals.setBorder(etchedTitledBorder);
 		panel.add(pScrollProposals);
 
+		//---aqui
+		tableAlt = new JTable();
+		tableAlt.setBounds(col1, filGroupTab3+150, BLOCK_WIDTH, 155);
+		scrollPaneTableAlt = new JScrollPane(tableAlt);
+		scrollPaneTableAlt.setBounds(col1, filGroupTab3+150, BLOCK_WIDTH, 155);
+		scrollPaneTableAlt.setBorder(etchedTitledBorder);
+		panel.add(scrollPaneTableAlt, BorderLayout.CENTER);
+
+		//--
+
 		lbExprInvNew = new JLabel("New Invariant body");
 		lbExprInvNew.setBounds(col1, filGroupTab3+320, 250, 20);
 		lbExprInvNew.setFont(fontTitles);
@@ -571,30 +596,29 @@ public class MVMObjCheckState extends JDialog {
 			@Override
 			public void insertUpdate(DocumentEvent e) {
 				// Metodo llamado cuando se inserta texto en el JTextArea
-				System.out.println("Texto insertado: " + taExprInvNew.getText());
-				prepareContentNew();
+				//				System.out.println("Texto insertado: " + taExprInvNew.getText());
+				//				prepareContentNew();
 			}
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
 				// Metodo llamado cuando se elimina texto del JTextArea
-				System.out.println("Texto eliminado: " + taExprInvNew.getText());
-				prepareContentNew();
+				//				System.out.println("Texto eliminado: " + taExprInvNew.getText());
+				//				prepareContentNew();
 			}
 
 			@Override
 			public void changedUpdate(DocumentEvent e) {
 				// Metodo llamado cuando se cambia el estilo del texto en el JTextArea
-				System.out.println("Estilo de texto cambiado: " + taExprInvNew.getText());
-				prepareContentNew();
+				//				System.out.println("Estilo de texto cambiado: " + taExprInvNew.getText());
+				//				prepareContentNew();
 			}
 		});
 		taExprInvNew.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
 				// Metodo llamado cuando el JTextArea obtiene el foco
-				System.out.println("El JTextArea ha obtenido el foco.");
-				//Aqui
+				//				System.out.println("El JTextArea ha obtenido el foco.");
 				lbIndicatorAlt.setText("???");
 				lbIndicatorAlt.setForeground(Color.RED);	
 				pIndicatorAlt.setBackground(Color.WHITE);
@@ -603,8 +627,7 @@ public class MVMObjCheckState extends JDialog {
 			@Override
 			public void focusLost(FocusEvent e) {
 				// Metodo llamado cuando el JTextArea pierde el foco
-				System.out.println("El JTextArea ha perdido el foco.");
-				//				saveWorkFile(contentNew);//provis
+				//				System.out.println("El JTextArea ha perdido el foco.");
 				if (contentNew!="") {
 					testNewBodyInv();
 				}
@@ -709,13 +732,11 @@ public class MVMObjCheckState extends JDialog {
 
 		if(tabInvs.getModel().getRowCount()>0) {
 			tabInvs.setRowSelectionInterval(0, 0);
-
 			showInfoLinkFromRow(0);
-
 		}
 		//--- AQUI
 
-		analyze_Model();		
+		//		analyze_Model();		
 
 		String fileAct=fileName;
 		String nameProposal ="";
@@ -732,8 +753,10 @@ public class MVMObjCheckState extends JDialog {
 			tabInvs.setRowSelectionInterval(0, 0);
 			prepareContentNew();
 			saveWorkFile(contentNew);
+
 		}
 		testNewBodyInv();//Provis
+
 	}
 	private void reloadComponentsModel() {
 		int nObj = tabObjects.getSelectedRow();
@@ -764,7 +787,8 @@ public class MVMObjCheckState extends JDialog {
 		}
 		lbViability.setText(msgError);
 	}
-	private void testNewBodyInv() {
+	private boolean testNewBodyInv() {
+		boolean bResTest=false;
 		int nInv = tabInvs.getSelectedRow();
 		int nInvAnt=nInv;
 		int nObj = tabObjects.getSelectedRow();
@@ -787,10 +811,14 @@ public class MVMObjCheckState extends JDialog {
 					String texto = (String) oInv.bodyExpression().toString();
 					boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
 					showIndicatorAlt(stateInv);
+					bResTest=stateInv;
+//					System.out.println("+++>>> en testNewBodyInv() ["+contentNew+"] ["+bRes+"] texto ["+texto+"] stateInv ["+stateInv+"]");
 				}
 			}else {
 				showIndicatorAlt(false);
+//				System.out.println("+++<<< en testNewBodyInv() ["+contentNew+"] ["+bRes+"]");
 			}
+
 			// Restablece fichero original aqui
 			bRes=ChangeContextSession(fileNameModelInicial);	
 			// Restablecer nInv
@@ -808,9 +836,9 @@ public class MVMObjCheckState extends JDialog {
 				loadListAttrs(nInv);
 			}
 		}
-
-
+		return bResTest;
 	}
+
 	private void prepareContentNew() {
 		String newBody=taExprInvNew.getText();
 		String sourceNew=contentFile;
@@ -839,10 +867,9 @@ public class MVMObjCheckState extends JDialog {
 			if (tabInvs.getModel().getRowCount()>0) {
 				MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
 				String nomInv = (String) oInv.bodyExpression().toString();
-				calcStateInvObj(nomObj, nomInv);
+//				calcStateInvObj(nomObj, nomInv);
 			}
 		}
-
 	}
 
 	private void showSource() {
@@ -867,7 +894,7 @@ public class MVMObjCheckState extends JDialog {
 		String fileProposal=fileSinExtBarras; 
 		String nomFile="";
 		String directory="";
-		System.out.println("Nombre "+nameFileModel);
+		//		System.out.println("Nombre "+nameFileModel);
 		if (fileSinExt.contains("/")) {
 			String[] partes = fileSinExt.split("/");
 			int nPartes = partes.length;
@@ -890,17 +917,14 @@ public class MVMObjCheckState extends JDialog {
 		boolean exist=false;
 		do {
 			contador++; // Incrementa el contador en 1
-			System.out.println("El contador es: " + contador);
 
 			fileProposal=base+"_v"+contador+"."+strExtension;
 			File archivo = new File(fileProposal);
 
 			// Verificar si el archivo existe
 			if (archivo.exists()) {
-				System.out.println("El archivo existe.");
 				exist=true;
 			} else {
-				System.out.println("El archivo no existe.");
 				exist=false;
 			}
 		} while (exist && contador < 5);
@@ -919,7 +943,6 @@ public class MVMObjCheckState extends JDialog {
 				}
 				directory+=partes[n];
 			}
-
 		}else {
 			nomFile=fileProposal;
 			directory=directoryName;
@@ -928,7 +951,6 @@ public class MVMObjCheckState extends JDialog {
 		String res=nomFile.replace("."+strExtension, "");
 		return res;
 	}
-
 
 	/**
 	 * Save file
@@ -1012,13 +1034,10 @@ public class MVMObjCheckState extends JDialog {
 				Path source = fileInicial.toPath();
 				Path destination = fileFinal.toPath();
 				Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-				System.out.println("Archivo copiado correctamente.");
 			} catch (IOException e) {
-				System.out.println("Error al copiar el archivo: " + e.getMessage());
 				bRes=false;
 			}
 		} else {
-			System.out.println("El archivo inicial no existe.");
 			bRes=false;
 		}			
 		return bRes;
@@ -1057,6 +1076,7 @@ public class MVMObjCheckState extends JDialog {
 		MClassInvariant inv = (MClassInvariant) tabInvs.getModel().getValueAt(row, 0);
 		String strInv = inv.name();
 		showPanelActionsLink(strInv);
+		showPanelTableAlt(strInv);
 	}
 	private Map<String, String> doAlternatives(String strInv) {
 		Map<String, String> mapAlternatives = new HashMap<String, String>();
@@ -1085,6 +1105,14 @@ public class MVMObjCheckState extends JDialog {
 			mapAlternatives.put("clave2", "self.age < 0");
 			mapAlternatives.put("clave3", "self.age > 2");
 			mapAlternatives.put("clave4", "self.age < -4");
+			mapAlternatives.put("clave5", "self.age > 0");
+			mapAlternatives.put("clave6", "self.age < 0");
+			mapAlternatives.put("clave7", "self.age > 2");
+			mapAlternatives.put("clave8", "self.age < -4");
+			mapAlternatives.put("clave9", "self.age > 0");
+			mapAlternatives.put("clave10", "self.age < 0");
+			mapAlternatives.put("clave11", "self.age > 2");
+			mapAlternatives.put("clave12", "self.age < -4");			
 
 		}else {
 			for (int i=0;i<10;i++) {
@@ -1148,11 +1176,11 @@ public class MVMObjCheckState extends JDialog {
 		borderTitle="";//provis
 		panel.remove(pScrollProposals);
 		pScrollProposals = new JScrollPane(pProposals);
-		pScrollProposals.setBounds(col1, filGroupTab3+150, BLOCK_WIDTH, 155);
+		pScrollProposals.setBounds(900, filGroupTab3+150, 100, 155);
 		etchedTitledBorder = BorderFactory.createTitledBorder(etchedBorder, borderTitle);
 		pScrollProposals.setBorder(etchedTitledBorder);
 		panel.add(pScrollProposals);
-		panel.updateUI();
+		//		panel.updateUI();
 
 	}
 	private void showAlternative(String strAlt) {
@@ -1161,21 +1189,272 @@ public class MVMObjCheckState extends JDialog {
 			testNewBodyInv();
 		}
 	}
+
+	//--------------------------
+	private void showPanelTableAlt(String strInv) {
+		Map<String, String> mapSorted = doAlternatives(strInv);
+		scrollPaneTableAlt.remove(tableAlt);// OJO
+		tableAlt = new JTable(new CustomTableModel(mapSorted));
+		tableAlt.setRowSelectionAllowed(true);  // Desactivar la selección de filas
+
+		// Configurar el renderizador y editor para la columna de radio buttons
+		tableAlt.getColumnModel().getColumn(0).setCellRenderer(new RadioButtonRenderer());
+		tableAlt.getColumnModel().getColumn(0).setCellEditor(new RadioButtonEditor(new JCheckBox()));
+
+		// Configurar el renderizador y editor para las columnas JTextField
+		tableAlt.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(new JTextField()));
+		tableAlt.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JTextField()));
+
+		// Configurar el renderizador personalizado para la tercera columna
+		tableAlt.getColumnModel().getColumn(2).setCellRenderer(new CustomColumnRenderer());
+
+		TableColumn colOpAlt = tableAlt.getColumnModel().getColumn(0);
+		colOpAlt.setPreferredWidth(60);
+		colOpAlt.setMinWidth(40);
+		colOpAlt.setMaxWidth(60);
+
+		int widthBodyInv=710;
+		TableColumn colBodyInv = tableAlt.getColumnModel().getColumn(1);
+		colBodyInv.setPreferredWidth(widthBodyInv);
+		colBodyInv.setMinWidth(widthBodyInv);
+		colBodyInv.setMaxWidth(widthBodyInv);
+
+		TableColumn colStateInv = tableAlt.getColumnModel().getColumn(2);
+		colStateInv.setPreferredWidth(80);
+		colStateInv.setMinWidth(80);
+		colStateInv.setMaxWidth(80);
+
+		tableAlt.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent event) {
+				if (!event.getValueIsAdjusting()) {
+					int selectedRow = tableAlt.getSelectedRow();
+					if (selectedRow != -1) {
+						Object value = tableAlt.getValueAt(selectedRow, 1); // Columna 2 (índice 1)
+						System.out.println("["+selectedRow+"] desc inv: " + value);
+						tableAlt.setValueAt(true, selectedRow, 0);
+						int nInv = tabInvs.getSelectedRow();
+						int nInvAnt=nInv;
+						int nObj = tabObjects.getSelectedRow();
+						int nObjAnt=nObj;
+						String bodyAlt=value.toString();
+						showAlternative(bodyAlt);
+						saveWorkFile(contentNew);
+						// Restablecer nInv
+						nInv=nInvAnt;
+						if (tabInvs.getModel().getRowCount()>0) {
+							tabInvs.setRowSelectionInterval(nInv, nInv);
+							loadListAttrs(nObjAnt);
+						}
+						showExprInv(nInv);
+					}
+				}
+			}
+		});
+
+		if(tableAlt.getModel().getRowCount()>0) {
+			tableAlt.setRowSelectionInterval(0, 0);
+		}
+
+		tableAlt.setBounds(col1, filGroupTab3+150, BLOCK_WIDTH, 155);
+		panel.remove(scrollPaneTableAlt);
+		scrollPaneTableAlt = new JScrollPane(tableAlt);
+		scrollPaneTableAlt.setBounds(col1, filGroupTab3+150, BLOCK_WIDTH, 155);
+		scrollPaneTableAlt.setBorder(etchedTitledBorder);
+		panel.add(scrollPaneTableAlt, BorderLayout.CENTER);
+		panel.updateUI();
+
+	}
+	public class CustomTableModel extends AbstractTableModel {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private String[] columnNames = {"Op", "Alt", "State"};
+		private Object[][] data = {};
+
+		private int selectedRow = -1;
+		private Map<String, String> mapAlt;
+
+
+		public CustomTableModel(Map<String, String> pMapAlt) {
+			super();
+			mapAlt=pMapAlt;
+			int nFilas = mapAlt.size();
+			data = new Object[nFilas][3];
+			int nFila=0;
+			for (Map.Entry<String, String> entry : pMapAlt.entrySet()) {
+//				String clave = entry.getKey();
+				String valor = entry.getValue();
+
+				data[nFila][0]=false;
+				data[nFila][1]=valor;
+				// Calcular que pasa con la alternativa 
+
+				int nInv = tabInvs.getSelectedRow();
+				int nInvAnt=nInv;
+				int nObj = tabObjects.getSelectedRow();
+				int nObjAnt=nObj;
+				String bodyAlt=valor.toString();
+				showAlternative(bodyAlt);
+				prepareContentNew();//Provis
+				saveWorkFile(contentNew);
+				// Restablecer nInv
+				nInv=nInvAnt;
+				if (tabInvs.getModel().getRowCount()>0) {
+					tabInvs.setRowSelectionInterval(nInv, nInv);
+					loadListAttrs(nObjAnt);
+				}
+				showExprInv(nInv);
+
+				String textResult="Incorrecto";
+				boolean bRes=false;
+				if (!contentNew.equals("")) {
+					bRes=testNewBodyInv();//Provis
+				}
+				if (bRes) {
+					textResult="Correcto";
+				}
+				data[nFila][2]=textResult;
+				nFila++;
+			}
+		}
+
+		@Override
+		public int getRowCount() {
+			return data.length;
+		}
+
+		@Override
+		public int getColumnCount() {
+			return columnNames.length;
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+			return columnNames[columnIndex];
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			if (columnIndex == 0) {
+				return rowIndex == selectedRow;
+			} else {
+				return data[rowIndex][columnIndex];
+			}
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			if (columnIndex == 0) {
+				return true;
+			} else {
+				return rowIndex == selectedRow;
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			if (columnIndex == 0) {
+				selectedRow = rowIndex;
+				fireTableDataChanged();
+			} else {
+				data[rowIndex][columnIndex] = aValue;
+			}
+		}
+
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return columnIndex == 0 ? Boolean.class : String.class;
+		}
+	}
+
+	public class RadioButtonRenderer extends DefaultTableCellRenderer {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			JRadioButton radioButton = new JRadioButton();
+			radioButton.setSelected((Boolean) value);
+			radioButton.setHorizontalAlignment(SwingConstants.CENTER);
+			return radioButton;
+		}
+	}
+
+	public class RadioButtonEditor extends DefaultCellEditor implements ActionListener {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private JRadioButton radioButton;
+		private JTable table;
+
+		public RadioButtonEditor(JCheckBox checkBox) {
+			super(checkBox);
+			radioButton = new JRadioButton();
+			radioButton.setHorizontalAlignment(SwingConstants.CENTER);
+			radioButton.addActionListener(this);
+		}
+
+		@Override
+		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+			this.table = table;
+			radioButton.setSelected((Boolean) value);
+			return radioButton;
+		}
+
+		@Override
+		public Object getCellEditorValue() {
+			return radioButton.isSelected();
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			int row = table.getEditingRow();
+			table.getModel().setValueAt(true, row, 0);
+			stopCellEditing();
+		}
+	}
+
+	public class CustomColumnRenderer extends DefaultTableCellRenderer {
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			if (column == 2) {
+				String cellValue = (String) value;
+				if ("Correcto".equals(cellValue)) {
+					c.setBackground(Color.GREEN);
+					c.setForeground(Color.WHITE);
+				} else {
+					c.setBackground(Color.RED);
+					c.setForeground(Color.WHITE);
+				}
+			}
+			setHorizontalAlignment(SwingConstants.CENTER); // Centrar el texto
+			setFont(getFont().deriveFont(Font.BOLD));
+			return c;
+		}
+	}
+
 	//Aqui
 	//--------------------------
 
 	private void analyze_Model() {
-		System.out.println("START: " + fileName);
-
-		System.out.println("Model name "+ fModel.name());
-		System.out.println("Model filename "+ fileName);
+//		System.out.println("START: " + fileName);
+//
+//		System.out.println("Model name "+ fModel.name());
+//		System.out.println("Model filename "+ fileName);
 		File fileF = new File(fileName);
 
 		directory = fileF.getParent();
 		fileNameExt = fileF.getName();
 
-		System.out.println("Directorio: " + directory);
-		System.out.println("Nombre de archivo: " + fileNameExt);
+//		System.out.println("Directorio: " + directory);
+//		System.out.println("Nombre de archivo: " + fileNameExt);
 
 		listInv = new ArrayList<MVMDefInv>();
 		contentFile = "";
@@ -1204,25 +1483,25 @@ public class MVMObjCheckState extends JDialog {
 			// Cerrar el archivo
 			writer.close();
 
-			System.out.println("FINISH: " + fileName);
-			System.out.println("--------------------------------------------------------------------------------------------");
-			System.out.println("Hay ["+listInv.size()+"] invariants in file ["+fileName+"]");
-			System.out.println("--------------------------------------------------------------------------------------------");
-			int nInvs=listInv.size();
-			for (int nInv=0;nInv<nInvs;nInv++) {
-				MVMDefInv oInv = listInv.get(nInv);
-				String linea=String.format("%03d", nInv);
-				linea+="  [";
-				linea+=String.format("%5d", oInv.getIniBodyExpression());
-				linea+="-";
-				linea+=String.format("%5d", oInv.getFinBodyExpression());
-				linea+="]";
-				linea+="  ";
-				linea+=String.format("%-40s","["+oInv.getNameClass()+"::"+oInv.getNameInv()+"]");
-
-				linea+=String.format("%-70s","["+oInv.getBodyExpression()+"]");
-				System.out.println(linea);
-			}
+//			System.out.println("FINISH: " + fileName);
+//			System.out.println("--------------------------------------------------------------------------------------------");
+//			System.out.println("Hay ["+listInv.size()+"] invariants in file ["+fileName+"]");
+//			System.out.println("--------------------------------------------------------------------------------------------");
+//			int nInvs=listInv.size();
+//			for (int nInv=0;nInv<nInvs;nInv++) {
+//				MVMDefInv oInv = listInv.get(nInv);
+//				String linea=String.format("%03d", nInv);
+//				linea+="  [";
+//				linea+=String.format("%5d", oInv.getIniBodyExpression());
+//				linea+="-";
+//				linea+=String.format("%5d", oInv.getFinBodyExpression());
+//				linea+="]";
+//				linea+="  ";
+//				linea+=String.format("%-40s","["+oInv.getNameClass()+"::"+oInv.getNameInv()+"]");
+//
+//				linea+=String.format("%-70s","["+oInv.getBodyExpression()+"]");
+//				System.out.println(linea);
+//			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -1231,7 +1510,6 @@ public class MVMObjCheckState extends JDialog {
 	private void doRecursively(org.antlr.v4.runtime.tree.ParseTree tree) {
 		for (int i = 0; i < tree.getChildCount(); i++) {
 			Object child = tree.getChild(i);
-			String strChild = child.toString();
 
 			if (child instanceof org.antlr.v4.runtime.tree.TerminalNodeImpl) {
 				String partNL=((org.antlr.v4.runtime.tree.TerminalNodeImpl)child).getText();
@@ -1247,46 +1525,30 @@ public class MVMObjCheckState extends JDialog {
 					nameClassInv=childContext.nameClassInv.getText();
 					iniCONTEXT=contentFile.length();
 				}else if (child instanceof LineInvContext) {
-					LineInvContext childLineINV=(LineInvContext)child;
 					iniINV=contentFile.length();
 				}
 				doRecursively((org.antlr.v4.runtime.tree.ParseTree) child);
 				if (child instanceof InvDeclarationContext) {
-					InvDeclarationContext childContext=(InvDeclarationContext)child;
-
 					finCONTEXT=contentFile.length();
-					String strCONTEXT = contentFile.substring(iniCONTEXT, finCONTEXT);
-					//					System.out.println("["+iniCONTEXT+"]-["+finCONTEXT+"] nameClass ["+nameClassInv+"] ---------------- CONTEXT -----------------");
-					//					System.out.println("["+strCONTEXT+"]");
-					//					System.out.println("----------------------------------------------------------");
-					//					System.out.println();
 					nameClassInv="";
 				}else if (child instanceof LineInvContext) {
 					LineInvContext childLineINV=(LineInvContext)child;
 					String nameInv = childLineINV.nameConstraint.getText();
 					finINV=contentFile.length();
 					String strINV = contentFile.substring(iniINV, finINV);
-					String lineINV=strINV;
 					String bodyExpression = cleaninvExpression(strINV);
-
-					//					System.out.println("["+iniINV+"]-["+finINV+"] nameClass ["+nameClassInv+"] ["+nameInv+"] *** INV ************");
-					//					System.out.println("["+lineINV+"]");
-					//					System.out.println("***************************************************");
-					//					System.out.println("["+bodyExpression+"]");
-					//					System.out.println("***************************************************");
-					//					System.out.println();
 
 					int iniBody=iniINV+strINV.indexOf(bodyExpression);
 					int finBody=iniBody+bodyExpression.length();
-					String strCompare = contentFile.substring(iniBody, finBody);
-					if (bodyExpression.equals(strCompare)) {
-						//						System.out.println("SI");
-					}else {
-
-						//						System.out.println("bodyExpression ["+bodyExpression+"]");
-						//						System.out.println("strCompare     ["+strCompare+"]");
-						//						System.out.println("NO");
-					}
+//					String strCompare = contentFile.substring(iniBody, finBody);
+//					if (bodyExpression.equals(strCompare)) {
+//						//						System.out.println("SI");
+//					}else {
+//
+//						//						System.out.println("bodyExpression ["+bodyExpression+"]");
+//						//						System.out.println("strCompare     ["+strCompare+"]");
+//						//						System.out.println("NO");
+//					}
 
 					numINV+=1;
 					MVMDefInv oInv = new MVMDefInv();
@@ -1338,7 +1600,7 @@ public class MVMObjCheckState extends JDialog {
 
 	//--------------------------
 	private String verifyContentModel(String fileName){
-		boolean bRes=true;
+		//		boolean bRes=true;
 		String msgError="";
 
 		try {
@@ -1354,11 +1616,9 @@ public class MVMObjCheckState extends JDialog {
 			if (newModel==null) {
 				String error = contenido.replace(fileName+":", "");
 				msgError="Model no viable !!! ["+error+"]";
-				bRes=false;
 			}
 		}catch (Exception e) {
 			msgError=e.getMessage();
-			bRes=false;
 		}
 		return msgError;
 	}
@@ -1367,7 +1627,6 @@ public class MVMObjCheckState extends JDialog {
 		try {
 			allObjsOk=true;
 			MSystem system=fSession.system();
-			MModel model = fSession.system().model();
 			FileInputStream specStreamNew;
 
 			String msgError=verifyContentModel(fileName);
@@ -1377,8 +1636,8 @@ public class MVMObjCheckState extends JDialog {
 				MModel newModel = USECompiler.compileSpecification(specStreamNew,
 						fileName, new PrintWriter(System.err),
 						new ModelFactory());		
-				System.out.println("new Model name "+ newModel.name());
-				System.out.println("new Model filename "+ newModel.filename());
+//				System.out.println("new Model name "+ newModel.name());
+//				System.out.println("new Model filename "+ newModel.filename());
 				system = new MSystem(newModel);
 
 				fSession.setSystem(system);
@@ -1392,7 +1651,6 @@ public class MVMObjCheckState extends JDialog {
 				}
 				// Hay que rehacer mapObjects de MVMView
 				mapObjects = thisMVMView.getMapObjects(lActionsCheck);
-				System.out.println("cambiado");
 
 				reloadComponentsModel();
 			}else {
@@ -1403,8 +1661,8 @@ public class MVMObjCheckState extends JDialog {
 			MModel newModel = USECompiler.compileSpecification(specStreamNew,
 					fileName, new PrintWriter(System.err),
 					new ModelFactory());		
-			System.out.println("new Model name "+ newModel.name());
-			System.out.println("new Model filename "+ newModel.filename());
+//			System.out.println("old Model name "+ newModel.name());
+//			System.out.println("old Model filename "+ newModel.filename());
 			system = new MSystem(newModel);
 
 			fSession.setSystem(system);
@@ -1418,7 +1676,6 @@ public class MVMObjCheckState extends JDialog {
 			}
 			// Hay que rehacer mapObjects de MVMView
 			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
-			System.out.println("cambiado");
 
 			reloadComponentsModel();
 		} catch (Exception e) {
@@ -1431,19 +1688,19 @@ public class MVMObjCheckState extends JDialog {
 		// Ver contenido de modelo
 		// Obtener contenido de otro fichero
 		String dir = System.getProperty("user.dir");
-		System.out.println("Directorio actual: " + dir);
+//		System.out.println("Directorio actual: " + dir);
 		MSystem system=fSession.system();
 		MModel model = fSession.system().model();
 		String filename =model.filename();
-		System.out.println("Model name "+ model.name());
-		System.out.println("Model filename "+ filename);
+//		System.out.println("Model name "+ model.name());
+//		System.out.println("Model filename "+ filename);
 		File file = new File(filename);
 
 		String directory = file.getParent();
 		String fileNameExt = file.getName();
 
-		System.out.println("Directorio: " + directory);
-		System.out.println("Nombre de archivo: " + fileNameExt);
+//		System.out.println("Directorio: " + directory);
+//		System.out.println("Nombre de archivo: " + fileNameExt);
 
 		try {
 			FileInputStream specStreamNew;
@@ -1473,25 +1730,25 @@ public class MVMObjCheckState extends JDialog {
 			}
 			// Hay que rehacer mapObjects de MVMView
 			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
-			System.out.println("cambiado");
+//			System.out.println("cambiado");
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void compareExprInvs() {
-		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
-		int rowObject = tabObjects.getSelectedRow();
-		String oCompareName = (String) tabObjects.getValueAt(rowObject, 0);
-		String oCompareClass = (String) tabObjects.getValueAt(rowObject, 1);
-		MVMCompareExprInvs w = new MVMCompareExprInvs(frame,mapaOrdenado, rowObject,oCompareName, oCompareClass);
-		w.setSize(888, 340);
-		w.setLocationRelativeTo(null);
-		w.setResizable(false);
-		w.setVisible(true);
-
-	}
+	//	private void compareExprInvs() {
+	//		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
+	//		int rowObject = tabObjects.getSelectedRow();
+	//		String oCompareName = (String) tabObjects.getValueAt(rowObject, 0);
+	//		String oCompareClass = (String) tabObjects.getValueAt(rowObject, 1);
+	//		MVMCompareExprInvs w = new MVMCompareExprInvs(frame,mapaOrdenado, rowObject,oCompareName, oCompareClass);
+	//		w.setSize(888, 340);
+	//		w.setLocationRelativeTo(null);
+	//		w.setResizable(false);
+	//		w.setVisible(true);
+	//
+	//	}
 	private void showExprInv(int nInv) {
 
 		MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
@@ -1506,6 +1763,11 @@ public class MVMObjCheckState extends JDialog {
 	private void putColorObjs() {
 
 		DefaultTableCellRenderer renderObj = new DefaultTableCellRenderer() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value,
 					boolean isSelected, boolean hasFocus,
@@ -1533,6 +1795,11 @@ public class MVMObjCheckState extends JDialog {
 	private void putColorInvs() {
 
 		DefaultTableCellRenderer renderInv = new DefaultTableCellRenderer() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value,
 					boolean isSelected, boolean hasFocus,
@@ -1554,9 +1821,9 @@ public class MVMObjCheckState extends JDialog {
 
 	}
 
-	private void calcStateInvObj(String nomObj, String nomInv) {
-		System.out.println("Calculo state para ["+nomObj+"] - inv ["+nomInv+"]");
-	}
+//	private void calcStateInvObj(String nomObj, String nomInv) {
+//		System.out.println("Calculo state para ["+nomObj+"] - inv ["+nomInv+"]");
+//	}
 
 	/**
 	 * Load object table
@@ -1574,13 +1841,12 @@ public class MVMObjCheckState extends JDialog {
 		if (mapObjects.size()>0) {
 
 			int nObjs = mapObjects.size();
-			System.out.println("loadTabObjects - Hay ["+nObjs+"]");
+
 			Object[][] data = new Object[nObjs][3];
 
 			int nObj=0;
 			for (Map.Entry<MVMObject, Map<MClassInvariant, Boolean>> entry : mapObjects.entrySet()) {
 
-				int nInv=0;
 				MVMObject oObjKey = entry.getKey();
 				boolean allOk=true;
 
@@ -1708,7 +1974,6 @@ public class MVMObjCheckState extends JDialog {
 					int nInvs = innerMap.size();
 					Object[][] data = new Object[nInvs][2];
 					// Determina si todos los invs son ok o no
-					boolean allOk=true;
 
 					for (Map.Entry<MClassInvariant, Boolean> innerEntry : mapaOrdenado.entrySet()) {
 						MClassInvariant inv = innerEntry.getKey();
