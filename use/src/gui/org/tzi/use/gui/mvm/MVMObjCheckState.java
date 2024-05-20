@@ -1,5 +1,6 @@
 package org.tzi.use.gui.mvm; 
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
@@ -22,6 +23,10 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+<<<<<<< HEAD
+=======
+import java.io.StringWriter;
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,7 +40,9 @@ import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -47,13 +54,24 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+<<<<<<< HEAD
+=======
+import javax.swing.SwingConstants;
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+<<<<<<< HEAD
+=======
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 
 import org.tzi.use.gui.mvm.MVMInterpreteParser.InvDeclarationContext;
 import org.tzi.use.gui.mvm.MVMInterpreteParser.LineInvContext;
@@ -110,6 +128,10 @@ public class MVMObjCheckState extends JDialog {
 	private JLabel lbIndicator;
 	private JLabel lbIndicatorAlt;
 	private JLabel lbext;
+<<<<<<< HEAD
+=======
+	private JLabel lbViability;
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 
 	private JPanel pIndicator = new JPanel();
 	private JPanel pIndicatorAlt = new JPanel();
@@ -141,6 +163,7 @@ public class MVMObjCheckState extends JDialog {
 	private boolean checkAllObjs=true;
 	private boolean allObjsOk=true;
 
+<<<<<<< HEAD
 	private String strExtension="use";
 	private String strExtensionProperties="properties";
 	private String directoryName="";
@@ -162,6 +185,37 @@ public class MVMObjCheckState extends JDialog {
 
 	private Font fontTitles;
 	private Font fontTitles2;
+=======
+	private JTable tableAlt;
+	private TableColumn colOpAlt;
+	private TableColumn colBodyInv;
+	private TableColumn colStateInv;	
+	private JScrollPane scrollPaneTableAlt;
+
+	private String strExtension="use";
+	private String strExtensionProperties="properties";
+	private String directoryName="";
+
+	private String directory = "";
+	private String dirWrkReplaceBodyInv="wrkReplaceBodyInv";
+	private String dirWkr;
+	private String fileNameWork = "WRKReplaceInv";
+	private String fileNameExt = "";
+
+	private Border etchedTitledBorder;
+	private Border etchedBorder;
+	private int HEIGHT_TABLE = 140;
+	private int filGroupTab1=20;
+	private int filGroupTab2=120;
+	private int filGroupTab3=HEIGHT_TABLE+130;
+	private int BLOCK_WIDTH=850;
+	private int col1=10;
+
+	private Font fontNormal; // Normal Font
+	private Font fontTitles; // Block captions
+	private Font fontTitles2;// Indicator Alt
+	private Font fontTitles3;// Viability
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 
 	private enum StatesObj {
 		ALL, OK, KO
@@ -211,6 +265,7 @@ public class MVMObjCheckState extends JDialog {
 		lActions=pLactions;
 		listInv= new ArrayList<MVMDefInv>();
 
+<<<<<<< HEAD
 		MSystem system=fSession.system();
 		fModel = fSession.system().model();
 		fileName =fModel.filename();
@@ -219,6 +274,19 @@ public class MVMObjCheckState extends JDialog {
 		Path path = Paths.get("");
 		directoryName = path.toAbsolutePath().toString();
 		dirWkr=(directoryName+"/"+dirWrkReplaceBodyInv).replace("\\", "/");
+=======
+		//		MSystem system=fSession.system();
+
+		fModel = fSession.system().model();
+		fileName =fModel.filename();
+		fileNameModelInicial=fModel.filename();
+
+		Path path = Paths.get("");
+		directoryName = path.toAbsolutePath().toString();
+		dirWkr=(directoryName+"/"+dirWrkReplaceBodyInv).replace("\\", "/");
+
+		analyze_Model();
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 
 		// Objs options
 		rbObjAll = new JRadioButton("All");
@@ -245,17 +313,7 @@ public class MVMObjCheckState extends JDialog {
 						stateObj=StatesObj.ALL;
 					}
 				}
-				loadTabObjects();
-				if (tabObjects.getModel().getRowCount()>0) {
-					tabObjects.setRowSelectionInterval(0, 0);
-				}
-
-				int row = tabObjects.getSelectedRow();
-				loadListInvs(row);
-				if (tabInvs.getModel().getRowCount()>0) {
-					tabInvs.setRowSelectionInterval(0, 0);
-				}
-				loadListAttrs(row);
+				reloadComponentsModel();
 			}
 		};
 
@@ -287,7 +345,10 @@ public class MVMObjCheckState extends JDialog {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
+<<<<<<< HEAD
 					//					System.out.println("Seleccionado (inv): " + ((JRadioButton) e.getItem()).getText());
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 					String strCmp=((JRadioButton) e.getItem()).getText();
 					switch (strCmp) {
 					case "All":
@@ -356,8 +417,15 @@ public class MVMObjCheckState extends JDialog {
 
 		lbObjects = new JLabel("Objects");
 		lbObjects.setBounds(col1 ,filGroupTab2-30, 130, 25);
+<<<<<<< HEAD
 		fontTitles = new Font(lbObjects.getFont().getName(), Font.BOLD, 18);
 		fontTitles2 = new Font(lbObjects.getFont().getName(), Font.BOLD, 16);
+=======
+		fontNormal = lbObjects.getFont();
+		fontTitles = new Font(lbObjects.getFont().getName(), Font.BOLD, 18);
+		fontTitles2 = new Font(lbObjects.getFont().getName(), Font.BOLD, 16);
+		fontTitles3 = new Font(lbObjects.getFont().getName(), Font.BOLD, 16);
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 
 		lbObjects.setFont(fontTitles);
 		panel.add(lbObjects);	
@@ -397,6 +465,7 @@ public class MVMObjCheckState extends JDialog {
 
 		panel.add(pIndicator);
 
+<<<<<<< HEAD
 		//---
 		lbIndicatorAlt = new JLabel("");
 		lbIndicatorAlt.setFont(fontTitles2);
@@ -423,6 +492,30 @@ public class MVMObjCheckState extends JDialog {
 		panel.add(pIndicatorAlt);
 
 		//---
+=======
+		lbIndicatorAlt = new JLabel("");
+		lbIndicatorAlt.setFont(fontTitles2);
+		lbIndicatorAlt.setForeground(Color.WHITE);
+		lbIndicatorAlt.setBackground(Color.GREEN);
+
+		pIndicatorAlt = new JPanel();
+		pIndicatorAlt = new JPanel(new GridBagLayout());
+		pIndicatorAlt.setBounds(col1+210 ,filGroupTab3+320, 100, 25);
+		pIndicatorAlt.setBorder(border);
+
+		pIndicatorAlt.setBackground(Color.YELLOW);
+
+		GridBagConstraints constraintsAlt = new GridBagConstraints();
+		constraintsAlt.gridx = 0;
+		constraintsAlt.gridy = 0;
+		constraintsAlt.weightx = 1.0;
+		constraintsAlt.weighty = 1.0;
+		constraintsAlt.anchor = GridBagConstraints.CENTER;
+
+		pIndicatorAlt.add(lbIndicatorAlt, constraintsAlt);
+
+		panel.add(pIndicatorAlt);
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 
 		loadTabObjects();
 
@@ -442,16 +535,26 @@ public class MVMObjCheckState extends JDialog {
 		tabObjects.addMouseListener(new java.awt.event.MouseAdapter() {
 			@Override
 			public void mouseClicked(java.awt.event.MouseEvent evt) {
-				int row = tabObjects.rowAtPoint(evt.getPoint());
-				loadListInvs(row);
+				int nObj = tabObjects.rowAtPoint(evt.getPoint());
+				int nObjAnt=nObj;
+				loadListInvs(nObj);
 				if (tabInvs.getModel().getRowCount()>0) {
 					tabInvs.setRowSelectionInterval(0, 0);
 					int nInv = tabInvs.getSelectedRow();
+<<<<<<< HEAD
+=======
+
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 					showExprInv(nInv);
 					showInfoLinkFromRow(nInv);
 				}
-				loadListAttrs(row); // nObject
+
 				putColorInvs();
+				nObj=nObjAnt;
+				loadListAttrs(nObj); // nObject
+				if(tabObjects.getModel().getRowCount()>0) {
+					tabObjects.setRowSelectionInterval(nObj, nObj);
+				}
 			}
 		});
 
@@ -483,6 +586,17 @@ public class MVMObjCheckState extends JDialog {
 			@Override
 			public void mouseClicked(java.awt.event.MouseEvent evt) {
 				int nInv = tabInvs.getSelectedRow();
+				int nObj = tabObjects.getSelectedRow();
+				int nInvAnt=nInv;
+				int nObjAnt=nObj;
+
+				showInfoLinkFromRow(nInv);
+
+				nInv=nInvAnt;
+				if (tabInvs.getModel().getRowCount()>0) {
+					tabInvs.setRowSelectionInterval(nInv, nInv);
+					loadListAttrs(nObjAnt);
+				}
 				showExprInv(nInv);
 				showInfoLinkFromRow(nInv);
 			}
@@ -512,16 +626,36 @@ public class MVMObjCheckState extends JDialog {
 		paneTabAttrs.setBounds(col1+760, filGroupTab2, 243, HEIGHT_TABLE);
 		panel.add(paneTabAttrs);
 
+		if (tabAttrs.getModel().getRowCount()>0) {
+			tabAttrs.setRowSelectionInterval(0, 0);
+		}
 
+<<<<<<< HEAD
 		lbExprInvCurrent = new JLabel("Current Invariant body");
 		lbExprInvCurrent.setBounds(col1, filGroupTab3, 250, 25);
 		lbExprInvCurrent.setFont(fontTitles);
 		panel.add(lbExprInvCurrent);	
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 
+<<<<<<< HEAD
+		taExprInvCurrent = new JTextArea();
+		taExprInvCurrent.setBounds(col1, filGroupTab3+30,BLOCK_WIDTH, 80 );
+		taExprInvCurrent.setEditable(false);
+=======
+		lbExprInvCurrent = new JLabel("Current Invariant body");
+		lbExprInvCurrent.setBounds(col1, filGroupTab3, 250, 25);
+		lbExprInvCurrent.setFont(fontTitles);
+		panel.add(lbExprInvCurrent);	
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
+
+<<<<<<< HEAD
+=======
 		taExprInvCurrent = new JTextArea();
 		taExprInvCurrent.setBounds(col1, filGroupTab3+30,BLOCK_WIDTH, 80 );
 		taExprInvCurrent.setEditable(false);
 
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		scrollpaneExprCurrent=new JScrollPane(taExprInvCurrent);    
 		scrollpaneExprCurrent.setBounds(col1, filGroupTab3+30,BLOCK_WIDTH, 80);
 		panel.add(scrollpaneExprCurrent);
@@ -549,6 +683,7 @@ public class MVMObjCheckState extends JDialog {
 		pScrollProposals.setBorder(etchedTitledBorder);
 		panel.add(pScrollProposals);
 
+<<<<<<< HEAD
 		lbExprInvNew = new JLabel("New Invariant body");
 		lbExprInvNew.setBounds(col1, filGroupTab3+320, 250, 20);
 		lbExprInvNew.setFont(fontTitles);
@@ -625,6 +760,101 @@ public class MVMObjCheckState extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				//				prepareContentNew();
 				//				saveWorkFile(contentNew);
+=======
+		//---aqui
+		tableAlt = new JTable();
+		tableAlt.setBounds(col1, filGroupTab3+150, BLOCK_WIDTH, 155);
+		scrollPaneTableAlt = new JScrollPane(tableAlt);
+		scrollPaneTableAlt.setBounds(col1, filGroupTab3+150, BLOCK_WIDTH, 155);
+		scrollPaneTableAlt.setBorder(etchedTitledBorder);
+		panel.add(scrollPaneTableAlt, BorderLayout.CENTER);
+
+		//--
+
+		lbExprInvNew = new JLabel("New Invariant body");
+		lbExprInvNew.setBounds(col1, filGroupTab3+320, 250, 20);
+		lbExprInvNew.setFont(fontTitles);
+		panel.add(lbExprInvNew);	
+
+		taExprInvNew = new JTextArea();
+		taExprInvNew.setBounds(15, filGroupTab3+350, BLOCK_WIDTH,50 );
+
+		taExprInvNew.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				// Metodo llamado cuando se inserta texto en el JTextArea
+				//				System.out.println("Texto insertado: " + taExprInvNew.getText());
+				//				prepareContentNew();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				// Metodo llamado cuando se elimina texto del JTextArea
+				//				System.out.println("Texto eliminado: " + taExprInvNew.getText());
+				//				prepareContentNew();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				// Metodo llamado cuando se cambia el estilo del texto en el JTextArea
+				//				System.out.println("Estilo de texto cambiado: " + taExprInvNew.getText());
+				//				prepareContentNew();
+			}
+		});
+		taExprInvNew.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				// Metodo llamado cuando el JTextArea obtiene el foco
+				//				System.out.println("El JTextArea ha obtenido el foco.");
+				lbIndicatorAlt.setText("???");
+				lbIndicatorAlt.setForeground(Color.RED);	
+				pIndicatorAlt.setBackground(Color.WHITE);
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				// Metodo llamado cuando el JTextArea pierde el foco
+				//				System.out.println("El JTextArea ha perdido el foco.");
+				if (contentNew!="") {
+					testNewBodyInv();
+				}
+			}
+		});
+
+		// Establecer el borde en el JTextArea
+		panel.add(taExprInvNew);
+
+		scrollpaneExprNew=new JScrollPane(taExprInvNew);    
+		scrollpaneExprNew.setBounds(col1, filGroupTab3+350,BLOCK_WIDTH, 80);
+		panel.add(scrollpaneExprNew);
+
+		lbFileName = new JLabel("File Name");
+		lbFileName.setBounds(col1, filGroupTab3+440,150, 20);
+		panel.add(lbFileName);	
+
+		lbViability = new JLabel("viability");
+		lbViability.setBounds(col1+440, filGroupTab3+320,500, 20);
+		panel.add(lbViability);	
+
+		lbDIRWRK = new JLabel("Work Directory: "+dirWkr);
+		lbDIRWRK.setBounds(col1+60, filGroupTab3+440,450, 20);
+		panel.add(lbDIRWRK);	
+
+		txFileName = new JTextField();
+		txFileName.setBounds(col1, filGroupTab3+465, 450,20 );
+		txFileName.setEditable(false);
+		panel.add(txFileName);
+
+		lbext = new JLabel("."+strExtension);
+		lbext.setBounds(col1+460, filGroupTab3+465	,150, 20);
+		panel.add(lbext);
+
+		btnShowSource = new JButton("Show Source");
+		btnShowSource.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 				showSource();
 			}
 		});
@@ -678,6 +908,7 @@ public class MVMObjCheckState extends JDialog {
 				allObjsOk=true;
 				analyze(); //Provis
 
+<<<<<<< HEAD
 				loadTabObjects();
 				putColorObjs();
 				loadListInvs(0);
@@ -692,6 +923,9 @@ public class MVMObjCheckState extends JDialog {
 					tabInvs.setRowSelectionInterval(0, 0);
 					showExprInv(0);
 				}
+=======
+				reloadComponentsModel();
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 				showIndicator();
 
 			}
@@ -703,6 +937,7 @@ public class MVMObjCheckState extends JDialog {
 
 		if(tabInvs.getModel().getRowCount()>0) {
 			tabInvs.setRowSelectionInterval(0, 0);
+<<<<<<< HEAD
 			//		showExprInv(0);// NO SE
 			showInfoLinkFromRow(0);
 
@@ -727,8 +962,35 @@ public class MVMObjCheckState extends JDialog {
 			prepareContentNew();
 			saveWorkFile(contentNew);
 		}
+=======
+			showInfoLinkFromRow(0);
+		}
+		//--- AQUI
+
+		//		analyze_Model();		
+
+		String fileAct=fileName;
+		String nameProposal ="";
+		try {
+			nameProposal = findNewNameModel(fileAct);
+			txFileName.setText(nameProposal);
+		} catch (Exception e1) {
+			nameProposal="????";
+			txFileName.setText(nameProposal);
+			JOptionPane.showMessageDialog(null, e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+
+		if(tabInvs.getModel().getRowCount()>0) {
+			tabInvs.setRowSelectionInterval(0, 0);
+			prepareContentNew();
+			saveWorkFile(contentNew);
+
+		}
+		testNewBodyInv();//Provis
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 
 	}
+<<<<<<< HEAD
 	private void testNewBodyInv() {
 		int nInv = tabInvs.getSelectedRow();
 		prepareContentNew();
@@ -1424,13 +1686,1020 @@ public class MVMObjCheckState extends JDialog {
 		String oCompareClass = (String) tabObjects.getValueAt(rowObject, 1);
 		MVMCompareExprInvs w = new MVMCompareExprInvs(frame,mapaOrdenado, rowObject,oCompareName, oCompareClass);
 		w.setSize(888, 340);
+=======
+	private void reloadComponentsModel() {
+		int nObj = tabObjects.getSelectedRow();
+		int nInv = tabInvs.getSelectedRow();
+
+		int nObjAnt=nObj;
+		int nInvAnt=nInv;
+
+		loadTabObjects();
+		putColorObjs();
+		loadListInvs(nObjAnt);
+		putColorInvs();
+		loadListAttrs(nObjAnt);
+
+		if(tabObjects.getModel().getRowCount()>0) {
+			tabObjects.setRowSelectionInterval(nObjAnt, nObjAnt);
+		}
+
+		if(tabInvs.getModel().getRowCount()>0) {
+			tabInvs.setRowSelectionInterval(nInvAnt, nInvAnt);
+			showExprInv(nInvAnt);
+		}
+	}
+	private void showViability(String msgError) {
+		lbViability.setForeground(Color.BLACK);
+		if(!msgError.equals("")) {
+			lbViability.setFont(fontNormal);
+			lbViability.setForeground(Color.RED);
+			lbViability.setText(msgError);
+		}else {
+			String srtViable="Model viable";
+			Color darkGreen = new Color(0, 0, 140);
+			lbViability.setFont(fontTitles3);
+			lbViability.setForeground(darkGreen);
+			lbViability.setText(srtViable);
+		}
+
+	}
+	private boolean testNewBodyInv() {
+		boolean bResTest=false;
+		int nInv = tabInvs.getSelectedRow();
+		int nInvAnt=nInv;
+		int nObj = tabObjects.getSelectedRow();
+		int nObjAnt=nObj;
+		prepareContentNew();
+		saveWorkFile(contentNew);
+
+		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
+		String msgError=verifyContentModel(workFile);
+		showViability(msgError);
+		if (msgError.equals("")) {
+			boolean bRes=ChangeContextSession(workFile);
+			// Restablecer nInv
+			nInv=nInvAnt;
+
+			if (bRes) {
+				// Almacena resultado de la invariante deseada
+				if (nInv>-1) {
+					MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+					String texto = (String) oInv.bodyExpression().toString();
+					boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
+					showIndicatorAlt(stateInv);
+					bResTest=stateInv;
+					//					System.out.println("+++>>> en testNewBodyInv() ["+contentNew+"] ["+bRes+"] texto ["+texto+"] stateInv ["+stateInv+"]");
+				}
+			}else {
+				showIndicatorAlt(false);
+				//				System.out.println("+++<<< en testNewBodyInv() ["+contentNew+"] ["+bRes+"]");
+			}
+
+			// Restablece fichero original aqui
+			bRes=ChangeContextSession(fileNameModelInicial);	
+			// Restablecer nInv
+			nInv=nInvAnt;
+			if (tabInvs.getModel().getRowCount()>0) {
+				tabInvs.setRowSelectionInterval(nInv, nInv);
+				loadListAttrs(nObjAnt);
+			}
+		}else {
+			// Restablecer nInv
+			showIndicatorAlt(false);
+			nInv=nInvAnt;
+			if (tabInvs.getModel().getRowCount()>0) {
+				tabInvs.setRowSelectionInterval(nInv, nInv);
+				loadListAttrs(nInv);
+			}
+		}
+		return bResTest;
+	}
+
+	private void prepareContentNew() {
+		String newBody=taExprInvNew.getText();
+		String sourceNew=contentFile;
+		int nInv = tabInvs.getSelectedRow();
+		if(listInv.size()>0 && nInv>-1) {
+			MVMDefInv oInv = listInv.get(nInv);
+			int iniBodyExpr=oInv.getIniBodyExpression();
+			int finBodyExpr=oInv.getFinBodyExpression();
+			String strLeft=contentFile.substring(0,iniBodyExpr);
+			String strRight=contentFile.substring(finBodyExpr, contentFile.length());
+			String strChange=contentFile.substring(iniBodyExpr, finBodyExpr);
+			//			String strModified="--<<< Modify by MVM ["+strChange+"] <<<\r\n-->>>\r\n" +newBody+"\r\n-->>>\r\n";
+			String strModified="--< Modify by MVM ["+strChange+"]\r\n" +newBody; // Simple
+			sourceNew=strLeft + strModified.trim() + strRight;
+		}
+		contentNew=sourceNew;
+
+		//		if (tabObjects.getModel().getRowCount()>0) {
+		//			String oCompareName = "";
+		//			String oCompareClass = "";	
+		//			int row = tabObjects.getSelectedRow();
+		//			oCompareName = (String) tabObjects.getValueAt(row, 0);
+		//			oCompareClass = (String) tabObjects.getValueAt(row, 1);
+		//			String nomObj="("+oCompareClass+") - "+oCompareName;
+		//
+		//			if (tabInvs.getModel().getRowCount()>0) {
+		//				MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+		//				String nomInv = (String) oInv.bodyExpression().toString();
+		////				calcStateInvObj(nomObj, nomInv);
+		//			}
+		//		}
+	}
+
+	private void showSource() {
+
+		prepareContentNew();
+		saveWorkFile(contentNew);
+		String sourceAct=contentFile;
+
+		MVMShowSourceModelInvs w = new MVMShowSourceModelInvs(frame, this, sourceAct, contentNew);
+
+		w.setSize(1055, 625);
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		w.setLocationRelativeTo(null);
 		w.setResizable(false);
 		w.setVisible(true);
+<<<<<<< HEAD
+
+=======
+		// Obtener el contenido de la pantalla new
+		contentNew=w.getContentNew();
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
+	}
+<<<<<<< HEAD
+	private void showExprInv(int nInv) {
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
+
+<<<<<<< HEAD
+=======
+	private String findNewNameModel(String nameFileModel)throws Exception {
+		String fileSinExtBarras=nameFileModel.replace("."+strExtension, "").replace("\\", "/");
+		String fileSinExt=fileSinExtBarras.replace("\\", "/");
+		String fileProposal=fileSinExtBarras; 
+		String nomFile="";
+		String directory="";
+		//		System.out.println("Nombre "+nameFileModel);
+		if (fileSinExt.contains("/")) {
+			String[] partes = fileSinExt.split("/");
+			int nPartes = partes.length;
+			nomFile=partes[nPartes-1];
+			for (int n=0;n<(nPartes-1);n++) {
+				if (directory!="") {
+					directory+="/";
+				}
+				directory+=partes[n];
+			}
+
+		}else {
+			nomFile=fileSinExt;
+			directory=directoryName;
+		}
+
+		String base=dirWkr+"/"+nomFile;
+
+		int contador=0;
+		boolean exist=false;
+		do {
+			contador++; // Incrementa el contador en 1
+
+			fileProposal=base+"_v"+contador+"."+strExtension;
+			File archivo = new File(fileProposal);
+
+			// Verificar si el archivo existe
+			if (archivo.exists()) {
+				exist=true;
+			} else {
+				exist=false;
+			}
+		} while (exist && contador < 5);
+
+		if (exist) {
+			throw new Exception("It is not possible to propose a name for a new file. Too many versions");
+		}
+
+		if (fileProposal.contains("/")) {
+			String[] partes = fileProposal.split("/");
+			int nPartes = partes.length;
+			nomFile=partes[nPartes-1];
+			for (int n=0;n<(nPartes-1);n++) {
+				if (directory!="") {
+					directory+="/";
+				}
+				directory+=partes[n];
+			}
+		}else {
+			nomFile=fileProposal;
+			directory=directoryName;
+		}
+
+		String res=nomFile.replace("."+strExtension, "");
+		return res;
+	}
+
+	/**
+	 * Save file
+	 */
+	private void saveFile() {
+		String nomFile=txFileName.getText();
+		String nomFileFull = dirWkr+"/"+nomFile+"."+strExtension;
+
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setDialogTitle("File to save");   
+
+		File directorioInicial = new File(dirWkr);
+		fileChooser.setCurrentDirectory(directorioInicial);
+		fileChooser.setSelectedFile(new File(nomFileFull));
+
+		int result = fileChooser.showSaveDialog(frame);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			File fileToSave = fileChooser.getSelectedFile();
+
+			// Comprobar si el archivo ya existe
+			if (fileToSave.exists()) {
+				int overwriteResult = JOptionPane.showConfirmDialog(frame,
+						"El archivo ya existe. Â¿Deseas sobrescribirlo?",
+						"Confirmar Sobrescritura",
+						JOptionPane.YES_NO_OPTION);
+
+				if (overwriteResult != JOptionPane.YES_OPTION) {
+					// El usuario eligio no sobrescribir, salir sin guardar
+					return;
+				}
+			}
+			try {
+
+				String nomFileSave = fileToSave.getAbsolutePath().replace("\\", "/");
+
+				if (nomFileSave.contains("/")) {
+					String[] partes = nomFileSave.split("/");
+					int nPartes = partes.length;
+					nomFile=partes[nPartes-1];
+					for (int n=0;n<(nPartes-1);n++) {
+						if (directory!="") {
+							directory+="/";
+						}
+						directory+=partes[n];
+					}
+
+				}else {
+					nomFile=nomFileSave;
+					directory=directoryName;
+				}
+
+				String res=nomFile.replace("."+strExtension, "");
+				txFileName.setText(res);
+
+				String content = contentNew;
+				writeFileOnDisk(nomFileSave, content);
+
+				// Salvar .properties nuevo
+				copyProperties(nomFileSave);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+	}
+	private boolean copyProperties(String nomFileSave) {
+		boolean bRes=true;
+		// Leer .properties inicial
+		String filePropertiesInicial=fileNameModelInicial.replace("."+strExtension, "."+strExtensionProperties);
+		String filePropertiesFinal=nomFileSave.replace("."+strExtension, "."+strExtensionProperties);
+
+		// Crear objetos File para los archivos inicial y final
+		File fileInicial = new File(filePropertiesInicial);
+		File fileFinal = new File(filePropertiesFinal);
+
+		// Verificar si el archivo inicial existe
+		if (fileInicial.exists()) {
+			try {
+				// Copiar el archivo inicial al archivo final
+				Path source = fileInicial.toPath();
+				Path destination = fileFinal.toPath();
+				Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				bRes=false;
+			}
+		} else {
+			bRes=false;
+		}			
+		return bRes;
+	}
+
+	private boolean saveWorkFile(String content) {
+		boolean bRes=false;
+		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
+		bRes=writeFileOnDisk(workFile, content);
+
+		copyProperties(workFile);
+
+		//------
+		// txt provis para vista previa en windows para comprobaciones
+		String workFileTXT = workFile.replace(("."+strExtension), ".txt");
+		bRes=writeFileOnDisk(workFileTXT, content);
+		//------
+
+		return bRes;
+	}
+
+	private boolean writeFileOnDisk(String nomFile, String content) {
+		boolean bRes=false;
+		File fileToSave = new File(nomFile);
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileToSave))) {
+			content = contentNew;
+			writer.write(content);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return bRes;
+	}
+
+	private void showInfoLinkFromRow(int row) {
+		MClassInvariant inv = (MClassInvariant) tabInvs.getModel().getValueAt(row, 0);
+		String strInv = inv.name();
+		showPanelActionsLink(strInv);
+		showPanelTableAlt(strInv);
+	}
+	private Map<String, String> doAlternatives(String strInv) {
+		Map<String, String> mapAlternatives = new HashMap<String, String>();
+
+		String nameSimple = fileNameModelInicial;
+
+		String workName = fileNameModelInicial.replace("\\", "/");
+		if (workName.contains("/")) {
+			String[] partes = workName.split("/");
+			int nPartes = partes.length;
+			nameSimple=partes[nPartes-1];
+			for (int n=0;n<(nPartes-1);n++) {
+				if (directory!="") {
+					directory+="/";
+				}
+				directory+=partes[n];
+			}
+
+		}else {
+			nameSimple=workName;
+			directory=directoryName;
+		}
+
+		if (nameSimple.equals("Animals4_P2.use")) {
+			mapAlternatives.put("clave1", "self.age > 0");
+			mapAlternatives.put("clave2", "self.age < 0");
+			mapAlternatives.put("clave3", "self.age > 2");
+			mapAlternatives.put("clave4", "self.age < -4");
+			mapAlternatives.put("clave5", "self.age > 0");
+			mapAlternatives.put("clave6", "self.age < 0");
+			mapAlternatives.put("clave7", "self.age > 2");
+			mapAlternatives.put("clave8", "self.age < -4");
+			mapAlternatives.put("clave9", "self.age > 0");
+			mapAlternatives.put("clave10", "self.age < 0");
+			mapAlternatives.put("clave11", "self.age > 2");
+			mapAlternatives.put("clave12", "self.age < -4");			
+
+		}else {
+			for (int i=0;i<10;i++) {
+				mapAlternatives.put("clave"+i, "valor"+i+" de "+strInv);
+			}
+		}
+
+		TreeMap<String, String> mapSorted = new TreeMap<>(mapAlternatives);
+		return mapSorted;
+	}
+	private void showPanelActionsLink(String strInv) {
+
+		Map<String, String> mapSorted = doAlternatives(strInv);
+		pProposals = new JPanel();
+		BoxLayout layout = new BoxLayout(pProposals, BoxLayout.Y_AXIS);
+
+		pProposals.setLayout(layout);
+		group = new ButtonGroup();
+		boolean pVez = true;
+		int sizeAlternatives=mapSorted.size();
+
+		int nrb=0;
+		for (String clave : mapSorted.keySet()) {
+
+			String bodyAlt = mapSorted.get(clave);
+			if (bodyAlt!="") {
+				JRadioButton rb = new JRadioButton (bodyAlt);
+				if (pVez) {
+					rb.setSelected(true);
+					pVez=false;
+					showAlternative(bodyAlt);
+				}
+				rb.setActionCommand(bodyAlt);
+				rb.setName("o"+nrb);
+				pProposals.add(rb);
+				group.add(rb);	
+				rb.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						int nInv = tabInvs.getSelectedRow();
+						int nInvAnt=nInv;
+						int nObj = tabObjects.getSelectedRow();
+						int nObjAnt=nObj;
+						showAlternative(bodyAlt);
+						saveWorkFile(contentNew);
+						// Restablecer nInv
+						nInv=nInvAnt;
+						if (tabInvs.getModel().getRowCount()>0) {
+							tabInvs.setRowSelectionInterval(nInv, nInv);
+							loadListAttrs(nObjAnt);
+						}
+						showExprInv(nInv);
+
+					}
+				});
+				nrb+=1;
+			}
+		}
+
+		String borderTitle = "Alternatives ("+ sizeAlternatives+")";
+		borderTitle="";//provis
+		panel.remove(pScrollProposals);
+		pScrollProposals = new JScrollPane(pProposals);
+		pScrollProposals.setBounds(900, filGroupTab3+150, 100, 155);
+		etchedTitledBorder = BorderFactory.createTitledBorder(etchedBorder, borderTitle);
+		pScrollProposals.setBorder(etchedTitledBorder);
+		panel.add(pScrollProposals);
+		//		panel.updateUI();
 
 	}
+	private void showAlternative(String strAlt) {
+		taExprInvNew.setText(strAlt);
+		if (contentNew!="") {
+			testNewBodyInv();
+		}
+	}
+
+	//--------------------------
+	private void showPanelTableAlt(String strInv) {
+		Map<String, String> mapSorted = doAlternatives(strInv);
+		scrollPaneTableAlt.remove(tableAlt);// OJO
+		tableAlt = new JTable(new CustomTableModel(mapSorted));
+		tableAlt.setRowSelectionAllowed(true);  // Desactivar la selección de filas
+
+		// Configurar el renderizador y editor para la columna de radio buttons
+		tableAlt.getColumnModel().getColumn(0).setCellRenderer(new RadioButtonRenderer());
+		tableAlt.getColumnModel().getColumn(0).setCellEditor(new RadioButtonEditor(new JCheckBox()));
+
+		// Configurar el renderizador y editor para las columnas JTextField
+		tableAlt.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(new JTextField()));
+		tableAlt.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JTextField()));
+
+		// Configurar el renderizador personalizado para la tercera columna
+		tableAlt.getColumnModel().getColumn(2).setCellRenderer(new CustomColumnRenderer());
+
+		TableColumn colOpAlt = tableAlt.getColumnModel().getColumn(0);
+		colOpAlt.setPreferredWidth(60);
+		colOpAlt.setMinWidth(40);
+		colOpAlt.setMaxWidth(60);
+
+		int widthBodyInv=710;
+		TableColumn colBodyInv = tableAlt.getColumnModel().getColumn(1);
+		colBodyInv.setPreferredWidth(widthBodyInv);
+		colBodyInv.setMinWidth(widthBodyInv);
+		colBodyInv.setMaxWidth(widthBodyInv);
+
+		TableColumn colStateInv = tableAlt.getColumnModel().getColumn(2);
+		colStateInv.setPreferredWidth(80);
+		colStateInv.setMinWidth(80);
+		colStateInv.setMaxWidth(80);
+
+		tableAlt.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent event) {
+				if (!event.getValueIsAdjusting()) {
+					int selectedRow = tableAlt.getSelectedRow();
+					if (selectedRow != -1) {
+						Object value = tableAlt.getValueAt(selectedRow, 1); // Columna 2 (índice 1)
+						System.out.println("["+selectedRow+"] desc inv: " + value);
+						tableAlt.setValueAt(true, selectedRow, 0);
+						int nInv = tabInvs.getSelectedRow();
+						int nInvAnt=nInv;
+						int nObj = tabObjects.getSelectedRow();
+						int nObjAnt=nObj;
+						String bodyAlt=value.toString();
+						showAlternative(bodyAlt);
+						saveWorkFile(contentNew);
+						// Restablecer nInv
+						nInv=nInvAnt;
+						if (tabInvs.getModel().getRowCount()>0) {
+							tabInvs.setRowSelectionInterval(nInv, nInv);
+							loadListAttrs(nObjAnt);
+						}
+						showExprInv(nInv);
+					}
+				}
+			}
+		});
+
+		if(tableAlt.getModel().getRowCount()>0) {
+			tableAlt.setRowSelectionInterval(0, 0);
+		}
+
+		tableAlt.setBounds(col1, filGroupTab3+150, BLOCK_WIDTH, 155);
+		panel.remove(scrollPaneTableAlt);
+		scrollPaneTableAlt = new JScrollPane(tableAlt);
+		scrollPaneTableAlt.setBounds(col1, filGroupTab3+150, BLOCK_WIDTH, 155);
+		scrollPaneTableAlt.setBorder(etchedTitledBorder);
+		panel.add(scrollPaneTableAlt, BorderLayout.CENTER);
+		panel.updateUI();
+
+	}
+	public class CustomTableModel extends AbstractTableModel {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private String[] columnNames = {"Op", "Alt", "State"};
+		private Object[][] data = {};
+
+		private int selectedRow = -1;
+		private Map<String, String> mapAlt;
+
+
+		public CustomTableModel(Map<String, String> pMapAlt) {
+			super();
+			mapAlt=pMapAlt;
+			int nFilas = mapAlt.size();
+			data = new Object[nFilas][3];
+			int nFila=0;
+			for (Map.Entry<String, String> entry : pMapAlt.entrySet()) {
+				//				String clave = entry.getKey();
+				String valor = entry.getValue();
+
+				data[nFila][0]=false;
+				data[nFila][1]=valor;
+				// Calcular que pasa con la alternativa 
+
+				int nInv = tabInvs.getSelectedRow();
+				int nInvAnt=nInv;
+				int nObj = tabObjects.getSelectedRow();
+				int nObjAnt=nObj;
+				String bodyAlt=valor.toString();
+				showAlternative(bodyAlt);
+				prepareContentNew();//Provis
+				saveWorkFile(contentNew);
+				// Restablecer nInv
+				nInv=nInvAnt;
+				if (tabInvs.getModel().getRowCount()>0) {
+					tabInvs.setRowSelectionInterval(nInv, nInv);
+					loadListAttrs(nObjAnt);
+				}
+				showExprInv(nInv);
+
+				String textResult="Incorrecto";
+				boolean bRes=false;
+				if (!contentNew.equals("")) {
+					bRes=testNewBodyInv();//Provis
+				}
+				if (bRes) {
+					textResult="Correcto";
+				}
+				data[nFila][2]=textResult;
+				nFila++;
+			}
+		}
+
+		@Override
+		public int getRowCount() {
+			return data.length;
+		}
+
+		@Override
+		public int getColumnCount() {
+			return columnNames.length;
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+			return columnNames[columnIndex];
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			if (columnIndex == 0) {
+				return rowIndex == selectedRow;
+			} else {
+				return data[rowIndex][columnIndex];
+			}
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			if (columnIndex == 0) {
+				return true;
+			} else {
+				return rowIndex == selectedRow;
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			if (columnIndex == 0) {
+				selectedRow = rowIndex;
+				fireTableDataChanged();
+			} else {
+				data[rowIndex][columnIndex] = aValue;
+			}
+		}
+
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return columnIndex == 0 ? Boolean.class : String.class;
+		}
+	}
+
+	public class RadioButtonRenderer extends DefaultTableCellRenderer {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			JRadioButton radioButton = new JRadioButton();
+			radioButton.setSelected((Boolean) value);
+			radioButton.setHorizontalAlignment(SwingConstants.CENTER);
+			return radioButton;
+		}
+	}
+
+	public class RadioButtonEditor extends DefaultCellEditor implements ActionListener {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private JRadioButton radioButton;
+		private JTable table;
+
+		public RadioButtonEditor(JCheckBox checkBox) {
+			super(checkBox);
+			radioButton = new JRadioButton();
+			radioButton.setHorizontalAlignment(SwingConstants.CENTER);
+			radioButton.addActionListener(this);
+		}
+
+		@Override
+		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+			this.table = table;
+			radioButton.setSelected((Boolean) value);
+			return radioButton;
+		}
+
+		@Override
+		public Object getCellEditorValue() {
+			return radioButton.isSelected();
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			int row = table.getEditingRow();
+			table.getModel().setValueAt(true, row, 0);
+			stopCellEditing();
+		}
+	}
+
+	public class CustomColumnRenderer extends DefaultTableCellRenderer {
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			if (column == 2) {
+				String cellValue = (String) value;
+				if ("Correcto".equals(cellValue)) {
+					c.setBackground(Color.GREEN);
+					c.setForeground(Color.WHITE);
+				} else {
+					c.setBackground(Color.RED);
+					c.setForeground(Color.WHITE);
+				}
+			}
+			setHorizontalAlignment(SwingConstants.CENTER); // Centrar el texto
+			setFont(getFont().deriveFont(Font.BOLD));
+			return c;
+		}
+	}
+
+	//Aqui
+	//--------------------------
+
+	private void analyze_Model() {
+		//		System.out.println("START: " + fileName);
+		//
+		//		System.out.println("Model name "+ fModel.name());
+		//		System.out.println("Model filename "+ fileName);
+		File fileF = new File(fileName);
+
+		directory = fileF.getParent();
+		fileNameExt = fileF.getName();
+
+		//		System.out.println("Directorio: " + directory);
+		//		System.out.println("Nombre de archivo: " + fileNameExt);
+
+		listInv = new ArrayList<MVMDefInv>();
+		contentFile = "";
+		String[] parts = fileName.replace("\\", "/").split("/");
+
+		String filenameWithExtension = parts[parts.length - 1];
+		String nameFile = filenameWithExtension.substring(0, filenameWithExtension.indexOf("."));
+
+
+		org.antlr.v4.runtime.CharStream in;
+		try {
+			in = org.antlr.v4.runtime.CharStreams.fromFileName(fileName);
+
+			MVMInterpreteLexer lexer = new MVMInterpreteLexer(in);
+			org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
+			MVMInterpreteParser parser = new MVMInterpreteParser(tokens);
+			MVMInterpreteParser.ModelContext tree = parser.model();
+			MVMInterpreteCustomVisitor visitor = new MVMInterpreteCustomVisitor();
+			visitor.visit(tree);
+
+			expression="";
+			particula = "";
+
+			writer = new PrintWriter("C://temp//"+nameFile+".ran", "UTF-8");
+			doRecursively(tree);
+			// Cerrar el archivo
+			writer.close();
+
+			//			System.out.println("FINISH: " + fileName);
+			//			System.out.println("--------------------------------------------------------------------------------------------");
+			//			System.out.println("Hay ["+listInv.size()+"] invariants in file ["+fileName+"]");
+			//			System.out.println("--------------------------------------------------------------------------------------------");
+			//			int nInvs=listInv.size();
+			//			for (int nInv=0;nInv<nInvs;nInv++) {
+			//				MVMDefInv oInv = listInv.get(nInv);
+			//				String linea=String.format("%03d", nInv);
+			//				linea+="  [";
+			//				linea+=String.format("%5d", oInv.getIniBodyExpression());
+			//				linea+="-";
+			//				linea+=String.format("%5d", oInv.getFinBodyExpression());
+			//				linea+="]";
+			//				linea+="  ";
+			//				linea+=String.format("%-40s","["+oInv.getNameClass()+"::"+oInv.getNameInv()+"]");
+			//
+			//				linea+=String.format("%-70s","["+oInv.getBodyExpression()+"]");
+			//				System.out.println(linea);
+			//			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		contentFile=contentFile.replace("<EOF>", "");
+	}
+	private void doRecursively(org.antlr.v4.runtime.tree.ParseTree tree) {
+		for (int i = 0; i < tree.getChildCount(); i++) {
+			Object child = tree.getChild(i);
+
+			if (child instanceof org.antlr.v4.runtime.tree.TerminalNodeImpl) {
+				String partNL=((org.antlr.v4.runtime.tree.TerminalNodeImpl)child).getText();
+				doTerminalNodeImpl(child);
+				if (partNL.equals("\r\n")||partNL.equals("\n")||partNL.equals("<EOF>")){
+					expression=expression.replace("<EOF>", "");
+					wit(expression); // Escribe el contexto en el archivo
+					expression="";
+				}
+			}else {
+				if (child instanceof InvDeclarationContext) {
+					InvDeclarationContext childContext=(InvDeclarationContext)child;
+					nameClassInv=childContext.nameClassInv.getText();
+					iniCONTEXT=contentFile.length();
+				}else if (child instanceof LineInvContext) {
+					iniINV=contentFile.length();
+				}
+				doRecursively((org.antlr.v4.runtime.tree.ParseTree) child);
+				if (child instanceof InvDeclarationContext) {
+					finCONTEXT=contentFile.length();
+					nameClassInv="";
+				}else if (child instanceof LineInvContext) {
+					LineInvContext childLineINV=(LineInvContext)child;
+					String nameInv = childLineINV.nameConstraint.getText();
+					finINV=contentFile.length();
+					String strINV = contentFile.substring(iniINV, finINV);
+					String bodyExpression = cleaninvExpression(strINV);
+
+					int iniBody=iniINV+strINV.indexOf(bodyExpression);
+					int finBody=iniBody+bodyExpression.length();
+					//					String strCompare = contentFile.substring(iniBody, finBody);
+					//					if (bodyExpression.equals(strCompare)) {
+					//						//						System.out.println("SI");
+					//					}else {
+					//
+					//						//						System.out.println("bodyExpression ["+bodyExpression+"]");
+					//						//						System.out.println("strCompare     ["+strCompare+"]");
+					//						//						System.out.println("NO");
+					//					}
+
+					numINV+=1;
+					MVMDefInv oInv = new MVMDefInv();
+					oInv.setOrden(numINV);
+					oInv.setNameClass(nameClassInv);
+					oInv.setNameInv(nameInv);
+					oInv.setRawExpression(strINV);
+					oInv.setBodyExpression(bodyExpression);
+					oInv.setIniRawExpression(iniINV);
+					oInv.setFinRawExpression(finINV);
+					oInv.setIniBodyExpression(iniBody);
+					oInv.setFinBodyExpression(finBody);					
+
+					listInv.add(oInv);
+				}
+			}
+
+		}
+	}
+
+	private String cleaninvExpression(String invExpression) {
+		String body="";
+		// Localiza primer ':'
+		int posiCOLON = invExpression.indexOf(":");
+		String resto="";
+		if (posiCOLON>0) {
+			resto=invExpression.substring(posiCOLON+1, invExpression.length());
+		}
+
+		int posiHYPHEN = resto.indexOf("--");
+		if (posiHYPHEN>0) {
+			resto=resto.substring(0, posiHYPHEN);
+		}
+		body=resto.replace("\r\n","").replace("\n", "").trim();
+		return body;
+	}
+
+	private void doTerminalNodeImpl(Object child) {
+		org.antlr.v4.runtime.tree.TerminalNodeImpl child2 = ((org.antlr.v4.runtime.tree.TerminalNodeImpl)child);
+		particula = ((org.antlr.v4.runtime.tree.TerminalNodeImpl) child2).getText(); // Obtiene el texto del contexto
+		expression+=particula;
+		contentFile+= particula;
+	}
+
+	private void wit(String line) {
+		//		System.out.print(line);			
+		writer.print(line);
+	}
+
+	//--------------------------
+	private String verifyContentModel(String fileName){
+		//		boolean bRes=true;
+		String msgError="";
+
+		try {
+			FileInputStream specStreamNew;
+			StringWriter stringWriter = new StringWriter();
+			PrintWriter pw=new PrintWriter(stringWriter);
+			specStreamNew = new FileInputStream(fileName);
+
+			MModel newModel = USECompiler.compileSpecification(specStreamNew,
+					fileName, pw,
+					new ModelFactory());
+			String contenido = stringWriter.toString();
+			if (newModel==null) {
+				String error = contenido.replace(fileName+":", "");
+				msgError="Model no viable !!! ["+error+"]";
+			}
+		}catch (Exception e) {
+			msgError=e.getMessage();
+		}
+		return msgError;
+	}
+	private boolean ChangeContextSession(String fileName){
+		boolean bRes=true;
+		try {
+			allObjsOk=true;
+			MSystem system=fSession.system();
+			FileInputStream specStreamNew;
+
+			String msgError=verifyContentModel(fileName);
+			showViability(msgError);
+			if(msgError.equals("")) {
+				specStreamNew = new FileInputStream(fileName);
+				MModel newModel = USECompiler.compileSpecification(specStreamNew,
+						fileName, new PrintWriter(System.err),
+						new ModelFactory());		
+				//				System.out.println("new Model name "+ newModel.name());
+				//				System.out.println("new Model filename "+ newModel.filename());
+				system = new MSystem(newModel);
+
+				fSession.setSystem(system);
+				thisMVMView.putSession(fSession);
+
+				List<MVMAction> lActionsCheck=new ArrayList<MVMAction>();
+				int nActions = lActions.size();
+				for (int nAction=0;nAction<nActions;nAction++) {
+					MVMAction oAction=lActions.get(nActions-1);
+					lActionsCheck.add(nAction, oAction);
+				}
+				// Hay que rehacer mapObjects de MVMView
+				mapObjects = thisMVMView.getMapObjects(lActionsCheck);
+
+				reloadComponentsModel();
+			}else {
+				bRes=false;
+			}
+
+			specStreamNew = new FileInputStream(fileName);
+			MModel newModel = USECompiler.compileSpecification(specStreamNew,
+					fileName, new PrintWriter(System.err),
+					new ModelFactory());		
+			//			System.out.println("old Model name "+ newModel.name());
+			//			System.out.println("old Model filename "+ newModel.filename());
+			system = new MSystem(newModel);
+
+			fSession.setSystem(system);
+			thisMVMView.putSession(fSession);
+
+			List<MVMAction> lActionsCheck=new ArrayList<MVMAction>();
+			int nActions = lActions.size();
+			for (int nAction=0;nAction<nActions;nAction++) {
+				MVMAction oAction=lActions.get(nActions-1);
+				lActionsCheck.add(nAction, oAction);
+			}
+			// Hay que rehacer mapObjects de MVMView
+			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
+
+			reloadComponentsModel();
+		} catch (Exception e) {
+			bRes=false;
+		}
+		return bRes;
+	}
+	private void analyze() {
+
+		// Ver contenido de modelo
+		// Obtener contenido de otro fichero
+		String dir = System.getProperty("user.dir");
+		//		System.out.println("Directorio actual: " + dir);
+		MSystem system=fSession.system();
+		MModel model = fSession.system().model();
+		String filename =model.filename();
+		//		System.out.println("Model name "+ model.name());
+		//		System.out.println("Model filename "+ filename);
+		File file = new File(filename);
+
+		String directory = file.getParent();
+		String fileNameExt = file.getName();
+
+		//		System.out.println("Directorio: " + directory);
+		//		System.out.println("Nombre de archivo: " + fileNameExt);
+
+		try {
+			FileInputStream specStreamNew;
+			String newFilename="";
+			if (filename.indexOf("Animals4_P2_v2")>0) {
+				newFilename=filename;
+			}else {
+				newFilename=filename.replace("Animals4_P2", "Animals4_P2_v2");
+			}
+
+			specStreamNew = new FileInputStream(newFilename);
+			MModel newModel = USECompiler.compileSpecification(specStreamNew,
+					newFilename, new PrintWriter(System.err),
+					new ModelFactory());		
+			System.out.println("new Model name "+ newModel.name());
+			System.out.println("new Model filename "+ newModel.filename());
+			system = new MSystem(newModel);
+
+			fSession.setSystem(system);
+			thisMVMView.putSession(fSession);
+
+			List<MVMAction> lActionsCheck=new ArrayList<MVMAction>();
+			int nActions = lActions.size();
+			for (int nAction=0;nAction<nActions;nAction++) {
+				MVMAction oAction=lActions.get(nActions-1);
+				lActionsCheck.add(nAction, oAction);
+			}
+			// Hay que rehacer mapObjects de MVMView
+			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
+			//			System.out.println("cambiado");
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	//	private void compareExprInvs() {
+	//		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
+	//		int rowObject = tabObjects.getSelectedRow();
+	//		String oCompareName = (String) tabObjects.getValueAt(rowObject, 0);
+	//		String oCompareClass = (String) tabObjects.getValueAt(rowObject, 1);
+	//		MVMCompareExprInvs w = new MVMCompareExprInvs(frame,mapaOrdenado, rowObject,oCompareName, oCompareClass);
+	//		w.setSize(888, 340);
+	//		w.setLocationRelativeTo(null);
+	//		w.setResizable(false);
+	//		w.setVisible(true);
+	//
+	//	}
 	private void showExprInv(int nInv) {
 
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
 		String texto = (String) oInv.bodyExpression().toString();
 		taExprInvCurrent.setText(texto);
@@ -1443,6 +2712,11 @@ public class MVMObjCheckState extends JDialog {
 	private void putColorObjs() {
 
 		DefaultTableCellRenderer renderObj = new DefaultTableCellRenderer() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value,
 					boolean isSelected, boolean hasFocus,
@@ -1470,6 +2744,11 @@ public class MVMObjCheckState extends JDialog {
 	private void putColorInvs() {
 
 		DefaultTableCellRenderer renderInv = new DefaultTableCellRenderer() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value,
 					boolean isSelected, boolean hasFocus,
@@ -1491,9 +2770,15 @@ public class MVMObjCheckState extends JDialog {
 
 	}
 
+<<<<<<< HEAD
 	private void calcStateInvObj(String nomObj, String nomInv) {
 		System.out.println("Calculo state para ["+nomObj+"] - inv ["+nomInv+"]");
 	}
+=======
+	//	private void calcStateInvObj(String nomObj, String nomInv) {
+	//		System.out.println("Calculo state para ["+nomObj+"] - inv ["+nomInv+"]");
+	//	}
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 
 	/**
 	 * Load object table
@@ -1511,12 +2796,12 @@ public class MVMObjCheckState extends JDialog {
 		if (mapObjects.size()>0) {
 
 			int nObjs = mapObjects.size();
+
 			Object[][] data = new Object[nObjs][3];
 
 			int nObj=0;
 			for (Map.Entry<MVMObject, Map<MClassInvariant, Boolean>> entry : mapObjects.entrySet()) {
 
-				int nInv=0;
 				MVMObject oObjKey = entry.getKey();
 				boolean allOk=true;
 
@@ -1602,6 +2887,7 @@ public class MVMObjCheckState extends JDialog {
 
 		}
 	}
+<<<<<<< HEAD
 	//showIndicator();
 	private void showIndicatorAlt(boolean stateInv) {
 		if (stateInv) {
@@ -1609,6 +2895,17 @@ public class MVMObjCheckState extends JDialog {
 			lbIndicatorAlt.setText("Correct");
 		}else {
 			pIndicatorAlt.setBackground(Color.RED);
+=======
+
+	private void showIndicatorAlt(boolean stateInv) {
+		if (stateInv) {
+			pIndicatorAlt.setBackground(Color.GREEN);
+			lbIndicatorAlt.setForeground(Color.WHITE);
+			lbIndicatorAlt.setText("Correct");
+		}else {
+			pIndicatorAlt.setBackground(Color.RED);
+			lbIndicatorAlt.setForeground(Color.WHITE);
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 			lbIndicatorAlt.setText("Incorrect");
 		}
 	}
@@ -1642,7 +2939,10 @@ public class MVMObjCheckState extends JDialog {
 					int nInvs = innerMap.size();
 					Object[][] data = new Object[nInvs][2];
 					// Determina si todos los invs son ok o no
+<<<<<<< HEAD
 					boolean allOk=true;
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 
 					for (Map.Entry<MClassInvariant, Boolean> innerEntry : mapaOrdenado.entrySet()) {
 						MClassInvariant inv = innerEntry.getKey();
@@ -1670,7 +2970,10 @@ public class MVMObjCheckState extends JDialog {
 							data[nInv][1]=value;
 							nInv++;	
 						}
+<<<<<<< HEAD
 
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 					}
 
 					// Resize data result

@@ -224,10 +224,13 @@ public class WizardMVMView extends JPanel implements View {
 	private JSeparator separator1 = new JSeparator();
 	private JSeparator separator2 = new JSeparator();
 
+<<<<<<< HEAD
 	//	espacioVertical.setPreferredSize(new Dimension(10, 10));
 	//----------------------------------------
 
 	//	private WizardMVMView thisWizard;
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 	private boolean bNewObj;
 	private JTable fTable;
 	private JScrollPane fTablePane;
@@ -240,7 +243,12 @@ public class WizardMVMView extends JPanel implements View {
 	private NewObjectDiagram odvAssoc;
 	private String aMulti[] = new String[] { 
 			"0", "1", "*" };
+	//---
+	private ExecutorService executor;
 	private List<Future<EvalResult>> futures;
+	private ExecutorCompletionService<EvalResult> ecs;	
+	private MyEvaluatorCallable cb;
+
 	private List<AssocWizard> lAssocsWizard;
 	private Color colorSoftGray;
 
@@ -349,6 +357,12 @@ public class WizardMVMView extends JPanel implements View {
 		fSystem.getEventBus().register(this);
 		fLogWriter=logWriter;
 		colorSoftGray=new Color(218,224,224);
+		//---
+		executor = Executors.newFixedThreadPool(Options.EVAL_NUMTHREADS);
+		//		executor = Executors.newFixedThreadPool(20);
+		futures = new ArrayList<Future<EvalResult>>();
+		ecs = new ExecutorCompletionService<EvalResult>(executor);
+		//---
 
 		searchObjDiagramAssociated();
 
@@ -475,7 +489,10 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnNewObjectAuto);
 		// masmas
+<<<<<<< HEAD
 		//		btnNewObjectSampleAuto = new JButton("S");
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		btnNewObjectSampleAuto = new JButton("Fill");
 		btnNewObjectSampleAuto.setBounds(150, 160, 46, 25);
 		btnNewObjectSampleAuto.setToolTipText("add an object of each class");
@@ -542,6 +559,9 @@ public class WizardMVMView extends JPanel implements View {
 		btnCreateObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				initNewObject();
+				if (chkAutoLayout.isSelected()) {
+					odvAssoc.forceStartLayoutThread();
+				}
 			}
 		});
 		panel.add(btnCreateObject);
@@ -604,12 +624,15 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnDeleteObject);
 
+<<<<<<< HEAD
 		//JG-----------------------
 		//		espacioVertical.setPreferredSize(new Dimension(10, 10));
 		//		espacioVertical.setBounds(10, 150, 300, 10);
 		//		
 		//		panel.add(espacioVertical);
 		//---
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		separator1.setOrientation(SwingConstants.HORIZONTAL);
 		separator1.setBounds(127, 195, 459, 10);
 		panel.add(separator1);
@@ -618,15 +641,21 @@ public class WizardMVMView extends JPanel implements View {
 		lbTitleAssociations.setBounds(10, 183, 200, 25);
 		lbTitleAssociations.setFont(titleFont);
 		panel.add(lbTitleAssociations);
-		//JG-----------------------		
 
+<<<<<<< HEAD
 		//		lbAssoc = new JLabel("Association");
 		//		lbAssoc.setBounds(10, 190, 160, 25);
 		//		panel.add(lbAssoc);	
 
 
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		lbFrom = new JLabel("From");
+<<<<<<< HEAD
 		//		Font boldFont = new Font(lbFrom.getFont().getName(), Font.BOLD, 11);
+=======
+
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		lbFrom.setBounds(205, 192, 160, 25);
 		lbFrom.setFont(boldFont);
 		panel.add(lbFrom);
@@ -650,7 +679,10 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lAssocs);
 
 		btnRefreshComponents = new JButton("Refresh");
+<<<<<<< HEAD
 		//		btnRefreshComponents.setBounds(10, 310, 90, 25);// old
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		btnRefreshComponents.setBounds(301, 160, 90, 25);
 		btnRefreshComponents.setVerticalAlignment(SwingConstants.CENTER);
 		btnRefreshComponents.setHorizontalAlignment(SwingConstants.CENTER);
@@ -738,14 +770,19 @@ public class WizardMVMView extends JPanel implements View {
 				cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 			}
 		});
+<<<<<<< HEAD
 		//		cmbClassOri.setEnabled(false);//Provis
 		//		cmbClassOri.setVisible(false);//Provis
+=======
+
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		cmbClassOri.setEnabled(true);
 		cmbClassOri.setVisible(true);
 		panel.add(cmbClassOri);
 
 		// Lo siguiente es provisional -------------------------------------------------
 		Border blackline = BorderFactory.createLineBorder(Color.black);
+<<<<<<< HEAD
 		//
 		//		lbFromClass = new JLabel("");
 		//		lbFromClass.setBounds(205, 215, 120, 25);
@@ -756,6 +793,8 @@ public class WizardMVMView extends JPanel implements View {
 		//
 		//		panel.add(lbFromClass);
 		//------------------------------------------------------------------------------
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 
 		cmbClassDes = new JComboBox<MClass>();
 		cmbClassDes.setModel(loadComboClass());
@@ -765,12 +804,17 @@ public class WizardMVMView extends JPanel implements View {
 				cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 			}
 		});
+<<<<<<< HEAD
 		//		cmbClassDes.setEnabled(false);
 		//		cmbClassDes.setVisible(false);
+=======
+
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		cmbClassDes.setEnabled(true);
 		cmbClassDes.setVisible(true);
 		panel.add(cmbClassDes);
 
+<<<<<<< HEAD
 		//		lbToClass = new JLabel("");
 		//		lbToClass.setBounds(335, 215, 120, 25);
 		//		lbToClass.setBorder(blackline);
@@ -779,6 +823,8 @@ public class WizardMVMView extends JPanel implements View {
 		//		lbToClass.setOpaque(true);
 		//		panel.add(lbToClass);
 
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		cmbObjectOri = new JComboBox<MObject>();
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 		cmbObjectOri.setBounds(205, 245, 120, 25);
@@ -913,7 +959,10 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnShowClassInvariants);
 
 		btnShowIndividuals = new JButton("OBJs");
+<<<<<<< HEAD
 		//		btnShowIndividuals.setBounds(375, 375, 80, 25);
+=======
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		btnShowIndividuals.setBounds(385, 385, 70, 25);
 		btnShowIndividuals.setVerticalAlignment(SwingConstants.CENTER);
 		btnShowIndividuals.setHorizontalAlignment(SwingConstants.CENTER);
@@ -1008,8 +1057,15 @@ public class WizardMVMView extends JPanel implements View {
 
 		//--------- provis AQUI
 		// Llamar a fill
+<<<<<<< HEAD
 		//				newObjectSampleAuto();
 		//				check_inv_state_individual();
+=======
+		//						newObjectSampleAuto();
+		//						newObjectSampleAuto();
+		//						newObjectSampleAuto();
+		//						check_inv_state_individual();
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		//---provis
 	}
 
@@ -1045,8 +1101,13 @@ public class WizardMVMView extends JPanel implements View {
 			doActions(pLactions);
 			lActions=pLactions;
 		}
+<<<<<<< HEAD
 		refreshComponents();
 		return mapObjects;
+=======
+		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
+		return mapaOrdenado;
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 	}
 	/**
 	 * Refresh components
@@ -1777,9 +1838,11 @@ public class WizardMVMView extends JPanel implements View {
 		for (int i = 0; i < fValues.length; i++) {
 			fValues[i] = null;
 		}
-		ExecutorService executor = Executors.newFixedThreadPool(Options.EVAL_NUMTHREADS);
-		futures = new ArrayList<Future<EvalResult>>();
-		ExecutorCompletionService<EvalResult> ecs = new ExecutorCompletionService<EvalResult>(executor);
+
+		executor = Executors.newFixedThreadPool(Options.EVAL_NUMTHREADS);
+		ecs = new ExecutorCompletionService<EvalResult>(executor);
+
+		futures.clear();//Provis
 		boolean violationLabel = false; 
 		int numFailures = 0;
 		boolean structureOK = true;	
@@ -1787,8 +1850,12 @@ public class WizardMVMView extends JPanel implements View {
 			if(!fClassInvariants[i].isActive()){
 				continue;
 			}
+<<<<<<< HEAD
 			//			System.out.println("fSystem.state() ["+fSystem.state().name()+"]");
 			MyEvaluatorCallable cb = new MyEvaluatorCallable(fSystem.state(), i, fClassInvariants[i]);
+=======
+			cb = new MyEvaluatorCallable(fSystem.state(), i, fClassInvariants[i]);
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 			futures.add(ecs.submit(cb));
 		}
 
@@ -1831,11 +1898,11 @@ public class WizardMVMView extends JPanel implements View {
 			Boolean boolRes=  ((BooleanValue)res.result).value();
 
 			if (boolRes.equals(false)) todosOk=false;
-			//			MClassInvariant inv = fClassInvariants[res.index];
-			//			Value resultado = res.result;
+
 		}
 
-		executor.shutdown();
+		executor.shutdown();// provis
+//		cb=null;//provis
 
 		return todosOk;
 	}
@@ -1846,15 +1913,24 @@ public class WizardMVMView extends JPanel implements View {
 
 		//---
 		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
+<<<<<<< HEAD
 		//		MVMObjCheckState w = new MVMObjCheckState(frame,mapaOrdenado, fSession, thisMVMView );
 		thisMVMView=this;
 		List<MVMAction> lActionsCheck=lActions;
 		MVMObjCheckState w = new MVMObjCheckState(thisMVMView,mapaOrdenado, fSession, lActionsCheck);
 		//		w.setSize(1038, 432);
+=======
+
+		thisMVMView=this;
+		List<MVMAction> lActionsCheck=lActions;
+
+		MVMObjCheckState w = new MVMObjCheckState(thisMVMView,mapaOrdenado, fSession, lActionsCheck);
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 		w.setSize(1038, 820);//provis
 		w.setLocationRelativeTo(null);
 		w.setResizable(false);
 		w.setVisible(true);
+<<<<<<< HEAD
 		// Aqui
 		// Comprobar si existen las vistas de MVMWizard y de objetos y si no recrearlas
 	}
@@ -1970,6 +2046,12 @@ public class WizardMVMView extends JPanel implements View {
 	//		}
 	//		doActions(lActionsBck);
 	//	}
+=======
+		refreshComponents();// Provis
+		// Aqui
+		// Comprobar si existen las vistas de MVMWizard y de objetos y si no recrearlas
+	}
+>>>>>>> branch 'main' of https://github.com/juanto2021/MVMUse.git
 
 	/**
 	 * Gets information with structure check errors
@@ -2426,7 +2508,7 @@ public class WizardMVMView extends JPanel implements View {
 		int na=0;
 		MAssociationEnd oAssocEnd = oAsocEnds.get(na);
 		MClass oClassAssocEnd = oAssocEnd.cls();
-		//		if (oClassAssocEnd.name().equals(o1.cls().name())) {
+
 		if (oClassAssocEnd.name().equals(o1.cls().name())||o1.cls().isSubClassOf(oClassAssocEnd)) {
 			oOri = o1;
 			oDes =	o2;	
@@ -2670,9 +2752,9 @@ public class WizardMVMView extends JPanel implements View {
 		fMainWindow.createObject(oClass, nomObj);
 		lObjects.setModel(loadListObjects(nomClass));
 
-		if (chkAutoLayout.isSelected()) {
-			odvAssoc.forceStartLayoutThread();
-		}
+		//		if (chkAutoLayout.isSelected()) {
+		//			odvAssoc.forceStartLayoutThread();
+		//		}
 	}
 
 	/**
@@ -3036,9 +3118,12 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	private class MyEvaluatorCallable implements Callable<EvalResult> {
-		final int index;
-		final MSystemState state;
-		final MClassInvariant inv;
+		//		final int index;
+		//		final MSystemState state;
+		//		final MClassInvariant inv;
+		int index;
+		MSystemState state;
+		MClassInvariant inv;
 
 		public MyEvaluatorCallable(MSystemState state, int index, MClassInvariant inv) {
 			this.state = state;
