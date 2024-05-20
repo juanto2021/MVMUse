@@ -47,7 +47,7 @@ public class MVMShowSourceModelInvs extends JDialog {
 //			int pRowObject, 
 //			String pCompareName, 
 //			String pCompareClass) {
-	public MVMShowSourceModelInvs(JFrame fParent, String sourceAct, String sourceNew) {
+	public MVMShowSourceModelInvs(JFrame fParent, MVMObjCheckState oParent, String sourceAct, String sourceNew) {
 		super(fParent, "MVM Show source model",ModalityType.APPLICATION_MODAL);
 		frame = new JFrame("MVM Show source model");
 		frame.setAlwaysOnTop(true);

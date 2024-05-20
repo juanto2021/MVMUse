@@ -176,8 +176,10 @@ public class MVMObjCheckState extends JDialog {
 	private int BLOCK_WIDTH=850;
 	private int col1=10;
 
-	private Font fontTitles;
-	private Font fontTitles2;
+	private Font fontNormal; // Normal Font
+	private Font fontTitles; // Block captions
+	private Font fontTitles2;// Indicator Alt
+	private Font fontTitles3;// Viability
 
 	private enum StatesObj {
 		ALL, OK, KO
@@ -227,8 +229,8 @@ public class MVMObjCheckState extends JDialog {
 		lActions=pLactions;
 		listInv= new ArrayList<MVMDefInv>();
 
-//		MSystem system=fSession.system();
-		
+		//		MSystem system=fSession.system();
+
 		fModel = fSession.system().model();
 		fileName =fModel.filename();
 		fileNameModelInicial=fModel.filename();
@@ -364,8 +366,10 @@ public class MVMObjCheckState extends JDialog {
 
 		lbObjects = new JLabel("Objects");
 		lbObjects.setBounds(col1 ,filGroupTab2-30, 130, 25);
+		fontNormal = lbObjects.getFont();
 		fontTitles = new Font(lbObjects.getFont().getName(), Font.BOLD, 18);
 		fontTitles2 = new Font(lbObjects.getFont().getName(), Font.BOLD, 16);
+		fontTitles3 = new Font(lbObjects.getFont().getName(), Font.BOLD, 16);
 
 		lbObjects.setFont(fontTitles);
 		panel.add(lbObjects);	
@@ -783,9 +787,17 @@ public class MVMObjCheckState extends JDialog {
 	private void showViability(String msgError) {
 		lbViability.setForeground(Color.BLACK);
 		if(!msgError.equals("")) {
+			lbViability.setFont(fontNormal);
 			lbViability.setForeground(Color.RED);
+			lbViability.setText(msgError);
+		}else {
+			String srtViable="Model viable";
+			Color darkGreen = new Color(0, 0, 140);
+			lbViability.setFont(fontTitles3);
+			lbViability.setForeground(darkGreen);
+			lbViability.setText(srtViable);
 		}
-		lbViability.setText(msgError);
+
 	}
 	private boolean testNewBodyInv() {
 		boolean bResTest=false;
@@ -812,11 +824,11 @@ public class MVMObjCheckState extends JDialog {
 					boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
 					showIndicatorAlt(stateInv);
 					bResTest=stateInv;
-//					System.out.println("+++>>> en testNewBodyInv() ["+contentNew+"] ["+bRes+"] texto ["+texto+"] stateInv ["+stateInv+"]");
+					//					System.out.println("+++>>> en testNewBodyInv() ["+contentNew+"] ["+bRes+"] texto ["+texto+"] stateInv ["+stateInv+"]");
 				}
 			}else {
 				showIndicatorAlt(false);
-//				System.out.println("+++<<< en testNewBodyInv() ["+contentNew+"] ["+bRes+"]");
+				//				System.out.println("+++<<< en testNewBodyInv() ["+contentNew+"] ["+bRes+"]");
 			}
 
 			// Restablece fichero original aqui
@@ -856,20 +868,20 @@ public class MVMObjCheckState extends JDialog {
 		}
 		contentNew=sourceNew;
 
-		if (tabObjects.getModel().getRowCount()>0) {
-			String oCompareName = "";
-			String oCompareClass = "";	
-			int row = tabObjects.getSelectedRow();
-			oCompareName = (String) tabObjects.getValueAt(row, 0);
-			oCompareClass = (String) tabObjects.getValueAt(row, 1);
-			String nomObj="("+oCompareClass+") - "+oCompareName;
-
-			if (tabInvs.getModel().getRowCount()>0) {
-				MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
-				String nomInv = (String) oInv.bodyExpression().toString();
-//				calcStateInvObj(nomObj, nomInv);
-			}
-		}
+		//		if (tabObjects.getModel().getRowCount()>0) {
+		//			String oCompareName = "";
+		//			String oCompareClass = "";	
+		//			int row = tabObjects.getSelectedRow();
+		//			oCompareName = (String) tabObjects.getValueAt(row, 0);
+		//			oCompareClass = (String) tabObjects.getValueAt(row, 1);
+		//			String nomObj="("+oCompareClass+") - "+oCompareName;
+		//
+		//			if (tabInvs.getModel().getRowCount()>0) {
+		//				MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+		//				String nomInv = (String) oInv.bodyExpression().toString();
+		////				calcStateInvObj(nomObj, nomInv);
+		//			}
+		//		}
 	}
 
 	private void showSource() {
@@ -878,7 +890,7 @@ public class MVMObjCheckState extends JDialog {
 		saveWorkFile(contentNew);
 		String sourceAct=contentFile;
 
-		MVMShowSourceModelInvs w = new MVMShowSourceModelInvs(frame, sourceAct, contentNew);
+		MVMShowSourceModelInvs w = new MVMShowSourceModelInvs(frame, this, sourceAct, contentNew);
 
 		w.setSize(1055, 625);
 		w.setLocationRelativeTo(null);
@@ -1284,7 +1296,7 @@ public class MVMObjCheckState extends JDialog {
 			data = new Object[nFilas][3];
 			int nFila=0;
 			for (Map.Entry<String, String> entry : pMapAlt.entrySet()) {
-//				String clave = entry.getKey();
+				//				String clave = entry.getKey();
 				String valor = entry.getValue();
 
 				data[nFila][0]=false;
@@ -1444,17 +1456,17 @@ public class MVMObjCheckState extends JDialog {
 	//--------------------------
 
 	private void analyze_Model() {
-//		System.out.println("START: " + fileName);
-//
-//		System.out.println("Model name "+ fModel.name());
-//		System.out.println("Model filename "+ fileName);
+		//		System.out.println("START: " + fileName);
+		//
+		//		System.out.println("Model name "+ fModel.name());
+		//		System.out.println("Model filename "+ fileName);
 		File fileF = new File(fileName);
 
 		directory = fileF.getParent();
 		fileNameExt = fileF.getName();
 
-//		System.out.println("Directorio: " + directory);
-//		System.out.println("Nombre de archivo: " + fileNameExt);
+		//		System.out.println("Directorio: " + directory);
+		//		System.out.println("Nombre de archivo: " + fileNameExt);
 
 		listInv = new ArrayList<MVMDefInv>();
 		contentFile = "";
@@ -1483,25 +1495,25 @@ public class MVMObjCheckState extends JDialog {
 			// Cerrar el archivo
 			writer.close();
 
-//			System.out.println("FINISH: " + fileName);
-//			System.out.println("--------------------------------------------------------------------------------------------");
-//			System.out.println("Hay ["+listInv.size()+"] invariants in file ["+fileName+"]");
-//			System.out.println("--------------------------------------------------------------------------------------------");
-//			int nInvs=listInv.size();
-//			for (int nInv=0;nInv<nInvs;nInv++) {
-//				MVMDefInv oInv = listInv.get(nInv);
-//				String linea=String.format("%03d", nInv);
-//				linea+="  [";
-//				linea+=String.format("%5d", oInv.getIniBodyExpression());
-//				linea+="-";
-//				linea+=String.format("%5d", oInv.getFinBodyExpression());
-//				linea+="]";
-//				linea+="  ";
-//				linea+=String.format("%-40s","["+oInv.getNameClass()+"::"+oInv.getNameInv()+"]");
-//
-//				linea+=String.format("%-70s","["+oInv.getBodyExpression()+"]");
-//				System.out.println(linea);
-//			}
+			//			System.out.println("FINISH: " + fileName);
+			//			System.out.println("--------------------------------------------------------------------------------------------");
+			//			System.out.println("Hay ["+listInv.size()+"] invariants in file ["+fileName+"]");
+			//			System.out.println("--------------------------------------------------------------------------------------------");
+			//			int nInvs=listInv.size();
+			//			for (int nInv=0;nInv<nInvs;nInv++) {
+			//				MVMDefInv oInv = listInv.get(nInv);
+			//				String linea=String.format("%03d", nInv);
+			//				linea+="  [";
+			//				linea+=String.format("%5d", oInv.getIniBodyExpression());
+			//				linea+="-";
+			//				linea+=String.format("%5d", oInv.getFinBodyExpression());
+			//				linea+="]";
+			//				linea+="  ";
+			//				linea+=String.format("%-40s","["+oInv.getNameClass()+"::"+oInv.getNameInv()+"]");
+			//
+			//				linea+=String.format("%-70s","["+oInv.getBodyExpression()+"]");
+			//				System.out.println(linea);
+			//			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -1540,15 +1552,15 @@ public class MVMObjCheckState extends JDialog {
 
 					int iniBody=iniINV+strINV.indexOf(bodyExpression);
 					int finBody=iniBody+bodyExpression.length();
-//					String strCompare = contentFile.substring(iniBody, finBody);
-//					if (bodyExpression.equals(strCompare)) {
-//						//						System.out.println("SI");
-//					}else {
-//
-//						//						System.out.println("bodyExpression ["+bodyExpression+"]");
-//						//						System.out.println("strCompare     ["+strCompare+"]");
-//						//						System.out.println("NO");
-//					}
+					//					String strCompare = contentFile.substring(iniBody, finBody);
+					//					if (bodyExpression.equals(strCompare)) {
+					//						//						System.out.println("SI");
+					//					}else {
+					//
+					//						//						System.out.println("bodyExpression ["+bodyExpression+"]");
+					//						//						System.out.println("strCompare     ["+strCompare+"]");
+					//						//						System.out.println("NO");
+					//					}
 
 					numINV+=1;
 					MVMDefInv oInv = new MVMDefInv();
@@ -1636,8 +1648,8 @@ public class MVMObjCheckState extends JDialog {
 				MModel newModel = USECompiler.compileSpecification(specStreamNew,
 						fileName, new PrintWriter(System.err),
 						new ModelFactory());		
-//				System.out.println("new Model name "+ newModel.name());
-//				System.out.println("new Model filename "+ newModel.filename());
+				//				System.out.println("new Model name "+ newModel.name());
+				//				System.out.println("new Model filename "+ newModel.filename());
 				system = new MSystem(newModel);
 
 				fSession.setSystem(system);
@@ -1661,8 +1673,8 @@ public class MVMObjCheckState extends JDialog {
 			MModel newModel = USECompiler.compileSpecification(specStreamNew,
 					fileName, new PrintWriter(System.err),
 					new ModelFactory());		
-//			System.out.println("old Model name "+ newModel.name());
-//			System.out.println("old Model filename "+ newModel.filename());
+			//			System.out.println("old Model name "+ newModel.name());
+			//			System.out.println("old Model filename "+ newModel.filename());
 			system = new MSystem(newModel);
 
 			fSession.setSystem(system);
@@ -1688,19 +1700,19 @@ public class MVMObjCheckState extends JDialog {
 		// Ver contenido de modelo
 		// Obtener contenido de otro fichero
 		String dir = System.getProperty("user.dir");
-//		System.out.println("Directorio actual: " + dir);
+		//		System.out.println("Directorio actual: " + dir);
 		MSystem system=fSession.system();
 		MModel model = fSession.system().model();
 		String filename =model.filename();
-//		System.out.println("Model name "+ model.name());
-//		System.out.println("Model filename "+ filename);
+		//		System.out.println("Model name "+ model.name());
+		//		System.out.println("Model filename "+ filename);
 		File file = new File(filename);
 
 		String directory = file.getParent();
 		String fileNameExt = file.getName();
 
-//		System.out.println("Directorio: " + directory);
-//		System.out.println("Nombre de archivo: " + fileNameExt);
+		//		System.out.println("Directorio: " + directory);
+		//		System.out.println("Nombre de archivo: " + fileNameExt);
 
 		try {
 			FileInputStream specStreamNew;
@@ -1730,7 +1742,7 @@ public class MVMObjCheckState extends JDialog {
 			}
 			// Hay que rehacer mapObjects de MVMView
 			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
-//			System.out.println("cambiado");
+			//			System.out.println("cambiado");
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -1821,9 +1833,9 @@ public class MVMObjCheckState extends JDialog {
 
 	}
 
-//	private void calcStateInvObj(String nomObj, String nomInv) {
-//		System.out.println("Calculo state para ["+nomObj+"] - inv ["+nomInv+"]");
-//	}
+	//	private void calcStateInvObj(String nomObj, String nomInv) {
+	//		System.out.println("Calculo state para ["+nomObj+"] - inv ["+nomInv+"]");
+	//	}
 
 	/**
 	 * Load object table
