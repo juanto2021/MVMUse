@@ -106,7 +106,7 @@ public class MVMObjCheckState extends JDialog {
 	private JPanel panelGroupAlt;
 
 
-	private ButtonGroup group;// Para alternativas
+	//	private ButtonGroup group;// Para alternativas
 
 	private JTextArea taExprInvCurrent = null;
 	private JTextArea taExprInvNew = null;
@@ -138,8 +138,8 @@ public class MVMObjCheckState extends JDialog {
 	private JTable tabAttrs;
 	private JScrollPane paneTabAttrs;
 
-	private JPanel pProposals;
-	private JScrollPane pScrollProposals ;
+	//	private JPanel pProposals;
+	//	private JScrollPane pScrollProposals ;
 
 	private JLabel lbFileName;
 	private JLabel lbDIRWRK;
@@ -147,8 +147,8 @@ public class MVMObjCheckState extends JDialog {
 	private JTextField txFileName;
 
 	private JButton btnExit;
-	private JButton btnCompareExpr;
-	private JButton btnAnalyze;
+	//	private JButton btnCompareExpr;
+	//	private JButton btnAnalyze;
 	private JButton btnSaveFile;
 	private JButton btnTest;
 	private JButton btnShowSource;
@@ -171,7 +171,7 @@ public class MVMObjCheckState extends JDialog {
 	private String dirWrkReplaceBodyInv="wrkReplaceBodyInv";
 	private String dirWkr;
 	private String fileNameWork = "WRKReplaceInv";
-	private String fileNameExt = "";
+	//	private String fileNameExt = "";
 
 	private Border etchedTitledBorder;
 	private Border etchedBorder;
@@ -276,11 +276,7 @@ public class MVMObjCheckState extends JDialog {
 					}
 				}
 				reloadComponentsModel();
-				// Aqui reload links
-				//				showPanelTableAlt("");//Aqui
-				//				testNewBodyInv();
-//				taExprInvCurrent.setText("");
-//				showPanelTableAlt("");
+
 				int nInv = tabInvs.getSelectedRow();
 				if (nInv>-1) {
 					showInfoLinkFromRow(nInv);
@@ -290,7 +286,7 @@ public class MVMObjCheckState extends JDialog {
 					lbIndicatorAlt.setText("");
 					pIndicatorAlt.setBackground(Color.YELLOW);
 				}
-				
+
 			}
 		};
 
@@ -734,13 +730,8 @@ public class MVMObjCheckState extends JDialog {
 
 		lbDIRWRK = new JLabel("Work Directory: ");
 		lbDIRWRK.setBounds(col1+60, filGroupTab3+440,450, 20);
-		//		lbDIRWRK.setForeground(new Color(0, 0, 140));
-		//		Font courierNewFont = new Font("Courier New", Font.PLAIN, 12);
-		//		lbDIRWRK.setFont(courierNewFont);
 		panel.add(lbDIRWRK);	
 
-
-		//lbDIRWRKValue
 		lbDIRWRKValue = new JLabel(dirWkr);
 		lbDIRWRKValue.setBounds(col1+140, filGroupTab3+442,450, 20);
 		lbDIRWRKValue.setForeground(new Color(0, 0, 140));
@@ -771,13 +762,11 @@ public class MVMObjCheckState extends JDialog {
 
 		btnTest = new JButton("Test");
 		btnTest.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (contentNew!="") {
 					testNewBodyInv();
 				}
-
 			}
 		});
 
@@ -808,28 +797,7 @@ public class MVMObjCheckState extends JDialog {
 		btnExit.setBounds(900, filGroupTab3+465, 110, 25);
 		panel.add(btnExit);
 
-		//		btnAnalyze = new JButton("Analyze");
-		//		btnAnalyze.addActionListener(new ActionListener() {
-		//
-		//			@Override
-		//			public void actionPerformed(ActionEvent e) {
-		//				allObjsOk=true;
-		//				analyze();
-		//
-		//				reloadComponentsModel();
-		//				showIndicator();
-		//
-		//			}
-		//		});
-		//		btnAnalyze.setBounds(900, 10, 110, 80);
-		//		panel.add(btnAnalyze);
-
 		getContentPane().add(panel);
-
-		//		if(tabInvs.getModel().getRowCount()>0) {
-		//			tabInvs.setRowSelectionInterval(0, 0);
-		//			showInfoLinkFromRow(0);
-		//		}
 
 		String fileAct=fileName;
 		String nameProposal ="";
@@ -849,9 +817,9 @@ public class MVMObjCheckState extends JDialog {
 			saveWorkFile(contentNew);
 
 		}
-		testNewBodyInv();//Provis
-
+		testNewBodyInv();
 	}
+
 	private void reloadComponentsModel() {
 		int nObj = tabObjects.getSelectedRow();
 		int nInv = tabInvs.getSelectedRow();
@@ -872,7 +840,6 @@ public class MVMObjCheckState extends JDialog {
 
 		putColorInvs();
 
-
 		if(tabObjects.getModel().getRowCount()>0) {
 			if(nObjAnt>-1) {
 				tabObjects.setRowSelectionInterval(nObjAnt, nObjAnt);	
@@ -889,11 +856,6 @@ public class MVMObjCheckState extends JDialog {
 				tabInvs.setRowSelectionInterval(0, 0);
 				showExprInv(0);
 			}
-
-		}else {
-			//			showPanelTableAlt("");//Aqui
-			//			testNewBodyInv();
-			//			taExprInvCurrent.setText("");
 		}
 	}
 	private void showViability(String msgError) {
@@ -913,10 +875,10 @@ public class MVMObjCheckState extends JDialog {
 	}
 	private boolean testNewBodyInv() {
 		boolean bResTest=false;
-		//Provis
-		if (tabInvs.getModel().getRowCount()==0) {
-			System.out.println("count " + tabInvs.getModel().getRowCount());
-		}
+//		//Provis
+//		if (tabInvs.getModel().getRowCount()==0) {
+//			System.out.println("count " + tabInvs.getModel().getRowCount());
+//		}
 		int nInv = tabInvs.getSelectedRow();
 		int nInvAnt=nInv;
 		int nObj = tabObjects.getSelectedRow();
@@ -937,24 +899,16 @@ public class MVMObjCheckState extends JDialog {
 				if (nInv>-1) {
 					//Provis
 					int nFilasInv=tabInvs.getModel().getRowCount();
-					if (nFilasInv==0) {
-						System.out.println("count " + tabInvs.getModel().getRowCount());
-					}
+//					if (nFilasInv==0) {
+//						System.out.println("count " + tabInvs.getModel().getRowCount());
+//					}
 					if (nFilasInv>0) {
 						MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
 						String texto = (String) oInv.bodyExpression().toString();
 						boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
 						showIndicatorAlt(stateInv);
 						bResTest=stateInv;
-					}else {
-//						pIndicatorAlt.setBackground(Color.YELLOW);
 					}
-					//					MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
-					//					String texto = (String) oInv.bodyExpression().toString();
-					//					boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
-					//					showIndicatorAlt(stateInv);
-					//					bResTest=stateInv;
-					//					System.out.println("+++>>> en testNewBodyInv() ["+contentNew+"] ["+bRes+"] texto ["+texto+"] stateInv ["+stateInv+"]");
 				}
 			}else {
 				showIndicatorAlt(false);
@@ -997,21 +951,6 @@ public class MVMObjCheckState extends JDialog {
 			sourceNew=strLeft + strModified.trim() + strRight;
 		}
 		contentNew=sourceNew;
-
-		//		if (tabObjects.getModel().getRowCount()>0) {
-		//			String oCompareName = "";
-		//			String oCompareClass = "";	
-		//			int row = tabObjects.getSelectedRow();
-		//			oCompareName = (String) tabObjects.getValueAt(row, 0);
-		//			oCompareClass = (String) tabObjects.getValueAt(row, 1);
-		//			String nomObj="("+oCompareClass+") - "+oCompareName;
-		//
-		//			if (tabInvs.getModel().getRowCount()>0) {
-		//				MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
-		//				String nomInv = (String) oInv.bodyExpression().toString();
-		////				calcStateInvObj(nomObj, nomInv);
-		//			}
-		//		}
 	}
 
 	private void showSource() {
@@ -1220,7 +1159,6 @@ public class MVMObjCheckState extends JDialog {
 	private void showInfoLinkFromRow(int row) {
 		MClassInvariant inv = (MClassInvariant) tabInvs.getModel().getValueAt(row, 0);
 		String strInv = inv.name();
-		//		showPanelActionsLink(strInv);
 		showPanelTableAlt(strInv);
 	}
 	private Map<String, String> doAlternatives(String strInv) {
@@ -1249,16 +1187,16 @@ public class MVMObjCheckState extends JDialog {
 		if (nameSimple.equals("Animals4_P2.use")) {
 			mapAlternatives.put("clave1", "self.age > 0");
 			mapAlternatives.put("clave2", "self.age < 0");
-//			mapAlternatives.put("clave3", "self.age > 2");
-//			mapAlternatives.put("clave4", "self.age < -4");
-//			mapAlternatives.put("clave5", "self.age > 0");
-//			mapAlternatives.put("clave6", "self.age < 0");
-//			mapAlternatives.put("clave7", "self.age > 2");
-//			mapAlternatives.put("clave8", "self.age < -4");
-//			mapAlternatives.put("clave9", "self.age > 0");
-//			mapAlternatives.put("clave10", "self.age < 0");
-//			mapAlternatives.put("clave11", "self.age > 2");
-//			mapAlternatives.put("clave12", "self.age < -4");			
+			mapAlternatives.put("clave3", "self.age > 2");
+			mapAlternatives.put("clave4", "self.age < -4");
+			mapAlternatives.put("clave5", "self.age > 0");
+			mapAlternatives.put("clave6", "self.age < 0");
+			mapAlternatives.put("clave7", "self.age > 2");
+			mapAlternatives.put("clave8", "self.age < -4");
+			mapAlternatives.put("clave9", "self.age > 0");
+			mapAlternatives.put("clave10", "self.age < 0");
+			mapAlternatives.put("clave11", "self.age > 2");
+			mapAlternatives.put("clave12", "self.age < -4");			
 
 		}else {
 			for (int i=0;i<10;i++) {
@@ -1269,66 +1207,7 @@ public class MVMObjCheckState extends JDialog {
 		TreeMap<String, String> mapSorted = new TreeMap<>(mapAlternatives);
 		return mapSorted;
 	}
-	//	private void showPanelActionsLink(String strInv) {
-	//
-	//		Map<String, String> mapSorted = doAlternatives(strInv);
-	//		pProposals = new JPanel();
-	//		BoxLayout layout = new BoxLayout(pProposals, BoxLayout.Y_AXIS);
-	//
-	//		pProposals.setLayout(layout);
-	//		group = new ButtonGroup();
-	//		boolean pVez = true;
-	//		int sizeAlternatives=mapSorted.size();
-	//
-	//		int nrb=0;
-	//		for (String clave : mapSorted.keySet()) {
-	//
-	//			String bodyAlt = mapSorted.get(clave);
-	//			if (bodyAlt!="") {
-	//				JRadioButton rb = new JRadioButton (bodyAlt);
-	//				if (pVez) {
-	//					rb.setSelected(true);
-	//					pVez=false;
-	//					showAlternative(bodyAlt);
-	//				}
-	//				rb.setActionCommand(bodyAlt);
-	//				rb.setName("o"+nrb);
-	//				pProposals.add(rb);
-	//				group.add(rb);	
-	//				rb.addActionListener(new ActionListener() {
-	//					@Override
-	//					public void actionPerformed(ActionEvent e) {
-	//						int nInv = tabInvs.getSelectedRow();
-	//						int nInvAnt=nInv;
-	//						int nObj = tabObjects.getSelectedRow();
-	//						int nObjAnt=nObj;
-	//						showAlternative(bodyAlt);
-	//						saveWorkFile(contentNew);
-	//						// Restablecer nInv
-	//						nInv=nInvAnt;
-	//						if (tabInvs.getModel().getRowCount()>0) {
-	//							tabInvs.setRowSelectionInterval(nInv, nInv);
-	//							loadListAttrs(nObjAnt);
-	//						}
-	//						showExprInv(nInv);
-	//
-	//					}
-	//				});
-	//				nrb+=1;
-	//			}
-	//		}
-	//
-	//		String borderTitle = "Alternatives ("+ sizeAlternatives+")";
-	//		borderTitle="";//provis
-	//		panel.remove(pScrollProposals);
-	//		pScrollProposals = new JScrollPane(pProposals);
-	//		pScrollProposals.setBounds(900, filGroupTab3+150, 100, 155);
-	//		etchedTitledBorder = BorderFactory.createTitledBorder(etchedBorder, borderTitle);
-	//		pScrollProposals.setBorder(etchedTitledBorder);
-	//		panel.add(pScrollProposals);
-	//		//		panel.updateUI();
-	//
-	//	}
+
 	private void showAlternative(String strAlt) {
 		taExprInvNew.setText(strAlt);
 		if (contentNew!="") {
@@ -1338,7 +1217,7 @@ public class MVMObjCheckState extends JDialog {
 
 	//--------------------------
 	private void showPanelTableAlt(String strInv) {
-//		Map<String, String> mapSorted = doAlternatives(strInv);
+		//		Map<String, String> mapSorted = doAlternatives(strInv);
 		Map<String, String> mapSorted = new TreeMap<>();
 		if (!strInv.equals("")) {
 			mapSorted = doAlternatives(strInv);
@@ -1381,7 +1260,7 @@ public class MVMObjCheckState extends JDialog {
 					int selectedRow = tableAlt.getSelectedRow();
 					if (selectedRow != -1) {
 						Object value = tableAlt.getValueAt(selectedRow, 1); // Columna 2 (�ndice 1)
-						System.out.println("["+selectedRow+"] desc inv: " + value);
+//						System.out.println("["+selectedRow+"] desc inv: " + value);
 						tableAlt.setValueAt(true, selectedRow, 0);
 						int nInv = tabInvs.getSelectedRow();
 						int nInvAnt=nInv;
@@ -1402,10 +1281,6 @@ public class MVMObjCheckState extends JDialog {
 			}
 		});
 
-		//		if(tableAlt.getModel().getRowCount()>0) {
-		//			tableAlt.setRowSelectionInterval(0, 0);
-		//		}
-
 		tableAlt.setBounds(col1, filGroupTab3+150, BLOCK_WIDTH, 155);
 		panel.remove(scrollPaneTableAlt);
 		scrollPaneTableAlt = new JScrollPane(tableAlt);
@@ -1417,8 +1292,7 @@ public class MVMObjCheckState extends JDialog {
 		if(tableAlt.getModel().getRowCount()>0) {
 			tableAlt.setRowSelectionInterval(0, 0);
 			Object value = tableAlt.getValueAt(0, 1); // Columna 2 (�ndice 1)
-			//			System.out.println("["+selectedRow+"] desc inv: " + value);
-			//			tableAlt.setValueAt(true, selectedRow, 0);
+
 			int nInv = tabInvs.getSelectedRow();
 			int nInvAnt=nInv;
 			int nObj = tabObjects.getSelectedRow();
@@ -1521,7 +1395,7 @@ public class MVMObjCheckState extends JDialog {
 			}
 			if (nFilas==0) {
 				this.data=new Object[0][0];
-		        fireTableDataChanged();
+				fireTableDataChanged();
 			}
 		}
 
@@ -1653,7 +1527,7 @@ public class MVMObjCheckState extends JDialog {
 		File fileF = new File(fileName);
 
 		directory = fileF.getParent();
-		fileNameExt = fileF.getName();
+		//		fileNameExt = fileF.getName();
 		listInv = new ArrayList<MVMDefInv>();
 		contentFile = "";
 		String[] parts = fileName.replace("\\", "/").split("/");
@@ -1719,15 +1593,6 @@ public class MVMObjCheckState extends JDialog {
 
 					int iniBody=iniINV+strINV.indexOf(bodyExpression);
 					int finBody=iniBody+bodyExpression.length();
-					//					String strCompare = contentFile.substring(iniBody, finBody);
-					//					if (bodyExpression.equals(strCompare)) {
-					//						//						System.out.println("SI");
-					//					}else {
-					//
-					//						//						System.out.println("bodyExpression ["+bodyExpression+"]");
-					//						//						System.out.println("strCompare     ["+strCompare+"]");
-					//						//						System.out.println("NO");
-					//					}
 
 					numINV+=1;
 					MVMDefInv oInv = new MVMDefInv();
@@ -1862,71 +1727,13 @@ public class MVMObjCheckState extends JDialog {
 		}
 		return bRes;
 	}
-	//	private void analyze() {
-	//
-	//		// Ver contenido de modelo
-	//		// Obtener contenido de otro fichero
-	//		String dir = System.getProperty("user.dir");
-	//		//		System.out.println("Directorio actual: " + dir);
-	//		MSystem system=fSession.system();
-	//		MModel model = fSession.system().model();
-	//		String filename =model.filename();
-	//		//		System.out.println("Model name "+ model.name());
-	//		//		System.out.println("Model filename "+ filename);
-	//		File file = new File(filename);
-	//
-	//		String directory = file.getParent();
-	//		String fileNameExt = file.getName();
-	//
-	//		//		System.out.println("Directorio: " + directory);
-	//		//		System.out.println("Nombre de archivo: " + fileNameExt);
-	//
-	//		try {
-	//			FileInputStream specStreamNew;
-	//			String newFilename="";
-	//			if (filename.indexOf("Animals4_P2_v2")>0) {
-	//				newFilename=filename;
-	//			}else {
-	//				newFilename=filename.replace("Animals4_P2", "Animals4_P2_v2");
-	//			}
-	//
-	//			specStreamNew = new FileInputStream(newFilename);
-	//			MModel newModel = USECompiler.compileSpecification(specStreamNew,
-	//					newFilename, new PrintWriter(System.err),
-	//					new ModelFactory());		
-	//			System.out.println("new Model name "+ newModel.name());
-	//			System.out.println("new Model filename "+ newModel.filename());
-	//			system = new MSystem(newModel);
-	//
-	//			fSession.setSystem(system);
-	//			thisMVMView.putSession(fSession);
-	//
-	//			List<MVMAction> lActionsCheck=new ArrayList<MVMAction>();
-	//			int nActions = lActions.size();
-	//			for (int nAction=0;nAction<nActions;nAction++) {
-	//				MVMAction oAction=lActions.get(nActions-1);
-	//				lActionsCheck.add(nAction, oAction);
-	//			}
-	//			// Hay que rehacer mapObjects de MVMView
-	//			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
-	//			//			System.out.println("cambiado");
-	//
-	//		} catch (FileNotFoundException e) {
-	//			e.printStackTrace();
-	//		}
-	//	}
 
 	private void showExprInv(int nInv) {
 
-		//		MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
-		//		String texto = (String) oInv.bodyExpression().toString();
-		//		taExprInvCurrent.setText(texto);
-
-		//--
-		System.out.println("showExprInv "+nInv);
-		if (nInv<0) {
-			System.out.println("showExprInv Falla--- "+nInv);
-		}
+//		System.out.println("showExprInv "+nInv);
+//		if (nInv<0) {
+//			System.out.println("showExprInv Falla--- "+nInv);
+//		}
 		if (nInv>-1) {
 			MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
 			String texto = (String) oInv.bodyExpression().toString();
@@ -1934,9 +1741,6 @@ public class MVMObjCheckState extends JDialog {
 		}else {
 			taExprInvCurrent.setText("");
 		}
-		//--
-
-
 	}
 
 	/**
@@ -2133,7 +1937,7 @@ public class MVMObjCheckState extends JDialog {
 		columns = new String[] {
 				"Invariant", "Satisfied "
 		};
-		// seguramente and nObject > -1
+
 		if (mapObjects.size()>0 && nObject>-1) {
 			String oCompareName = "";
 			String oCompareClass = "";
