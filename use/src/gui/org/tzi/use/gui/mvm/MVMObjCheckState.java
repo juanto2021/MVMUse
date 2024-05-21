@@ -142,7 +142,8 @@ public class MVMObjCheckState extends JDialog {
 	private JScrollPane pScrollProposals ;
 
 	private JLabel lbFileName;
-	private JLabel lbDIRWRK;	
+	private JLabel lbDIRWRK;
+	private JLabel lbDIRWRKValue;
 	private JTextField txFileName;
 
 	private JButton btnExit;
@@ -275,6 +276,21 @@ public class MVMObjCheckState extends JDialog {
 					}
 				}
 				reloadComponentsModel();
+				// Aqui reload links
+				//				showPanelTableAlt("");//Aqui
+				//				testNewBodyInv();
+//				taExprInvCurrent.setText("");
+//				showPanelTableAlt("");
+				int nInv = tabInvs.getSelectedRow();
+				if (nInv>-1) {
+					showInfoLinkFromRow(nInv);
+				}else {
+					showPanelTableAlt("");
+					taExprInvNew.setText("");
+					lbIndicatorAlt.setText("");
+					pIndicatorAlt.setBackground(Color.YELLOW);
+				}
+				
 			}
 		};
 
@@ -325,6 +341,13 @@ public class MVMObjCheckState extends JDialog {
 				loadListInvs(row);
 				if (tabInvs.getModel().getRowCount()>0) {
 					tabInvs.setRowSelectionInterval(0, 0);
+					showInfoLinkFromRow(0);
+				}else {
+					//aqui
+					showPanelTableAlt("");
+					taExprInvNew.setText("");
+					lbIndicatorAlt.setText("");
+					pIndicatorAlt.setBackground(Color.YELLOW);
 				}
 			}
 		};
@@ -709,10 +732,22 @@ public class MVMObjCheckState extends JDialog {
 		lbViability.setBounds(col1+440, filGroupTab3+320,500, 20);
 		panel.add(lbViability);	
 
-		lbDIRWRK = new JLabel("Work Directory: "+dirWkr);
+		lbDIRWRK = new JLabel("Work Directory: ");
 		lbDIRWRK.setBounds(col1+60, filGroupTab3+440,450, 20);
-		lbDIRWRK.setForeground(new Color(0, 0, 140));
+		//		lbDIRWRK.setForeground(new Color(0, 0, 140));
+		//		Font courierNewFont = new Font("Courier New", Font.PLAIN, 12);
+		//		lbDIRWRK.setFont(courierNewFont);
 		panel.add(lbDIRWRK);	
+
+
+		//lbDIRWRKValue
+		lbDIRWRKValue = new JLabel(dirWkr);
+		lbDIRWRKValue.setBounds(col1+140, filGroupTab3+442,450, 20);
+		lbDIRWRKValue.setForeground(new Color(0, 0, 140));
+		Font courierNewFont = new Font("Courier New", Font.BOLD, 12);
+		lbDIRWRKValue.setFont(courierNewFont);
+		panel.add(lbDIRWRKValue);	
+
 
 		txFileName = new JTextField();
 		txFileName.setBounds(col1, filGroupTab3+465, 450,20 );
@@ -791,10 +826,10 @@ public class MVMObjCheckState extends JDialog {
 
 		getContentPane().add(panel);
 
-		if(tabInvs.getModel().getRowCount()>0) {
-			tabInvs.setRowSelectionInterval(0, 0);
-			showInfoLinkFromRow(0);
-		}
+		//		if(tabInvs.getModel().getRowCount()>0) {
+		//			tabInvs.setRowSelectionInterval(0, 0);
+		//			showInfoLinkFromRow(0);
+		//		}
 
 		String fileAct=fileName;
 		String nameProposal ="";
@@ -809,6 +844,7 @@ public class MVMObjCheckState extends JDialog {
 
 		if(tabInvs.getModel().getRowCount()>0) {
 			tabInvs.setRowSelectionInterval(0, 0);
+			showInfoLinkFromRow(0);
 			prepareContentNew();
 			saveWorkFile(contentNew);
 
@@ -825,17 +861,39 @@ public class MVMObjCheckState extends JDialog {
 
 		loadTabObjects();
 		putColorObjs();
-		loadListInvs(nObjAnt);
+
+		if(nObjAnt>-1) {
+			loadListInvs(nObjAnt);
+			loadListAttrs(nObjAnt);
+		}else {
+			loadListInvs(0);
+			loadListAttrs(0);
+		}
+
 		putColorInvs();
-		loadListAttrs(nObjAnt);
+
 
 		if(tabObjects.getModel().getRowCount()>0) {
-			tabObjects.setRowSelectionInterval(nObjAnt, nObjAnt);
+			if(nObjAnt>-1) {
+				tabObjects.setRowSelectionInterval(nObjAnt, nObjAnt);	
+			}else {
+				tabObjects.setRowSelectionInterval(0, 0);
+			}
 		}
 
 		if(tabInvs.getModel().getRowCount()>0) {
-			tabInvs.setRowSelectionInterval(nInvAnt, nInvAnt);
-			showExprInv(nInvAnt);
+			if (nInvAnt>-1) {
+				tabInvs.setRowSelectionInterval(nInvAnt, nInvAnt);
+				showExprInv(nInvAnt);	
+			}else {
+				tabInvs.setRowSelectionInterval(0, 0);
+				showExprInv(0);
+			}
+
+		}else {
+			//			showPanelTableAlt("");//Aqui
+			//			testNewBodyInv();
+			//			taExprInvCurrent.setText("");
 		}
 	}
 	private void showViability(String msgError) {
@@ -855,6 +913,10 @@ public class MVMObjCheckState extends JDialog {
 	}
 	private boolean testNewBodyInv() {
 		boolean bResTest=false;
+		//Provis
+		if (tabInvs.getModel().getRowCount()==0) {
+			System.out.println("count " + tabInvs.getModel().getRowCount());
+		}
 		int nInv = tabInvs.getSelectedRow();
 		int nInvAnt=nInv;
 		int nObj = tabObjects.getSelectedRow();
@@ -873,11 +935,25 @@ public class MVMObjCheckState extends JDialog {
 			if (bRes) {
 				// Almacena resultado de la invariante deseada
 				if (nInv>-1) {
-					MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
-					String texto = (String) oInv.bodyExpression().toString();
-					boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
-					showIndicatorAlt(stateInv);
-					bResTest=stateInv;
+					//Provis
+					int nFilasInv=tabInvs.getModel().getRowCount();
+					if (nFilasInv==0) {
+						System.out.println("count " + tabInvs.getModel().getRowCount());
+					}
+					if (nFilasInv>0) {
+						MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+						String texto = (String) oInv.bodyExpression().toString();
+						boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
+						showIndicatorAlt(stateInv);
+						bResTest=stateInv;
+					}else {
+//						pIndicatorAlt.setBackground(Color.YELLOW);
+					}
+					//					MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+					//					String texto = (String) oInv.bodyExpression().toString();
+					//					boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
+					//					showIndicatorAlt(stateInv);
+					//					bResTest=stateInv;
 					//					System.out.println("+++>>> en testNewBodyInv() ["+contentNew+"] ["+bRes+"] texto ["+texto+"] stateInv ["+stateInv+"]");
 				}
 			}else {
@@ -1053,6 +1129,7 @@ public class MVMObjCheckState extends JDialog {
 				String nomFileSave = fileToSave.getAbsolutePath().replace("\\", "/");
 
 				if (nomFileSave.contains("/")) {
+					directory="";
 					String[] partes = nomFileSave.split("/");
 					int nPartes = partes.length;
 					nomFile=partes[nPartes-1];
@@ -1073,6 +1150,8 @@ public class MVMObjCheckState extends JDialog {
 
 				String content = contentNew;
 				writeFileOnDisk(nomFileSave, content);
+
+				lbDIRWRKValue.setText(directory);
 
 				// Salvar .properties nuevo
 				copyProperties(nomFileSave);
@@ -1145,6 +1224,7 @@ public class MVMObjCheckState extends JDialog {
 		showPanelTableAlt(strInv);
 	}
 	private Map<String, String> doAlternatives(String strInv) {
+
 		Map<String, String> mapAlternatives = new HashMap<String, String>();
 
 		String nameSimple = fileNameModelInicial;
@@ -1169,16 +1249,16 @@ public class MVMObjCheckState extends JDialog {
 		if (nameSimple.equals("Animals4_P2.use")) {
 			mapAlternatives.put("clave1", "self.age > 0");
 			mapAlternatives.put("clave2", "self.age < 0");
-			mapAlternatives.put("clave3", "self.age > 2");
-			mapAlternatives.put("clave4", "self.age < -4");
-			mapAlternatives.put("clave5", "self.age > 0");
-			mapAlternatives.put("clave6", "self.age < 0");
-			mapAlternatives.put("clave7", "self.age > 2");
-			mapAlternatives.put("clave8", "self.age < -4");
-			mapAlternatives.put("clave9", "self.age > 0");
-			mapAlternatives.put("clave10", "self.age < 0");
-			mapAlternatives.put("clave11", "self.age > 2");
-			mapAlternatives.put("clave12", "self.age < -4");			
+//			mapAlternatives.put("clave3", "self.age > 2");
+//			mapAlternatives.put("clave4", "self.age < -4");
+//			mapAlternatives.put("clave5", "self.age > 0");
+//			mapAlternatives.put("clave6", "self.age < 0");
+//			mapAlternatives.put("clave7", "self.age > 2");
+//			mapAlternatives.put("clave8", "self.age < -4");
+//			mapAlternatives.put("clave9", "self.age > 0");
+//			mapAlternatives.put("clave10", "self.age < 0");
+//			mapAlternatives.put("clave11", "self.age > 2");
+//			mapAlternatives.put("clave12", "self.age < -4");			
 
 		}else {
 			for (int i=0;i<10;i++) {
@@ -1189,66 +1269,66 @@ public class MVMObjCheckState extends JDialog {
 		TreeMap<String, String> mapSorted = new TreeMap<>(mapAlternatives);
 		return mapSorted;
 	}
-	private void showPanelActionsLink(String strInv) {
-
-		Map<String, String> mapSorted = doAlternatives(strInv);
-		pProposals = new JPanel();
-		BoxLayout layout = new BoxLayout(pProposals, BoxLayout.Y_AXIS);
-
-		pProposals.setLayout(layout);
-		group = new ButtonGroup();
-		boolean pVez = true;
-		int sizeAlternatives=mapSorted.size();
-
-		int nrb=0;
-		for (String clave : mapSorted.keySet()) {
-
-			String bodyAlt = mapSorted.get(clave);
-			if (bodyAlt!="") {
-				JRadioButton rb = new JRadioButton (bodyAlt);
-				if (pVez) {
-					rb.setSelected(true);
-					pVez=false;
-					showAlternative(bodyAlt);
-				}
-				rb.setActionCommand(bodyAlt);
-				rb.setName("o"+nrb);
-				pProposals.add(rb);
-				group.add(rb);	
-				rb.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						int nInv = tabInvs.getSelectedRow();
-						int nInvAnt=nInv;
-						int nObj = tabObjects.getSelectedRow();
-						int nObjAnt=nObj;
-						showAlternative(bodyAlt);
-						saveWorkFile(contentNew);
-						// Restablecer nInv
-						nInv=nInvAnt;
-						if (tabInvs.getModel().getRowCount()>0) {
-							tabInvs.setRowSelectionInterval(nInv, nInv);
-							loadListAttrs(nObjAnt);
-						}
-						showExprInv(nInv);
-
-					}
-				});
-				nrb+=1;
-			}
-		}
-
-		String borderTitle = "Alternatives ("+ sizeAlternatives+")";
-		borderTitle="";//provis
-		panel.remove(pScrollProposals);
-		pScrollProposals = new JScrollPane(pProposals);
-		pScrollProposals.setBounds(900, filGroupTab3+150, 100, 155);
-		etchedTitledBorder = BorderFactory.createTitledBorder(etchedBorder, borderTitle);
-		pScrollProposals.setBorder(etchedTitledBorder);
-		panel.add(pScrollProposals);
-		//		panel.updateUI();
-
-	}
+	//	private void showPanelActionsLink(String strInv) {
+	//
+	//		Map<String, String> mapSorted = doAlternatives(strInv);
+	//		pProposals = new JPanel();
+	//		BoxLayout layout = new BoxLayout(pProposals, BoxLayout.Y_AXIS);
+	//
+	//		pProposals.setLayout(layout);
+	//		group = new ButtonGroup();
+	//		boolean pVez = true;
+	//		int sizeAlternatives=mapSorted.size();
+	//
+	//		int nrb=0;
+	//		for (String clave : mapSorted.keySet()) {
+	//
+	//			String bodyAlt = mapSorted.get(clave);
+	//			if (bodyAlt!="") {
+	//				JRadioButton rb = new JRadioButton (bodyAlt);
+	//				if (pVez) {
+	//					rb.setSelected(true);
+	//					pVez=false;
+	//					showAlternative(bodyAlt);
+	//				}
+	//				rb.setActionCommand(bodyAlt);
+	//				rb.setName("o"+nrb);
+	//				pProposals.add(rb);
+	//				group.add(rb);	
+	//				rb.addActionListener(new ActionListener() {
+	//					@Override
+	//					public void actionPerformed(ActionEvent e) {
+	//						int nInv = tabInvs.getSelectedRow();
+	//						int nInvAnt=nInv;
+	//						int nObj = tabObjects.getSelectedRow();
+	//						int nObjAnt=nObj;
+	//						showAlternative(bodyAlt);
+	//						saveWorkFile(contentNew);
+	//						// Restablecer nInv
+	//						nInv=nInvAnt;
+	//						if (tabInvs.getModel().getRowCount()>0) {
+	//							tabInvs.setRowSelectionInterval(nInv, nInv);
+	//							loadListAttrs(nObjAnt);
+	//						}
+	//						showExprInv(nInv);
+	//
+	//					}
+	//				});
+	//				nrb+=1;
+	//			}
+	//		}
+	//
+	//		String borderTitle = "Alternatives ("+ sizeAlternatives+")";
+	//		borderTitle="";//provis
+	//		panel.remove(pScrollProposals);
+	//		pScrollProposals = new JScrollPane(pProposals);
+	//		pScrollProposals.setBounds(900, filGroupTab3+150, 100, 155);
+	//		etchedTitledBorder = BorderFactory.createTitledBorder(etchedBorder, borderTitle);
+	//		pScrollProposals.setBorder(etchedTitledBorder);
+	//		panel.add(pScrollProposals);
+	//		//		panel.updateUI();
+	//
+	//	}
 	private void showAlternative(String strAlt) {
 		taExprInvNew.setText(strAlt);
 		if (contentNew!="") {
@@ -1258,7 +1338,11 @@ public class MVMObjCheckState extends JDialog {
 
 	//--------------------------
 	private void showPanelTableAlt(String strInv) {
-		Map<String, String> mapSorted = doAlternatives(strInv);
+//		Map<String, String> mapSorted = doAlternatives(strInv);
+		Map<String, String> mapSorted = new TreeMap<>();
+		if (!strInv.equals("")) {
+			mapSorted = doAlternatives(strInv);
+		}
 		scrollPaneTableAlt.remove(tableAlt);// OJO
 		tableAlt = new JTable(new CustomTableModel(mapSorted));
 		tableAlt.setRowSelectionAllowed(true);  // Desactivar la selecci�n de filas
@@ -1349,11 +1433,15 @@ public class MVMObjCheckState extends JDialog {
 				loadListAttrs(nObjAnt);
 			}
 			showExprInv(nInv);
+			rbAltAll.setEnabled(true);
+			rbAltOk.setEnabled(true);
+			rbAltKo.setEnabled(true);
+		}else {
+			// aqui si no hay alt
+			rbAltAll.setEnabled(false);
+			rbAltOk.setEnabled(false);
+			rbAltKo.setEnabled(false);
 		}
-
-
-
-		//---
 
 	}
 	public class CustomTableModel extends AbstractTableModel {
@@ -1361,7 +1449,7 @@ public class MVMObjCheckState extends JDialog {
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private String[] columnNames = {"Op", "Alt", "State"};
+		private String[] columnNames = {"Op", "Alternative", "State"};
 		private Object[][] data = {};
 
 		private int selectedRow = -1;
@@ -1430,6 +1518,10 @@ public class MVMObjCheckState extends JDialog {
 					nFila++;
 				}
 
+			}
+			if (nFilas==0) {
+				this.data=new Object[0][0];
+		        fireTableDataChanged();
 			}
 		}
 
@@ -1760,70 +1852,91 @@ public class MVMObjCheckState extends JDialog {
 			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
 
 			reloadComponentsModel();
-		} catch (Exception e) {
+		}catch (FileNotFoundException e) {
+			// Manejar la excepción si el archivo no se encuentra
+			//			System.err.println("Archivo no encontrado: " + e.getMessage());
+			lbViability.setText("File not found: "+e.getMessage());
+			bRes=false;
+		}catch (Exception e) {
 			bRes=false;
 		}
 		return bRes;
 	}
-//	private void analyze() {
-//
-//		// Ver contenido de modelo
-//		// Obtener contenido de otro fichero
-//		String dir = System.getProperty("user.dir");
-//		//		System.out.println("Directorio actual: " + dir);
-//		MSystem system=fSession.system();
-//		MModel model = fSession.system().model();
-//		String filename =model.filename();
-//		//		System.out.println("Model name "+ model.name());
-//		//		System.out.println("Model filename "+ filename);
-//		File file = new File(filename);
-//
-//		String directory = file.getParent();
-//		String fileNameExt = file.getName();
-//
-//		//		System.out.println("Directorio: " + directory);
-//		//		System.out.println("Nombre de archivo: " + fileNameExt);
-//
-//		try {
-//			FileInputStream specStreamNew;
-//			String newFilename="";
-//			if (filename.indexOf("Animals4_P2_v2")>0) {
-//				newFilename=filename;
-//			}else {
-//				newFilename=filename.replace("Animals4_P2", "Animals4_P2_v2");
-//			}
-//
-//			specStreamNew = new FileInputStream(newFilename);
-//			MModel newModel = USECompiler.compileSpecification(specStreamNew,
-//					newFilename, new PrintWriter(System.err),
-//					new ModelFactory());		
-//			System.out.println("new Model name "+ newModel.name());
-//			System.out.println("new Model filename "+ newModel.filename());
-//			system = new MSystem(newModel);
-//
-//			fSession.setSystem(system);
-//			thisMVMView.putSession(fSession);
-//
-//			List<MVMAction> lActionsCheck=new ArrayList<MVMAction>();
-//			int nActions = lActions.size();
-//			for (int nAction=0;nAction<nActions;nAction++) {
-//				MVMAction oAction=lActions.get(nActions-1);
-//				lActionsCheck.add(nAction, oAction);
-//			}
-//			// Hay que rehacer mapObjects de MVMView
-//			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
-//			//			System.out.println("cambiado");
-//
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		}
-//	}
+	//	private void analyze() {
+	//
+	//		// Ver contenido de modelo
+	//		// Obtener contenido de otro fichero
+	//		String dir = System.getProperty("user.dir");
+	//		//		System.out.println("Directorio actual: " + dir);
+	//		MSystem system=fSession.system();
+	//		MModel model = fSession.system().model();
+	//		String filename =model.filename();
+	//		//		System.out.println("Model name "+ model.name());
+	//		//		System.out.println("Model filename "+ filename);
+	//		File file = new File(filename);
+	//
+	//		String directory = file.getParent();
+	//		String fileNameExt = file.getName();
+	//
+	//		//		System.out.println("Directorio: " + directory);
+	//		//		System.out.println("Nombre de archivo: " + fileNameExt);
+	//
+	//		try {
+	//			FileInputStream specStreamNew;
+	//			String newFilename="";
+	//			if (filename.indexOf("Animals4_P2_v2")>0) {
+	//				newFilename=filename;
+	//			}else {
+	//				newFilename=filename.replace("Animals4_P2", "Animals4_P2_v2");
+	//			}
+	//
+	//			specStreamNew = new FileInputStream(newFilename);
+	//			MModel newModel = USECompiler.compileSpecification(specStreamNew,
+	//					newFilename, new PrintWriter(System.err),
+	//					new ModelFactory());		
+	//			System.out.println("new Model name "+ newModel.name());
+	//			System.out.println("new Model filename "+ newModel.filename());
+	//			system = new MSystem(newModel);
+	//
+	//			fSession.setSystem(system);
+	//			thisMVMView.putSession(fSession);
+	//
+	//			List<MVMAction> lActionsCheck=new ArrayList<MVMAction>();
+	//			int nActions = lActions.size();
+	//			for (int nAction=0;nAction<nActions;nAction++) {
+	//				MVMAction oAction=lActions.get(nActions-1);
+	//				lActionsCheck.add(nAction, oAction);
+	//			}
+	//			// Hay que rehacer mapObjects de MVMView
+	//			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
+	//			//			System.out.println("cambiado");
+	//
+	//		} catch (FileNotFoundException e) {
+	//			e.printStackTrace();
+	//		}
+	//	}
 
 	private void showExprInv(int nInv) {
 
-		MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
-		String texto = (String) oInv.bodyExpression().toString();
-		taExprInvCurrent.setText(texto);
+		//		MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+		//		String texto = (String) oInv.bodyExpression().toString();
+		//		taExprInvCurrent.setText(texto);
+
+		//--
+		System.out.println("showExprInv "+nInv);
+		if (nInv<0) {
+			System.out.println("showExprInv Falla--- "+nInv);
+		}
+		if (nInv>-1) {
+			MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+			String texto = (String) oInv.bodyExpression().toString();
+			taExprInvCurrent.setText(texto);
+		}else {
+			taExprInvCurrent.setText("");
+		}
+		//--
+
+
 	}
 
 	/**
@@ -2020,8 +2133,8 @@ public class MVMObjCheckState extends JDialog {
 		columns = new String[] {
 				"Invariant", "Satisfied "
 		};
-
-		if (mapObjects.size()>0) {
+		// seguramente and nObject > -1
+		if (mapObjects.size()>0 && nObject>-1) {
 			String oCompareName = "";
 			String oCompareClass = "";
 			if (tabObjects.getModel().getRowCount()>0) {
@@ -2117,7 +2230,7 @@ public class MVMObjCheckState extends JDialog {
 		};
 
 		boolean hallaObj=false;
-		if(tabObjects.getModel().getRowCount()>0) {
+		if(tabObjects.getModel().getRowCount()>0 && nObj>-1) {
 			String oCompareName = (String) tabObjects.getValueAt(nObj, 0);
 			String oCompareClass = (String) tabObjects.getValueAt(nObj, 1);
 			for (Map.Entry<MVMObject, Map<MClassInvariant, Boolean>> entry : mapObjects.entrySet()) {
