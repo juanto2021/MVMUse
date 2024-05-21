@@ -1,0 +1,32 @@
+model Animals
+ class Person
+ attributes
+   age: Integer
+   height: Integer
+   weight: Integer
+ end
+ 
+class Pet
+ attributes
+   name: String
+   species: String   
+   weight: Integer
+ end
+ 
+association BelongsTo between
+  Person[1] role OwnerOf
+  Pet[*] role BelongingTo
+end 
+ constraints
+
+context Person inv validGreaterThanAge:
+  --< Modify by MVM [self.age > 3]
+self.age > 0   
+  
+context Person inv validSmallerThanNegAge:
+  self.age < 8     
+
+
+
+
+ 
