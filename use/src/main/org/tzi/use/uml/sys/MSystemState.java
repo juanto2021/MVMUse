@@ -38,7 +38,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.tzi.use.config.Options;
 import org.tzi.use.graph.DirectedGraph;
 import org.tzi.use.graph.DirectedGraphBase;
-import org.tzi.use.gui.mvm.AssocWizard;
+import org.tzi.use.gui.mvm.MVMAssocWizard;
 import org.tzi.use.gui.mvm.LinkWizard;
 import org.tzi.use.uml.mm.MAggregationKind;
 import org.tzi.use.uml.mm.MAssociation;
@@ -1814,9 +1814,9 @@ public final class MSystemState {
 	public boolean checkStructure(PrintWriter out) {
 		return checkStructure(out, true);
 	}
-	public List<AssocWizard> checkStructureWithErrorsInfo(PrintWriter out, boolean reportAllErrors) {
+	public List<MVMAssocWizard> checkStructureWithErrorsInfo(PrintWriter out, boolean reportAllErrors) {
 		// Inicializar estructura de errores
-		List<AssocWizard> lAssocsWizard = new ArrayList<AssocWizard>();
+		List<MVMAssocWizard> lAssocsWizard = new ArrayList<MVMAssocWizard>();
 		long start = System.currentTimeMillis();
 
 		boolean res = true;
@@ -1829,11 +1829,11 @@ public final class MSystemState {
 		for (MAssociation assoc : fSystem.model().associations()) {
 			//			res = checkStructure(assoc, out, reportAllErrors) && res;
 			List<LinkWizard> lLinksWizard = new ArrayList<LinkWizard>();
-			AssocWizard aw = new AssocWizard();
+			MVMAssocWizard aw = new MVMAssocWizard();
 			boolean existAssocWizard=false;
 			int indexAssoc=-1;
 			for(indexAssoc=0;indexAssoc<lAssocsWizard.size();indexAssoc++) {
-				AssocWizard awl = lAssocsWizard.get(indexAssoc);
+				MVMAssocWizard awl = lAssocsWizard.get(indexAssoc);
 				if (awl.getName().equals(assoc.name())) {
 					aw = awl;
 					existAssocWizard=true;
@@ -2026,8 +2026,8 @@ public final class MSystemState {
 
 		return res;
 	}
-	public List<AssocWizard> checkStructureErrors(PrintWriter out, boolean reportAllErrors) {
-		List<AssocWizard> lAssocsWizard = new ArrayList<AssocWizard>();
+	public List<MVMAssocWizard> checkStructureErrors(PrintWriter out, boolean reportAllErrors) {
+		List<MVMAssocWizard> lAssocsWizard = new ArrayList<MVMAssocWizard>();
 		long start = System.currentTimeMillis();
 
 		boolean res = true;
@@ -2050,11 +2050,11 @@ public final class MSystemState {
 			//			boolean res = true;
 
 			List<LinkWizard> lLinksWizard = new ArrayList<LinkWizard>();
-			AssocWizard aw = new AssocWizard();
+			MVMAssocWizard aw = new MVMAssocWizard();
 			boolean existAssocWizard=false;
 			int indexAssoc=-1;
 			for(indexAssoc=0;indexAssoc<lAssocsWizard.size();indexAssoc++) {
-				AssocWizard awl = lAssocsWizard.get(indexAssoc);
+				MVMAssocWizard awl = lAssocsWizard.get(indexAssoc);
 				if (awl.getName().equals(assoc.name())) {
 					aw = awl;
 					existAssocWizard=true;

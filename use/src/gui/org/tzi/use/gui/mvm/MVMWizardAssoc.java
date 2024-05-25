@@ -70,20 +70,20 @@ public class MVMWizardAssoc extends JDialog {
 
 	private ButtonGroup group;
 
-	private ArrayList<AssocWizard> lAssocs;
+	private ArrayList<MVMAssocWizard> lAssocs;
 
-	private AssocWizard assocPral;
+	private MVMAssocWizard assocPral;
 	private String commandWizard;
 	private MAssociation assocSelectWizard;
 
-	private List<AssocWizard> lAssocsWizard;
+	private List<MVMAssocWizard> lAssocsWizard;
 
 	private Border etchedTitledBorder;
 	private Border etchedBorder;
 
 	private int HEIGHT_TABLE = 100;
 
-	public MVMWizardAssoc(JFrame fParent, List<AssocWizard> lAssocsParent) {
+	public MVMWizardAssoc(JFrame fParent, List<MVMAssocWizard> lAssocsParent) {
 		super(fParent, "Wizard Association",ModalityType.APPLICATION_MODAL);
 
 		lAssocsWizard = lAssocsParent;
@@ -200,7 +200,7 @@ public class MVMWizardAssoc extends JDialog {
 		panel.add(paneTabLinks);
 
 		Object o = tabAssocs.getValueAt(0, 0);
-		assocPral= new AssocWizard();
+		assocPral= new MVMAssocWizard();
 
 		if (!o.toString().equals("")) {
 			// buscar assoc en lista			
@@ -479,8 +479,8 @@ public class MVMWizardAssoc extends JDialog {
 	 * @param assocRef
 	 * @return
 	 */
-	private AssocWizard findInfoAssoc(String assocRef) {
-		AssocWizard assoc = new AssocWizard();
+	private MVMAssocWizard findInfoAssoc(String assocRef) {
+		MVMAssocWizard assoc = new MVMAssocWizard();
 		// find row of Assoc
 		for (int i=0;i<lAssocs.size();i++) {
 			assoc = lAssocs.get(i);
@@ -502,7 +502,7 @@ public class MVMWizardAssoc extends JDialog {
 				"Association", "State"
 		};
 
-		ArrayList<AssocWizard>data = loadAssocs();
+		ArrayList<MVMAssocWizard>data = loadAssocs();
 
 		Object[][] objects = new Object[data.size()][2];
 		for (int i=0;i<data.size();i++) {
@@ -521,8 +521,8 @@ public class MVMWizardAssoc extends JDialog {
 	 * Load associations
 	 * @return
 	 */
-	private ArrayList<AssocWizard> loadAssocs(){
-		lAssocs = new ArrayList<AssocWizard>(lAssocsWizard);
+	private ArrayList<MVMAssocWizard> loadAssocs(){
+		lAssocs = new ArrayList<MVMAssocWizard>(lAssocsWizard);
 		return lAssocs;		
 	}
 
@@ -532,7 +532,7 @@ public class MVMWizardAssoc extends JDialog {
 	 * @return
 	 */
 
-	private ArrayList<LinkWizard> loadLinksAssoc(AssocWizard assoc){
+	private ArrayList<LinkWizard> loadLinksAssoc(MVMAssocWizard assoc){
 		ArrayList<LinkWizard> lLinks = new ArrayList<LinkWizard>(assoc.getlLinks());
 		return lLinks;
 	}
@@ -541,7 +541,7 @@ public class MVMWizardAssoc extends JDialog {
 	 * Load links table
 	 * @param assoc
 	 */
-	private void loadTableLinks(AssocWizard assoc) {
+	private void loadTableLinks(MVMAssocWizard assoc) {
 		modelTabLinks = new DefaultTableModel();
 		String[] columns;
 		columns = new String[] {

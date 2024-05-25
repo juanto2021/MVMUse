@@ -82,9 +82,10 @@ import org.tzi.use.gui.main.ModelBrowserSorting;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeEvent;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
 import org.tzi.use.gui.main.ViewFrame;
-import org.tzi.use.gui.mvm.AssocWizard;
+import org.tzi.use.gui.mvm.MVMAssocWizard;
 import org.tzi.use.gui.mvm.LinkWizard;
 import org.tzi.use.gui.mvm.MVMAction;
+import org.tzi.use.gui.mvm.MVMAssocWizard;
 import org.tzi.use.gui.mvm.MVMAttribute;
 import org.tzi.use.gui.mvm.MVMLink;
 import org.tzi.use.gui.mvm.MVMObjCheckState;
@@ -242,7 +243,7 @@ public class WizardMVMView extends JPanel implements View {
 	private ExecutorCompletionService<EvalResult> ecs;	
 	private MyEvaluatorCallable cb;
 
-	private List<AssocWizard> lAssocsWizard;
+	private List<MVMAssocWizard> lAssocsWizard;
 	private Color colorSoftGray;
 
 	private JInternalFrame[] allframes;
@@ -972,14 +973,16 @@ public class WizardMVMView extends JPanel implements View {
 			setComposAssoc(oAssoc);
 		}
 
-		setResClassInvariants();
-		setResCheckStructure();
+//		setResClassInvariants();//Provis
+//		setResCheckStructure();//Provis
 		add(panel);
 
 		setSize(new Dimension(400, 300));
 
 		// Reload existing components and actions to recreate them
 		refreshComponents();
+		setResClassInvariants();//Provis
+		setResCheckStructure();//Provis
 
 		//--------- provis AQUI
 		// Llamar a fill
@@ -1842,7 +1845,7 @@ public class WizardMVMView extends JPanel implements View {
 	 * Gets information with structure check errors
 	 */
 	private void getErrorsEstructure() {
-		lAssocsWizard = new ArrayList<AssocWizard>();
+		lAssocsWizard = new ArrayList<MVMAssocWizard>();
 		StringWriter buffer = new StringWriter();
 		PrintWriter out = new PrintWriter(buffer);
 		boolean reportAllErrors=true;
@@ -1860,7 +1863,7 @@ public class WizardMVMView extends JPanel implements View {
 		// In one pass the objects that admit a multiplicity of * must be seen so that they are available
 		// You have to see all the final associations that there are and see which objects are always available
 
-		for(AssocWizard oAssoc: lAssocsWizard) {
+		for(MVMAssocWizard oAssoc: lAssocsWizard) {
 			MAssociation oAssocModel = oAssoc.getassocModel();
 			List<MAssociationEnd> oAsoccEnds = oAssocModel.associationEnds();
 
@@ -1880,12 +1883,12 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}
 
-		List<AssocWizard> lAssocsWizardPaso = new ArrayList<AssocWizard>();
-		for(AssocWizard oAssoc: lAssocsWizard) {
+		List<MVMAssocWizard> lAssocsWizardPaso = new ArrayList<MVMAssocWizard>();
+		for(MVMAssocWizard oAssoc: lAssocsWizard) {
 			lAssocsWizardPaso.add(oAssoc);
 		}
 		lAssocsWizard.clear();
-		for (AssocWizard aw: lAssocsWizardPaso) {
+		for (MVMAssocWizard aw: lAssocsWizardPaso) {
 			for (LinkWizard lw: aw.getlLinks()) {
 				int needed = lw.getNeeded();
 				int disponibility = lw.getDisponibility();
@@ -1952,9 +1955,9 @@ public class WizardMVMView extends JPanel implements View {
 	 * Based on the structure of an association object, it proposes to create and/or link said object to others
 	 * 
 	 */
-	public void analyzeProposals(AssocWizard aw,Map<String, List<String>> mapObjects) {
+	public void analyzeProposals(MVMAssocWizard aw,Map<String, List<String>> mapObjects) {
 
-		AssocWizard awNew = aw;
+		MVMAssocWizard awNew = aw;
 		List<LinkWizard> oLinks = aw.getlLinks();
 		List<LinkWizard> oNewLinks = new ArrayList<LinkWizard>();
 

@@ -5,13 +5,13 @@ import java.util.List;
 
 import org.tzi.use.uml.mm.MAssociation;
 
-public class AssocWizard {
+public class MVMAssocWizard {
 	private String name;
 	private String state ;
 	private List<LinkWizard> lLinks;
 	private MAssociation assocModel;
 
-	public AssocWizard() {
+	public MVMAssocWizard() {
 		super();
 		this.name = "";
 		this.state = "";
@@ -20,7 +20,7 @@ public class AssocWizard {
 		this.assocModel= null;
 	}
 
-	public AssocWizard(String name, String state, List<LinkWizard> lLinks, MAssociation assocModel) {
+	public MVMAssocWizard(String name, String state, List<LinkWizard> lLinks, MAssociation assocModel) {
 		super();
 		this.name = name;
 		this.state = state;
