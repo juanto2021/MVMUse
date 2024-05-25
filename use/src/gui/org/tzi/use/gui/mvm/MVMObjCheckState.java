@@ -70,6 +70,7 @@ import org.tzi.use.parser.use.USECompiler;
 import org.tzi.use.uml.mm.MClassInvariant;
 import org.tzi.use.uml.mm.MModel;
 import org.tzi.use.uml.mm.ModelFactory;
+import org.tzi.use.uml.ocl.expr.Expression;
 import org.tzi.use.uml.sys.MSystem;
 
 public class MVMObjCheckState extends JDialog {
@@ -281,7 +282,7 @@ public class MVMObjCheckState extends JDialog {
 				if (nInv>-1) {
 					showInfoLinkFromRow(nInv);
 				}else {
-					showPanelTableAlt("");
+					showPanelTableAlt("", nInv);
 					taExprInvNew.setText("");
 					lbIndicatorAlt.setText("");
 					pIndicatorAlt.setBackground(Color.YELLOW);
@@ -339,8 +340,7 @@ public class MVMObjCheckState extends JDialog {
 					tabInvs.setRowSelectionInterval(0, 0);
 					showInfoLinkFromRow(0);
 				}else {
-					//aqui
-					showPanelTableAlt("");
+					showPanelTableAlt("", row);
 					taExprInvNew.setText("");
 					lbIndicatorAlt.setText("");
 					pIndicatorAlt.setBackground(Color.YELLOW);
@@ -875,10 +875,10 @@ public class MVMObjCheckState extends JDialog {
 	}
 	private boolean testNewBodyInv() {
 		boolean bResTest=false;
-//		//Provis
-//		if (tabInvs.getModel().getRowCount()==0) {
-//			System.out.println("count " + tabInvs.getModel().getRowCount());
-//		}
+		//		//Provis
+		//		if (tabInvs.getModel().getRowCount()==0) {
+		//			System.out.println("count " + tabInvs.getModel().getRowCount());
+		//		}
 		int nInv = tabInvs.getSelectedRow();
 		int nInvAnt=nInv;
 		int nObj = tabObjects.getSelectedRow();
@@ -899,9 +899,9 @@ public class MVMObjCheckState extends JDialog {
 				if (nInv>-1) {
 					//Provis
 					int nFilasInv=tabInvs.getModel().getRowCount();
-//					if (nFilasInv==0) {
-//						System.out.println("count " + tabInvs.getModel().getRowCount());
-//					}
+					//					if (nFilasInv==0) {
+					//						System.out.println("count " + tabInvs.getModel().getRowCount());
+					//					}
 					if (nFilasInv>0) {
 						MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
 						String texto = (String) oInv.bodyExpression().toString();
@@ -1159,7 +1159,30 @@ public class MVMObjCheckState extends JDialog {
 	private void showInfoLinkFromRow(int row) {
 		MClassInvariant inv = (MClassInvariant) tabInvs.getModel().getValueAt(row, 0);
 		String strInv = inv.name();
-		showPanelTableAlt(strInv);
+		showPanelTableAlt(strInv, row);
+	}
+	//Aqui
+	private Map<String, String> doAlternatives2(MClassInvariant oInv) {
+		Map<String, String> mapAlternatives = new HashMap<String, String>();
+		//--
+		//		String texto = (String) oInv.bodyExpression().toString();
+		Expression exp = oInv.bodyExpression();
+		List<Expression> ct = computeClassifyingTerms2(exp);
+		int nExpr=0;
+		for(Expression item: ct) {
+			System.out.println("Invariant " + item.toString());
+			String strNExpr = Integer.toString(nExpr);
+			mapAlternatives.put(strNExpr, item.toString());
+			nExpr+=1;
+		}
+
+		TreeMap<String, String> mapSorted = new TreeMap<>(mapAlternatives);
+		return mapSorted;
+	}
+	private static List<Expression> computeClassifyingTerms2(Expression exp) {
+		WeakenVisitor visitor = new WeakenVisitor();
+		exp.processWithVisitor(visitor);
+		return visitor.getMutatedExpr();
 	}
 	private Map<String, String> doAlternatives(String strInv) {
 
@@ -1216,12 +1239,22 @@ public class MVMObjCheckState extends JDialog {
 	}
 
 	//--------------------------
-	private void showPanelTableAlt(String strInv) {
+	private void showPanelTableAlt(String strInv2, int nInv2) {
 		//		Map<String, String> mapSorted = doAlternatives(strInv);
 		Map<String, String> mapSorted = new TreeMap<>();
-		if (!strInv.equals("")) {
-			mapSorted = doAlternatives(strInv);
+		String strInv ="";
+		if (nInv2>-1) {
+			MClassInvariant inv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv2, 0);
+			mapSorted = doAlternatives2(inv);
+			strInv = inv.name();
+		}else {
+			strInv = strInv2;
 		}
+
+
+		//		if (!strInv.equals("")) {
+		//			mapSorted = doAlternatives(strInv);
+		//		}
 		scrollPaneTableAlt.remove(tableAlt);// OJO
 		tableAlt = new JTable(new CustomTableModel(mapSorted));
 		tableAlt.setRowSelectionAllowed(true);  // Desactivar la selecci�n de filas
@@ -1260,7 +1293,7 @@ public class MVMObjCheckState extends JDialog {
 					int selectedRow = tableAlt.getSelectedRow();
 					if (selectedRow != -1) {
 						Object value = tableAlt.getValueAt(selectedRow, 1); // Columna 2 (�ndice 1)
-//						System.out.println("["+selectedRow+"] desc inv: " + value);
+						//						System.out.println("["+selectedRow+"] desc inv: " + value);
 						tableAlt.setValueAt(true, selectedRow, 0);
 						int nInv = tabInvs.getSelectedRow();
 						int nInvAnt=nInv;
@@ -1311,7 +1344,6 @@ public class MVMObjCheckState extends JDialog {
 			rbAltOk.setEnabled(true);
 			rbAltKo.setEnabled(true);
 		}else {
-			// aqui si no hay alt
 			rbAltAll.setEnabled(false);
 			rbAltOk.setEnabled(false);
 			rbAltKo.setEnabled(false);
@@ -1329,7 +1361,6 @@ public class MVMObjCheckState extends JDialog {
 		private int selectedRow = -1;
 		private Map<String, String> mapAlt;
 
-		//Aqui
 		public CustomTableModel(Map<String, String> pMapAlt) {
 			super();
 			mapAlt=pMapAlt;
@@ -1730,10 +1761,10 @@ public class MVMObjCheckState extends JDialog {
 
 	private void showExprInv(int nInv) {
 
-//		System.out.println("showExprInv "+nInv);
-//		if (nInv<0) {
-//			System.out.println("showExprInv Falla--- "+nInv);
-//		}
+		//		System.out.println("showExprInv "+nInv);
+		//		if (nInv<0) {
+		//			System.out.println("showExprInv Falla--- "+nInv);
+		//		}
 		if (nInv>-1) {
 			MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
 			String texto = (String) oInv.bodyExpression().toString();
