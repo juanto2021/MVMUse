@@ -21,7 +21,7 @@ end
 
 context Person inv validGreaterThanAge:
   --< Modify by MVM [self.age > 3]
-self.age > 0   
+(self.age > (3 - 1))   
   
 context Person inv validSmallerThanNegAge:
   self.age < 8     
