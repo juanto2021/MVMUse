@@ -106,9 +106,6 @@ public class MVMObjCheckState extends JDialog {
 	private ButtonGroup groupAlt;
 	private JPanel panelGroupAlt;
 
-
-	//	private ButtonGroup group;// Para alternativas
-
 	private JTextArea taExprInvCurrent = null;
 	private JTextArea taExprInvNew = null;
 	private JScrollPane scrollpaneExprCurrent;
@@ -139,17 +136,13 @@ public class MVMObjCheckState extends JDialog {
 	private JTable tabAttrs;
 	private JScrollPane paneTabAttrs;
 
-	//	private JPanel pProposals;
-	//	private JScrollPane pScrollProposals ;
-
 	private JLabel lbFileName;
 	private JLabel lbDIRWRK;
 	private JLabel lbDIRWRKValue;
 	private JTextField txFileName;
 
 	private JButton btnExit;
-	//	private JButton btnCompareExpr;
-	//	private JButton btnAnalyze;
+
 	private JButton btnSaveFile;
 	private JButton btnTest;
 	private JButton btnShowSource;
@@ -875,10 +868,7 @@ public class MVMObjCheckState extends JDialog {
 	}
 	private boolean testNewBodyInv() {
 		boolean bResTest=false;
-		//		//Provis
-		//		if (tabInvs.getModel().getRowCount()==0) {
-		//			System.out.println("count " + tabInvs.getModel().getRowCount());
-		//		}
+
 		int nInv = tabInvs.getSelectedRow();
 		int nInvAnt=nInv;
 		int nObj = tabObjects.getSelectedRow();
@@ -899,9 +889,7 @@ public class MVMObjCheckState extends JDialog {
 				if (nInv>-1) {
 					//Provis
 					int nFilasInv=tabInvs.getModel().getRowCount();
-					//					if (nFilasInv==0) {
-					//						System.out.println("count " + tabInvs.getModel().getRowCount());
-					//					}
+
 					if (nFilasInv>0) {
 						MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
 						String texto = (String) oInv.bodyExpression().toString();
@@ -912,7 +900,7 @@ public class MVMObjCheckState extends JDialog {
 				}
 			}else {
 				showIndicatorAlt(false);
-				//				System.out.println("+++<<< en testNewBodyInv() ["+contentNew+"] ["+bRes+"]");
+
 			}
 
 			// Restablece fichero original 
@@ -975,7 +963,7 @@ public class MVMObjCheckState extends JDialog {
 		String fileProposal=fileSinExtBarras; 
 		String nomFile="";
 		String directory="";
-		//		System.out.println("Nombre "+nameFileModel);
+
 		if (fileSinExt.contains("/")) {
 			String[] partes = fileSinExt.split("/");
 			int nPartes = partes.length;
@@ -1162,10 +1150,9 @@ public class MVMObjCheckState extends JDialog {
 		showPanelTableAlt(strInv, row);
 	}
 	//Aqui
-	private Map<String, String> doAlternatives2(MClassInvariant oInv) {
+	private Map<String, String> doAlternatives(MClassInvariant oInv) {
 		Map<String, String> mapAlternatives = new HashMap<String, String>();
-		//--
-		//		String texto = (String) oInv.bodyExpression().toString();
+
 		Expression exp = oInv.bodyExpression();
 		List<Expression> ct = computeClassifyingTerms2(exp);
 		int nExpr=0;
@@ -1184,52 +1171,6 @@ public class MVMObjCheckState extends JDialog {
 		exp.processWithVisitor(visitor);
 		return visitor.getMutatedExpr();
 	}
-	private Map<String, String> doAlternatives(String strInv) {
-
-		Map<String, String> mapAlternatives = new HashMap<String, String>();
-
-		String nameSimple = fileNameModelInicial;
-
-		String workName = fileNameModelInicial.replace("\\", "/");
-		if (workName.contains("/")) {
-			String[] partes = workName.split("/");
-			int nPartes = partes.length;
-			nameSimple=partes[nPartes-1];
-			for (int n=0;n<(nPartes-1);n++) {
-				if (directory!="") {
-					directory+="/";
-				}
-				directory+=partes[n];
-			}
-
-		}else {
-			nameSimple=workName;
-			directory=directoryName;
-		}
-
-		if (nameSimple.equals("Animals4_P2.use")) {
-			mapAlternatives.put("clave1", "self.age > 0");
-			mapAlternatives.put("clave2", "self.age < 0");
-			mapAlternatives.put("clave3", "self.age > 2");
-			mapAlternatives.put("clave4", "self.age < -4");
-			mapAlternatives.put("clave5", "self.age > 0");
-			mapAlternatives.put("clave6", "self.age < 0");
-			mapAlternatives.put("clave7", "self.age > 2");
-			mapAlternatives.put("clave8", "self.age < -4");
-			mapAlternatives.put("clave9", "self.age > 0");
-			mapAlternatives.put("clave10", "self.age < 0");
-			mapAlternatives.put("clave11", "self.age > 2");
-			mapAlternatives.put("clave12", "self.age < -4");			
-
-		}else {
-			for (int i=0;i<10;i++) {
-				mapAlternatives.put("clave"+i, "valor"+i+" de "+strInv);
-			}
-		}
-
-		TreeMap<String, String> mapSorted = new TreeMap<>(mapAlternatives);
-		return mapSorted;
-	}
 
 	private void showAlternative(String strAlt) {
 		taExprInvNew.setText(strAlt);
@@ -1240,21 +1181,17 @@ public class MVMObjCheckState extends JDialog {
 
 	//--------------------------
 	private void showPanelTableAlt(String strInv2, int nInv2) {
-		//		Map<String, String> mapSorted = doAlternatives(strInv);
+
 		Map<String, String> mapSorted = new TreeMap<>();
 		String strInv ="";
 		if (nInv2>-1) {
 			MClassInvariant inv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv2, 0);
-			mapSorted = doAlternatives2(inv);
+			mapSorted = doAlternatives(inv);
 			strInv = inv.name();
 		}else {
 			strInv = strInv2;
 		}
 
-
-		//		if (!strInv.equals("")) {
-		//			mapSorted = doAlternatives(strInv);
-		//		}
 		scrollPaneTableAlt.remove(tableAlt);// OJO
 		tableAlt = new JTable(new CustomTableModel(mapSorted));
 		tableAlt.setRowSelectionAllowed(true);  // Desactivar la selecci�n de filas
@@ -1293,7 +1230,7 @@ public class MVMObjCheckState extends JDialog {
 					int selectedRow = tableAlt.getSelectedRow();
 					if (selectedRow != -1) {
 						Object value = tableAlt.getValueAt(selectedRow, 1); // Columna 2 (�ndice 1)
-						//						System.out.println("["+selectedRow+"] desc inv: " + value);
+
 						tableAlt.setValueAt(true, selectedRow, 0);
 						int nInv = tabInvs.getSelectedRow();
 						int nInvAnt=nInv;
@@ -1760,11 +1697,6 @@ public class MVMObjCheckState extends JDialog {
 	}
 
 	private void showExprInv(int nInv) {
-
-		//		System.out.println("showExprInv "+nInv);
-		//		if (nInv<0) {
-		//			System.out.println("showExprInv Falla--- "+nInv);
-		//		}
 		if (nInv>-1) {
 			MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
 			String texto = (String) oInv.bodyExpression().toString();

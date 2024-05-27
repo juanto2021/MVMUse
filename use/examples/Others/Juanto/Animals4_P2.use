@@ -4,6 +4,7 @@ model Animals
    age: Integer
    height: Integer
    weight: Integer
+   ownedPets: Set(Pet)
  end
  
 class Pet
@@ -19,13 +20,7 @@ association BelongsTo between
 end 
  constraints
 
-context Person inv validGreaterThanAge:
-  self.age > 3   
+context Person inv ageNotUnder18:
+  not (self.age < 18)
   
-context Person inv validSmallerThanNegAge:
-  self.age < 8     
 
-
-
-
- 

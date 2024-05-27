@@ -3,21 +3,13 @@ package org.tzi.use.gui.mvm;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.tzi.use.uml.ocl.expr.ExpAllInstances;
 import org.tzi.use.uml.ocl.expr.ExpAny;
 import org.tzi.use.uml.ocl.expr.ExpAsType;
 import org.tzi.use.uml.ocl.expr.ExpAttrOp;
-import org.tzi.use.uml.ocl.expr.ExpBagLiteral;
 import org.tzi.use.uml.ocl.expr.ExpClosure;
-import org.tzi.use.uml.ocl.expr.ExpCollect;
-import org.tzi.use.uml.ocl.expr.ExpCollectNested;
 import org.tzi.use.uml.ocl.expr.ExpConstBoolean;
-import org.tzi.use.uml.ocl.expr.ExpConstEnum;
 import org.tzi.use.uml.ocl.expr.ExpConstInteger;
-import org.tzi.use.uml.ocl.expr.ExpConstReal;
-import org.tzi.use.uml.ocl.expr.ExpConstString;
 import org.tzi.use.uml.ocl.expr.ExpConstUnlimitedNatural;
-import org.tzi.use.uml.ocl.expr.ExpEmptyCollection;
 import org.tzi.use.uml.ocl.expr.ExpExists;
 import org.tzi.use.uml.ocl.expr.ExpForAll;
 import org.tzi.use.uml.ocl.expr.ExpIf;
@@ -25,25 +17,16 @@ import org.tzi.use.uml.ocl.expr.ExpInvalidException;
 import org.tzi.use.uml.ocl.expr.ExpIsKindOf;
 import org.tzi.use.uml.ocl.expr.ExpIsTypeOf;
 import org.tzi.use.uml.ocl.expr.ExpIsUnique;
-import org.tzi.use.uml.ocl.expr.ExpIterate;
-import org.tzi.use.uml.ocl.expr.ExpLet;
-import org.tzi.use.uml.ocl.expr.ExpNavigation;
 import org.tzi.use.uml.ocl.expr.ExpNavigationClassifierSource;
-import org.tzi.use.uml.ocl.expr.ExpObjAsSet;
 import org.tzi.use.uml.ocl.expr.ExpObjOp;
 import org.tzi.use.uml.ocl.expr.ExpObjRef;
 import org.tzi.use.uml.ocl.expr.ExpObjectByUseId;
 import org.tzi.use.uml.ocl.expr.ExpOclInState;
 import org.tzi.use.uml.ocl.expr.ExpOne;
-import org.tzi.use.uml.ocl.expr.ExpOrderedSetLiteral;
 import org.tzi.use.uml.ocl.expr.ExpQuery;
 import org.tzi.use.uml.ocl.expr.ExpRange;
-import org.tzi.use.uml.ocl.expr.ExpReject;
-import org.tzi.use.uml.ocl.expr.ExpSelect;
 import org.tzi.use.uml.ocl.expr.ExpSelectByKind;
 import org.tzi.use.uml.ocl.expr.ExpSelectByType;
-import org.tzi.use.uml.ocl.expr.ExpSequenceLiteral;
-import org.tzi.use.uml.ocl.expr.ExpSetLiteral;
 import org.tzi.use.uml.ocl.expr.ExpSortedBy;
 import org.tzi.use.uml.ocl.expr.ExpStdOp;
 import org.tzi.use.uml.ocl.expr.ExpTupleLiteral;
@@ -85,13 +68,39 @@ public class WeakenVisitor extends BooleanVisitor {
 		mutatedExpr.add(mutant);
 	}
 
+	// These expression have already been considered in BooleanVisitor
+	// public void visitAllInstances(ExpAllInstances exp) 
+	// public void visitBagLiteral(ExpBagLiteral exp) 
+	// public void visitCollect(ExpCollect exp) 
+	// public void visitCollect(ExpCollect exp) 
+	// public void visitCollectNested(ExpCollectNested exp) 
+	// public void visitConstEnum(ExpConstEnum exp) 
+	// public void visitConstInteger(ExpConstInteger exp) 
+	// public void visitConstReal(ExpConstReal exp) 
+	// public void visitConstString(ExpConstString exp) 
+	// public void visitEmptyCollection(ExpEmptyCollection exp) 
+	// public void visitObjAsSet(ExpObjAsSet exp) 
+	// public void visitOrderedSetLiteral(ExpOrderedSetLiteral exp)
+	// public void visitConstUnlimitedNatural(ExpConstUnlimitedNatural exp) 
+	// public void visitIterate(ExpIterate exp) 
+	// public void visitReject(ExpReject exp) 
+	// public void visitSelect(ExpSelect exp) 
+	// public void visitNavigation(ExpNavigation exp) 	
+	// public void visitSequenceLiteral(ExpSequenceLiteral exp) 
+	// public void visitSetLiteral(ExpSetLiteral exp)
+	// public void visitTupleLiteral(ExpTupleLiteral exp) 
+	// public void visitVarDeclList(VarDeclList varDeclList) 
+	// public void visitVarDecl(VarDecl varDecl)
+	// public void visitRange(ExpRange exp) 
+	// public void visitUndefined(ExpUndefined exp)
+
 	//---
 
-//	@Override
-//	public void visitAllInstances(ExpAllInstances exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	//	@Override
+	//	public void visitAllInstances(ExpAllInstances exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
 
 	@Override
 	public void visitAny(ExpAny exp) {
@@ -121,58 +130,58 @@ public class WeakenVisitor extends BooleanVisitor {
 		}	
 	}
 
-//	@Override
-//	public void visitBagLiteral(ExpBagLiteral exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void visitCollect(ExpCollect exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void visitCollectNested(ExpCollectNested exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	//	@Override
+	//	public void visitBagLiteral(ExpBagLiteral exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
+	//
+	//	@Override
+	//	public void visitCollect(ExpCollect exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
+	//
+	//	@Override
+	//	public void visitCollectNested(ExpCollectNested exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
 
 	@Override
 	public void visitConstBoolean(ExpConstBoolean exp) {
 		defaultWeakening();
 	}
 
-//	@Override
-//	public void visitConstEnum(ExpConstEnum exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void visitConstInteger(ExpConstInteger exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void visitConstReal(ExpConstReal exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void visitConstString(ExpConstString exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	//	@Override
+	//	public void visitConstEnum(ExpConstEnum exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
+	//
+	//	@Override
+	//	public void visitConstInteger(ExpConstInteger exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
+	//
+	//	@Override
+	//	public void visitConstReal(ExpConstReal exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
+	//
+	//	@Override
+	//	public void visitConstString(ExpConstString exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
 
-//	@Override
-//	public void visitEmptyCollection(ExpEmptyCollection exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	//	@Override
+	//	public void visitEmptyCollection(ExpEmptyCollection exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
 
 	@Override
 	public void visitExists(ExpExists exp) {
@@ -409,33 +418,33 @@ public class WeakenVisitor extends BooleanVisitor {
 		// Mutation 4: replace by "false"
 		defaultWeakening();
 	}
-//
-//	@Override
-//	public void visitIterate(ExpIterate exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	//
+	//	@Override
+	//	public void visitIterate(ExpIterate exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
 
-//	@Override
-//	public void visitLet(ExpLet exp) {
-//		if (exp.type().isTypeOfBoolean()) {		
-//			defaultWeakening();
-//		} else {
-//			wrongTypeError("variable of type " + exp.type().toString() );
-//		}
-//	}
-//
-//	@Override
-//	public void visitNavigation(ExpNavigation exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void visitObjAsSet(ExpObjAsSet exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	//	@Override
+	//	public void visitLet(ExpLet exp) {
+	//		if (exp.type().isTypeOfBoolean()) {		
+	//			defaultWeakening();
+	//		} else {
+	//			wrongTypeError("variable of type " + exp.type().toString() );
+	//		}
+	//	}
+	//
+	//	@Override
+	//	public void visitNavigation(ExpNavigation exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
+	//
+	//	@Override
+	//	public void visitObjAsSet(ExpObjAsSet exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
 
 	@Override
 	public void visitObjOp(ExpObjOp exp) {
@@ -460,12 +469,12 @@ public class WeakenVisitor extends BooleanVisitor {
 		// TODO Auto-generated method stub
 
 	}
-//
-//	@Override
-//	public void visitOrderedSetLiteral(ExpOrderedSetLiteral exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	//
+	//	@Override
+	//	public void visitOrderedSetLiteral(ExpOrderedSetLiteral exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
 
 	@Override
 	public void visitQuery(ExpQuery exp) {
@@ -473,11 +482,11 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	}
 
-//	@Override
-//	public void visitReject(ExpReject exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	//	@Override
+	//	public void visitReject(ExpReject exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
 
 	@Override
 	public void visitWithValue(ExpressionWithValue exp) {
@@ -488,23 +497,23 @@ public class WeakenVisitor extends BooleanVisitor {
 		}
 	}
 
-//	@Override
-//	public void visitSelect(ExpSelect exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void visitSequenceLiteral(ExpSequenceLiteral exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
-//	@Override
-//	public void visitSetLiteral(ExpSetLiteral exp) {
-//		// TODO Auto-generated method stub
-//
-//	}
+	//	@Override
+	//	public void visitSelect(ExpSelect exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
+	//
+	//	@Override
+	//	public void visitSequenceLiteral(ExpSequenceLiteral exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
+	//
+	//	@Override
+	//	public void visitSetLiteral(ExpSetLiteral exp) {
+	//		// TODO Auto-generated method stub
+	//
+	//	}
 
 	@Override
 	public void visitSortedBy(ExpSortedBy exp) {
@@ -530,7 +539,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 		// Mutation 1: Weaken the left subexpression
 		for(Expression mutant: leftMutants) {
-//			System.out.println("left mutant "+mutant.toString());
+			//			System.out.println("left mutant "+mutant.toString());
 			Expression newArgs[] = {mutant, right};
 			try {
 				Expression mutant1 = ExpStdOp.create("or", newArgs);
@@ -542,7 +551,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 		// Mutation 2: Weaken the right subexpression
 		for(Expression mutant: rightMutants) {
-//			System.out.println("right mutant "+mutant.toString());
+			//			System.out.println("right mutant "+mutant.toString());
 			Expression newArgs[] = {left, mutant};
 			try {
 				Expression mutant2 = ExpStdOp.create("or", newArgs);
@@ -558,14 +567,14 @@ public class WeakenVisitor extends BooleanVisitor {
 				Expression newArgs[] = {mutantA, mutantB};
 				try {
 					Expression mutant3 = ExpStdOp.create("or", newArgs);
-//					System.out.println("mutant3 mutant "+mutant3.toString());
+					//					System.out.println("mutant3 mutant "+mutant3.toString());
 					mutatedExpr.add(mutant3);
 				} catch (ExpInvalidException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-//		System.out.println("Aqui");
+		//		System.out.println("Aqui");
 	}
 	//OK
 	private void mutateAndExp(ExpStdOp exp) {
@@ -1275,24 +1284,24 @@ public class WeakenVisitor extends BooleanVisitor {
 		case "<>":
 			mutateNotEqualsExp(exp); 
 			break;	
-			//		case "isEmpty":
-			//			mutateIsEmptyExp(exp);
-			//			break;	
-			//		case "notEmpty":
-			//			mutateNotEmptyExp(exp);
-			//			break;	
-			//		case "includes":
-			//			mutateIncludesExp(exp);
-			//			break;	
-			//		case "excludes":
-			//			mutateExcludesExp(exp);
-			//			break;	
-			//		case "includesAll":
-			//			mutateIncludesAllExp(exp);
-			//			break;	
-			//		case "excludesAll":
-			//			mutateExcludesAllExp(exp);
-			//			break;	
+		case "isEmpty":
+			mutateIsEmptyExp(exp);
+			break;	
+		case "notEmpty":
+			mutateNotEmptyExp(exp);
+			break;	
+		case "includes":
+			mutateIncludesExp(exp);
+			break;	
+		case "excludes":
+			mutateExcludesExp(exp);
+			break;	
+		case "includesAll":
+			mutateIncludesAllExp(exp);
+			break;	
+		case "excludesAll":
+			mutateExcludesAllExp(exp);
+			break;	
 		case "isUndefined":
 			mutateUndefinedExp(exp);
 			break;

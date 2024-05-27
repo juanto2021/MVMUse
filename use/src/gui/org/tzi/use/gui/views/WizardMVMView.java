@@ -353,7 +353,7 @@ public class WizardMVMView extends JPanel implements View {
 		colorSoftGray=new Color(218,224,224);
 		//---
 		executor = Executors.newFixedThreadPool(Options.EVAL_NUMTHREADS);
-		//		executor = Executors.newFixedThreadPool(20);
+
 		futures = new ArrayList<Future<EvalResult>>();
 		ecs = new ExecutorCompletionService<EvalResult>(executor);
 		//---
@@ -503,7 +503,6 @@ public class WizardMVMView extends JPanel implements View {
 		fTablePane.setBounds(205, 40, 185, 80);
 
 		chkAutoLayout=new JCheckBox("Auto Layout");
-		//		chkAutoLayout.setBounds(205, 160, 160, 25);
 		chkAutoLayout.setBounds(205, 160, 90, 25);
 		chkAutoLayout.setSelected(true);
 		chkAutoLayout.addItemListener(new ItemListener() {
@@ -973,24 +972,15 @@ public class WizardMVMView extends JPanel implements View {
 			setComposAssoc(oAssoc);
 		}
 
-//		setResClassInvariants();//Provis
-//		setResCheckStructure();//Provis
 		add(panel);
 
 		setSize(new Dimension(400, 300));
 
 		// Reload existing components and actions to recreate them
 		refreshComponents();
-		setResClassInvariants();//Provis
-		setResCheckStructure();//Provis
+		setResClassInvariants();
+		setResCheckStructure();
 
-		//--------- provis AQUI
-		// Llamar a fill
-		//						newObjectSampleAuto();
-		//						newObjectSampleAuto();
-		//						newObjectSampleAuto();
-		//						check_inv_state_individual();
-		//---provis
 	}
 
 	/**
@@ -1816,7 +1806,7 @@ public class WizardMVMView extends JPanel implements View {
 		}
 
 		executor.shutdown();// provis
-//		cb=null;//provis
+		//		cb=null;//provis
 
 		return todosOk;
 	}
@@ -1832,13 +1822,12 @@ public class WizardMVMView extends JPanel implements View {
 		List<MVMAction> lActionsCheck=lActions;
 
 		MVMObjCheckState w = new MVMObjCheckState(thisMVMView,mapaOrdenado, fSession, lActionsCheck);
-		w.setSize(1038, 820);//provis
+		w.setSize(1038, 820);
 		w.setLocationRelativeTo(null);
 		w.setResizable(false);
 		w.setVisible(true);
-		refreshComponents();// Provis
-		// Aqui
-		// Comprobar si existen las vistas de MVMWizard y de objetos y si no recrearlas
+		refreshComponents();
+
 	}
 
 	/**
@@ -1897,7 +1886,6 @@ public class WizardMVMView extends JPanel implements View {
 				String classOfName = lw.getOfClass(); // Class of the object you need
 				// Swipe to view available items by class
 
-				//				if (needed>0) {//provis
 				if (needed>0 || disponibility>0) {
 					List<String> lObjDisponibles = new ArrayList<String>();
 					// If it have any need or availability, it is that it can link with other objects according to the relationship.
@@ -2227,10 +2215,8 @@ public class WizardMVMView extends JPanel implements View {
 				switch(nLink){
 				case 0:
 					selectClassInCombo(cmbClassOri,className);
-					//					lbFromClass.setText(className);//Provis
 				case 1:
 					selectClassInCombo(cmbClassDes,className);
-					//					lbToClass.setText(className);
 				default:
 					// Do nothing
 					break;
@@ -2261,7 +2247,6 @@ public class WizardMVMView extends JPanel implements View {
 						cmbObjectOri.setSelectedItem(oOri);
 						cmbMultiOri.setSelectedItem(oMMultiplicity.toString());
 						txMultiOri.setText(oMMultiplicity.toString());
-						//						lbFromClass.setText(oOri.cls().name());//Provis
 						break;
 					case 1:
 						oDes=oMlinkEnd.object();
@@ -2270,7 +2255,6 @@ public class WizardMVMView extends JPanel implements View {
 						cmbObjectDes.setSelectedItem(oDes);
 						cmbMultiDes.setSelectedItem(oMMultiplicity.toString());
 						txMultiDes.setText(oMMultiplicity.toString());
-						//						lbToClass.setText(oDes.cls().name());//Provis
 						break;
 					default:
 						// Do nothing
@@ -2643,7 +2627,6 @@ public class WizardMVMView extends JPanel implements View {
 			lObjects.setSelectedIndex(idx);
 			nomObj = (String) lObjects.getSelectedValue();
 			selectObject( nomObj);
-			// Aqui
 			txNewObject.setText(nomObj);
 		}else {
 			fTableModel.update();
@@ -2880,7 +2863,7 @@ public class WizardMVMView extends JPanel implements View {
 					x += w;
 
 				}
-			}//Provis
+			}
 			y += h; // start the next row
 			x = 0;
 		}
@@ -3060,9 +3043,7 @@ public class WizardMVMView extends JPanel implements View {
 						if  (ctx.varBindings().iterator().hasNext()) {
 							ctx.popVarBinding();
 						}
-						//						ctx.popVarBinding();//Provis
 					}
-					//					break;//Provis
 				}
 
 			}
