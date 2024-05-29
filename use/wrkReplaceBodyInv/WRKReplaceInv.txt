@@ -1,55 +1,35 @@
-model Animals
- class Person
+model Machines
+ abstract class AbstracMachine
  attributes
-   age: Integer
-   height: Integer
-   weight: Integer
-  end
- 
-class Pet
- attributes
-   name: String
-   species: String   
-   weight: Integer
+   ready: Boolean
  end
  
-association BelongsTo between
-  Person[1] role OwnerOf
-  Pet[*] role BelongingTo
+class Part
+ attributes
+   serial: Integer
+ end
+
+class Cutter < AbstracMachine
+ end 
+ 
+class Grinder < AbstracMachine
+ end  
+ 
+association Uses between
+  AbstracMachine[0..1] role device
+  Part[4] role pieces
 end 
- constraints
 
-context Person inv validGreaterThanAge:
-  --< Modify by MVM [self.age > 3]
-if (self.age = 3) then ((self.age - 1) < 1) else (self.age > (1 - 1)) endif   
+constraints
+
+context Part inv UniqueSerials:
+  --< Modify by MVM [Part.allInstances()->isUnique(serial)]
+(Cutter.allInstances->exists(c : Cutter | true) and Grinder.allInstances->exists(g : Grinder | g.ready))  
   
-context Person inv validSmallerThanAge:
-  self.age < 8   
-
-context Person inv validGreaterEqualThanAge:
-  self.age >= 3   
-  
-context Person inv validSmallerEqualThanAge:
-  self.age <= 8  
-
---context Person inv validNotEqualThanAge:
---  self.age <> 8 
-   
-context Person inv validEqualThanAge:
-  self.age = 8  
-
-context Person inv validGreaterAndSmallerThanAge:
-  self.age > 3  and self.age < 8 
-
-context Person inv validGreaterOrSmallerThanAge:
-  self.age > 3  or self.age < 8 
-
-context Person inv validGreaterXOrSmallerThanAge:
-  self.age > 3  xor self.age < 8   
-
-context Person inv testIf:  
-if self.age=3 then self.age<1 else self.age>1 endif  
-  
+context AbstracMachine inv Availability:
+  Cutter.allInstances()->exists(c|c.ready) and Grinder.allInstances()->exists(g|g.ready)
 
 
 
+
+ 

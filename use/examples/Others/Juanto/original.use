@@ -4,7 +4,7 @@ model Animals
    age: Integer
    height: Integer
    weight: Integer
-  end
+ end
  
 class Pet
  attributes
@@ -48,7 +48,33 @@ context Person inv validGreaterXOrSmallerThanAge:
 
 context Person inv testIf:  
 if self.age=3 then self.age<1 else self.age>1 endif  
+
+context Person inv existsAtLeastOnePerson:
+  Person.allInstances()->exists(p | true)
   
+context Person inv ageImpliesWeight:
+  self.age > 18 implies self.weight > 50 
 
+context Person inv ageNotUnder18:
+  not (self.age < 18)
+  
+context Person inv noPets:
+  Pet.allInstances()->select(p | false)->isEmpty()
+  
+context Person inv noPets2:
+  Pet.allInstances()->select(p | false)->notEmpty()  
 
+context Person inv noPets3:
+  not Pet.allInstances()->exists(p | Pet.allInstances()->includes(p))
 
+context Person inv noPets4:
+  Pet.allInstances()->forAll(p | Pet.allInstances()->excludes(p))  
+  
+--context Person inv noPets5:
+--  not Pet.allInstances()->exists(p | p.weight > 0) implies self.BelongingTo->includesAll(Pet.allInstances())
+  
+context Person inv noPets6:
+  Pet.allInstances()->excludesAll(Pet.allInstances()->select(p | p.weight > 0))
+
+--context Person inv AnyPersonHasNameStartingWithA:
+--  Person.allInstances()->any(person | person.age > 0)

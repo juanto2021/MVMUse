@@ -94,13 +94,6 @@ public class WeakenVisitor extends BooleanVisitor {
 	// public void visitRange(ExpRange exp) 
 	// public void visitUndefined(ExpUndefined exp)
 
-	//---
-
-	//	@Override
-	//	public void visitAllInstances(ExpAllInstances exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
 
 	@Override
 	public void visitAny(ExpAny exp) {
@@ -130,58 +123,12 @@ public class WeakenVisitor extends BooleanVisitor {
 		}	
 	}
 
-	//	@Override
-	//	public void visitBagLiteral(ExpBagLiteral exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
-	//
-	//	@Override
-	//	public void visitCollect(ExpCollect exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
-	//
-	//	@Override
-	//	public void visitCollectNested(ExpCollectNested exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
 
 	@Override
 	public void visitConstBoolean(ExpConstBoolean exp) {
 		defaultWeakening();
 	}
 
-	//	@Override
-	//	public void visitConstEnum(ExpConstEnum exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
-	//
-	//	@Override
-	//	public void visitConstInteger(ExpConstInteger exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
-	//
-	//	@Override
-	//	public void visitConstReal(ExpConstReal exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
-	//
-	//	@Override
-	//	public void visitConstString(ExpConstString exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
-
-	//	@Override
-	//	public void visitEmptyCollection(ExpEmptyCollection exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
 
 	@Override
 	public void visitExists(ExpExists exp) {
@@ -246,30 +193,7 @@ public class WeakenVisitor extends BooleanVisitor {
 			e.printStackTrace();
 		}
 
-		//		// Mutation 4: Replace "c->exists()" with a "c->forAll() and size() >= 1"
-		//		try {	
-		//			Expression aux1    = new ExpForAll(decl, range, query);	
-		//			Expression args1[] = {range};
-		//			Expression aux2    = ExpStdOp.create("size", args1);
-		//			Expression args2[] = {aux2, new ExpConstInteger(1) }; 
-		//			Expression aux3    = ExpStdOp.create(">=", args2);
-		//			Expression args3[] = {aux1, aux3};
-		//			Expression mutant  = ExpStdOp.create("and", args3);		
-		//			mutatedExpr.add(mutant);
-		//		} catch (ExpInvalidException e) {
-		//			e.printStackTrace();
-		//		}
-
-		// Mutation 5: as (4), but also strengthen the query
-		// TODO
-
-		// Mutation 6: as (4), but also compute the kernel of the range
-		// TODO
-
-		// Mutation 7: as (6), but also strengthen the query
-		// TODO
-
-		// Mutation 8: replace by "false"
+		// Mutation 5: replace by "false"
 		defaultWeakening();	
 	}
 
@@ -334,28 +258,6 @@ public class WeakenVisitor extends BooleanVisitor {
 		List<Expression> thenMutants = weaken(thenExp);
 		List<Expression> elseMutants = weaken(elseExp);
 
-		// Construct a new expression for each combination of mutants
-		// Three potential scenarios
-		// (1) we keep the original "then" and mutate "else"		
-		//		for(Expression elseMutant: elseMutants) {
-		//			Expression newMutant;
-		//			try {
-		//				newMutant = new ExpIf(cond, thenExp, elseMutant);
-		//				mutatedExpr.add(newMutant);
-		//			}  catch (ExpInvalidException e) {
-		//				e.printStackTrace();
-		//			}
-		//		}
-		//		// (2) we keep the original  "else" and mutate then
-		//		for(Expression thenMutant: thenMutants) {
-		//			Expression newMutant;
-		//			try {
-		//				newMutant = new ExpIf(cond, thenMutant, elseExp);
-		//				mutatedExpr.add(newMutant);
-		//			}  catch (ExpInvalidException e) {
-		//				e.printStackTrace();
-		//			}
-		//		}
 		// (3) we mutate both branches of the conditional
 		for(Expression thenMutant: thenMutants) {
 			for(Expression elseMutant: elseMutants) {
@@ -418,33 +320,6 @@ public class WeakenVisitor extends BooleanVisitor {
 		// Mutation 4: replace by "false"
 		defaultWeakening();
 	}
-	//
-	//	@Override
-	//	public void visitIterate(ExpIterate exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
-
-	//	@Override
-	//	public void visitLet(ExpLet exp) {
-	//		if (exp.type().isTypeOfBoolean()) {		
-	//			defaultWeakening();
-	//		} else {
-	//			wrongTypeError("variable of type " + exp.type().toString() );
-	//		}
-	//	}
-	//
-	//	@Override
-	//	public void visitNavigation(ExpNavigation exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
-	//
-	//	@Override
-	//	public void visitObjAsSet(ExpObjAsSet exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
 
 	@Override
 	public void visitObjOp(ExpObjOp exp) {
@@ -469,24 +344,12 @@ public class WeakenVisitor extends BooleanVisitor {
 		// TODO Auto-generated method stub
 
 	}
-	//
-	//	@Override
-	//	public void visitOrderedSetLiteral(ExpOrderedSetLiteral exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
 
 	@Override
 	public void visitQuery(ExpQuery exp) {
 		wrongTypeError("visit query - this node should not be reached");
 
 	}
-
-	//	@Override
-	//	public void visitReject(ExpReject exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
 
 	@Override
 	public void visitWithValue(ExpressionWithValue exp) {
@@ -496,24 +359,6 @@ public class WeakenVisitor extends BooleanVisitor {
 			wrongTypeError("variable of type " + exp.type().toString() );
 		}
 	}
-
-	//	@Override
-	//	public void visitSelect(ExpSelect exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
-	//
-	//	@Override
-	//	public void visitSequenceLiteral(ExpSequenceLiteral exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
-	//
-	//	@Override
-	//	public void visitSetLiteral(ExpSetLiteral exp) {
-	//		// TODO Auto-generated method stub
-	//
-	//	}
 
 	@Override
 	public void visitSortedBy(ExpSortedBy exp) {
@@ -574,7 +419,6 @@ public class WeakenVisitor extends BooleanVisitor {
 				}
 			}
 		}
-		//		System.out.println("Aqui");
 	}
 	//OK
 	private void mutateAndExp(ExpStdOp exp) {
@@ -778,19 +622,6 @@ public class WeakenVisitor extends BooleanVisitor {
 			}
 		}
 
-		//
-		//		// Dirty hack - Rewrite a->b as (!a)||b
-		//		// Then, strengthen that expression as a disjunction
-		//
-		//		try {
-		//			Expression args1[] = {left};
-		//			ExpStdOp aux1 = ExpStdOp.create("not", args1);
-		//			Expression args2[] = {aux1, right};
-		//			ExpStdOp aux2 = ExpStdOp.create("or", args2);
-		//			mutateOrExp(aux2);
-		//		} catch (ExpInvalidException e) {
-		//			e.printStackTrace();
-		//		}		
 	}
 
 	private void mutateNotExp(ExpStdOp exp) {

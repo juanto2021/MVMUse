@@ -2938,7 +2938,7 @@ public class WizardMVMView extends JPanel implements View {
 					exp = (ExpForAll) expr;
 				}else {
 					exp = (ExpStdOp) expr;
-					System.out.println("   NO ExpForAll [" + exp.name() + "]");
+//					System.out.println("   NO ExpForAll [" + exp.name() + "]");
 				}
 
 				fRangeExp=rangeExp;

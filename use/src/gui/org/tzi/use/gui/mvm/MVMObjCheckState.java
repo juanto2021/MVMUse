@@ -27,10 +27,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -571,7 +574,7 @@ public class MVMObjCheckState extends JDialog {
 		header.setVisible(true);
 
 		tabInvs.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		tabInvs.getColumnModel().getColumn(0).setPreferredWidth(380);
+		tabInvs.getColumnModel().getColumn(0).setPreferredWidth(360);
 		tabInvs.getColumnModel().getColumn(1).setPreferredWidth(50);
 
 		tabInvs.setDefaultEditor(Object.class, null);
@@ -821,8 +824,11 @@ public class MVMObjCheckState extends JDialog {
 		int nInvAnt=nInv;
 
 		loadTabObjects();
+		if (nObjAnt>=tabObjects.getModel().getRowCount()) {
+			nObjAnt=tabObjects.getModel().getRowCount()-1;
+		}
 		putColorObjs();
-
+		//Aqui
 		if(nObjAnt>-1) {
 			loadListInvs(nObjAnt);
 			loadListAttrs(nObjAnt);
@@ -896,6 +902,7 @@ public class MVMObjCheckState extends JDialog {
 						boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
 						showIndicatorAlt(stateInv);
 						bResTest=stateInv;
+						//						System.out.println("nInvAnt ["+nInvAnt+"] nInv ["+nInv+"] Inv ["+texto+"] stateInv ["+stateInv+"]");
 					}
 				}
 			}else {
@@ -1157,7 +1164,7 @@ public class MVMObjCheckState extends JDialog {
 		List<Expression> ct = computeClassifyingTerms2(exp);
 		int nExpr=0;
 		for(Expression item: ct) {
-			System.out.println("Invariant " + item.toString());
+			//			System.out.println("Invariant " + item.toString());
 			String strNExpr = Integer.toString(nExpr);
 			mapAlternatives.put(strNExpr, item.toString());
 			nExpr+=1;
@@ -1325,13 +1332,13 @@ public class MVMObjCheckState extends JDialog {
 				}
 				showExprInv(nInv);
 
-				String textResult="Incorrecto";
+				String textResult="Incorrect";
 				boolean bRes=false;
 				if (!contentNew.equals("")) {
 					bRes=testNewBodyInv();//Provis
 				}
 				if (bRes) {
-					textResult="Correcto";
+					textResult="Correct";
 				}
 
 				boolean saveData=false;
@@ -1473,10 +1480,10 @@ public class MVMObjCheckState extends JDialog {
 			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			if (column == 2) {
 				String cellValue = (String) value;
-				if ("Correcto".equals(cellValue)) {
+				if ("Correct".equals(cellValue)) {
 					c.setBackground(Color.GREEN);
 					c.setForeground(Color.WHITE);
-				}else if ("Incorrecto".equals(cellValue)) {
+				}else if ("Incorrect".equals(cellValue)) {
 					c.setBackground(Color.RED);
 					c.setForeground(Color.WHITE);
 				}else {
@@ -1755,7 +1762,15 @@ public class MVMObjCheckState extends JDialog {
 					boolean isSelected, boolean hasFocus,
 					int row, int column) {
 				Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-				boolean allOk=(boolean) table.getValueAt(row, 1);
+				boolean allOk=true;
+				Object o = table.getValueAt(row, 1);
+
+				//				if (!o.equals(null)) {
+				if (o!=null) {
+					allOk=(boolean) table.getValueAt(row, 1);
+				}
+
+				//				boolean allOk=(boolean) table.getValueAt(row, 1);//Provis
 
 				if (allOk == false) {
 					c.setForeground(Color.RED);
@@ -1904,6 +1919,8 @@ public class MVMObjCheckState extends JDialog {
 		if (mapObjects.size()>0 && nObject>-1) {
 			String oCompareName = "";
 			String oCompareClass = "";
+			System.out.println("tabObjects.getModel().getRowCount() ["+
+					tabObjects.getModel().getRowCount()+"] nObject ["+nObject+"]");
 			if (tabObjects.getModel().getRowCount()>0) {
 				oCompareName = (String) tabObjects.getValueAt(nObject, 0);
 				oCompareClass = (String) tabObjects.getValueAt(nObject, 1);
@@ -1957,7 +1974,9 @@ public class MVMObjCheckState extends JDialog {
 						}
 					}
 
-					modeltabInvs = new DefaultTableModel(newData,columns);
+					modeltabInvs = new DefaultTableModel(newData,columns);//Provis
+					//Aqui
+					//					modeltabInvs = new DefaultTableModel(sortTableModel(newData,0),columns);
 					break;
 				}
 			}
@@ -1974,15 +1993,78 @@ public class MVMObjCheckState extends JDialog {
 			modeltabInvs = new DefaultTableModel(data,columns);
 		}
 
+		//		tabInvs.setModel(modeltabInvs);// provis
+		//Aqui
+		//		sortTableModel(modeltabInvs,0);
+		if (modeltabInvs.getColumnCount()>0) {
+			sortTableModel2(columns);
+		}
+
 		tabInvs.setModel(modeltabInvs);
 		tabInvs.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		tabInvs.getColumnModel().getColumn(0).setPreferredWidth(380);
+		tabInvs.getColumnModel().getColumn(0).setPreferredWidth(365);
 		tabInvs.getColumnModel().getColumn(1).setPreferredWidth(50);
 
 		putColorInvs();
 
 		tabInvs.repaint();
 		return;
+	}
+
+	private void sortTableModel2(String[] columns) {
+		int nInvs = listInv.size();
+		int nInvsModel = modeltabInvs.getRowCount();
+		Object[][] data = new Object[nInvsModel][2];
+		for (int nInv=0;nInv<nInvs;nInv++) {
+			MVMDefInv oInv = listInv.get(nInv);
+			String nameClassInv = oInv.getNameClass();
+			String nameInv = oInv.getNameInv();
+			// busca en model
+			for (int nInvModel=0;nInvModel<nInvsModel;nInvModel++) {
+				//Aqui
+				MClassInvariant oInvModel = (MClassInvariant) modeltabInvs.getValueAt(nInvModel, 0);
+				String nameClassInvModel = oInvModel.cls().name();
+				String nameInvModel = oInvModel.name();
+				boolean value=(boolean) modeltabInvs.getValueAt(nInvModel, 1);
+				if (nameClassInv.equals(nameClassInvModel) &&
+						nameInv.equals(nameInvModel)) {
+					data[nInvModel][0]=oInvModel;
+					data[nInvModel][1]=value;
+					//					continue;
+					break;
+				}
+			}
+
+		}
+		modeltabInvs.setRowCount(0);
+		modeltabInvs = new DefaultTableModel(data,columns);//Provis
+	}
+
+	public static void sortTableModel(DefaultTableModel model, int colIndex) {
+		// Extract data from the model
+		ArrayList<Vector> tableData = new ArrayList<>();
+		for (int row = 0; row < model.getRowCount(); row++) {
+			Vector rowData = (Vector) model.getDataVector().elementAt(row);
+			tableData.add(rowData);
+		}
+
+		// Sort data based on the specified column index
+		Collections.sort(tableData, new Comparator<Vector>() {
+			@Override
+			public int compare(Vector row1, Vector row2) {
+				Comparable col1 = (Comparable) row1.get(colIndex);
+				Comparable col2 = (Comparable) row2.get(colIndex);
+				return col1.compareTo(col2);
+			}
+		});
+
+		// Remove all rows from the model
+		model.setRowCount(0);
+
+		// Add sorted data back to the model
+		for (Vector rowData : tableData) {
+			model.addRow(rowData);
+		}
 	}
 
 	/**
