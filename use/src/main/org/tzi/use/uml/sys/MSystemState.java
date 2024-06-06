@@ -2095,7 +2095,7 @@ public final class MSystemState {
 					if (linkedObjects.size() == 0 && !aend2.multiplicity().contains(0)) {
 						reportMultiplicityViolation(out, assoc, aend1, aend2, obj, null);
 						LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend1, aend2, obj, null);
-						System.out.println();
+//						System.out.println();
 						int multi = 0; 
 						int connectedTo=0; 
 						try {
@@ -2126,7 +2126,7 @@ public final class MSystemState {
 						if (!aend2.multiplicity().contains(entry.getValue().size())) {
 							reportMultiplicityViolation(out, assoc, aend1, aend2, obj, entry);
 							LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend1, aend2, obj, entry);
-							System.out.println();
+//							System.out.println();
 							int multi = 0; 
 							int connectedTo=0; 
 							try {
@@ -2175,7 +2175,7 @@ public final class MSystemState {
 					if (linkedObjects.size() == 0 && !aend1.multiplicity().equals(0)) {
 						reportMultiplicityViolation(out, assoc, aend2, aend1, obj, null);
 						LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, null);
-						System.out.println();
+//						System.out.println();
 						int multi = 0; 
 						int minMulti=0;
 						int maxMulti=0;
@@ -2224,7 +2224,7 @@ public final class MSystemState {
 						if (!aend1.multiplicity().contains(entry.getValue().size())) {
 							reportMultiplicityViolation(out, assoc, aend2, aend1, obj, entry);
 							LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, entry);
-							System.out.println();
+//							System.out.println();
 							int multi = 0; 
 							int minMulti=0;
 							int maxMulti=0;

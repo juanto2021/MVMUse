@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1908,7 +1909,6 @@ public class MVMObjCheckState extends JDialog {
 	 * Load invs table
 	 */
 	private void loadListInvs(int nObject) {
-
 		modeltabInvs = new DefaultTableModel();
 		String[] columns;
 
@@ -1919,8 +1919,6 @@ public class MVMObjCheckState extends JDialog {
 		if (mapObjects.size()>0 && nObject>-1) {
 			String oCompareName = "";
 			String oCompareClass = "";
-			System.out.println("tabObjects.getModel().getRowCount() ["+
-					tabObjects.getModel().getRowCount()+"] nObject ["+nObject+"]");
 			if (tabObjects.getModel().getRowCount()>0) {
 				oCompareName = (String) tabObjects.getValueAt(nObject, 0);
 				oCompareClass = (String) tabObjects.getValueAt(nObject, 1);

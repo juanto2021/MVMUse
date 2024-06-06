@@ -24,7 +24,7 @@ constraints
 
 context Part inv UniqueSerials:
   --< Modify by MVM [Part.allInstances()->isUnique(serial)]
-(Cutter.allInstances->exists(c : Cutter | true) and Grinder.allInstances->exists(g : Grinder | g.ready))  
+(Part.allInstances->size <= 1)  
   
 context AbstracMachine inv Availability:
   Cutter.allInstances()->exists(c|c.ready) and Grinder.allInstances()->exists(g|g.ready)
