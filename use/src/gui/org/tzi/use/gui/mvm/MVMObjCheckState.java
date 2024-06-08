@@ -882,7 +882,10 @@ public class MVMObjCheckState extends JDialog {
 		int nObjAnt=nObj;
 		prepareContentNew();
 		saveWorkFile(contentNew);
-
+		//----------------
+		String newBody=taExprInvNew.getText();
+//		System.out.println("Antes calculo ["+newBody+"]");
+		//----------------
 		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
 		String msgError=verifyContentModel(workFile);
 		showViability(msgError);
@@ -903,7 +906,7 @@ public class MVMObjCheckState extends JDialog {
 						boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
 						showIndicatorAlt(stateInv);
 						bResTest=stateInv;
-						//						System.out.println("nInvAnt ["+nInvAnt+"] nInv ["+nInv+"] Inv ["+texto+"] stateInv ["+stateInv+"]");
+//						System.out.println("nInvAnt ["+nInvAnt+"] nInv ["+nInv+"] Inv ["+texto+"] stateInv ["+stateInv+"]");
 					}
 				}
 			}else {
@@ -928,6 +931,7 @@ public class MVMObjCheckState extends JDialog {
 				loadListAttrs(nInv);
 			}
 		}
+//		System.out.println("Después calculo ["+newBody+"] ["+bResTest+"]");
 		return bResTest;
 	}
 
