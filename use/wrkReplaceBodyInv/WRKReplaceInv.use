@@ -1,25 +1,35 @@
-model Animals
- class Person
+model Machines
+ abstract class AbstracMachine
  attributes
-   age: Integer
-   height: Integer
-   weight: Integer
+   ready: Boolean
  end
  
-class Pet
+class Part
  attributes
-   name: String
-   species: String   
-   weight: Integer
+   serial: Integer
  end
+
+class Cutter < AbstracMachine
+ end 
  
-association BelongsTo between
-  Person[1] role OwnerOf
-  Pet[*] role BelongingTo
+class Grinder < AbstracMachine
+ end  
+ 
+association Uses between
+  AbstracMachine[0..1] role device
+  Part[4] role pieces
 end 
- constraints
 
-context Person inv validGreaterAndSmallerThanAge:
-  --< Modify by MVM [self.age > 3  and self.age < 8]
-(true and ((self.age - 1) < 8)) 
+constraints
 
+context Part inv UniqueSerials:
+  --< Modify by MVM [Part.allInstances()->isUnique(serial)]
+(Part.allInstances->size <= 1)  
+  
+context AbstracMachine inv Availability:
+  Cutter.allInstances()->exists(c|c.ready) and Grinder.allInstances()->exists(g|g.ready)
+
+
+
+
+ 
