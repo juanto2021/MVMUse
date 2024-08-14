@@ -75,6 +75,7 @@ import org.tzi.use.uml.mm.MClassInvariant;
 import org.tzi.use.uml.mm.MModel;
 import org.tzi.use.uml.mm.ModelFactory;
 import org.tzi.use.uml.ocl.expr.Expression;
+import org.tzi.use.uml.ocl.expr.VarDecl;
 import org.tzi.use.uml.sys.MSystem;
 
 public class MVMObjCheckState extends JDialog {
@@ -829,7 +830,7 @@ public class MVMObjCheckState extends JDialog {
 			nObjAnt=tabObjects.getModel().getRowCount()-1;
 		}
 		putColorObjs();
-		//Aqui
+
 		if(nObjAnt>-1) {
 			loadListInvs(nObjAnt);
 			loadListAttrs(nObjAnt);
@@ -884,7 +885,7 @@ public class MVMObjCheckState extends JDialog {
 		saveWorkFile(contentNew);
 		//----------------
 		String newBody=taExprInvNew.getText();
-//		System.out.println("Antes calculo ["+newBody+"]");
+		//		System.out.println("Antes calculo ["+newBody+"]");
 		//----------------
 		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
 		String msgError=verifyContentModel(workFile);
@@ -906,7 +907,7 @@ public class MVMObjCheckState extends JDialog {
 						boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
 						showIndicatorAlt(stateInv);
 						bResTest=stateInv;
-//						System.out.println("nInvAnt ["+nInvAnt+"] nInv ["+nInv+"] Inv ["+texto+"] stateInv ["+stateInv+"]");
+						//						System.out.println("nInvAnt ["+nInvAnt+"] nInv ["+nInv+"] Inv ["+texto+"] stateInv ["+stateInv+"]");
 					}
 				}
 			}else {
@@ -928,10 +929,11 @@ public class MVMObjCheckState extends JDialog {
 			nInv=nInvAnt;
 			if (tabInvs.getModel().getRowCount()>0) {
 				tabInvs.setRowSelectionInterval(nInv, nInv);
-				loadListAttrs(nInv);
+				//				loadListAttrs(nInv);
+				loadListAttrs(nObjAnt);
 			}
 		}
-//		System.out.println("Despu�s calculo ["+newBody+"] ["+bResTest+"]");
+		//		System.out.println("Después calculo ["+newBody+"] ["+bResTest+"]");
 		return bResTest;
 	}
 
@@ -939,16 +941,44 @@ public class MVMObjCheckState extends JDialog {
 		String newBody=taExprInvNew.getText();
 		String sourceNew=contentFile;
 		int nInv = tabInvs.getSelectedRow();
+		MClassInvariant oInvTab = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+		String nameClassTabInv=oInvTab.cls().name();
+		String nameInvTabInv=oInvTab.name();
 		if(listInv.size()>0 && nInv>-1) {
-			MVMDefInv oInv = listInv.get(nInv);
-			int iniBodyExpr=oInv.getIniBodyExpression();
-			int finBodyExpr=oInv.getFinBodyExpression();
-			String strLeft=contentFile.substring(0,iniBodyExpr);
-			String strRight=contentFile.substring(finBodyExpr, contentFile.length());
-			String strChange=contentFile.substring(iniBodyExpr, finBodyExpr);
-			//			String strModified="--<<< Modify by MVM ["+strChange+"] <<<\r\n-->>>\r\n" +newBody+"\r\n-->>>\r\n";
-			String strModified="--< Modify by MVM ["+strChange+"]\r\n" +newBody; // Simple
-			sourceNew=strLeft + strModified.trim() + strRight;
+			// Hay que buscar oInv comparando nombre de inv y no basandose en listInv
+			//Aqui8 bucle de listInv para comparar con tabInv
+			for (int i=0;i<listInv.size();i++) {
+				MVMDefInv oInv = listInv.get(i);
+				String nameClassoInv=oInv.getNameClass();
+				String nameInvoInv=oInv.getNameInv();
+				if(nameClassoInv.equals(nameClassTabInv)&&
+						nameInvoInv.equals(nameInvTabInv)) {
+					//					MVMDefInv oInv = listInv.get(nInv);
+					//					int nInvsList=listInv.size();
+
+					int iniBodyExpr=oInv.getIniBodyExpression();
+					int finBodyExpr=oInv.getFinBodyExpression();
+					String strLeft=contentFile.substring(0,iniBodyExpr);
+					String strRight=contentFile.substring(finBodyExpr, contentFile.length());
+					String strChange=contentFile.substring(iniBodyExpr, finBodyExpr);
+					//			String strModified="--<<< Modify by MVM ["+strChange+"] <<<\r\n-->>>\r\n" +newBody+"\r\n-->>>\r\n";
+					String strModified="--< Modify by MVM ["+strChange+"]\r\n" +newBody; // Simple
+					sourceNew=strLeft + strModified.trim() + strRight;
+					//					sourceNew=strModified.trim() + strRight;
+					break;
+				}
+			}
+			//			MVMDefInv oInv = listInv.get(nInv);
+			//			int nInvsList=listInv.size();
+			//			
+			//			int iniBodyExpr=oInv.getIniBodyExpression();
+			//			int finBodyExpr=oInv.getFinBodyExpression();
+			//			String strLeft=contentFile.substring(0,iniBodyExpr);
+			//			String strRight=contentFile.substring(finBodyExpr, contentFile.length());
+			//			String strChange=contentFile.substring(iniBodyExpr, finBodyExpr);
+			//			//			String strModified="--<<< Modify by MVM ["+strChange+"] <<<\r\n-->>>\r\n" +newBody+"\r\n-->>>\r\n";
+			//			String strModified="--< Modify by MVM ["+strChange+"]\r\n" +newBody; // Simple
+			//			sourceNew=strLeft + strModified.trim() + strRight;
 		}
 		contentNew=sourceNew;
 	}
@@ -1054,7 +1084,7 @@ public class MVMObjCheckState extends JDialog {
 			// Comprobar si el archivo ya existe
 			if (fileToSave.exists()) {
 				int overwriteResult = JOptionPane.showConfirmDialog(frame,
-						"El archivo ya existe. ¿Deseas sobrescribirlo?",
+						"El archivo ya existe. Â¿Deseas sobrescribirlo?",
 						"Confirmar Sobrescritura",
 						JOptionPane.YES_NO_OPTION);
 
@@ -1161,7 +1191,7 @@ public class MVMObjCheckState extends JDialog {
 		String strInv = inv.name();
 		showPanelTableAlt(strInv, row);
 	}
-	//Aqui
+
 	private Map<String, String> doAlternatives(MClassInvariant oInv) {
 		Map<String, String> mapAlternatives = new HashMap<String, String>();
 
@@ -1179,7 +1209,9 @@ public class MVMObjCheckState extends JDialog {
 		return mapSorted;
 	}
 	private static List<Expression> computeClassifyingTerms2(Expression exp) {
-		WeakenVisitor visitor = new WeakenVisitor();
+		Map<String, List<VarDecl>> mapVarsByType;
+		mapVarsByType= new HashMap<>(); 
+		WeakenVisitor visitor = new WeakenVisitor(mapVarsByType);
 		exp.processWithVisitor(visitor);
 		return visitor.getMutatedExpr();
 	}
@@ -1206,7 +1238,7 @@ public class MVMObjCheckState extends JDialog {
 
 		scrollPaneTableAlt.remove(tableAlt);// OJO
 		tableAlt = new JTable(new CustomTableModel(mapSorted));
-		tableAlt.setRowSelectionAllowed(true);  // Desactivar la selecci�n de filas
+		tableAlt.setRowSelectionAllowed(true);  // Desactivar la selecciï¿½n de filas
 
 		// Configurar el renderizador y editor para la columna de radio buttons
 		tableAlt.getColumnModel().getColumn(0).setCellRenderer(new RadioButtonRenderer());
@@ -1241,7 +1273,7 @@ public class MVMObjCheckState extends JDialog {
 				if (!event.getValueIsAdjusting()) {
 					int selectedRow = tableAlt.getSelectedRow();
 					if (selectedRow != -1) {
-						Object value = tableAlt.getValueAt(selectedRow, 1); // Columna 2 (�ndice 1)
+						Object value = tableAlt.getValueAt(selectedRow, 1); // Columna 2 (ï¿½ndice 1)
 
 						tableAlt.setValueAt(true, selectedRow, 0);
 						int nInv = tabInvs.getSelectedRow();
@@ -1273,7 +1305,7 @@ public class MVMObjCheckState extends JDialog {
 		//---
 		if(tableAlt.getModel().getRowCount()>0) {
 			tableAlt.setRowSelectionInterval(0, 0);
-			Object value = tableAlt.getValueAt(0, 1); // Columna 2 (�ndice 1)
+			Object value = tableAlt.getValueAt(0, 1); // Columna 2 (ï¿½ndice 1)
 
 			int nInv = tabInvs.getSelectedRow();
 			int nInvAnt=nInv;
@@ -1609,6 +1641,31 @@ public class MVMObjCheckState extends JDialog {
 		body=resto.replace("\r\n","").replace("\n", "").trim();
 		return body;
 	}
+	//	public static String cleanBlock(String block) {
+	//		StringBuilder result = new StringBuilder();
+	//		String block1 = block.replace("\r\n", "\n");
+	//		// Dividir el bloque en líneas individuales
+	//		String[] lines = block.split("\n");
+	//
+	//		for (String line : lines) {
+	//			// Eliminar todo lo que esté después de '--' (incluido) y los espacios anteriores
+	//			String cleanedLine = line.split("--")[0].trim();
+	//
+	//			// Solo agregar la línea si no está vacía
+	//			if (!cleanedLine.isEmpty()) {
+	//				result.append(cleanedLine).append("\r\n");
+	//				//	                result.append(cleanedLine).append("\n");
+	//			}
+	//		}
+	//
+	//		return result.toString();
+	//	}
+	//	private static String cleaninvExpression(String invExpression) {
+	//		//		   String body="";
+	//		String body = cleanBlock(invExpression);
+	//
+	//		return body.replace("\r\n","").replace("\n", "");
+	//	}
 
 	private void doTerminalNodeImpl(Object child) {
 		org.antlr.v4.runtime.tree.TerminalNodeImpl child2 = ((org.antlr.v4.runtime.tree.TerminalNodeImpl)child);
@@ -1698,7 +1755,7 @@ public class MVMObjCheckState extends JDialog {
 
 			reloadComponentsModel();
 		}catch (FileNotFoundException e) {
-			// Manejar la excepción si el archivo no se encuentra
+			// Manejar la excepciÃ³n si el archivo no se encuentra
 			//			System.err.println("Archivo no encontrado: " + e.getMessage());
 			lbViability.setText("File not found: "+e.getMessage());
 			bRes=false;
@@ -1912,6 +1969,7 @@ public class MVMObjCheckState extends JDialog {
 	/**
 	 * Load invs table
 	 */
+	//Aqui
 	private void loadListInvs(int nObject) {
 		modeltabInvs = new DefaultTableModel();
 		String[] columns;
@@ -1977,7 +2035,6 @@ public class MVMObjCheckState extends JDialog {
 					}
 
 					modeltabInvs = new DefaultTableModel(newData,columns);//Provis
-					//Aqui
 					//					modeltabInvs = new DefaultTableModel(sortTableModel(newData,0),columns);
 					break;
 				}
@@ -1996,7 +2053,6 @@ public class MVMObjCheckState extends JDialog {
 		}
 
 		//		tabInvs.setModel(modeltabInvs);// provis
-		//Aqui
 		//		sortTableModel(modeltabInvs,0);
 		if (modeltabInvs.getColumnCount()>0) {
 			sortTableModel2(columns);
@@ -2023,7 +2079,6 @@ public class MVMObjCheckState extends JDialog {
 			String nameInv = oInv.getNameInv();
 			// busca en model
 			for (int nInvModel=0;nInvModel<nInvsModel;nInvModel++) {
-				//Aqui
 				MClassInvariant oInvModel = (MClassInvariant) modeltabInvs.getValueAt(nInvModel, 0);
 				String nameClassInvModel = oInvModel.cls().name();
 				String nameInvModel = oInvModel.name();
@@ -2081,6 +2136,7 @@ public class MVMObjCheckState extends JDialog {
 		};
 
 		boolean hallaObj=false;
+		System.out.println("tabObjects.getModel().getRowCount() ["+tabObjects.getModel().getRowCount()+"] nObj ["+nObj+"]");
 		if(tabObjects.getModel().getRowCount()>0 && nObj>-1) {
 			String oCompareName = (String) tabObjects.getValueAt(nObj, 0);
 			String oCompareClass = (String) tabObjects.getValueAt(nObj, 1);

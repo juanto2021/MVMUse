@@ -1,4 +1,4 @@
-model Animals
+	model Animals
  class Person
  attributes
    age: Integer
@@ -29,14 +29,15 @@ context Person inv numPets:
    self.pet->size()>0  
 
 context Person inv allWeightGreaterPets: 
-   --< Modify by MVM [self.pet -> forAll(p|p.weight>5)]
-self.pet->forAll(p : Pet | (p.weight >= 5))
+   self.pet -> forAll(p|p.weight>5)
 
 context Pet inv existsWeightGreaterPets: 
+   --< Modify by MVM [Pet.allInstances()->exists(p|p.weight>5)]
 Pet.allInstances->exists(p : Pet | ((p.weight + 1) >= 5))
 
 -- Invariant that it was never fulfilled
 context Person inv validAge:
+   --< Modify by MVM [self.age <= 0 and self.age >99]
 self.age >= 0 and self.age < 99     
 
 -- One or the other will be valid but not both at the same time
@@ -44,8 +45,7 @@ context Pet inv validGreaterThanWeight:
   self.weight >= 0 
   
 context Pet inv validSmallerThanWeight:
-  --< Modify by MVM [self.weight < 4]
-(self.weight <=7)    
+  self.weight < 4    
   
 
 
