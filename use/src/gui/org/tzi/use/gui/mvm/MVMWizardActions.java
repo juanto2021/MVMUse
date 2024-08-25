@@ -520,7 +520,8 @@ public class MVMWizardActions extends JDialog {
 			String nomFile = selectedFile.getName();
 			int indicePunto = nomFile.indexOf('.');
 			String parteIzquierda = indicePunto != -1 ? nomFile.substring(0, indicePunto) : nomFile;			
-			if (!modelNew.equals(strLastFileAnt)) {
+//			if (!modelNew.equals(strLastFileAnt)) {
+				if (!modelNew.equals(sModel)) {
 				int forceUse = JOptionPane.showConfirmDialog(frame,
 						"File ["+parteIzquierda+"] contains model ["+modelNew+"] diferent a model ["+sModel+"], Continuous?",
 						"The models do not match",

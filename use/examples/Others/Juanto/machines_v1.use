@@ -1,0 +1,30 @@
+model Machines
+ abstract class AbstracMachine
+ attributes
+   ready: Boolean
+ end
+ 
+class Part
+ attributes
+   serial: Integer
+ end
+
+class Cutter < AbstracMachine
+ end 
+ 
+class Grinder < AbstracMachine
+ end  
+ 
+association Uses between
+  AbstracMachine[0..1] role device
+  Part[4] role pieces
+end 
+
+constraints
+
+context Part inv UniqueSerials:
+  Part.allInstances()->isUnique(serial)  
+  
+context AbstracMachine inv Availability:
+  --< Modify by MVM [Cutter.allInstances()->exists(c|c.ready) and Grinder.allInstances()->exists(g|g.ready)]
+(Cutter.allInstances->exists(c : Cutter | true) or Grinder.allInstances->exists(g : Grinder | g.ready))

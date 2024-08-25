@@ -1,53 +1,128 @@
-model Animals
- class Person
- attributes
-   age: Integer
-   height: Integer
-   weight: Integer
- end
- 
-class Pet
- attributes
-   name: String
-   species: String   
-   weight: Integer
- end
- 
-association BelongsTo between
-  Person[*]
-  Pet[*]
-end 
- constraints
+model shop
 
-context Person inv validGreaterThanAge:
-  self.age > 3   
+-- Definición de la clase Products
+class Products 
+    attributes
+        ID: Integer
+        description: String
+        price: Real
+        stock: Integer
+end
+
+-- Definición de la clase Categories
+class Categories 
+    attributes
+        ID: Integer
+        name: String
+end
+
+-- Definición de la clase Customers
+class Customers 
+    attributes
+        ID: Integer
+        name: String
+        email: String
+        pwd: String
+        blocked: Integer
+end
+
+-- Definición de la clase Orders
+class Orders 
+    attributes
+        ID: Integer
+        customer_ID: Integer
+        total: Real
+end
+
+-- Definición de la clase Orders_line
+class Orders_line 
+    attributes
+--        product_ID: Integer
+        quantity: Integer
+end
+
+-- Asociación entre Orders y Customers
+association OrderCustomer between
+    Orders[*] role order
+    Customers[1] role customer
+end
+
+-- Asociación entre Orders_line y Orders
+association OrderLineOrder between
+    Orders_line[1..*] role orderLine
+    Orders[1] role order
+end
+
+-- Asociación entre Products y Categories
+association ProductCategory between
+    Products[*] role product
+    Categories[1] role category
+end
+
+-- Asociación entre Orders_line y Products
+association OrderLineProduct between
+    Orders_line[*] role orderLine
+    Products[1] role product
+end
+
+constraints
+
+-- Bloque de restricciones
+
+-- Invariantes para Products
+context Products inv ID_positive:
+    self.ID > 0
+
+context Products inv description_not_empty:
+    self.description.size() > 0
+
+context Products inv price_non_negative:
+    self.price >= 0.0
+
+context Products inv stock_non_negative:
+    self.stock >= 0
+
+context Products inv stock_reasonable:
+    self.stock <= 10000
+
+
+-- Invariantes para Categories
+context Categories inv ID_positive:
+  --< Modify by MVM [self.ID > 0]
+(self.ID >= 0)context Categories inv name_not_empty:
+self.name.size() > 0
+
+context Categories inv name_unique:
+  Categories.allInstances()->forAll(c | c <> self implies c.name <> self.name)
+
+context Categories inv name_valid_length:
+  self.name.size() <= 50
   
-context Person inv validSmallerThanNegAge:
-  self.age < 8     
+-- Invariantes para Customers
+context Customers inv ID_positive:
+    self.ID > 0
 
-context Person inv numPets:
-   self.pet->size()>0  
+context Customers inv name_not_empty:
+    self.name.size() > 0
 
-context Person inv allWeightGreaterPets: 
-   --< Modify by MVM [self.pet -> forAll(p|p.weight>5)]
-self.pet->forAll(p : Pet | (p.weight >= 5))
+context Customers inv password_min_length:
+    self.pwd.size() >= 8
 
-context Pet inv existsWeightGreaterPets: 
-Pet.allInstances->exists(p : Pet | ((p.weight + 1) >= 5))
+context Customers inv blocked_status:
+    self.blocked >= 0 and self.blocked <= 1
 
--- Invariant that it was never fulfilled
-context Person inv validAge:
-self.age >= 0 and self.age < 99     
-
--- One or the other will be valid but not both at the same time
-context Pet inv validGreaterThanWeight:
-  self.weight >= 0 
+context Customers inv customer_not_blocked:
+    Orders.allInstances()->exists(o | o.customer_ID = self.ID) implies self.blocked = 0
   
-context Pet inv validSmallerThanWeight:
-  --< Modify by MVM [self.weight < 4]
-(self.weight <=7)    
-  
+-- Invariantes para Orders
+context Orders inv ID_positive:
+    self.ID > 0
 
+context Orders inv customer_assigned:
+    Customers.allInstances()->exists(c | c.ID = self.customer_ID)
 
+context Orders inv unique_order_id:
+    Orders.allInstances()->forAll(o | o <> self implies o.ID <> self.ID) 
 
- 
+context Orders inv calculate_total:
+    self.total = Orders_line.allInstances()->select(ol | ol.order = self)->collect(ol | ol.quantity * ol.product.price)->sum()

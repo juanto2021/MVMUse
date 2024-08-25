@@ -1,5 +1,6 @@
 // Generated from com\juanto\simple\inter2\Simple.g4 by ANTLR 4.9.2
 package org.tzi.use.gui.mvm;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
  * This interface defines a complete generic visitor for a parse tree produced
@@ -8,7 +9,7 @@ package org.tzi.use.gui.mvm;
  * @param <T> The return type of the visit operation. Use {@link Void} for
  * operations with no return type.
  */
-public interface MVMInterpreteVisitor<T> extends org.antlr.v4.runtime.tree.ParseTreeVisitor<T> {
+public interface MVMInterpreteVisitor<T> extends ParseTreeVisitor<T> {
 	/**
 	 * Visit a parse tree produced by {@link MVMInterpreteParser#model}.
 	 * @param ctx the parse tree

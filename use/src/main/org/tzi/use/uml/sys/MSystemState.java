@@ -1652,7 +1652,7 @@ public final class MSystemState {
 			numChecked++;
 			String msg = "checking invariant (" + numChecked + ") `"
 					+ inv.cls().name() + "::" + inv.name() + "': ";
-			out.print(msg); // + inv.bodyExpression());
+			out.print(msg); 
 			out.flush();
 			try {
 				Value v = (Value) resultValues.get();
@@ -2036,19 +2036,8 @@ public final class MSystemState {
 
 		updateDerivedValues(true);
 
-		// check the whole/part hierarchy
-		//		if (!checkWholePartLink(out)) {
-		//			if (!reportAllErrors) return false;
-		//			res = false;
-		//		}
-
 		// check all associations
 		for (MAssociation assoc : fSystem.model().associations()) {
-			//			res = checkStructure(assoc, out, reportAllErrors) && res;// Sustituyo
-
-			//--------------------------------------
-			//			boolean res = true;
-
 			List<LinkWizard> lLinksWizard = new ArrayList<LinkWizard>();
 			MVMAssocWizard aw = new MVMAssocWizard();
 			boolean existAssocWizard=false;
@@ -2079,9 +2068,6 @@ public final class MSystemState {
 				Iterator<MAssociationEnd> it2 = assoc.associationEnds().iterator();
 				MAssociationEnd aend1 = it2.next();
 				MAssociationEnd aend2 = it2.next();
-
-				//				res = validateBinaryAssociationsTakeErrors(out, assoc, aend1, aend2, reportAllErrors) && res;
-				//-------------------------------------
 				boolean valid = true;
 
 				// for each object of the association end's type get
@@ -2095,12 +2081,35 @@ public final class MSystemState {
 					if (linkedObjects.size() == 0 && !aend2.multiplicity().contains(0)) {
 						reportMultiplicityViolation(out, assoc, aend1, aend2, obj, null);
 						LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend1, aend2, obj, null);
-//						System.out.println();
+
 						int multi = 0; 
+						int minMulti=0;
+						int maxMulti=0;
 						int connectedTo=0; 
+						String strMulti = lw.getMultiSpecified();
 						try {
-							multi = Integer.parseInt(lw.getMultiSpecified()); 
-						}catch(Exception e) {}
+							if (strMulti.contains("..")) {
+								int posicion = strMulti.indexOf("..");
+								minMulti=Integer.parseInt(strMulti.substring(0, posicion));
+								multi=minMulti;
+								String strmaxMulti=strMulti.substring(posicion+2); 
+								maxMulti=-1;
+								if (!strmaxMulti.equals("*")) {
+									maxMulti=Integer.parseInt(strmaxMulti);
+								}
+
+							}else {
+								multi = 0; 
+								if (!strMulti.equals("*")) {
+									multi=Integer.parseInt(strMulti);
+								}
+								minMulti=multi;
+								maxMulti=multi;
+							}
+						}catch(Exception e) {
+							System.out.println(e.getMessage());
+						}
+
 						try {
 							connectedTo=Integer.parseInt(lw.getConnectedTo()); 
 						}catch(Exception e) {}
@@ -2126,16 +2135,40 @@ public final class MSystemState {
 						if (!aend2.multiplicity().contains(entry.getValue().size())) {
 							reportMultiplicityViolation(out, assoc, aend1, aend2, obj, entry);
 							LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend1, aend2, obj, entry);
-//							System.out.println();
+
 							int multi = 0; 
+							int minMulti=0;
+							int maxMulti=0;
 							int connectedTo=0; 
+							String strMulti = lw.getMultiSpecified();
+							if (strMulti.equals("*")) {
+								strMulti="0..*";
+							}
 							try {
-								multi = Integer.parseInt(lw.getMultiSpecified()); 
-							}catch(Exception e) {}
-							try {
-								connectedTo=Integer.parseInt(lw.getConnectedTo()); 
-							}catch(Exception e) {}
+								if (strMulti.contains("..")) {
+									int posicion = strMulti.indexOf("..");
+									minMulti=Integer.parseInt(strMulti.substring(0, posicion));
+									multi=minMulti;
+									String strmaxMulti=strMulti.substring(posicion+2); 
+									maxMulti=-1;
+									if (!strmaxMulti.equals("*")) {
+										maxMulti=Integer.parseInt(strmaxMulti);
+									}
+
+								}else {
+									multi = -1; 
+									if (!strMulti.equals("*")) {
+										maxMulti=Integer.parseInt(strMulti);
+									}
+									minMulti=multi;
+									maxMulti=multi;
+								}
+							}catch(Exception e) {
+								System.out.println(e.getMessage());
+							}
+
 							int needed = multi-connectedTo;
+
 							if (needed < 0) 
 								needed=0;
 							lw.setNeeded(needed);
@@ -2158,46 +2191,50 @@ public final class MSystemState {
 						}
 					}
 				}
-				//--------------------------------------
 
-
-
-				//				if (!res && !reportAllErrors) return res;
-
-				//				res = validateBinaryAssociationsTakeErrors(out, assoc, aend2, aend1, reportAllErrors) && res;
 				cls = aend2.cls();
 				objects = objectsOfClassAndSubClasses(cls);
-				//Aqui no pasa
+
 				for (MObject obj : objects) {
 					Map<List<Value>,Set<MObject>> linkedObjects = getLinkedObjects(obj, aend2, aend1);
-					MMultiplicity mm = aend1.multiplicity();
-					//					if (linkedObjects.size() == 0 && !aend1.multiplicity().contains(0)) {//Provis
+
 					if (linkedObjects.size() == 0 && !aend1.multiplicity().equals(0)) {
 						reportMultiplicityViolation(out, assoc, aend2, aend1, obj, null);
 						LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, null);
-//						System.out.println();
+
 						int multi = 0; 
 						int minMulti=0;
 						int maxMulti=0;
 						int connectedTo=0; 
 						String strMulti = lw.getMultiSpecified();
+						if (strMulti.equals("*")) {
+							strMulti="0..*";
+						}
 						try {
 							if (strMulti.contains("..")) {
 								int posicion = strMulti.indexOf("..");
 								minMulti=Integer.parseInt(strMulti.substring(0, posicion));
 								multi=minMulti;
-								maxMulti=Integer.parseInt(strMulti.substring(posicion+2));
+								String strmaxMulti=strMulti.substring(posicion+2); 
+								maxMulti=-1;
+								if (!strmaxMulti.equals("*")) {
+									maxMulti=Integer.parseInt(strmaxMulti);
+								}
+
 							}else {
-								multi = Integer.parseInt(strMulti); 
+								multi = 0; 
+
+								if (!strMulti.equals("*")) {
+									multi=Integer.parseInt(strMulti);
+								}
 								minMulti=multi;
 								maxMulti=multi;
+
 							}
 						}catch(Exception e) {
 							System.out.println(e.getMessage());
 						}
-						try {
-							connectedTo=Integer.parseInt(lw.getConnectedTo()); 
-						}catch(Exception e) {}
+
 						int needed = multi-connectedTo;
 						int disponibility = maxMulti-connectedTo;
 						if (needed < 0) 
@@ -2224,29 +2261,38 @@ public final class MSystemState {
 						if (!aend1.multiplicity().contains(entry.getValue().size())) {
 							reportMultiplicityViolation(out, assoc, aend2, aend1, obj, entry);
 							LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, entry);
-//							System.out.println();
+
 							int multi = 0; 
 							int minMulti=0;
 							int maxMulti=0;
 							int connectedTo=0; 
 							String strMulti = lw.getMultiSpecified();
+							if (strMulti.equals("*")) {
+								strMulti="0..*";
+							}
 							try {
 								if (strMulti.contains("..")) {
 									int posicion = strMulti.indexOf("..");
 									minMulti=Integer.parseInt(strMulti.substring(0, posicion));
 									multi=minMulti;
-									maxMulti=Integer.parseInt(strMulti.substring(posicion+2));
+									String strmaxMulti=strMulti.substring(posicion+2); 
+									maxMulti=-1;
+									if (!strmaxMulti.equals("*")) {
+										maxMulti=Integer.parseInt(strmaxMulti);
+									}
+
 								}else {
-									multi = Integer.parseInt(strMulti); 
+									multi = -1; 
+									if (!strMulti.equals("*")) {
+										maxMulti=Integer.parseInt(strMulti);
+									}
 									minMulti=multi;
 									maxMulti=multi;
 								}
 							}catch(Exception e) {
 								System.out.println(e.getMessage());
 							}
-							try {
-								connectedTo=Integer.parseInt(lw.getConnectedTo()); 
-							}catch(Exception e) {}
+							//--
 							int needed = multi-connectedTo;
 							int disponibility = maxMulti-connectedTo;
 							if (needed < 0) 
@@ -2255,7 +2301,6 @@ public final class MSystemState {
 								disponibility=0;
 							lw.setNeeded(needed);
 							lw.setDisponibility(disponibility);
-							//							lw.setNeeded(needed);
 
 							lLinksWizard.add(lw);
 
@@ -2266,7 +2311,7 @@ public final class MSystemState {
 								lAssocsWizard.add(aw);
 							}else {
 								lAssocsWizard.add(aw);
-								existAssocWizard=true;//Provis
+								existAssocWizard=true;
 							}
 						}
 
@@ -2278,10 +2323,7 @@ public final class MSystemState {
 			}
 
 			out.flush();
-			//			return res;
 
-			//--------------------------------------			
-			//			if (!reportAllErrors && !res) return false;
 		}
 
 		out.flush();
@@ -2458,12 +2500,6 @@ public final class MSystemState {
 
 			if (linkedObjects.size() == 0 && !aend2.multiplicity().contains(0)) {
 				reportMultiplicityViolation(out, assoc, aend1, aend2, obj, null);
-				//				if (!reportAllErrors) {
-				//					return false;
-				//				} else {
-				//					valid = false;
-				//					continue;
-				//				}
 			}
 
 			for(Map.Entry<List<Value>, Set<MObject>> entry : linkedObjects.entrySet()) {
@@ -2477,10 +2513,6 @@ public final class MSystemState {
 						valid = false;
 				}
 			}
-
-			//			if (!reportAllErrors && !valid) {
-			//				return valid;
-			//			}
 		}
 
 		return valid;
@@ -2535,8 +2567,6 @@ public final class MSystemState {
 		String assoccEnd="";//JG
 		String multiplicity="";	//JG
 		MObject oObjectPral=null;//JG
-
-		//		if (out == NullPrintWriter.getInstance()) return;
 
 		int n = (entry == null ? 0 : entry.getValue().size());
 

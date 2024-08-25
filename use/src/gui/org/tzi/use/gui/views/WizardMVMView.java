@@ -145,7 +145,6 @@ public class WizardMVMView extends JPanel implements View {
 	public static final String NAMEFRAMEMVMDIAGRAM = "MVM";
 	public static final String NAMEFRAMEMVMWIZARD = "MVMWizard";
 	public MainWindow fMainWindow;
-	//	private WizardMVMView thisWizard;
 	private PrintWriter fLogWriter;
 	private Session fSession;
 	private MSystem fSystem;
@@ -155,7 +154,6 @@ public class WizardMVMView extends JPanel implements View {
 	private JPanel panel;
 
 	private DefaultListModel<String> modelObjects;
-	//	private DefaultTableModel modelTabAttrs;
 
 	// Titles block
 	private JLabel lbTitleElements;
@@ -219,8 +217,7 @@ public class WizardMVMView extends JPanel implements View {
 	private JButton btnActions;
 	private JButton btnReset;
 
-	//----------------------------------------
-	private JPanel espacioVertical = new JPanel();
+	//	private JPanel espacioVertical = new JPanel();
 	private JSeparator separator0 = new JSeparator();
 	private JSeparator separator1 = new JSeparator();
 	private JSeparator separator2 = new JSeparator();
@@ -236,8 +233,7 @@ public class WizardMVMView extends JPanel implements View {
 	private Map<MAttribute, Value> fAttributeValueMap;
 	private NewObjectDiagram odvAssoc;
 	private String aMulti[] = new String[] { 
-			"0", "1", "*" };
-	//---
+			"0", "1", "*", "0..*", "1..*" };
 	private ExecutorService executor;
 	private List<Future<EvalResult>> futures;
 	private ExecutorCompletionService<EvalResult> ecs;	
@@ -247,7 +243,7 @@ public class WizardMVMView extends JPanel implements View {
 	private Color colorSoftGray;
 
 	private JInternalFrame[] allframes;
-	// To MVMWizardActions
+
 	static List<MVMAction> lActions = new ArrayList<MVMAction>();
 	private String strLastFile="";
 
@@ -342,7 +338,6 @@ public class WizardMVMView extends JPanel implements View {
 	}
 	public WizardMVMView(MainWindow parent, Session session, PrintWriter logWriter) {
 		super(new BorderLayout());
-		//		thisWizard=this;
 		lActions = new ArrayList<MVMAction>();
 		fMainWindow = parent;
 		fSession = session;
@@ -351,12 +346,10 @@ public class WizardMVMView extends JPanel implements View {
 		fSystem.getEventBus().register(this);
 		fLogWriter=logWriter;
 		colorSoftGray=new Color(218,224,224);
-		//---
 		executor = Executors.newFixedThreadPool(Options.EVAL_NUMTHREADS);
 
 		futures = new ArrayList<Future<EvalResult>>();
 		ecs = new ExecutorCompletionService<EvalResult>(executor);
-		//---
 
 		searchObjDiagramAssociated();
 
@@ -694,7 +687,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnActions);
 
 		btnReset = new JButton("Reset");
-		//		btnReset.setBounds(10, 400, 90, 25);
+
 		btnReset.setBounds(400, 160, 95, 25);		
 		btnReset.setVerticalAlignment(SwingConstants.CENTER);
 		btnReset.setHorizontalAlignment(SwingConstants.CENTER);
@@ -739,7 +732,6 @@ public class WizardMVMView extends JPanel implements View {
 		cmbClassOri.setVisible(true);
 		panel.add(cmbClassOri);
 
-		// Lo siguiente es provisional -------------------------------------------------
 		Border blackline = BorderFactory.createLineBorder(Color.black);
 
 		cmbClassDes = new JComboBox<MClass>();
@@ -896,9 +888,7 @@ public class WizardMVMView extends JPanel implements View {
 		btnShowIndividuals.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				check_inv_state_individual();
-				// Si ha desaparecido la vista volver a mostrarla AQUI
 
-				//--------------- bueno
 				boolean existDiagram=false;
 				boolean existWizard=false; 
 				//		Ver frames
@@ -1212,10 +1202,10 @@ public class WizardMVMView extends JPanel implements View {
 			MClass oClassAssocEnd = oAssocEnd.cls();
 			if (oClassAssocEnd.name().equals(o1.cls().name())) {
 				oOri = o1;
-				oDes =	o2;	
+				oDes = o2;	
 			}else {
 				oOri = o2;
-				oDes =	o1;	
+				oDes = o1;	
 			}
 			storeAction("CL", "Creation link ["+oClassAssocEnd.name()+"] - ["+oOri.name()+"]/["+oDes.name()+"]");
 		}
@@ -1358,7 +1348,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		List<MVMAttribute> lAttrsMVM = oObj.getAttributes();
 
-		boolean error = false;
+		//		boolean error = false;
 		for (int i = 0; i < fAttributes.size(); ++i) {
 			MAttribute attribute = fAttributes.get(i);
 			MVMAttribute attrMVM = lAttrsMVM.get(i);
@@ -1378,7 +1368,7 @@ public class WizardMVMView extends JPanel implements View {
 					JOptionPane.showMessageDialog(fMainWindow,errorOutput,"Error",JOptionPane.ERROR_MESSAGE);
 				}
 
-				error = true;
+				//				error = true;
 				continue;
 			}
 
@@ -1390,7 +1380,7 @@ public class WizardMVMView extends JPanel implements View {
 				if (verbose) {
 					JOptionPane.showMessageDialog(fMainWindow,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
 				}
-				error = true;
+				//				error = true;
 			}
 		}					
 	}
@@ -1439,10 +1429,10 @@ public class WizardMVMView extends JPanel implements View {
 				MClass oClassAssocEnd = oAssocEnd.cls();
 				if (oClassAssocEnd.name().equals(o1.cls().name())) {
 					oOri = o1;
-					oDes =	o2;	
+					oDes = o2;	
 				}else {
 					oOri = o2;
-					oDes =	o1;	
+					oDes = o1;	
 				}			
 				cmbClassOri.setSelectedItem(oOri.cls());
 				cmbObjectOri.setSelectedItem(oOri);
@@ -1538,13 +1528,13 @@ public class WizardMVMView extends JPanel implements View {
 					int na=0;
 					MAssociationEnd oAssocEnd = oAsocEnds.get(na);
 					MClass oClassAssocEnd = oAssocEnd.cls();
-					//					if (oClassAssocEnd.name().equals(o1.cls().name())) {
+
 					if (oClassAssocEnd.name().equals(o1.cls().name())||o1.cls().isSubClassOf(oClassAssocEnd)) {
 						oOri = o1;
-						oDes =	o2;	
+						oDes = o2;	
 					}else {
 						oOri = o2;
-						oDes =	o1;	
+						oDes = o1;	
 					}
 
 					MObject[] fParticipants = new MObject[] {oOri,oDes};
@@ -1768,6 +1758,7 @@ public class WizardMVMView extends JPanel implements View {
 				continue;
 			}
 			try {
+				//Aqui
 				EvalResult res;
 				res = ecs.take().get();
 				fValues[res.index] = res;
@@ -1777,7 +1768,11 @@ public class WizardMVMView extends JPanel implements View {
 				// a MultiplicityViolation and it is skipped as failure count
 				boolean skip = false;
 				if (res.result != null) {
-					ok = res.result.isDefined() && ((BooleanValue)res.result).isTrue();
+					try {
+						ok = res.result.isDefined() && ((BooleanValue)res.result).isTrue();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				} else {
 					violationLabel = true;
 					skip = true;
@@ -1799,21 +1794,28 @@ public class WizardMVMView extends JPanel implements View {
 		boolean todosOk=true;
 
 		for (EvalResult res : fValues) {
-			Boolean boolRes=  ((BooleanValue)res.result).value();
+
+			Boolean boolRes= false;
+			try {
+				if(!res.result.equals(null)) {
+					boolRes=  ((BooleanValue)res.result).value();
+				}
+			}catch (Exception e) {
+				boolRes= false;
+			}
 
 			if (boolRes.equals(false)) todosOk=false;
 
 		}
 
-		executor.shutdown();// provis
-		//		cb=null;//provis
+		executor.shutdown();
 
 		return todosOk;
 	}
 	// Analyze every object in individual way
 
 	public void check_inv_state_individual() {
-		boolean bRes = check_inv_state();
+		//		boolean bRes = check_inv_state();
 
 		//---
 		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
@@ -2283,10 +2285,10 @@ public class WizardMVMView extends JPanel implements View {
 
 		if (oClassAssocEnd.name().equals(o1.cls().name())||o1.cls().isSubClassOf(oClassAssocEnd)) {
 			oOri = o1;
-			oDes =	o2;	
+			oDes = o2;	
 		}else {
 			oOri = o2;
-			oDes =	o1;	
+			oDes = o1;	
 		}
 
 		MObject[] fParticipants = new MObject[] {oOri,oDes};
@@ -2576,6 +2578,8 @@ public class WizardMVMView extends JPanel implements View {
 						fValues[i] = "'x'";
 					}if (attr.type().isTypeOfBoolean()) {
 						fValues[i] = "true";
+					}if (attr.type().isTypeOfReal()) {
+						fValues[i] = "1.0";
 					}
 				}
 			}
@@ -2889,9 +2893,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	private class MyEvaluatorCallable implements Callable<EvalResult> {
-		//		final int index;
-		//		final MSystemState state;
-		//		final MClassInvariant inv;
+
 		int index;
 		MSystemState state;
 		MClassInvariant inv;
@@ -2938,7 +2940,6 @@ public class WizardMVMView extends JPanel implements View {
 					exp = (ExpForAll) expr;
 				}else {
 					exp = (ExpStdOp) expr;
-//					System.out.println("   NO ExpForAll [" + exp.name() + "]");
 				}
 
 				fRangeExp=rangeExp;
@@ -3012,7 +3013,13 @@ public class WizardMVMView extends JPanel implements View {
 			} else {
 				// evaluate predicate expression
 				Value queryVal = fQueryExp.eval(ctx);
-				Boolean boolRes = ((BooleanValue)queryVal).value();
+				//				Boolean boolRes = ((BooleanValue)queryVal).value();
+				Boolean boolRes = false;
+				if (!queryVal.isUndefined()) {
+					boolRes = ((BooleanValue)queryVal).value();
+				}else {
+					boolRes = false;
+				}
 				// Locate map objects in mapObjects
 				Map<MClassInvariant, Boolean> mapInvsObj = new HashMap<>();
 				if(mapObjects.containsKey(oMVMObj)) {
