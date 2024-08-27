@@ -107,7 +107,8 @@ implements Printable {
 	protected Selection<EdgeBase> fEdgeSelection;
 
 	// needed for auto layout
-	protected LayoutThread fLayoutThread;
+	//	protected LayoutThread fLayoutThread;
+	public LayoutThread fLayoutThread;
 
 	protected volatile SpringLayout<PlaceableNode> fLayouter;
 
@@ -740,6 +741,9 @@ implements Printable {
 	/**
 	 * Starts the auto layout thread.
 	 */
+	public LayoutThread getFDoAutoLayout() {
+		return fLayoutThread;
+	}
 	public void startLayoutThread() {
 		if (fOpt.isDoAutoLayout()) {
 			fLayoutThread = new LayoutThread();
@@ -747,20 +751,25 @@ implements Printable {
 			fLayoutThread.start();
 		}
 	}
-	public void forceStartLayoutThread() {
-//		if (fOpt.isDoAutoLayout()) {//JG
-			fOpt.fDoAutoLayout=true;
+	public LayoutThread forceStartLayoutThread() {
+		fOpt.fDoAutoLayout=true;
+		if (fLayoutThread==null) {
 			fLayoutThread = new LayoutThread();
-			fLayoutThread.doLayout = true;
+		}
+		fLayoutThread.doLayout = true;
+		if (!fLayoutThread.isAlive()) {
 			fLayoutThread.start();
-//		}
+		}
+		return fLayoutThread;
 	}
-	public void forceStopLayoutThread() {
-		if (fLayoutThread != null) {//JG
-			fLayoutThread.doLayout = false;
-			fLayoutThread.interrupt();
-			fLayoutThread = null;
+	public void forceStopLayoutThread(LayoutThread thread) {
+
+		if (thread != null) {
+			thread.doLayout = false;
+			thread.interrupt();
+			thread = null;
 			fOpt.fDoAutoLayout=false;
+			fLayoutThread = thread;
 		}
 	}
 
@@ -920,7 +929,7 @@ implements Printable {
 		repaint();
 	}
 
-	class LayoutThread extends Thread {
+	public class LayoutThread extends Thread {
 		public boolean doLayout = true;
 		public boolean doHierarchicalLayout = false;
 		public boolean doHierarchicalUpsideDownLayout = false;

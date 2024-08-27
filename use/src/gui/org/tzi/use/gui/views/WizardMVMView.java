@@ -93,6 +93,7 @@ import org.tzi.use.gui.mvm.MVMObject;
 import org.tzi.use.gui.mvm.MVMWizardActions;
 import org.tzi.use.gui.mvm.MVMWizardAssoc;
 import org.tzi.use.gui.util.ExtendedJTable;
+import org.tzi.use.gui.views.diagrams.DiagramView.LayoutThread;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.QualifierInputView;
@@ -217,7 +218,6 @@ public class WizardMVMView extends JPanel implements View {
 	private JButton btnActions;
 	private JButton btnReset;
 
-	//	private JPanel espacioVertical = new JPanel();
 	private JSeparator separator0 = new JSeparator();
 	private JSeparator separator1 = new JSeparator();
 	private JSeparator separator2 = new JSeparator();
@@ -256,6 +256,8 @@ public class WizardMVMView extends JPanel implements View {
 	protected Expression fRangeExp;
 	protected VarDeclList fElemVarDecls;
 	protected Expression fQueryExp;
+
+	private LayoutThread fLayoutThread;
 
 	/**
 	 * The table model.
@@ -501,10 +503,20 @@ public class WizardMVMView extends JPanel implements View {
 		chkAutoLayout.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (odvAssoc!=null) {
+					//					boolean isDoLayout = odvAssoc.getFDoAutoLayout;
 					if (e.getStateChange()==1) {
-						odvAssoc.forceStartLayoutThread();
+						if (fLayoutThread!=null) {
+							boolean isDoLayout = fLayoutThread.isAlive();
+							if (!isDoLayout) {
+								fLayoutThread= odvAssoc.forceStartLayoutThread();
+							}
+						}else {
+							fLayoutThread= odvAssoc.forceStartLayoutThread();
+						}
+
+
 					}else {
-						odvAssoc.forceStopLayoutThread();
+						odvAssoc.forceStopLayoutThread(fLayoutThread);
 					}
 				}
 			}
@@ -542,7 +554,16 @@ public class WizardMVMView extends JPanel implements View {
 			public void actionPerformed(ActionEvent e) {
 				initNewObject();
 				if (chkAutoLayout.isSelected()) {
-					odvAssoc.forceStartLayoutThread();
+					if (odvAssoc!=null) {
+						if (fLayoutThread!=null) {
+							boolean isDoLayout = fLayoutThread.isAlive();
+							if (!isDoLayout) {
+								fLayoutThread= odvAssoc.forceStartLayoutThread();
+							}
+						}else {
+							fLayoutThread= odvAssoc.forceStartLayoutThread();
+						}
+					}
 				}
 			}
 		});
@@ -1348,7 +1369,6 @@ public class WizardMVMView extends JPanel implements View {
 
 		List<MVMAttribute> lAttrsMVM = oObj.getAttributes();
 
-		//		boolean error = false;
 		for (int i = 0; i < fAttributes.size(); ++i) {
 			MAttribute attribute = fAttributes.get(i);
 			MVMAttribute attrMVM = lAttrsMVM.get(i);
@@ -1368,7 +1388,6 @@ public class WizardMVMView extends JPanel implements View {
 					JOptionPane.showMessageDialog(fMainWindow,errorOutput,"Error",JOptionPane.ERROR_MESSAGE);
 				}
 
-				//				error = true;
 				continue;
 			}
 
@@ -1380,7 +1399,7 @@ public class WizardMVMView extends JPanel implements View {
 				if (verbose) {
 					JOptionPane.showMessageDialog(fMainWindow,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
 				}
-				//				error = true;
+
 			}
 		}					
 	}
@@ -1741,7 +1760,7 @@ public class WizardMVMView extends JPanel implements View {
 		executor = Executors.newFixedThreadPool(Options.EVAL_NUMTHREADS);
 		ecs = new ExecutorCompletionService<EvalResult>(executor);
 
-		futures.clear();//Provis
+		futures.clear();
 		boolean violationLabel = false; 
 		int numFailures = 0;
 		boolean structureOK = true;	
@@ -1815,9 +1834,7 @@ public class WizardMVMView extends JPanel implements View {
 	// Analyze every object in individual way
 
 	public void check_inv_state_individual() {
-		//		boolean bRes = check_inv_state();
 
-		//---
 		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
 
 		thisMVMView=this;
@@ -2424,6 +2441,11 @@ public class WizardMVMView extends JPanel implements View {
 			if (odv.getName()!=null) {
 				if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 					odvAssoc = odv.getDiagram();
+					fLayoutThread=odvAssoc.fLayoutThread;
+					//Aqui
+					if (fLayoutThread==null) {
+						fMainWindow.getObjectDiagrams().remove(odv);	
+					}
 					return;
 				}
 			}
@@ -2460,7 +2482,8 @@ public class WizardMVMView extends JPanel implements View {
 		fMainWindow.addNewViewFrame(f);
 		fMainWindow.getObjectDiagrams().add(odv);
 		odvAssoc = odv.getDiagram();
-		odvAssoc.forceStartLayoutThread();
+		fLayoutThread=odvAssoc.getFDoAutoLayout();
+		fLayoutThread=odvAssoc.forceStartLayoutThread();
 
 		tile();
 	}
@@ -2502,6 +2525,7 @@ public class WizardMVMView extends JPanel implements View {
 						}
 						if (newObj.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 							odvAssoc = newObj.getDiagram();
+							fLayoutThread=odvAssoc.fLayoutThread;
 							break;
 						}
 					}
@@ -2589,7 +2613,9 @@ public class WizardMVMView extends JPanel implements View {
 		applyChanges();
 
 		if (!checkExistObjDiagram()) {
-			odvAssoc.forceStartLayoutThread();
+			fLayoutThread=odvAssoc.forceStartLayoutThread();
+		}else {
+			fLayoutThread=odvAssoc.fLayoutThread;
 		}
 		if (bNewObj) {
 			storeAction("CO", "Creation object ["+nomObj+"] of ["+oClass.name()+"]");
