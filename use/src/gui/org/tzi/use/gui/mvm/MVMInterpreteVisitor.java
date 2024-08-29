@@ -125,6 +125,12 @@ public interface MVMInterpreteVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInvExpression(MVMInterpreteParser.InvExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link MVMInterpreteParser#genericType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGenericType(MVMInterpreteParser.GenericTypeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link MVMInterpreteParser#exprBase}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -154,4 +160,28 @@ public interface MVMInterpreteVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitLineComment(MVMInterpreteParser.LineCommentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MVMInterpreteParser#exprCMP}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprCMP(MVMInterpreteParser.ExprCMPContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MVMInterpreteParser#exprALG}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprALG(MVMInterpreteParser.ExprALGContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MVMInterpreteParser#exprLITERAL}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprLITERAL(MVMInterpreteParser.ExprLITERALContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link MVMInterpreteParser#exprRightIMPLIES}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprRightIMPLIES(MVMInterpreteParser.ExprRightIMPLIESContext ctx);
 }

@@ -96,8 +96,9 @@ context Products inv sufficient_stock:
 
 -- Invariantes para Categories
 context Categories inv ID_positive:
-  --< Modify by MVM [self.ID > 0]
-(self.ID >= 0)context Categories inv name_not_empty:
+  self.ID > 0
+
+context Categories inv name_not_empty:
 self.name.size() > 0
 
 context Categories inv name_unique:
@@ -120,9 +121,8 @@ context Customers inv blocked_status:
     self.blocked >= 0 and self.blocked <= 1
 
 context Customers inv customer_not_blocked:
-    Orders.allInstances()->exists(o | o.customerID = self.ID) implies self.blocked = 0
-  
--- Invariantes para Orders
+    --< Modify by MVM [Orders.allInstances()->exists(o | o.customerID = self.ID) implies self.blocked = 0  -- Invariantes para Orders]
+((Orders.allInstances->forAll(o : Orders | (o.customerID = self.ID)) and (Orders.allInstances->size >= 1)) implies (self.blocked = 0))
 context Orders inv ID_positive:
     self.ID > 0
 

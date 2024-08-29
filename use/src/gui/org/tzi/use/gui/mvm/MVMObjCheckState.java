@@ -947,6 +947,9 @@ public class MVMObjCheckState extends JDialog {
 				MVMDefInv oInv = listInv.get(i);
 				String nameClassoInv=oInv.getNameClass();
 				String nameInvoInv=oInv.getNameInv();
+				if (nameInvoInv.equals("customer_not_blocked")) {
+					System.out.println("Aqui");
+				}
 				if(nameClassoInv.equals(nameClassTabInv)&&
 						nameInvoInv.equals(nameInvTabInv)) {
 
@@ -956,8 +959,12 @@ public class MVMObjCheckState extends JDialog {
 					String strRight=contentFile.substring(finBodyExpr, contentFile.length());
 					String strChange=contentFile.substring(iniBodyExpr, finBodyExpr);
 					String strChanged = strChange.replace("\r\n","").replace("\n", "").trim();
-					String strModified="--< Modify by MVM ["+strChanged+"]\r\n" +newBody; // Simple
-					sourceNew=strLeft + strModified.trim() + strRight;
+					//Aqui10
+					String strModified="--< Modify by MVM ["+strChanged+"]\r\n" +newBody+"\r\n"; // Simple
+					if (nameInvoInv.equals("customer_not_blocked")) {
+						System.out.println("Aqui");
+					}
+					sourceNew=strLeft + strModified.trim() +"\r\n" + strRight;
 					break;
 				}
 			}

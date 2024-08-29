@@ -103,7 +103,7 @@ public class WeakenVisitor extends BooleanVisitor {
 				mapVarsByType.put(typeName, varsByType);
 			}
 
-			System.out.println("mapVarsByType "+mapVarsByType);
+//			System.out.println("mapVarsByType "+mapVarsByType);
 		}
 	}
 	private void excludeDecl(VarDeclList decl) {
@@ -131,7 +131,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 			}
 		}
-		System.out.println("mapVarsByType "+mapVarsByType);
+//		System.out.println("mapVarsByType "+mapVarsByType);
 	}
 
 	// These expression have already been considered in BooleanVisitor
@@ -139,7 +139,7 @@ public class WeakenVisitor extends BooleanVisitor {
 	// public void visitBagLiteral(ExpBagLiteral exp) 
 	// public void visitCollect(ExpCollect exp) 
 	public void visitCollect(ExpCollect exp) {
-		System.out.println("Weaken - visitCollect");
+//		System.out.println("Weaken - visitCollect");
 	}
 	// public void visitCollectNested(ExpCollectNested exp) 
 	// public void visitConstEnum(ExpConstEnum exp) 
@@ -165,7 +165,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitAny(ExpAny exp) {
-		System.out.println("Weaken - visitAny");
+//		System.out.println("Weaken - visitAny");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
 		} else {
@@ -175,7 +175,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitAsType(ExpAsType exp) {
-		System.out.println("Weaken - visitAsType");
+//		System.out.println("Weaken - visitAsType");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
 		} else {
@@ -185,7 +185,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitAttrOp(ExpAttrOp exp) {
-		System.out.println("Weaken - visitAttrOp");
+//		System.out.println("Weaken - visitAttrOp");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
 		} else {
@@ -196,7 +196,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitConstBoolean(ExpConstBoolean exp) {
-		System.out.println("Weaken - visitConstBoolean");
+//		System.out.println("Weaken - visitConstBoolean");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
 		} else {
@@ -207,7 +207,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitExists(ExpExists exp) {
-		System.out.println("Weaken - visitExists");
+//		System.out.println("Weaken - visitExists");
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
 		VarDeclList decl = exp.getVariableDeclarations();
@@ -269,7 +269,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitForAll(ExpForAll exp) {
-		System.out.println("Weaken - visitForAll");
+//		System.out.println("Weaken - visitForAll");
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression(); // coleccion de tipo x
 		VarDeclList decl = exp.getVariableDeclarations(); 
@@ -398,7 +398,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitIf(ExpIf exp) {
-		System.out.println("Weaken - visitIf");
+//		System.out.println("Weaken - visitIf");
 		Expression cond = exp.getCondition();
 		Expression thenExp = exp.getThenExpression();
 		Expression elseExp = exp.getElseExpression();
@@ -430,7 +430,7 @@ public class WeakenVisitor extends BooleanVisitor {
 	@Override
 	public void visitIsKindOf(ExpIsKindOf exp) {
 
-		System.out.println("Weaken - visitIsKindOf");
+//		System.out.println("Weaken - visitIsKindOf");
 		Type targetType = exp.getTargetType();
 		Set<? extends Type> setSuperTypes= targetType.allSupertypes();// Type set. Each one is a T2
 
@@ -458,7 +458,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitIsTypeOf(ExpIsTypeOf exp) {
-		System.out.println("Weaken - visitIsTypeOf");
+//		System.out.println("Weaken - visitIsTypeOf");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
 		} else {
@@ -468,7 +468,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitIsUnique(ExpIsUnique exp) {
-		System.out.println("Weaken - visitIsUnique");
+//		System.out.println("Weaken - visitIsUnique");
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
 		VarDeclList decl = exp.getVariableDeclarations();
@@ -503,7 +503,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitLet(ExpLet exp) {
-		System.out.println("Weaken - visitLet");
+//		System.out.println("Weaken - visitLet");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
 		} else {
@@ -513,7 +513,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitObjOp(ExpObjOp exp) {
-		System.out.println("Weaken - visitObjOp");
+//		System.out.println("Weaken - visitObjOp");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
 		} else {
@@ -523,7 +523,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitObjRef(ExpObjRef exp) {
-		System.out.println("Weaken - visitObjRef");
+//		System.out.println("Weaken - visitObjRef");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
 		} else {
@@ -533,7 +533,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitOne(ExpOne exp) {
-		System.out.println("Weaken - visitOne");
+//		System.out.println("Weaken - visitOne");
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
 		VarDeclList decl = exp.getVariableDeclarations();
@@ -603,14 +603,14 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitQuery(ExpQuery exp) {
-		System.out.println("Weaken - visitQuery");
+//		System.out.println("Weaken - visitQuery");
 		wrongTypeError("visit query - this node should not be reached");
 
 	}
 
 	@Override
 	public void visitWithValue(ExpressionWithValue exp) {
-		System.out.println("Weaken - visitWithValue");
+//		System.out.println("Weaken - visitWithValue");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
 		} else {
@@ -620,7 +620,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitSortedBy(ExpSortedBy exp) {
-		System.out.println("Weaken - visitSortedBy");
+//		System.out.println("Weaken - visitSortedBy");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
 		} else {
@@ -630,7 +630,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	//OK
 	private void mutateOrExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateOrExp");
+//		System.out.println("Weaken - mutateOrExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -686,7 +686,7 @@ public class WeakenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateAndExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateAndExp");
+//		System.out.println("Weaken - mutateAndExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -794,7 +794,7 @@ public class WeakenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateXorExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateXorExp");
+//		System.out.println("Weaken - mutateXorExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -890,7 +890,7 @@ public class WeakenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateImpliesExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateImpliesExp");
+//		System.out.println("Weaken - mutateImpliesExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -977,7 +977,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 
 	private void mutateIsEmptyExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateIsEmptyExp");
+//		System.out.println("Weaken - mutateIsEmptyExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -1009,7 +1009,7 @@ public class WeakenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateNotEmptyExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateNotEmptyExp");
+//		System.out.println("Weaken - mutateNotEmptyExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -1296,7 +1296,7 @@ public class WeakenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateLessExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateLessExp");
+//		System.out.println("Weaken - mutateLessExp");
 
 		Expression[] args = exp.args();
 
@@ -1348,7 +1348,7 @@ public class WeakenVisitor extends BooleanVisitor {
 	}
 	//OK
 	private void mutateGreaterExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateGreaterExp");
+//		System.out.println("Weaken - mutateGreaterExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -1400,7 +1400,7 @@ public class WeakenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateNotEqualsExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateNotEqualsExp");
+//		System.out.println("Weaken - mutateNotEqualsExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -1493,7 +1493,7 @@ public class WeakenVisitor extends BooleanVisitor {
 		defaultWeakening();
 	}
 	private void mutateEqualsExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateEqualsExp");
+//		System.out.println("Weaken - mutateEqualsExp");
 		Expression[] args = exp.args();
 		assert(args.length == 2);
 		Expression left  = args[0];
@@ -1550,13 +1550,13 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitStdOp(ExpStdOp exp) {
-		System.out.println("Weaken - visitStdOp");
+//		System.out.println("Weaken - visitStdOp");
 		// Place-holder for operations returning a boolean value
 		// Boolean: or, xor, and, not, implies
 		// Collection operations: isEmpty, notEmpty, includes, excludes, includesAll, excludesAll
 		// Relational: <=, >=, <, >, =, <>
 		String opName = exp.opname();
-		System.out.println("Weaken - visitStdOp - opName ["+opName+"] -----------------------------------");
+//		System.out.println("Weaken - visitStdOp - opName ["+opName+"] -----------------------------------");
 		switch(opName) {
 		case "or":
 			mutateOrExp(exp);
@@ -1620,7 +1620,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitTupleLiteral(ExpTupleLiteral exp) {
-		System.out.println("Weaken - visitTupleLiteral");
+//		System.out.println("Weaken - visitTupleLiteral");
 		// Mutation 1: replace by "true"
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
@@ -1631,7 +1631,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitTupleSelectOp(ExpTupleSelectOp exp) {
-		System.out.println("Weaken - visitTupleSelectOp");
+//		System.out.println("Weaken - visitTupleSelectOp");
 		// Mutation 1: replace by "true"
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
@@ -1642,7 +1642,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitUndefined(ExpUndefined exp) {
-		System.out.println("Weaken - visitUndefined");
+//		System.out.println("Weaken - visitUndefined");
 		// Mutation 1: replace by "true"
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
@@ -1653,7 +1653,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitVariable(ExpVariable exp) {
-		System.out.println("Weaken - visitVariable");
+//		System.out.println("Weaken - visitVariable");
 		// Mutation 1: replace by "true"
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
@@ -1664,7 +1664,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitClosure(ExpClosure exp) {
-		System.out.println("Weaken - visitClosure");
+//		System.out.println("Weaken - visitClosure");
 		// Mutation 1: replace by "true"
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
@@ -1675,27 +1675,27 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitOclInState(ExpOclInState exp) {
-		System.out.println("Weaken - visitOclInState");
+//		System.out.println("Weaken - visitOclInState");
 		defaultWeakening();
 	}
 
 	@Override
 	public void visitVarDeclList(VarDeclList varDeclList) {
-		System.out.println("Weaken - visitVarDeclList");
+//		System.out.println("Weaken - visitVarDeclList");
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void visitVarDecl(VarDecl varDecl) {
-		System.out.println("Weaken - visitVarDecl");
+//		System.out.println("Weaken - visitVarDecl");
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void visitObjectByUseId(ExpObjectByUseId exp) {
-		System.out.println("Weaken - visitObjectByUseId");
+//		System.out.println("Weaken - visitObjectByUseId");
 		// Mutation 1: replace by "true"
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
@@ -1706,7 +1706,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitConstUnlimitedNatural(ExpConstUnlimitedNatural exp) {
-		System.out.println("Weaken - visitConstUnlimitedNatural");
+//		System.out.println("Weaken - visitConstUnlimitedNatural");
 		// Mutation 1: replace by "true"
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
@@ -1727,7 +1727,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitExpSelectByType(ExpSelectByType exp) {
-		System.out.println("Weaken - visitExpSelectByType");
+//		System.out.println("Weaken - visitExpSelectByType");
 		// Mutation 1: replace by "true"
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
@@ -1738,7 +1738,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitRange(ExpRange exp) {
-		System.out.println("Weaken - visitRange");
+//		System.out.println("Weaken - visitRange");
 		// Mutation 1: replace by "true"
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();
@@ -1749,7 +1749,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitNavigationClassifierSource(ExpNavigationClassifierSource exp) {
-		System.out.println("Weaken - visitNavigationClassifierSource");
+//		System.out.println("Weaken - visitNavigationClassifierSource");
 		// Mutation 1: replace by "true"
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultWeakening();

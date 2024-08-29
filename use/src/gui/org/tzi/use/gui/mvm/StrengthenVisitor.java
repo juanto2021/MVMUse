@@ -68,7 +68,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	// public void visitAllInstances(ExpAllInstances exp) 
 	// public void visitBagLiteral(ExpBagLiteral exp) 
 	public void visitCollect(ExpCollect exp) {
-		System.out.println("Strengthening - visitCollect");
+//		System.out.println("Strengthening - visitCollect");
 	}
 	// public void visitCollect(ExpCollect exp) 
 	// public void visitCollectNested(ExpCollectNested exp) 
@@ -95,7 +95,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitAny(ExpAny exp) {
-		System.out.println("Strengthening - visitAny");
+//		System.out.println("Strengthening - visitAny");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -105,7 +105,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitAsType(ExpAsType exp) {
-		System.out.println("Strengthening - visitAsType");
+//		System.out.println("Strengthening - visitAsType");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {	
@@ -115,7 +115,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitAttrOp(ExpAttrOp exp) {
-		System.out.println("Strengthening - visitAttrOp");
+//		System.out.println("Strengthening - visitAttrOp");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -125,13 +125,13 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitConstBoolean(ExpConstBoolean exp) {
-		System.out.println("Strengthening - visitConstBoolean");
+//		System.out.println("Strengthening - visitConstBoolean");
 		defaultStrengthening();
 	}
 
 	@Override
 	public void visitExists(ExpExists exp) {
-		System.out.println("Strengthening - visitExists");
+//		System.out.println("Strengthening - visitExists");
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
 		VarDeclList decl = exp.getVariableDeclarations();
@@ -208,7 +208,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitForAll(ExpForAll exp) {
-		System.out.println("Strengthening - visitForAll");
+//		System.out.println("Strengthening - visitForAll");
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
 		VarDeclList decl = exp.getVariableDeclarations();		
@@ -263,7 +263,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitIf(ExpIf exp) {
-		System.out.println("Strengthening - collect");
+//		System.out.println("Strengthening - collect");
 		Expression cond = exp.getCondition();
 		Expression thenExp = exp.getThenExpression();
 		Expression elseExp = exp.getElseExpression();
@@ -310,19 +310,19 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitIsKindOf(ExpIsKindOf exp) {
-		System.out.println("Strengthening - visitIsKindOf");
+//		System.out.println("Strengthening - visitIsKindOf");
 		defaultStrengthening();
 	}
 
 	@Override
 	public void visitIsTypeOf(ExpIsTypeOf exp) {
-		System.out.println("Strengthening - visitIsTypeOf");
+//		System.out.println("Strengthening - visitIsTypeOf");
 		defaultStrengthening();
 	}
 
 	@Override
 	public void visitIsUnique(ExpIsUnique exp) {
-		System.out.println("Strengthening - visitIsUnique");
+//		System.out.println("Strengthening - visitIsUnique");
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
 		VarDeclList decl = exp.getVariableDeclarations();
@@ -365,7 +365,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitLet(ExpLet exp) {
-		System.out.println("Strengthening - visitLet");
+//		System.out.println("Strengthening - visitLet");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -375,7 +375,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitObjOp(ExpObjOp exp) {
-		System.out.println("Strengthening - ExpObjOp");
+//		System.out.println("Strengthening - ExpObjOp");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -385,7 +385,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitObjRef(ExpObjRef exp) {
-		System.out.println("Strengthening - ExpObjRef");
+//		System.out.println("Strengthening - ExpObjRef");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -395,20 +395,20 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitOne(ExpOne exp) {
-		System.out.println("Strengthening - ExpOne");
+//		System.out.println("Strengthening - ExpOne");
 		// TODO what to do here?
 	}
 
 
 	@Override
 	public void visitQuery(ExpQuery exp) {
-		System.out.println("Strengthening - ExpQuery");
+//		System.out.println("Strengthening - ExpQuery");
 		wrongTypeError("visit query - this node should not be reached");
 	}
 
 	@Override
 	public void visitWithValue(ExpressionWithValue exp) {
-		System.out.println("Strengthening - visitWithValue");
+//		System.out.println("Strengthening - visitWithValue");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -418,7 +418,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitSortedBy(ExpSortedBy exp) {
-		System.out.println("Strengthening - visitSortedBy");
+//		System.out.println("Strengthening - visitSortedBy");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -427,7 +427,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateOrExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateOrExp");
+//		System.out.println("Strengthening - mutateOrExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -531,7 +531,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateAndExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateAndExp");
+//		System.out.println("Strengthening - mutateAndExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -580,7 +580,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateXorExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateXorExp");
+//		System.out.println("Strengthening - mutateXorExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -614,7 +614,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateImpliesExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateImpliesExp");
+//		System.out.println("Strengthening - mutateImpliesExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -638,7 +638,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateNotExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateNotExp");
+//		System.out.println("Strengthening - mutateNotExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -667,7 +667,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 
 	private void mutateIsEmptyExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateIsEmptyExp");
+//		System.out.println("Strengthening - mutateIsEmptyExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -697,7 +697,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateNotEmptyExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateNotEmptyExp");
+//		System.out.println("Strengthening - mutateNotEmptyExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -726,7 +726,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateIncludesExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateIncludesExp");
+//		System.out.println("Strengthening - mutateIncludesExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -756,7 +756,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateExcludesExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateExcludesExp");
+//		System.out.println("Strengthening - mutateExcludesExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -787,7 +787,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}	
 
 	private void mutateIncludesAllExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateIncludesAllExp");
+//		System.out.println("Strengthening - mutateIncludesAllExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -844,7 +844,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateExcludesAllExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateExcludesAllExp");
+//		System.out.println("Strengthening - mutateExcludesAllExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -902,7 +902,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}	
 
 	private void mutateLessEqualExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateLessEqualExp");
+//		System.out.println("Strengthening - mutateLessEqualExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -932,7 +932,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateGreaterEqualExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateGreaterEqualExp");
+//		System.out.println("Strengthening - mutateGreaterEqualExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -963,7 +963,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	private void mutateLessExp(ExpStdOp exp) {
 
-		System.out.println("Strengthening - mutateLessExp");
+//		System.out.println("Strengthening - mutateLessExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -988,7 +988,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateGreaterExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateGreaterExp");
+//		System.out.println("Strengthening - mutateGreaterExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -1013,7 +1013,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateNotEqualsExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateNotEqualsExp");
+//		System.out.println("Strengthening - mutateNotEqualsExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
@@ -1044,13 +1044,13 @@ public class StrengthenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateUndefinedExp(ExpStdOp exp) {
-		System.out.println("Strengthening - mutateUndefinedExp");
+//		System.out.println("Strengthening - mutateUndefinedExp");
 		defaultStrengthening();
 	}
 
 	@Override
 	public void visitStdOp(ExpStdOp exp) {
-		System.out.println("Strengthening - visitStdOp");
+//		System.out.println("Strengthening - visitStdOp");
 		// Place-holder for operations returning a boolean value
 		// Boolean: or, xor, and, not, implies
 		// Collection operations: isEmpty, notEmpty, includes, excludes, includesAll, excludesAll
@@ -1118,7 +1118,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitTupleSelectOp(ExpTupleSelectOp exp) {
-		System.out.println("Strengthening - visitTupleSelectOp");
+//		System.out.println("Strengthening - visitTupleSelectOp");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -1128,7 +1128,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitVariable(ExpVariable exp) {
-		System.out.println("Strengthening - ExpVariable");
+//		System.out.println("Strengthening - ExpVariable");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -1138,7 +1138,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitClosure(ExpClosure exp) {
-		System.out.println("Strengthening - ExpClosure");
+//		System.out.println("Strengthening - ExpClosure");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -1148,13 +1148,13 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitOclInState(ExpOclInState exp) {
-		System.out.println("Strengthening - visitOclInState");
+//		System.out.println("Strengthening - visitOclInState");
 		defaultStrengthening();
 	}
 
 	@Override
 	public void visitObjectByUseId(ExpObjectByUseId exp) {
-		System.out.println("Strengthening - visitObjectByUseId");
+//		System.out.println("Strengthening - visitObjectByUseId");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -1164,7 +1164,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitSelectByKind(ExpSelectByKind exp) {
-		System.out.println("Strengthening - visitSelectByKind");
+//		System.out.println("Strengthening - visitSelectByKind");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -1174,7 +1174,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitExpSelectByType(ExpSelectByType exp) {
-		System.out.println("Strengthening - visitExpSelectByType");
+//		System.out.println("Strengthening - visitExpSelectByType");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
@@ -1184,7 +1184,7 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 	@Override
 	public void visitNavigationClassifierSource(ExpNavigationClassifierSource exp) {
-		System.out.println("Strengthening - visitNavigationClassifierSource");
+//		System.out.println("Strengthening - visitNavigationClassifierSource");
 		if (exp.type().isTypeOfBoolean()) {		
 			defaultStrengthening();
 		} else {
