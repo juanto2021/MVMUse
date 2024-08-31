@@ -89,7 +89,7 @@ context Products inv unique_product_id:
     Products.allInstances()->forAll(p | p <> self implies p.ID <> self.ID)
 
 context Products inv sufficient_stock:
-    self.stock >= Orders_line.allInstances()
+    self.stock = Orders_line.allInstances()
                     ->select(ol | ol.product = self)
                     ->collect(ol | ol.quantity)
                     ->sum()
@@ -108,9 +108,8 @@ context Categories inv name_valid_length:
   self.name.size() <= 50
   
 -- Invariantes para Customers
-context Customers inv ID_positive:
-    self.ID > 0
-
+context Customers inv ID_positive:--< Modify by MVM [self.ID > 0]
+(self.ID >= 0)
 context Customers inv name_not_empty:
     self.name.size() > 0
 
@@ -121,8 +120,9 @@ context Customers inv blocked_status:
     self.blocked >= 0 and self.blocked <= 1
 
 context Customers inv customer_not_blocked:
-    --< Modify by MVM [Orders.allInstances()->exists(o | o.customerID = self.ID) implies self.blocked = 0  -- Invariantes para Orders]
-((Orders.allInstances->forAll(o : Orders | (o.customerID = self.ID)) and (Orders.allInstances->size >= 1)) implies (self.blocked = 0))
+    Orders.allInstances()->exists(o | o.customerID = self.ID) implies self.blocked = 0
+  
+-- Invariantes para Orders
 context Orders inv ID_positive:
     self.ID > 0
 
@@ -133,7 +133,10 @@ context Orders inv unique_order_id:
     Orders.allInstances()->forAll(o | o <> self implies o.ID <> self.ID) 
 
 context Orders inv calculate_total:
-    self.total = Orders_line.allInstances()->select(ol | ol.order = self)->collect(ol | ol.quantity * ol.product.price)->sum()
+    self.total = Orders_line.allInstances()
+	   ->select(ol | ol.order = self)
+	   ->collect(ol | ol.quantity * ol.product.price)
+	   ->sum()
 
 context Orders inv distinctProductsInOrderLines:
     self.orderLine->forAll(ol1, ol2 | ol1 <> ol2 implies ol1.product <> ol2.product)

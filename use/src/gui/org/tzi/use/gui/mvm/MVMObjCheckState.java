@@ -670,21 +670,21 @@ public class MVMObjCheckState extends JDialog {
 		taExprInvNew.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
 			public void insertUpdate(DocumentEvent e) {
-				// Metodo llamado cuando se inserta texto en el JTextArea
+				// Method called when text is inserted into the JTextArea
 				//				System.out.println("Texto insertado: " + taExprInvNew.getText());
 				//				prepareContentNew();
 			}
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
-				// Metodo llamado cuando se elimina texto del JTextArea
+				// Method called when text is removed from the JTextArea
 				//				System.out.println("Texto eliminado: " + taExprInvNew.getText());
 				//				prepareContentNew();
 			}
 
 			@Override
 			public void changedUpdate(DocumentEvent e) {
-				// Metodo llamado cuando se cambia el estilo del texto en el JTextArea
+				// Method called when the text in the JTextArea is changed
 				//				System.out.println("Estilo de texto cambiado: " + taExprInvNew.getText());
 				//				prepareContentNew();
 			}
@@ -885,11 +885,11 @@ public class MVMObjCheckState extends JDialog {
 		showViability(msgError);
 		if (msgError.equals("")) {
 			boolean bRes=ChangeContextSession(workFile);
-			// Restablecer nInv
+			// Restore nInv
 			nInv=nInvAnt;
 
 			if (bRes) {
-				// Almacena resultado de la invariante deseada
+				// Stores result of the desired invariant
 				if (nInv>-1) {
 					//Provis
 					int nFilasInv=tabInvs.getModel().getRowCount();
@@ -907,16 +907,16 @@ public class MVMObjCheckState extends JDialog {
 
 			}
 
-			// Restablece fichero original 
+			// Restore original file 
 			bRes=ChangeContextSession(fileNameModelInicial);	
-			// Restablecer nInv
+			// Restore nInv
 			nInv=nInvAnt;
 			if (tabInvs.getModel().getRowCount()>0) {
 				tabInvs.setRowSelectionInterval(nInv, nInv);
 				loadListAttrs(nObjAnt);
 			}
 		}else {
-			// Restablecer nInv
+			// Restore nInv
 			showIndicatorAlt(false);
 			nInv=nInvAnt;
 			if (tabInvs.getModel().getRowCount()>0) {
@@ -941,15 +941,11 @@ public class MVMObjCheckState extends JDialog {
 		String nameClassTabInv=oInvTab.cls().name();
 		String nameInvTabInv=oInvTab.name();
 		if(listInv.size()>0 && nInv>-1) {
-			// Hay que buscar oInv comparando nombre de inv y no basandose en listInv
-			//Aqui8 bucle de listInv para comparar con tabInv
+			// You have to search for oInv by comparing inv name and not based on listInv
 			for (int i=0;i<listInv.size();i++) {
 				MVMDefInv oInv = listInv.get(i);
 				String nameClassoInv=oInv.getNameClass();
 				String nameInvoInv=oInv.getNameInv();
-				if (nameInvoInv.equals("customer_not_blocked")) {
-					System.out.println("Aqui");
-				}
 				if(nameClassoInv.equals(nameClassTabInv)&&
 						nameInvoInv.equals(nameInvTabInv)) {
 
@@ -959,16 +955,11 @@ public class MVMObjCheckState extends JDialog {
 					String strRight=contentFile.substring(finBodyExpr, contentFile.length());
 					String strChange=contentFile.substring(iniBodyExpr, finBodyExpr);
 					String strChanged = strChange.replace("\r\n","").replace("\n", "").trim();
-					//Aqui10
 					String strModified="--< Modify by MVM ["+strChanged+"]\r\n" +newBody+"\r\n"; // Simple
-					if (nameInvoInv.equals("customer_not_blocked")) {
-						System.out.println("Aqui");
-					}
 					sourceNew=strLeft + strModified.trim() +"\r\n" + strRight;
 					break;
 				}
 			}
-
 		}
 		contentNew=sourceNew;
 	}
@@ -985,7 +976,7 @@ public class MVMObjCheckState extends JDialog {
 		w.setLocationRelativeTo(null);
 		w.setResizable(false);
 		w.setVisible(true);
-		// Obtener el contenido de la pantalla new
+		// Get the contents of the new screen
 		contentNew=w.getContentNew();
 	}
 
@@ -1017,12 +1008,12 @@ public class MVMObjCheckState extends JDialog {
 		int contador=0;
 		boolean exist=false;
 		do {
-			contador++; // Incrementa el contador en 1
+			contador++; // Increments the counter by 1
 
 			fileProposal=base+"_v"+contador+"."+strExtension;
 			File archivo = new File(fileProposal);
 
-			// Verificar si el archivo existe
+			// Check if the file exists
 			if (archivo.exists()) {
 				exist=true;
 			} else {
@@ -1071,7 +1062,7 @@ public class MVMObjCheckState extends JDialog {
 		if (result == JFileChooser.APPROVE_OPTION) {
 			File fileToSave = fileChooser.getSelectedFile();
 
-			// Comprobar si el archivo ya existe
+			// Check if file already exists
 			if (fileToSave.exists()) {
 				int overwriteResult = JOptionPane.showConfirmDialog(frame,
 						"El archivo ya existe. Â¿Deseas sobrescribirlo?",
@@ -1079,7 +1070,7 @@ public class MVMObjCheckState extends JDialog {
 						JOptionPane.YES_NO_OPTION);
 
 				if (overwriteResult != JOptionPane.YES_OPTION) {
-					// El usuario eligio no sobrescribir, salir sin guardar
+					// User chose not to overwrite, exit without saving
 					return;
 				}
 			}
@@ -1112,7 +1103,7 @@ public class MVMObjCheckState extends JDialog {
 
 				lbDIRWRKValue.setText(directory);
 
-				// Salvar .properties nuevo
+				// Save new .properties 
 				copyProperties(nomFileSave);
 
 			} catch (Exception e) {
@@ -1123,18 +1114,18 @@ public class MVMObjCheckState extends JDialog {
 	}
 	private boolean copyProperties(String nomFileSave) {
 		boolean bRes=true;
-		// Leer .properties inicial
+		// Read initial .properties
 		String filePropertiesInicial=fileNameModelInicial.replace("."+strExtension, "."+strExtensionProperties);
 		String filePropertiesFinal=nomFileSave.replace("."+strExtension, "."+strExtensionProperties);
 
-		// Crear objetos File para los archivos inicial y final
+		// Create File objects for the start and end files
 		File fileInicial = new File(filePropertiesInicial);
 		File fileFinal = new File(filePropertiesFinal);
 
-		// Verificar si el archivo inicial existe
+		// Check if the initial file exists
 		if (fileInicial.exists()) {
 			try {
-				// Copiar el archivo inicial al archivo final
+				// Copy the initial file to the final file
 				Path source = fileInicial.toPath();
 				Path destination = fileFinal.toPath();
 				Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
@@ -1155,7 +1146,7 @@ public class MVMObjCheckState extends JDialog {
 		copyProperties(workFile);
 
 		//------
-		// txt provis para vista previa en windows para comprobaciones
+		// txt provis for preview on windows for checking
 		String workFileTXT = workFile.replace(("."+strExtension), ".txt");
 		bRes=writeFileOnDisk(workFileTXT, content);
 		//------
@@ -1193,13 +1184,12 @@ public class MVMObjCheckState extends JDialog {
 			List<Expression> ct = computeClassifyingTerms2(exp);
 			int nExpr=0;
 			for(Expression item: ct) {
-				//			System.out.println("Invariant " + item.toString());
 				String strNExpr = Integer.toString(nExpr);
 				mapAlternatives.put(strNExpr, item.toString());
 				nExpr+=1;
 			}
 		}catch (Exception e) {
-
+			// Do nothing
 		}
 
 
@@ -1221,7 +1211,6 @@ public class MVMObjCheckState extends JDialog {
 		}
 	}
 
-	//--------------------------
 	private void showPanelTableAlt(String strInv2, int nInv2) {
 
 		Map<String, String> mapSorted = new TreeMap<>();
@@ -1237,19 +1226,19 @@ public class MVMObjCheckState extends JDialog {
 			strInv = strInv2;
 		}
 
-		scrollPaneTableAlt.remove(tableAlt);// OJO
+		scrollPaneTableAlt.remove(tableAlt);
 		tableAlt = new JTable(new CustomTableModel(mapSorted));
-		tableAlt.setRowSelectionAllowed(true);  // Desactivar la selecciï¿½n de filas
+		tableAlt.setRowSelectionAllowed(true);  // Disable row selection
 
-		// Configurar el renderizador y editor para la columna de radio buttons
+		// Setting up the renderer and editor for the radio buttons column
 		tableAlt.getColumnModel().getColumn(0).setCellRenderer(new RadioButtonRenderer());
 		tableAlt.getColumnModel().getColumn(0).setCellEditor(new RadioButtonEditor(new JCheckBox()));
 
-		// Configurar el renderizador y editor para las columnas JTextField
+		// Setting up the renderer and editor for JTextField columns
 		tableAlt.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(new JTextField()));
 		tableAlt.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JTextField()));
 
-		// Configurar el renderizador personalizado para la tercera columna
+		// Setting up custom renderer for third column
 		tableAlt.getColumnModel().getColumn(2).setCellRenderer(new CustomColumnRenderer());
 
 		colOpAlt = tableAlt.getColumnModel().getColumn(0);
@@ -1284,7 +1273,7 @@ public class MVMObjCheckState extends JDialog {
 						String bodyAlt=value.toString();
 						showAlternative(bodyAlt);
 						saveWorkFile(contentNew);
-						// Restablecer nInv
+						// Restore nInv
 						nInv=nInvAnt;
 						if (tabInvs.getModel().getRowCount()>0) {
 							tabInvs.setRowSelectionInterval(nInv, nInv);
@@ -1315,7 +1304,7 @@ public class MVMObjCheckState extends JDialog {
 			String bodyAlt=value.toString();
 			showAlternative(bodyAlt);
 			saveWorkFile(contentNew);
-			// Restablecer nInv
+			// Restore nInv
 			nInv=nInvAnt;
 			if (tabInvs.getModel().getRowCount()>0) {
 				tabInvs.setRowSelectionInterval(nInv, nInv);
@@ -1352,7 +1341,7 @@ public class MVMObjCheckState extends JDialog {
 
 			for (Map.Entry<String, String> entry : pMapAlt.entrySet()) {
 				String valor = entry.getValue();
-				// Calcular que pasa con la alternativa 
+				// Calculate with the alternative to see the result
 
 				int nInv = tabInvs.getSelectedRow();
 				int nInvAnt=nInv;
@@ -1362,7 +1351,7 @@ public class MVMObjCheckState extends JDialog {
 				showAlternative(bodyAlt);
 				prepareContentNew();
 				saveWorkFile(contentNew);
-				// Restablecer nInv
+				// Restore nInv
 				nInv=nInvAnt;
 				if (tabInvs.getModel().getRowCount()>0) {
 					tabInvs.setRowSelectionInterval(nInv, nInv);
@@ -1373,7 +1362,7 @@ public class MVMObjCheckState extends JDialog {
 				String textResult="Incorrect";
 				boolean bRes=false;
 				if (!contentNew.equals("")) {
-					bRes=testNewBodyInv();//Provis
+					bRes=testNewBodyInv();
 				}
 				if (bRes) {
 					textResult="Correct";
@@ -1604,13 +1593,8 @@ public class MVMObjCheckState extends JDialog {
 					String strINV = contentFile.substring(iniINV, finINV);
 					String bodyExpression = cleaninvExpression(strINV);
 
-					// Localiza primer ':'
-					int posiCOLON = strINV.indexOf(":");
-
 					int iniBody=iniINV+strINV.indexOf(bodyExpression);
-					//					int finBody=iniBody+bodyExpression.length(); // Provis
-					int finBody=iniINV+strINV.length();
-					// Mostrar 
+					int finBody=iniBody+bodyExpression.length();
 
 					numINV+=1;
 					MVMDefInv oInv = new MVMDefInv();
@@ -1633,22 +1617,21 @@ public class MVMObjCheckState extends JDialog {
 
 	public static String cleanBlock(String block) {
 		StringBuilder result = new StringBuilder();
-		String body="";
-		// Localiza primer ':'
+		// Find first ':'
 		int posiCOLON = block.indexOf(":");
 		String resto="";
 		if (posiCOLON>0) {
 			resto=block.substring(posiCOLON+1, block.length());
 		}
 		String block1 = resto.replace("\r\n", "\n");
-		// Dividir el bloque en líneas individuales
+		// Split the block into individual lines
 		String[] lines = block1.split("\n");
 
 		for (String line : lines) {
-			// Eliminar todo lo que esté después de '--' (incluido) y los espacios anteriores
+			// Remove everything after '--' (inclusive) and any preceding spaces
 			String cleanedLine = line.split("--")[0].trim();
 
-			// Solo agregar la línea si no está vacía
+			// Only add the line if it is not empty
 			if (!cleanedLine.isEmpty()) {
 				result.append(cleanedLine).append("\r\n");
 			}
@@ -1656,9 +1639,30 @@ public class MVMObjCheckState extends JDialog {
 
 		return result.toString();
 	}
+
+	//--- old
+	//	private static String cleaninvExpression(String invExpression) {
+	//		String body = cleanBlock(invExpression);
+	//		return body.replace("\r\n","").replace("\n", "");
+	//	}
+	//--- old
+
 	private static String cleaninvExpression(String invExpression) {
-		String body = cleanBlock(invExpression);
-		return body.replace("\r\n","").replace("\n", "");
+		String body="";
+		// Find first ':'
+		int posiCOLON = invExpression.indexOf(":");
+		String resto="";
+		if (posiCOLON>0) {
+			resto=invExpression.substring(posiCOLON+1, invExpression.length());
+		}
+
+		int posiHYPHEN = resto.indexOf("--");
+		if (posiHYPHEN>0) {
+			resto=resto.substring(0, posiHYPHEN);
+		}
+		//		body=resto.replace("\r\n","").replace("\n", "").trim();//Old
+		body=resto;
+		return body;
 	}
 
 	private void doTerminalNodeImpl(Object child) {
@@ -1673,7 +1677,6 @@ public class MVMObjCheckState extends JDialog {
 		writer.print(line);
 	}
 
-	//--------------------------
 	private String verifyContentModel(String fileName){
 		String msgError="";
 
@@ -1689,7 +1692,7 @@ public class MVMObjCheckState extends JDialog {
 			String contenido = stringWriter.toString();
 			if (newModel==null) {
 				String error = contenido.replace(fileName+":", "");
-				msgError="Model no viable !!! ["+error+"]";
+				msgError="Non-viable model !!! ["+error+"]";
 			}
 		}catch (Exception e) {
 			msgError=e.getMessage();
@@ -1721,7 +1724,7 @@ public class MVMObjCheckState extends JDialog {
 					MVMAction oAction=lActions.get(nActions-1);
 					lActionsCheck.add(nAction, oAction);
 				}
-				// Hay que rehacer mapObjects de MVMView
+				// MVMView mapObjects need to be redone
 				mapObjects = thisMVMView.getMapObjects(lActionsCheck);
 
 				reloadComponentsModel();
@@ -1744,7 +1747,7 @@ public class MVMObjCheckState extends JDialog {
 				MVMAction oAction=lActions.get(nActions-1);
 				lActionsCheck.add(nAction, oAction);
 			}
-			// Hay que rehacer mapObjects de MVMView
+			// MVMView mapObjects need to be redone
 			mapObjects = thisMVMView.getMapObjects(lActionsCheck);
 
 			reloadComponentsModel();
@@ -1765,11 +1768,9 @@ public class MVMObjCheckState extends JDialog {
 					MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
 					texto = (String) oInv.bodyExpression().toString();
 				}catch (Exception e) {
-
+					// Do nothing
 				}
-
 			}
-			taExprInvCurrent.setText(texto);
 		}
 		taExprInvCurrent.setText(texto);
 	}
@@ -1869,7 +1870,7 @@ public class MVMObjCheckState extends JDialog {
 				boolean allOk=true;
 
 				Map<MClassInvariant, Boolean> innerMap = entry.getValue();
-				// Determina si todos los invs son ok o no
+				// Determines whether all invs are ok or not
 
 				for (Map.Entry<MClassInvariant, Boolean> innerEntry : innerMap.entrySet()) {
 					MClassInvariant inv = innerEntry.getKey();
@@ -1990,7 +1991,7 @@ public class MVMObjCheckState extends JDialog {
 					TreeMap<MClassInvariant, Boolean> mapaOrdenado = new TreeMap<>(innerMap);
 					int nInvs = innerMap.size();
 					Object[][] data = new Object[nInvs][2];
-					// Determina si todos los invs son ok o no
+					// Determines whether all invs are ok or not
 
 					for (Map.Entry<MClassInvariant, Boolean> innerEntry : mapaOrdenado.entrySet()) {
 						MClassInvariant inv = innerEntry.getKey();
@@ -2033,12 +2034,12 @@ public class MVMObjCheckState extends JDialog {
 					break;
 				}
 			}
-			// Si no halla objeto
+			// If there is no object...
 			if(!hallaObj) {
 				Object[][] data = new Object[0][2];
 				modeltabInvs = new DefaultTableModel(data,columns);
-			}else {
-				//				modeltabInvs = new DefaultTableModel(data,columns);
+				//			}else {
+				//				//				modeltabInvs = new DefaultTableModel(data,columns);
 			}
 
 		}else {
@@ -2069,7 +2070,7 @@ public class MVMObjCheckState extends JDialog {
 			MVMDefInv oInv = listInv.get(nInv);
 			String nameClassInv = oInv.getNameClass();
 			String nameInv = oInv.getNameInv();
-			// busca en model
+			// Find in model
 			for (int nInvModel=0;nInvModel<nInvsModel;nInvModel++) {
 				MClassInvariant oInvModel = (MClassInvariant) modeltabInvs.getValueAt(nInvModel, 0);
 				String nameClassInvModel = oInvModel.cls().name();
@@ -2147,7 +2148,7 @@ public class MVMObjCheckState extends JDialog {
 				}
 			}
 		}
-		// Si no halla objeto
+		// If there is no object...
 		if(!hallaObj) {
 			Object[][] data = new Object[0][2];
 			modelTabAttrs = new DefaultTableModel(data,columns);

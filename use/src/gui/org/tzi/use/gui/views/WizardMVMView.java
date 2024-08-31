@@ -935,7 +935,6 @@ public class WizardMVMView extends JPanel implements View {
 					createObjDiagram();
 				}
 			}
-			//---------------
 
 		});
 		panel.add(btnShowIndividuals);
