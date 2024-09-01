@@ -1233,7 +1233,6 @@ public class WeakenVisitor extends BooleanVisitor {
 	}	
 
 	private void mutateLessEqualExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateLessEqualExp");
 
 		Expression[] args = exp.args();
 

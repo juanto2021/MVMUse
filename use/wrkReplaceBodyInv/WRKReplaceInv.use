@@ -1,142 +1,33 @@
-model shop
+model Animals
+ class Person
+ attributes
+   age: Integer
+   height: Integer
+   weight: Integer
+ end
+ 
+class Pet
+ attributes
+   name: String
+   species: String   
+   weight: Integer
+ end
+ 
+association BelongsTo between
+  Person[*]
+  Pet[*]
+end 
+ constraints
 
--- Definición de la clase Products
-class Products 
-    attributes
-        ID: Integer
-        description: String
-        price: Real
-        stock: Integer
-end
+context Person inv validGreaterThanAge:--< Modify by MVM [self.age > 3]
+(self.age >=1)
+context Pet inv validSmallerThanWeight:
+  --< Modify by MVM [self.weight < 4]
+--< Modify by MVM [(self.weight <= 7)]
+(self.weight - 1) <= 7
 
--- Definición de la clase Categories
-class Categories 
-    attributes
-        ID: Integer
-        name: String
-end
+context Person inv validSmallerThanNegAge:
+  self.age < 8  
 
--- Definición de la clase Customers
-class Customers 
-    attributes
-        ID: Integer
-        name: String
-        email: String
-        pwd: String
-        blocked: Integer
-end
-
--- Definición de la clase Orders
-class Orders 
-    attributes
-        ID: Integer
-        customerID: Integer
-        total: Real
-end
-
--- Definición de la clase Orders_line
-class Orders_line 
-    attributes
---        product_ID: Integer
-        quantity: Integer
-end
-
--- Asociación entre Orders y Customers
-association OrderCustomer between
-    Orders[*] role order
-    Customers[1] role customer
-end
-
--- Asociación entre Orders_line y Orders
-association OrderLineOrder between
-    Orders_line[1..*] role orderLine
-    Orders[1] role order
-end
-
--- Asociación entre Products y Categories
-association ProductCategory between
-    Products[*] role product
-    Categories[1] role category
-end
-
--- Asociación entre Orders_line y Products
-association OrderLineProduct between
-    Orders_line[*] role orderLine
-    Products[1] role product
-end
-
-constraints
-
--- Bloque de restricciones
-
--- Invariantes para Products
-context Products inv ID_positive:
-    self.ID > 0
-
-context Products inv description_not_empty:
-    self.description.size() > 0
-
-context Products inv price_non_negative:
-    self.price >= 0.0
-
-context Products inv stock_non_negative:
-    self.stock >= 0
-
-context Products inv stock_reasonable:
-    self.stock <= 10000
-
-context Products inv unique_product_id:
-    Products.allInstances()->forAll(p | p <> self implies p.ID <> self.ID)
-
-context Products inv sufficient_stock:
-    self.stock = Orders_line.allInstances()
-                    ->select(ol | ol.product = self)
-                    ->collect(ol | ol.quantity)
-                    ->sum()
-
--- Invariantes para Categories
-context Categories inv ID_positive:
-  self.ID > 0
-
-context Categories inv name_not_empty:
-self.name.size() > 0
-
-context Categories inv name_unique:
-  Categories.allInstances()->forAll(c | c <> self implies c.name <> self.name)
-
-context Categories inv name_valid_length:
-  self.name.size() <= 50
-  
--- Invariantes para Customers
-context Customers inv ID_positive:--< Modify by MVM [self.ID > 0]
-(self.ID >= 0)
-context Customers inv name_not_empty:
-    self.name.size() > 0
-
-context Customers inv password_min_length:
-    self.pwd.size() >= 8
-
-context Customers inv blocked_status:
-    self.blocked >= 0 and self.blocked <= 1
-
-context Customers inv customer_not_blocked:
-    Orders.allInstances()->exists(o | o.customerID = self.ID) implies self.blocked = 0
-  
--- Invariantes para Orders
-context Orders inv ID_positive:
-    self.ID > 0
-
-context Orders inv customer_assigned:
-    Customers.allInstances()->exists(c | c.ID = self.customerID)
-
-context Orders inv unique_order_id:
-    Orders.allInstances()->forAll(o | o <> self implies o.ID <> self.ID) 
-
-context Orders inv calculate_total:
-    self.total = Orders_line.allInstances()
-	   ->select(ol | ol.order = self)
-	   ->collect(ol | ol.quantity * ol.product.price)
-	   ->sum()
-
-context Orders inv distinctProductsInOrderLines:
-    self.orderLine->forAll(ol1, ol2 | ol1 <> ol2 implies ol1.product <> ol2.product)
+context Person inv pru1:
+  ( (    (self.age - 2  < ( 8+   self.age) )         ) )--pri
