@@ -1,33 +1,71 @@
-model Animals
- class Person
- attributes
-   age: Integer
-   height: Integer
-   weight: Integer
- end
- 
-class Pet
- attributes
-   name: String
-   species: String   
-   weight: Integer
- end
- 
-association BelongsTo between
-  Person[*]
-  Pet[*]
-end 
- constraints
+model shop
 
-context Person inv validGreaterThanAge:--< Modify by MVM [self.age > 3]
-(self.age >=1)
-context Pet inv validSmallerThanWeight:
-  --< Modify by MVM [self.weight < 4]
---< Modify by MVM [(self.weight <= 7)]
-(self.weight - 1) <= 7
+-- Definición de la clase Products
+class Products 
+    attributes
+        ID: Integer
+        description: String
+        price: Real
+        stock: Integer
+end
 
-context Person inv validSmallerThanNegAge:
-  self.age < 8  
+-- Definición de la clase Categories
+class Categories 
+    attributes
+        ID: Integer
+        name: String
+end
 
-context Person inv pru1:
-  ( (    (self.age - 2  < ( 8+   self.age) )         ) )--pri
+-- Definición de la clase Customers
+class Customers 
+    attributes
+        ID: Integer
+        name: String
+        email: String
+        pwd: String
+        blocked: Integer
+end
+
+-- Definición de la clase Orders
+class Orders 
+    attributes
+        ID: Integer
+        customerID: Integer
+        total: Real		
+end
+
+-- Definición de la clase Orders_line
+class Orders_line 
+    attributes
+--        product_ID: Integer
+        quantity: Integer
+end
+
+-- Asociación entre Orders y Customers
+association OrderCustomer between
+    Orders[*] role order
+    Customers[1] role customer
+end
+	
+-- Asociación entre Orders_line y Orders
+association OrderLineOrder between
+    Orders_line[1..*] role orderLine
+    Orders[1] role order
+end
+
+-- Asociación entre Products y Categories
+association ProductCategory between
+    Products[*] role product
+    Categories[1] role category
+end
+
+-- Asociación entre Orders_line y Products
+association OrderLineProduct between
+    Orders_line[*] role orderLine
+    Products[1] role product
+end
+
+constraints
+
+context Orders inv calculate_total:--< Modify by MVM [self.total = self.orderLine->collect(ol | ol.quantity * ol.product.price)->sum()]
+(self.total >= self.orderLine->collect(ol : Orders_line | (ol.quantity * ol.product.price))->sum)

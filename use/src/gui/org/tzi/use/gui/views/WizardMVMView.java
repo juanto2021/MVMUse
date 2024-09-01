@@ -502,8 +502,10 @@ public class WizardMVMView extends JPanel implements View {
 		chkAutoLayout.setSelected(true);
 		chkAutoLayout.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+
+				iniObjDiagramAssoc();
+
 				if (odvAssoc!=null) {
-					//					boolean isDoLayout = odvAssoc.getFDoAutoLayout;
 					if (e.getStateChange()==1) {
 						if (fLayoutThread!=null) {
 							boolean isDoLayout = fLayoutThread.isAlive();
@@ -931,6 +933,9 @@ public class WizardMVMView extends JPanel implements View {
 				if (!existWizard) {
 					fMainWindow.showMVMWizard(NAMEFRAMEMVMWIZARD);
 				}
+				//--- aqui0
+				searchObjDiagramAssociated();
+				//--
 				if (!existDiagram) {
 					createObjDiagram();
 				}
@@ -1838,7 +1843,17 @@ public class WizardMVMView extends JPanel implements View {
 
 		thisMVMView=this;
 		List<MVMAction> lActionsCheck=lActions;
-
+		//-- Aqui eliminar diagrama
+		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
+			if (odv.getName()!=null) {
+				if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+					iniObjDiagramAssoc();
+					fMainWindow.getObjectDiagrams().remove(odv);	
+					break;
+				}
+			}
+		}
+		//		
 		MVMObjCheckState w = new MVMObjCheckState(thisMVMView,mapaOrdenado, fSession, lActionsCheck);
 		w.setSize(1038, 820);
 		w.setLocationRelativeTo(null);
@@ -2439,8 +2454,9 @@ public class WizardMVMView extends JPanel implements View {
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
 			if (odv.getName()!=null) {
 				if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
-					odvAssoc = odv.getDiagram();
-					fLayoutThread=odvAssoc.fLayoutThread;
+					//					odvAssoc = odv.getDiagram();
+					//					fLayoutThread=odvAssoc.fLayoutThread;
+					iniObjDiagramAssoc();
 					//Aqui
 					if (fLayoutThread==null) {
 						fMainWindow.getObjectDiagrams().remove(odv);	
@@ -2480,10 +2496,9 @@ public class WizardMVMView extends JPanel implements View {
 		c.add(odv, BorderLayout.CENTER);
 		fMainWindow.addNewViewFrame(f);
 		fMainWindow.getObjectDiagrams().add(odv);
-		odvAssoc = odv.getDiagram();
-		fLayoutThread=odvAssoc.getFDoAutoLayout();
+		iniObjDiagramAssoc();
 		fLayoutThread=odvAssoc.forceStartLayoutThread();
-
+		fLayoutThread=odvAssoc.getFDoAutoLayout();
 		tile();
 	}
 
@@ -2523,8 +2538,9 @@ public class WizardMVMView extends JPanel implements View {
 							newObj.setName(NAMEFRAMEMVMDIAGRAM);
 						}
 						if (newObj.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
-							odvAssoc = newObj.getDiagram();
-							fLayoutThread=odvAssoc.fLayoutThread;
+							//							odvAssoc = newObj.getDiagram();
+							//							fLayoutThread=odvAssoc.fLayoutThread;
+							iniObjDiagramAssoc();
 							break;
 						}
 					}
@@ -2537,6 +2553,17 @@ public class WizardMVMView extends JPanel implements View {
 			createObjDiagram();
 		}
 		return existDiagram;
+	}
+	private void iniObjDiagramAssoc() {
+		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
+			if (odv.getName()!=null) {
+				if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+					odvAssoc = odv.getDiagram();
+					fLayoutThread=odvAssoc.getFDoAutoLayout();
+					break;
+				}
+			}
+		}
 	}
 	/**
 	 * Create an object
@@ -2614,7 +2641,8 @@ public class WizardMVMView extends JPanel implements View {
 		if (!checkExistObjDiagram()) {
 			fLayoutThread=odvAssoc.forceStartLayoutThread();
 		}else {
-			fLayoutThread=odvAssoc.fLayoutThread;
+			//			fLayoutThread=odvAssoc.fLayoutThread;// Provis
+			iniObjDiagramAssoc();
 		}
 		if (bNewObj) {
 			storeAction("CO", "Creation object ["+nomObj+"] of ["+oClass.name()+"]");
