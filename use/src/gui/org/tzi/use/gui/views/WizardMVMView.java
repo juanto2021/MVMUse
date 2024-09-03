@@ -23,7 +23,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -82,7 +81,6 @@ import org.tzi.use.gui.main.ModelBrowserSorting;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeEvent;
 import org.tzi.use.gui.main.ModelBrowserSorting.SortChangeListener;
 import org.tzi.use.gui.main.ViewFrame;
-import org.tzi.use.gui.mvm.MVMAssocWizard;
 import org.tzi.use.gui.mvm.LinkWizard;
 import org.tzi.use.gui.mvm.MVMAction;
 import org.tzi.use.gui.mvm.MVMAssocWizard;
@@ -474,6 +472,7 @@ public class WizardMVMView extends JPanel implements View {
 		btnNewObjectAuto.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				newObjectAuto();
+				iniObjDiagramAssoc();
 			}
 		});
 		panel.add(btnNewObjectAuto);
@@ -485,6 +484,7 @@ public class WizardMVMView extends JPanel implements View {
 		btnNewObjectSampleAuto.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				newObjectSampleAuto();
+				iniObjDiagramAssoc();
 			}
 		});
 		panel.add(btnNewObjectSampleAuto);
@@ -555,6 +555,7 @@ public class WizardMVMView extends JPanel implements View {
 		btnCreateObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				initNewObject();
+				iniObjDiagramAssoc();//aqui
 				if (chkAutoLayout.isSelected()) {
 					if (odvAssoc!=null) {
 						if (fLayoutThread!=null) {
@@ -781,8 +782,8 @@ public class WizardMVMView extends JPanel implements View {
 				MObject oRel = findAssocEnd(oSel);
 				if (oRel!=null) {
 					cmbObjectDes.setSelectedItem(oRel);
-				}else {
-					//					System.out.println("["+oSel.name()+"] No tiene extremo");
+					//				}else {
+					//					//					System.out.println("["+oSel.name()+"] No tiene extremo");
 				}
 			}
 		});
@@ -799,8 +800,8 @@ public class WizardMVMView extends JPanel implements View {
 				MObject oRel = findAssocEnd(oSel);
 				if (oRel!=null) {
 					cmbObjectDes.setSelectedItem(oRel);
-				}else {
-					//					System.out.println("["+oSel.name()+"] No tiene extremo");
+					//				}else {
+					//					//					System.out.println("["+oSel.name()+"] No tiene extremo");
 				}
 			}
 		});
@@ -1745,9 +1746,8 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	public boolean check_inv_state() {
 		boolean bRes = false;
-		//---
 		mapObjects = new HashMap<>();
-		//---
+
 		MModel fModel = fSystem.model();
 		int n = fModel.classInvariants().size();
 		MClassInvariant[] fClassInvariants = new MClassInvariant[0];
@@ -1765,9 +1765,7 @@ public class WizardMVMView extends JPanel implements View {
 		ecs = new ExecutorCompletionService<EvalResult>(executor);
 
 		futures.clear();
-		boolean violationLabel = false; 
-		int numFailures = 0;
-		boolean structureOK = true;	
+
 		for (int i = 0; i < fClassInvariants.length; i++) {
 			if(!fClassInvariants[i].isActive()){
 				continue;
@@ -1781,28 +1779,9 @@ public class WizardMVMView extends JPanel implements View {
 				continue;
 			}
 			try {
-				//Aqui
 				EvalResult res;
 				res = ecs.take().get();
 				fValues[res.index] = res;
-
-				boolean ok = false;
-				// if v == null it is not considered as a failure, rather it is
-				// a MultiplicityViolation and it is skipped as failure count
-				boolean skip = false;
-				if (res.result != null) {
-					try {
-						ok = res.result.isDefined() && ((BooleanValue)res.result).isTrue();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				} else {
-					violationLabel = true;
-					skip = true;
-				}
-
-				if (!skip && !ok)
-					numFailures++;
 
 			} catch (InterruptedException ex) {
 				break;
@@ -1843,12 +1822,12 @@ public class WizardMVMView extends JPanel implements View {
 
 		thisMVMView=this;
 		List<MVMAction> lActionsCheck=lActions;
-		//-- Aqui eliminar diagrama
+
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
 			if (odv.getName()!=null) {
 				if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+					fMainWindow.getObjectDiagrams().remove(odv);
 					iniObjDiagramAssoc();
-					fMainWindow.getObjectDiagrams().remove(odv);	
 					break;
 				}
 			}
@@ -1916,7 +1895,6 @@ public class WizardMVMView extends JPanel implements View {
 				int disponibility = lw.getDisponibility();
 				String objectName = lw.getObject();
 				String nomClass = lw.getNomClass(); //Main object class
-				String classOfName = lw.getOfClass(); // Class of the object you need
 				// Swipe to view available items by class
 
 				if (needed>0 || disponibility>0) {
@@ -2175,7 +2153,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	/**
 	 * Implements MClass comparator to classify
-	 * @author utopi
+	 * @author utopick
 	 *
 	 */
 	class MClassComparator implements Comparator<MClass> {
@@ -2454,13 +2432,10 @@ public class WizardMVMView extends JPanel implements View {
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
 			if (odv.getName()!=null) {
 				if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
-					//					odvAssoc = odv.getDiagram();
-					//					fLayoutThread=odvAssoc.fLayoutThread;
-					iniObjDiagramAssoc();
-					//Aqui
 					if (fLayoutThread==null) {
 						fMainWindow.getObjectDiagrams().remove(odv);	
 					}
+					iniObjDiagramAssoc();
 					return;
 				}
 			}
@@ -2499,6 +2474,9 @@ public class WizardMVMView extends JPanel implements View {
 		iniObjDiagramAssoc();
 		fLayoutThread=odvAssoc.forceStartLayoutThread();
 		fLayoutThread=odvAssoc.getFDoAutoLayout();
+
+		chkAutoLayout.setSelected(true);
+
 		tile();
 	}
 
@@ -2538,8 +2516,7 @@ public class WizardMVMView extends JPanel implements View {
 							newObj.setName(NAMEFRAMEMVMDIAGRAM);
 						}
 						if (newObj.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
-							//							odvAssoc = newObj.getDiagram();
-							//							fLayoutThread=odvAssoc.fLayoutThread;
+							fMainWindow.getObjectDiagrams().remove(newObj);
 							iniObjDiagramAssoc();
 							break;
 						}
@@ -2556,6 +2533,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 	private void iniObjDiagramAssoc() {
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
+
 			if (odv.getName()!=null) {
 				if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 					odvAssoc = odv.getDiagram();
@@ -2575,10 +2553,6 @@ public class WizardMVMView extends JPanel implements View {
 		checkExistObjDiagram();
 		fMainWindow.createObject(oClass, nomObj);
 		lObjects.setModel(loadListObjects(nomClass));
-
-		//		if (chkAutoLayout.isSelected()) {
-		//			odvAssoc.forceStartLayoutThread();
-		//		}
 	}
 
 	/**
@@ -2641,7 +2615,6 @@ public class WizardMVMView extends JPanel implements View {
 		if (!checkExistObjDiagram()) {
 			fLayoutThread=odvAssoc.forceStartLayoutThread();
 		}else {
-			//			fLayoutThread=odvAssoc.fLayoutThread;// Provis
 			iniObjDiagramAssoc();
 		}
 		if (bNewObj) {
@@ -2659,6 +2632,38 @@ public class WizardMVMView extends JPanel implements View {
 	private void deleteObject(String nomObjDel) {
 		int idx = selectObject(nomObjDel);
 		MSystemState state = fSystem.state();
+
+		boolean existDiagram=false;
+
+		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
+			// If it is null, it is given NAMEFRAMEMVMDIAGRAM
+
+			if (odv.getDiagram().getName()==null) {
+				odv.setName(NAMEFRAMEMVMDIAGRAM);
+			}
+			if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+				existDiagram=true;
+
+				break;
+			}
+		}
+
+		if(!existDiagram) {
+			for (JInternalFrame ifr: allframes) {
+				if (ifr.getName()==null&&ifr.getTitle().equals("Object diagram")){
+					ifr.setName(NAMEFRAMEMVMDIAGRAM);
+				}
+				if (ifr.getName()!=null){
+					if (ifr.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+						existDiagram=true;
+
+						ifr.dispose();
+						createObjDiagram();
+					}
+				}
+			}
+		}
+
 		// Locate diagram and see if it can be updated
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
 			// If it is null, it is given NAMEFRAMEMVMDIAGRAM
