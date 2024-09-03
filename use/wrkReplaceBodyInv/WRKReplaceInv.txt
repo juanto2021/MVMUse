@@ -23,7 +23,7 @@ class Customers
         name: String
         email: String
         pwd: String
-        blocked: Integer
+        blocked: Integer -- We define it as an integer to make it easier to define in USE.
 end
 
 -- Definición de la clase Orders
@@ -67,5 +67,81 @@ end
 
 constraints
 
-context Orders inv calculate_total:--< Modify by MVM [self.total = self.orderLine->collect(ol | ol.quantity * ol.product.price)->sum()]
-(self.total >= self.orderLine->collect(ol : Orders_line | (ol.quantity * ol.product.price))->sum)
+-- Bloque de restricciones
+
+-- Invariantes para Products
+context Products inv ID_positive:
+    self.ID > 0
+
+context Products inv description_not_empty:
+    self.description.size() > 0
+
+context Products inv price_non_negative:
+    self.price >= 0.0
+
+context Products inv stock_non_negative:
+    self.stock >= 0
+
+context Products inv stock_reasonable:
+    self.stock <= 10000
+	
+context Products inv unique_product_id:
+    Products.allInstances()->forAll(p | p <> self implies p.ID <> self.ID)
+
+context Products inv sufficient_stock:
+    self.stock = Orders_line.allInstances()
+                    ->select(ol | ol.product = self)
+                    ->collect(ol | ol.quantity)
+                    ->sum()
+
+-- Invariantes para Categories
+context Categories inv ID_positive:
+  self.ID > 0
+
+context Categories inv name_not_empty:
+self.name.size() > 0
+
+context Categories inv name_unique:
+  Categories.allInstances()->forAll(c | c <> self implies c.name <> self.name)
+
+context Categories inv name_valid_length:
+  self.name.size() <= 50
+  
+-- Invariantes para Customers
+context Customers inv ID_positive:
+    self.ID > 0
+
+context Customers inv name_not_empty:
+    self.name.size() > 0
+
+context Customers inv password_min_length:
+    self.pwd.size() >= 8
+
+context Customers inv blocked_status:
+    self.blocked >= 0 and self.blocked <= 1
+
+context Customers inv customer_not_blocked:--< Modify by MVM [Orders.allInstances()->exists(o | o.customerID = self.ID) implies self.blocked = 0]
+(Orders.allInstances->exists(o : Orders | false) implies (self.blocked = 0))
+-- Invariantes para Orders
+context Orders inv ID_positive:
+    self.ID > 0
+
+context Orders inv customer_assigned:
+    Customers.allInstances()->exists(c | c.ID = self.customerID)
+
+context Orders inv unique_order_id:
+    Orders.allInstances()->forAll(o | o <> self implies o.ID <> self.ID) 
+
+--context Orders inv calculate_total:
+--    self.total = Orders_line.allInstances()
+--	   ->select(ol | ol.order = self)
+--	   ->collect(ol | ol.quantity * ol.product.price)
+--	   ->sum()	
+	   
+context Orders inv calculate_total:
+    self.total = self.orderLine
+	   ->collect(ol | ol.quantity * ol.product.price)->sum() -- We start from Order to locate the lines
+	   
+	
+context Orders inv distinctProductsInOrderLines:
+    self.orderLine->forAll(ol1, ol2 | ol1 <> ol2 implies ol1.product <> ol2.product)	
