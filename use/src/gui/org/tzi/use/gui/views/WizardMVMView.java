@@ -2648,7 +2648,7 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}
 
-		if(!existDiagram) {
+		if(!existDiagram && allframes!=null) {
 			for (JInternalFrame ifr: allframes) {
 				if (ifr.getName()==null&&ifr.getTitle().equals("Object diagram")){
 					ifr.setName(NAMEFRAMEMVMDIAGRAM);
