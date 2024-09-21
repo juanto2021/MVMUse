@@ -112,9 +112,8 @@ context Customers inv ID_positive:
 context Customers inv name_not_empty:
     self.name.size() > 0
 
-context Customers inv password_min_length:
-    self.pwd.size() >= 8
-
+context Customers inv password_min_length:--< Modify by MVM [self.pwd.size() >= 8]
+((self.pwd.size + 1) >= 8)
 context Customers inv blocked_status:
     self.blocked >= 0 and self.blocked <= 1
 
@@ -131,7 +130,10 @@ context Orders inv customer_assigned:
 context Orders inv unique_order_id:
     Orders.allInstances()->forAll(o | o <> self implies o.ID <> self.ID)
 
-context Orders inv calculate_total:--< Modify by MVM [self.total = self.orderLine       ->collect(ol | ol.quantity * ol.product.price)       ->sum()]
-(self.total >= self.orderLine->collect(ol : Orders_line | (ol.quantity * ol.product.price))->sum)
+context Orders inv calculate_total:
+    self.total = self.orderLine
+       ->collect(ol | ol.quantity * ol.product.price)
+       ->sum()
+
 context Orders inv distinctProductsInOrderLines:
     self.orderLine->forAll(ol1, ol2 | ol1 <> ol2 implies ol1.product <> ol2.product)
