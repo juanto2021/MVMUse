@@ -246,20 +246,20 @@ public class MVMObjCheckState extends JDialog {
 		directoryName = path.toAbsolutePath().toString();
 		dirWkr=(directoryName+"/"+dirWrkReplaceBodyInv).replace("\\", "/");
 
-        // Create a File object for the directory
-        File directory = new File(dirWkr);
+		// Create a File object for the directory
+		File directory = new File(dirWkr);
 
-        // Check if the directory exists
-        if (!directory.exists()) {
-            // Si no existe, crearlo
-            if (directory.mkdirs()) {
-                JOptionPane.showMessageDialog(null, "Directory ["+dirWkr+"] created successfully.\r\n(Only first time)", "Successful", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(null, "Error creating directory ["+dirWkr+"].", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-		
-		
+		// Check if the directory exists
+		if (!directory.exists()) {
+			// Si no existe, crearlo
+			if (directory.mkdirs()) {
+				JOptionPane.showMessageDialog(null, "Directory ["+dirWkr+"] created successfully.\r\n(Only first time)", "Successful", JOptionPane.INFORMATION_MESSAGE);
+			} else {
+				JOptionPane.showMessageDialog(null, "Error creating directory ["+dirWkr+"].", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+
+
 		analyze_Model();
 
 		// Objs options
@@ -1241,11 +1241,11 @@ public class MVMObjCheckState extends JDialog {
 				}
 			}
 			//--
-//			MClassInvariant inv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv2, 0);
-//			mapSorted = doAlternatives(inv);
-//			if (inv!=null) {
-//				strInv = inv.name();
-//			}
+			//			MClassInvariant inv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv2, 0);
+			//			mapSorted = doAlternatives(inv);
+			//			if (inv!=null) {
+			//				strInv = inv.name();
+			//			}
 
 		}else {
 			strInv = strInv2;
@@ -1289,22 +1289,23 @@ public class MVMObjCheckState extends JDialog {
 					int selectedRow = tableAlt.getSelectedRow();
 					if (selectedRow != -1) {
 						Object value = tableAlt.getValueAt(selectedRow, 1); // Columna 2 (ï¿½ndice 1)
-
-						tableAlt.setValueAt(true, selectedRow, 0);
-						int nInv = tabInvs.getSelectedRow();
-						int nInvAnt=nInv;
-						int nObj = tabObjects.getSelectedRow();
-						int nObjAnt=nObj;
-						String bodyAlt=value.toString();
-						showAlternative(bodyAlt);
-						saveWorkFile(contentNew);
-						// Restore nInv
-						nInv=nInvAnt;
-						if (tabInvs.getModel().getRowCount()>0) {
-							tabInvs.setRowSelectionInterval(nInv, nInv);
-							loadListAttrs(nObjAnt);
+						if (value!=null) {
+							tableAlt.setValueAt(true, selectedRow, 0);
+							int nInv = tabInvs.getSelectedRow();
+							int nInvAnt=nInv;
+							int nObj = tabObjects.getSelectedRow();
+							int nObjAnt=nObj;
+							String bodyAlt=value.toString();
+							showAlternative(bodyAlt);
+							saveWorkFile(contentNew);
+							// Restore nInv
+							nInv=nInvAnt;
+							if (tabInvs.getModel().getRowCount()>0) {
+								tabInvs.setRowSelectionInterval(nInv, nInv);
+								loadListAttrs(nObjAnt);
+							}
+							showExprInv(nInv);
 						}
-						showExprInv(nInv);
 					}
 				}
 			}
@@ -1321,24 +1322,25 @@ public class MVMObjCheckState extends JDialog {
 		if(tableAlt.getModel().getRowCount()>0) {
 			tableAlt.setRowSelectionInterval(0, 0);
 			Object value = tableAlt.getValueAt(0, 1); // Columna 2 (ï¿½ndice 1)
-
-			int nInv = tabInvs.getSelectedRow();
-			int nInvAnt=nInv;
-			int nObj = tabObjects.getSelectedRow();
-			int nObjAnt=nObj;
-			String bodyAlt=value.toString();
-			showAlternative(bodyAlt);
-			saveWorkFile(contentNew);
-			// Restore nInv
-			nInv=nInvAnt;
-			if (tabInvs.getModel().getRowCount()>0) {
-				tabInvs.setRowSelectionInterval(nInv, nInv);
-				loadListAttrs(nObjAnt);
+			if (value!=null) {
+				int nInv = tabInvs.getSelectedRow();
+				int nInvAnt=nInv;
+				int nObj = tabObjects.getSelectedRow();
+				int nObjAnt=nObj;
+				String bodyAlt=value.toString();
+				showAlternative(bodyAlt);
+				saveWorkFile(contentNew);
+				// Restore nInv
+				nInv=nInvAnt;
+				if (tabInvs.getModel().getRowCount()>0) {
+					tabInvs.setRowSelectionInterval(nInv, nInv);
+					loadListAttrs(nObjAnt);
+				}
+				showExprInv(nInv);
+				rbAltAll.setEnabled(true);
+				rbAltOk.setEnabled(true);
+				rbAltKo.setEnabled(true);
 			}
-			showExprInv(nInv);
-			rbAltAll.setEnabled(true);
-			rbAltOk.setEnabled(true);
-			rbAltKo.setEnabled(true);
 		}else {
 			rbAltAll.setEnabled(false);
 			rbAltOk.setEnabled(false);
@@ -1399,12 +1401,12 @@ public class MVMObjCheckState extends JDialog {
 					saveData=true;
 					break;
 				case OK:
-					if (textResult.equals("Correcto")) {
+					if (textResult.equals("Correct")) {
 						saveData=true;
 					}
 					break;
 				case KO:
-					if (!textResult.equals("Correcto")) {
+					if (!textResult.equals("Correct")) {
 						saveData=true;
 					}
 					break;
