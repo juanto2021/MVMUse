@@ -136,6 +136,20 @@ public class MVMWizardActions extends JDialog {
 		Path path = Paths.get("");
 		directoryName = path.toAbsolutePath().toString()+"\\"+groupActionsFolder;
 
+		// Create a File object for the directory
+		File directory = new File(directoryName);
+
+		// Check if the directory exists
+		if (!directory.exists()) {
+			// Si no existe, crearlo
+			if (directory.mkdirs()) {
+				JOptionPane.showMessageDialog(null, "Directory ["+directoryName+"] created successfully.\r\n(Only first time)", "Successful", JOptionPane.INFORMATION_MESSAGE);
+			} else {
+				JOptionPane.showMessageDialog(null, "Error creating directory ["+directoryName+"].", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+
+
 		txFileName = new JTextField();
 
 		txCreationDate = new JTextField();
@@ -520,8 +534,8 @@ public class MVMWizardActions extends JDialog {
 			String nomFile = selectedFile.getName();
 			int indicePunto = nomFile.indexOf('.');
 			String parteIzquierda = indicePunto != -1 ? nomFile.substring(0, indicePunto) : nomFile;			
-//			if (!modelNew.equals(strLastFileAnt)) {
-				if (!modelNew.equals(sModel)) {
+			//			if (!modelNew.equals(strLastFileAnt)) {
+			if (!modelNew.equals(sModel)) {
 				int forceUse = JOptionPane.showConfirmDialog(frame,
 						"File ["+parteIzquierda+"] contains model ["+modelNew+"] diferent a model ["+sModel+"], Continuous?",
 						"The models do not match",
@@ -533,7 +547,7 @@ public class MVMWizardActions extends JDialog {
 				}
 
 			}
-			// Depuracion de existencia de clases en el modelo
+			// Debugging the existence of classes in the model
 			if (!debugsClassesAndAssociations(grPral)){
 				copyGrPralAntToGrPral();
 				return;			
@@ -547,14 +561,14 @@ public class MVMWizardActions extends JDialog {
 	private boolean debugsClassesAndAssociations(MVMGroupActions group) {
 		boolean existAll=true;
 		boolean ok=true;
-		// Ver objetos y clases de cada objeto
+		// View objects and classes of each object
 		List<MVMAction> listAct=grPral.getlActions();
 		int nActions = listAct.size();
 		MVMAction oAction=listAct.get(nActions-1);	
 		List<MVMObject> lObjs=oAction.getlObjs();
 		for (MVMObject oObj: lObjs) {
 			String className = oObj.getClassName();
-			// Comprobar existencia de la clase
+			// Check class existence
 
 			boolean exist=false;
 			for (MClass oClass: fSession.system().model().classes()) {
@@ -572,7 +586,7 @@ public class MVMWizardActions extends JDialog {
 			}
 		}
 
-		// Ver asociaciones
+		// See associations
 		List<MVMLink> lLinks = oAction.getlLinks();
 		for (MVMLink oMVMLink: lLinks) {
 			String linkName = oMVMLink.getNomAssoc();
@@ -616,7 +630,7 @@ public class MVMWizardActions extends JDialog {
 		if (result == JFileChooser.APPROVE_OPTION) {
 			File fileToSave = fileChooser.getSelectedFile();
 
-			// Comprobar si el archivo ya existe
+			// Check if file already exists
 			if (fileToSave.exists()) {
 				int overwriteResult = JOptionPane.showConfirmDialog(frame,
 						"El archivo ya existe. ¿Deseas sobrescribirlo?",
@@ -624,7 +638,7 @@ public class MVMWizardActions extends JDialog {
 						JOptionPane.YES_NO_OPTION);
 
 				if (overwriteResult != JOptionPane.YES_OPTION) {
-					// El usuario eligio no sobrescribir, salir sin guardar
+					// User chose not to overwrite, exit without saving
 					return;
 				}
 			}
@@ -813,9 +827,8 @@ public class MVMWizardActions extends JDialog {
 	 * Prepares list of actions to return for WizardMVMView
 	 */
 	private void prepareListActions() {
-		// Se ha de construir el grupo a devolver en base a la accion seleccionada
+		// The group to be returned must be built based on the selected action.
 		int nActionSel = tabActions.getSelectedRow();
-		//		MVMGroupActions group = new MVMGroupActions();
 
 		lActionsRes = new ArrayList<MVMAction>();
 		for (int nAction=0;nAction<=nActionSel;nAction++) {

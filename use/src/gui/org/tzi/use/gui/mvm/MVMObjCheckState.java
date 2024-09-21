@@ -76,6 +76,7 @@ import org.tzi.use.uml.mm.ModelFactory;
 import org.tzi.use.uml.ocl.expr.Expression;
 import org.tzi.use.uml.ocl.expr.VarDecl;
 import org.tzi.use.uml.sys.MSystem;
+import org.tzi.use.util.Log;
 
 public class MVMObjCheckState extends JDialog {
 
@@ -245,6 +246,20 @@ public class MVMObjCheckState extends JDialog {
 		directoryName = path.toAbsolutePath().toString();
 		dirWkr=(directoryName+"/"+dirWrkReplaceBodyInv).replace("\\", "/");
 
+        // Create a File object for the directory
+        File directory = new File(dirWkr);
+
+        // Check if the directory exists
+        if (!directory.exists()) {
+            // Si no existe, crearlo
+            if (directory.mkdirs()) {
+                JOptionPane.showMessageDialog(null, "Directory ["+dirWkr+"] created successfully.\r\n(Only first time)", "Successful", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Error creating directory ["+dirWkr+"].", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+		
+		
 		analyze_Model();
 
 		// Objs options
@@ -387,6 +402,7 @@ public class MVMObjCheckState extends JDialog {
 						stateAlt=StatesAlt.ALL;
 					}
 				}
+				// Aqui1
 				int nInv = tabInvs.getSelectedRow();
 				int nObj = tabObjects.getSelectedRow();
 				int nInvAnt=nInv;
@@ -1216,11 +1232,20 @@ public class MVMObjCheckState extends JDialog {
 		Map<String, String> mapSorted = new TreeMap<>();
 		String strInv ="";
 		if (nInv2>-1) {
-			MClassInvariant inv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv2, 0);
-			mapSorted = doAlternatives(inv);
-			if (inv!=null) {
-				strInv = inv.name();
+			//-- nuevo
+			if (tabInvs.getModel().getRowCount()>0) {
+				MClassInvariant inv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv2, 0);
+				mapSorted = doAlternatives(inv);
+				if (inv!=null) {
+					strInv = inv.name();
+				}
 			}
+			//--
+//			MClassInvariant inv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv2, 0);
+//			mapSorted = doAlternatives(inv);
+//			if (inv!=null) {
+//				strInv = inv.name();
+//			}
 
 		}else {
 			strInv = strInv2;

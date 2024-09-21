@@ -122,18 +122,16 @@ context Customers inv customer_not_blocked:
     self.order->notEmpty() implies self.blocked = 0
   
 -- Invariants for Orders
-context Orders inv ID_positive:--< Modify by MVM [self.ID > 0]
-(self.ID >= 0)
+context Orders inv ID_positive:
+    self.ID > 0
+
 context Orders inv customer_assigned:
     self.customer->notEmpty()
 
 context Orders inv unique_order_id:
     Orders.allInstances()->forAll(o | o <> self implies o.ID <> self.ID)
 
-context Orders inv calculate_total:
-    self.total = self.orderLine
-       ->collect(ol | ol.quantity * ol.product.price)
-       ->sum()
-
+context Orders inv calculate_total:--< Modify by MVM [self.total = self.orderLine       ->collect(ol | ol.quantity * ol.product.price)       ->sum()]
+(self.total >= self.orderLine->collect(ol : Orders_line | (ol.quantity * ol.product.price))->sum)
 context Orders inv distinctProductsInOrderLines:
     self.orderLine->forAll(ol1, ol2 | ol1 <> ol2 implies ol1.product <> ol2.product)

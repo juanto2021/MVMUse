@@ -477,7 +477,11 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnNewObjectAuto);
 		// masmas
+
 		btnNewObjectSampleAuto = new JButton("Fill");
+		Font defaultFont = btnNewObjectSampleAuto.getFont();
+		Font smallerFont = defaultFont.deriveFont(defaultFont.getSize() * 0.75f);		
+		btnNewObjectSampleAuto.setFont(smallerFont);
 		btnNewObjectSampleAuto.setBounds(150, 160, 46, 25);
 		btnNewObjectSampleAuto.setToolTipText("add an object of each class");
 
