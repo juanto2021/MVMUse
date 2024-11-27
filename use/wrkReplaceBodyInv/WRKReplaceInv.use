@@ -1,139 +1,139 @@
 model shop
 
--- Definition of the Products class
-class Products 
+-- Definition of the Product class
+class Product 
     attributes
-        ID: Integer
+        id: Integer
         description: String
-        price: Real
+        price: Integer
         stock: Integer
 end
 
--- Definition of the Categories class
-class Categories 
+-- Definition of the Category class
+class Category 
     attributes
-        ID: Integer
+        id: Integer
         name: String
 end
 
--- Definition of the Customers class
-class Customers 
+-- Definition of the Customer class
+class Customer 
     attributes
-        ID: Integer
-        name: String
-        email: String
-        pwd: String
-        blocked: Integer
+        id: Integer
+        blocked: Boolean
 end
 
--- Definition of the Orders class
-class Orders 
+-- Definition of the Order class
+class Order 
     attributes
-        ID: Integer
-        total: Real
+        id: Integer
+        total: Integer
+        finalized: Boolean
 end
 
--- Definition of the Orders_line class
-class Orders_line 
+-- Definition of the OrderLine class
+class OrderLine 
     attributes
         quantity: Integer
 end
 
--- Association between Orders and Customers
+-- Association between Order and Customer
 association OrderCustomer between
-    Orders[*] role order
-    Customers[1] role customer
+    Order[*] role order
+    Customer[1] role customer
 end
 
--- Association between Orders_line and Orders
+-- Association between OrderLine and Order
 association OrderLineOrder between
-    Orders_line[1..*] role orderLine
-    Orders[1] role order
+    OrderLine[1..*] role orderLine
+    Order[1] role order
 end
 
--- Association between Products and Categories
+-- Association between Product and Category
 association ProductCategory between
-    Products[*] role product
-    Categories[1] role category
+    Product[*] role product
+    Category[1] role category
 end
 
--- Association between Orders_line and Products
+-- Association between OrderLine and Product
+-- [*] does not cause link error but [1..*] does (IMPORTANT)
 association OrderLineProduct between
-    Orders_line[*] role orderLine
-    Products[1] role product
+    OrderLine[1..*] role orderLine
+    Product[1] role product
 end
 
 constraints
 
 -- Constraints block
 
--- Invariants for Products
-context Products inv ID_positive:
-    self.ID > 0
+-- Invariants for Product
+--context Product inv idPositive:
+--    self.id > 0
 
-context Products inv description_not_empty:
-    self.description.size() > 0
+---context Product inv descriptionNotEmpty:
+--    self.description.size() > 0
 
-context Products inv price_non_negative:
-    self.price >= 0.0
+context Product inv priceNonNegative:
+    self.price >= 0
 
-context Products inv stock_non_negative:
-    self.stock >= 0
+--context Product inv stockNonNegative:
+--    self.stock >= 0
 
-context Products inv stock_reasonable:
-    self.stock <= 10000
+--context Product inv stockReasonable:
+--    self.stock <= 10000
 
-context Products inv unique_product_id:
-    Products.allInstances()->forAll(p | p <> self implies p.ID <> self.ID)
+context Product inv uniqueProductId:
+    Product.allInstances()->forAll(p | p <> self implies p.id <> self.id)
 
-context Products inv sufficient_stock:
-    self.stock = Orders_line.allInstances()
-                    ->select(ol | ol.product = self)
-                    ->collect(ol | ol.quantity)
-                    ->sum()
+-- Invariant for Product ensuring sufficient stock for unfinished orders (IMPORTANT)
+context Product inv sufficientStock:--< Modify by MVM [self.stock = OrderLine.allInstances()        ->select(ol | ol.product = self and ol.order.finalized = false)        ->collect(ol | ol.quantity)        ->sum()]
+(self.stock >= OrderLine.allInstances->select(ol : OrderLine | ((ol.product = self) and (ol.order.finalized = false)))->collect(ol : OrderLine | ol.quantity)->sum)
+--provis
+context Product inv maxPetNoFinalizadas:
+    OrderLine.allInstances()
+        ->select(ol | ol.product = self and ol.order.finalized = false)->size() < 2
 
--- Invariants for Categories
-context Categories inv ID_positive:
-  self.ID > 0
+context Product inv stockLimits:
+    self.stock >= 5 and self.stock <=10
 
-context Categories inv name_not_empty:
-  self.name.size() > 0
+-- Invariants for Category
+--context Category inv idPositive:
+--  self.id > 0
 
-context Categories inv name_unique:
-  Categories.allInstances()->forAll(c | c <> self implies c.name <> self.name)
+--context Category inv nameNotEmpty:
+--  self.name.size() > 0
 
-context Categories inv name_valid_length:
-  self.name.size() <= 50
+context Category inv nameUnique:
+  Category.allInstances()->forAll(c | c <> self implies c.name <> self.name)
+
+--context Category inv nameValidLength:
+--  self.name.size() <= 50
   
--- Invariants for Customers
-context Customers inv ID_positive:
-    self.ID > 0
+-- Invariants for Customer
+--context Customer inv idPositive:
+--    self.id > 0
 
-context Customers inv name_not_empty:
-    self.name.size() > 0
+context Customer inv customerNotBlocked:
+    self.order->notEmpty() implies self.blocked = false
+  
+-- Invariants for Order
+--context Order inv idPositive:
+--    self.id > 0
 
-context Customers inv password_min_length:
-    self.pwd.size() >= 8
-
-context Customers inv blocked_status:
-    self.blocked >= 0 and self.blocked <= 1
-
-context Customers inv customer_not_blocked:--< Modify by MVM [self.order->notEmpty() implies self.blocked = 0]
-(false implies (self.blocked = 0))
--- Invariants for Orders
-context Orders inv ID_positive:
-    self.ID > 0
-
-context Orders inv customer_assigned:
+context Order inv customerAssigned:
     self.customer->notEmpty()
 
-context Orders inv unique_order_id:
-    Orders.allInstances()->forAll(o | o <> self implies o.ID <> self.ID)
+context Order inv uniqueOrderId:
+    Order.allInstances()->forAll(o | o <> self implies o.id <> self.id)
 
-context Orders inv calculate_total:
+context Order inv calculateTotal:
     self.total = self.orderLine
        ->collect(ol | ol.quantity * ol.product.price)
        ->sum()
 
-context Orders inv distinctProductsInOrderLines:
+context Order inv distinctProductInOrderLines:
     self.orderLine->forAll(ol1, ol2 | ol1 <> ol2 implies ol1.product <> ol2.product)
+
+-- Invariant for OrderLine ensuring positive quantity (NEW)
+context OrderLine inv positiveQuantity:
+    self.quantity = 1

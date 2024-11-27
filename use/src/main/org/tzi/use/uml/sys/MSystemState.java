@@ -2078,7 +2078,8 @@ public final class MSystemState {
 				for (MObject obj : objects) {
 					Map<List<Value>,Set<MObject>> linkedObjects = getLinkedObjects(obj, aend1, aend2);
 
-					if (linkedObjects.size() == 0 && !aend2.multiplicity().contains(0)) {
+//					if (linkedObjects.size() == 0 && !aend2.multiplicity().contains(0)) { //Original JG
+						if (linkedObjects.size() == 0 && !aend2.multiplicity().toString().equals("0")&& !aend2.multiplicity().toString().equals("*")) {
 						reportMultiplicityViolation(out, assoc, aend1, aend2, obj, null);
 						LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend1, aend2, obj, null);
 
@@ -2198,7 +2199,8 @@ public final class MSystemState {
 				for (MObject obj : objects) {
 					Map<List<Value>,Set<MObject>> linkedObjects = getLinkedObjects(obj, aend2, aend1);
 
-					if (linkedObjects.size() == 0 && !aend1.multiplicity().equals(0)) {
+//					if (linkedObjects.size() == 0 && !aend1.multiplicity().equals(0)) {// Original JG
+						if (linkedObjects.size() == 0 && !aend1.multiplicity().toString().equals("0")&& !aend1.multiplicity().toString().equals("*")) {
 						reportMultiplicityViolation(out, assoc, aend2, aend1, obj, null);
 						LinkWizard lw = reportMultiplicityViolationTakeErrors(out, assoc, aend2, aend1, obj, null);
 
@@ -2628,6 +2630,7 @@ public final class MSystemState {
 		lw.setOfClass(connectedClass);
 		lw.setAssocEnd(assoccEnd);
 		lw.setMultiSpecified(multiplicity);
+//		System.out.println("nomAssocObject ["+nomAssocObject+"] nomAssocClass ["+nomAssocClass+"] multiplicity ["+multiplicity+"]");
 		lw.setCause(cause);
 		lw.setFullMessage(fullMessage);
 		lw.setoMObject(oObjectPral);

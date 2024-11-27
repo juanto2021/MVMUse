@@ -315,7 +315,7 @@ public class MVMFindActions extends JDialog {
 
 		lActions = new ArrayList<>(mActions.entrySet());
 
-		// Ordenar la lista de entradas por clave
+		// Sort the list of entries by key
 		Collections.sort(lActions, Map.Entry.comparingByKey());
 	}
 
