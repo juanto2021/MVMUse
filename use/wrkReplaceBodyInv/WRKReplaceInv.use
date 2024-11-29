@@ -86,12 +86,15 @@ context Product inv uniqueProductId:
     Product.allInstances()->forAll(p | p <> self implies p.id <> self.id)
 
 -- Invariant for Product ensuring sufficient stock for unfinished orders (IMPORTANT)
-context Product inv sufficientStock:--< Modify by MVM [self.stock = OrderLine.allInstances()        ->select(ol | ol.product = self and ol.order.finalized = false)        ->collect(ol | ol.quantity)        ->sum()]
-(self.stock >= OrderLine.allInstances->select(ol : OrderLine | ((ol.product = self) and (ol.order.finalized = false)))->collect(ol : OrderLine | ol.quantity)->sum)
+context Product inv sufficientStock:
+    self.stock = OrderLine.allInstances()
+        ->select(ol | ol.product = self and ol.order.finalized = false)
+        ->collect(ol | ol.quantity)
+        ->sum()
 --provis
-context Product inv maxPetNoFinalizadas:
-    OrderLine.allInstances()
-        ->select(ol | ol.product = self and ol.order.finalized = false)->size() < 2
+--context Product inv maxPetNoFinalizadas:
+--    OrderLine.allInstances()
+--        ->select(ol | ol.product = self and ol.order.finalized = false)->size() < 2
 
 context Product inv stockLimits:
     self.stock >= 5 and self.stock <=10
@@ -120,8 +123,8 @@ context Customer inv customerNotBlocked:
 --context Order inv idPositive:
 --    self.id > 0
 
-context Order inv customerAssigned:
-    self.customer->notEmpty()
+--context Order inv customerAssigned:
+--    self.customer->notEmpty()
 
 context Order inv uniqueOrderId:
     Order.allInstances()->forAll(o | o <> self implies o.id <> self.id)
@@ -135,5 +138,5 @@ context Order inv distinctProductInOrderLines:
     self.orderLine->forAll(ol1, ol2 | ol1 <> ol2 implies ol1.product <> ol2.product)
 
 -- Invariant for OrderLine ensuring positive quantity (NEW)
-context OrderLine inv positiveQuantity:
-    self.quantity = 1
+context OrderLine inv singleProductOrders:--< Modify by MVM [self.quantity = 1]
+(self.quantity >= 1)
