@@ -1,142 +1,186 @@
-model shop
+model pharma
 
--- Definition of the Product class
-class Product 
+-- Definition of the Hospital class
+class Hospital 
     attributes
-        id: Integer
-        description: String
-        price: Integer
-        stock: Integer
-end
-
--- Definition of the Category class
-class Category 
-    attributes
-        id: Integer
+        idHospital: String
         name: String
 end
 
--- Definition of the Customer class
-class Customer 
+-- Definition of the Pharmacist class
+class Pharmacist 
     attributes
-        id: Integer
-        blocked: Boolean
+        idPharmacist: String
+        name: String
 end
 
--- Definition of the Order class
-class Order 
+-- Definition of the Dispensing class
+class Dispensing 
     attributes
-        id: Integer
-        total: Integer
-        finalized: Boolean
-end
-
--- Definition of the OrderLine class
-class OrderLine 
-    attributes
+        idDispensing: String
+        date: Integer
         quantity: Integer
 end
 
--- Association between Order and Customer
-association OrderCustomer between
-    Order[*] role order
-    Customer[1] role customer
+-- Definition of the Patient class
+class Patient 
+    attributes
+        idPatient: String
+        name: String
+        age: Integer
 end
 
--- Association between OrderLine and Order
-association OrderLineOrder between
-    OrderLine[1..*] role orderLine
-    Order[1] role order
+-- Definition of the Doctor class
+class Doctor 
+    attributes
+        idDoctor: String
+        name: String
 end
 
--- Association between Product and Category
-association ProductCategory between
-    Product[*] role product
-    Category[1] role category
+-- Definition of the Medication class
+class Medication 
+    attributes
+        idMedication: String
+        name: String
+        description: String
+        availableQuantity: Integer
 end
 
--- Association between OrderLine and Product
--- [*] does not cause link error but [1..*] does (IMPORTANT)
-association OrderLineProduct between
-    OrderLine[1..*] role orderLine
-    Product[1] role product
+-- Definition of the Prescription class
+class Prescription 
+    attributes
+        idPrescription: String
+        date: Integer
+end
+
+-- Definition of the Inventory class
+class Inventory 
+    attributes
+        idInventory: String
+        location: String
+end
+
+-- Definition of the Supplier class
+class Supplier 
+    attributes
+        idSupplier: String
+        name: String
+end
+
+
+-- Association between Hospital and Pharmacist
+association HospitalPharmacist between
+    Hospital[1] role hospital
+    Pharmacist[*] role pharmacist
+end
+
+-- Association between Hospital and Patient
+association HospitalPatient between
+    Hospital[1] role hospital
+    Patient[*] role patient
+end
+
+-- Association between Hospital and Doctor
+association HospitalDoctor between
+    Hospital[1] role hospital
+    Doctor[*] role doctor
+end
+
+-- Association between Doctor and Prescription
+association DoctorPrescription between
+    Doctor[1] role Doctor
+    Prescription[*] role prescription
+end
+
+-- Association between Pharmacist and Dispensing
+association PharmacistDispensing between
+    Pharmacist[1] role pharmacist
+    Dispensing[*] role dispensing
+end
+
+-- Association between Patient and Prescription
+association PatientPrescription between
+    Patient[1] role patient
+    Prescription[*] role prescription
+end
+
+-- Association between Dispensing and Patient
+association DispensingPatient between
+    Dispensing[1] role dispensing
+    Patient[1] role patient
+end
+
+-- Association between Dispensing and Medication
+association DispensingMedication between
+    Dispensing[1] role dispensing
+    Medication[1] role medication
+end
+
+-- Association between Medication and Prescription
+association MedicationPrescription between
+    Medication[*] role Medication
+    Prescription[*] role prescription
+end
+
+-- Association between Medication and Inventory
+association MedicationInventory between
+    Medication[*] role Medication
+    Inventory[1] role inventory
+end
+
+-- Association between Medication and Supplier
+association MedicationSupplier between
+    Medication[*] role Medication
+    Supplier[*] role supplier
+end
+
+-- Association between Inventory and Supplier
+association InventorySupplier between
+    Inventory[1] role Inventory
+    Supplier[*] role supplier
 end
 
 constraints
 
--- Constraints block
+context Hospital inv hospitalHasName:
+    self.name.size() > 0
 
--- Invariants for Product
---context Product inv idPositive:
---    self.id > 0
+context Hospital inv uniqueHospitalId:
+    Hospital.allInstances()->isUnique(h | h.idHospital)
 
----context Product inv descriptionNotEmpty:
---    self.description.size() > 0
+context Hospital inv hospitalHasPharmacists:
+    self.pharmacist->notEmpty()
 
-context Product inv priceNonNegative:
-    self.price >= 0
+context Hospital inv hospitalHasPatients:
+    self.patient->notEmpty()
 
---context Product inv stockNonNegative:
---    self.stock >= 0
+context Hospital inv hospitalHasDoctors:
+    self.doctor->notEmpty()
 
---context Product inv stockReasonable:
---    self.stock <= 10000
+context Pharmacist inv uniquePharmacistId:
+    Pharmacist.allInstances()->isUnique(p | p.idPharmacist)
 
-context Product inv uniqueProductId:
-    Product.allInstances()->forAll(p | p <> self implies p.id <> self.id)
+context Pharmacist inv pharmacistHasName:
+    self.name.size() > 0
 
--- Invariant for Product ensuring sufficient stock for unfinished orders (IMPORTANT)
-context Product inv sufficientStock:
-    self.stock = OrderLine.allInstances()
-        ->select(ol | ol.product = self and ol.order.finalized = false)
-        ->collect(ol | ol.quantity)
-        ->sum()
---provis
---context Product inv maxPetNoFinalizadas:
---    OrderLine.allInstances()
---        ->select(ol | ol.product = self and ol.order.finalized = false)->size() < 2
+context Pharmacist inv pharmacistAssignedToHospital:
+    self.hospital->notEmpty()
 
-context Product inv stockLimits:
-    self.stock >= 5 and self.stock <=10
+context Pharmacist inv pharmacistHasDispensations:
+    self.dispensing->notEmpty()
 
--- Invariants for Category
---context Category inv idPositive:
---  self.id > 0
+--context Pharmacist inv maxDispensationsPerDay:
+--    self.dispensing->select(d | d.date = Date.today())->size() <= 50
 
---context Category inv nameNotEmpty:
---  self.name.size() > 0
+context Dispensing inv uniqueDispensingId:
+    Dispensing.allInstances()->isUnique(d | d.idDispensing)
+--context Dispensing inv dispensingDateValid:
+--    self.date <= Date.today()
+context Dispensing inv dispensingQuantityPositive:--< Modify by MVM [self.quantity > 0]
+(self.quantity >= 0)
+context Dispensing inv dispensingReferencesPatient:
+    self.patient->notEmpty()
+context Dispensing inv dispensingReferencesMedication:
+    self.medication->notEmpty()
 
-context Category inv nameUnique:
-  Category.allInstances()->forAll(c | c <> self implies c.name <> self.name)
 
---context Category inv nameValidLength:
---  self.name.size() <= 50
-  
--- Invariants for Customer
---context Customer inv idPositive:
---    self.id > 0
-
-context Customer inv customerNotBlocked:
-    self.order->notEmpty() implies self.blocked = false
-  
--- Invariants for Order
---context Order inv idPositive:
---    self.id > 0
-
---context Order inv customerAssigned:
---    self.customer->notEmpty()
-
-context Order inv uniqueOrderId:
-    Order.allInstances()->forAll(o | o <> self implies o.id <> self.id)
-
-context Order inv calculateTotal:
-    self.total = self.orderLine
-       ->collect(ol | ol.quantity * ol.product.price)
-       ->sum()
-
-context Order inv distinctProductInOrderLines:
-    self.orderLine->forAll(ol1, ol2 | ol1 <> ol2 implies ol1.product <> ol2.product)
-
--- Invariant for OrderLine ensuring positive quantity (NEW)
-context OrderLine inv singleProductOrders:--< Modify by MVM [self.quantity = 1]
-(self.quantity >= 1)
