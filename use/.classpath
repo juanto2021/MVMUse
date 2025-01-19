@@ -9,19 +9,19 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/junit.jar" sourcepath="C:/Users/lhamann/.m2/repository/junit/junit/4.6/junit-4.6-sources.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/antlr-3.4-complete.jar" sourcepath="D:/JavaDoc/antlr-3.4.tar/antlr-3.4"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/combinatoricslib-0.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/vtd-xml.jar" sourcepath="D:/Install/ximpleware_2.10_java"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/gsbase.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/guava-20.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/jruby-1.7.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib_build/org.eclipse.jdt.annotation_1.1.0.v20130513-1648.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/itextpdf-5.5.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/apache-xml-xerces.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/antlr4-runtime-4.9.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/jackson-annotations-2.16.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/jackson-core-2.16.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/jackson-databind-2.16.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/junit.jar" sourcepath="C:/Users/lhamann/.m2/repository/junit/junit/4.6/junit-4.6-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/antlr-3.4-complete.jar" sourcepath="D:/JavaDoc/antlr-3.4.tar/antlr-3.4"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/combinatoricslib-0.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/vtd-xml.jar" sourcepath="D:/Install/ximpleware_2.10_java"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/gsbase.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/guava-20.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/jruby-1.7.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib_build/org.eclipse.jdt.annotation_1.1.0.v20130513-1648.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/itextpdf-5.5.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/apache-xml-xerces.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/jackson-annotations-2.16.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/jackson-core-2.16.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/jackson-databind-2.16.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Juanto/git/MVMUse/use/lib/antlr4-runtime-4.9.2.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
