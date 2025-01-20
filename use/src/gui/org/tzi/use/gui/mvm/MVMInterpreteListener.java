@@ -159,6 +159,16 @@ public interface MVMInterpreteListener extends ParseTreeListener {
 	 */
 	void exitExprBase(@NotNull MVMInterpreteParser.ExprBaseContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MVMInterpreteParser#exprGral}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprGral(@NotNull MVMInterpreteParser.ExprGralContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MVMInterpreteParser#exprGral}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprGral(@NotNull MVMInterpreteParser.ExprGralContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MVMInterpreteParser#invExpression}.
 	 * @param ctx the parse tree
 	 */
