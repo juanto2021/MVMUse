@@ -178,6 +178,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	private JScrollPane scrollPaneClass;
 	private JScrollPane scrollPaneObj;
+	private JScrollPane scrollPaneAssoc;	
 
 	private JList<MClass> lClass;
 	private JList<String> lObjects;
@@ -656,7 +657,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		lAssocs = new JList<MAssociation>(loadListAssoc());
 
-		lAssocs.setBounds(10, 215, 90, 85);
+		lAssocs.setBounds(10, 215, 120, 140);
 		lAssocs.setBorder(BorderFactory.createLineBorder(Color.black));
 		lAssocs.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
@@ -665,7 +666,12 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 
-		panel.add(lAssocs);
+		scrollPaneAssoc = new JScrollPane();
+		scrollPaneAssoc.setViewportView(lAssocs);
+		scrollPaneAssoc.setBounds(10, 215, 120, 140);
+		   
+//		panel.add(lAssocs);
+		panel.add(scrollPaneAssoc);
 
 		btnRefreshComponents = new JButton("Refresh");
 		btnRefreshComponents.setBounds(301, 160, 90, 25);

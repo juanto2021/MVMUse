@@ -137,7 +137,7 @@ end
 
 -- Association between Dispensing and Prescription
 association DispensingPrescription between
-    Dispensing[1] role dispensing
+    Dispensing[*] role dispensing
     Prescription[1] role prescription
 end
 
@@ -209,9 +209,14 @@ context Dispensing inv dispensingReferencesMedication:
 context Dispensing inv dispensingWithinPrescription:
     self.quantity <= self.prescription.quantity
 
+-- Each dispensation must be associated with exactly one prescription.
+context Dispensing inv associatedWithPrescription:
+    self.prescription->notEmpty()
+
+-- The sum of the dispensed quantities associated with a prescription must not exceed the prescribed quantity.
+context Dispensing inv dispensingDoesNotExceedPrescription:--< Modify by MVM [self.prescription->notEmpty() and    Dispensing.allInstances()->select(d | d.prescription = self.prescription)        ->collect(d | d.quantity)        ->sum() <= self.prescription.quantity]
+(Prescription.allInstances->notEmpty and (Dispensing.allInstances->select(d : Dispensing | (d.prescription = self.prescription))->collect(d : Dispensing | d.quantity)->sum <= self.prescription.quantity))
 -- Invariants for PATIENT
-
-
 
 -- Patient IDs must be unique across all patients.
 context Patient inv uniquePatientId:
@@ -408,8 +413,11 @@ context Inventory inv medicationQuantityMatchesInventory:
     self.medication->forAll(m | m.availableQuantity >= 0)
 
 -- The total prescribed quantity of each medication must be less than or equal to the quantity available in the inventory.
-context Inventory inv prescribedQuantityLimit:--< Modify by MVM [self.medication->forAll(m |        m.prescription->collect(p | p.quantity)->sum() <= m.availableQuantity    )]
-self.medication->forAll(m : Medication | ((m.prescription->collect(p : Prescription | p.quantity)->sum - 1) <= m.availableQuantity))
+context Inventory inv prescribedQuantityLimit:
+    self.medication->forAll(m |
+        m.prescription->collect(p | p.quantity)->sum() <= m.availableQuantity
+    )
+
 -- An inventory associated with more than 5 medications must have at least 2 different suppliers
 context Inventory inv suppliersForLargeInventories:
     self.medication->size() > 5 implies self.supplier->size() >= 2
@@ -447,3 +455,12 @@ context Incompatibility inv uniqueIncompatibility:
     not Incompatibility.allInstances()->exists(i |
         (i.idMedication1 = self.idMedication2 and i.idMedication2 = self.idMedication1)
     )
+
+-- The medications involved in an incompatibility must exist in the system
+context Incompatibility inv medicationsExist:
+    Medication.allInstances()->exists(m | m.idMedication = self.idMedication1) and
+    Medication.allInstances()->exists(m | m.idMedication = self.idMedication2)
+
+context Incompatibility inv maxIncompatibilitiesPerMedication:
+    Incompatibility.allInstances()->select(i | i.idMedication1 = self.idMedication1 or i.idMedication2 = self.idMedication1)->size() <= 10 and
+    Incompatibility.allInstances()->select(i | i.idMedication1 = self.idMedication2 or i.idMedication2 = self.idMedication2)->size() <= 10
