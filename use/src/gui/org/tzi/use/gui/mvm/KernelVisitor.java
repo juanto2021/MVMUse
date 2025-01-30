@@ -66,7 +66,7 @@ public class KernelVisitor implements ExpressionVisitor {
 	private List<Expression> mutatedExpr;
 
 	public KernelVisitor() {
-		System.out.println("KernelVisitor***");
+//		System.out.println("KernelVisitor***");
 		mutatedExpr = new LinkedList<Expression>();
 	}
 
@@ -75,14 +75,14 @@ public class KernelVisitor implements ExpressionVisitor {
 	}
 
 	public static List<Expression> kernel(Expression exp) {
-		System.out.println("Kernel - exp ["+exp+"]");
+//		System.out.println("Kernel - exp ["+exp+"]");
 		KernelVisitor vis = new KernelVisitor();
 		exp.processWithVisitor(vis);
 		return vis.getMutatedExpr();
 	}
 
 	private void defaultKernel(Expression exp) {
-		System.out.println("Kernel - kernel - defaultKernel");
+//		System.out.println("Kernel - kernel - defaultKernel");
 
 		SetType mc = (SetType) exp.type();
 		Type type = mc.elemType();
@@ -104,7 +104,7 @@ public class KernelVisitor implements ExpressionVisitor {
 	}
 
 	public void visitIncluding(ExpAllInstances exp) {
-		System.out.println("Kernel - visitIncluding - exp ["+exp+"]");
+//		System.out.println("Kernel - visitIncluding - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultKernel(exp);
 	}
 

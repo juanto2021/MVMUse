@@ -68,6 +68,7 @@ import org.tzi.use.uml.ocl.type.Type;
 
 public class HullVisitor implements ExpressionVisitor {
 
+	private static boolean debHullMet = false;
 	private List<Expression> mutatedExpr;
 	private static Map<String, List<VarDecl>> mapVarsByType;
 
@@ -81,19 +82,19 @@ public class HullVisitor implements ExpressionVisitor {
 	}
 
 	private static List<Expression> strengthen(Expression exp, Map<String, List<VarDecl>> pMapVarsByType) {
-		System.out.println("Hull - strengthen - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - strengthen - exp ["+exp+"]");
 		StrengthenVisitor vis = new StrengthenVisitor(pMapVarsByType);
 		exp.processWithVisitor(vis);
 		return vis.getMutatedExpr();
 	}
 	private static List<Expression> weaken(Expression exp, Map<String, List<VarDecl>> pMapVarsByType) {
-		System.out.println("Hull - weaken - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - weaken - exp ["+exp+"]");
 		WeakenVisitor vis = new WeakenVisitor(pMapVarsByType);
 		exp.processWithVisitor(vis);
 		return vis.getMutatedExpr();
 	}
 	public static List<Expression> hull(Expression exp) {
-		System.out.println("Hull - hull - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - hull - exp ["+exp+"]");
 		// create empty map
 		Map<String, List<VarDecl>> mapVarsByType= new HashMap<>(); 
 		// call the second signature
@@ -101,20 +102,20 @@ public class HullVisitor implements ExpressionVisitor {
 	}
 
 	public static List<Expression> hull(Expression exp,Map<String, List<VarDecl>> pMapVarsByType) {
-		System.out.println("Hull - exp ["+exp+"] map ["+pMapVarsByType+"]");
+		if (debHullMet) System.out.println("Hull - exp ["+exp+"] map ["+pMapVarsByType+"]");
 		HullVisitor vis = new HullVisitor(pMapVarsByType);
 		exp.processWithVisitor(vis);
 		return vis.getMutatedExpr();
 	}
 
 	public void anyIncluding(Expression exp) {
-		System.out.println("Hull - anyIncluing");
+		if (debHullMet) System.out.println("Hull - anyIncluing");
 		// If it is a collection, search all the declarations and see if there are any with a suitable type
 		// The type is appropriate if the type of the collection matches that of the variable itself existing in map
 		// (note that in map there can be variables of different types)
 
 		if (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)){
-			System.out.println("Hull - exp ["+exp+"] es collection ["+exp.type().shortName());
+			if (debHullMet) System.out.println("Hull - exp ["+exp+"] es collection ["+exp.type().shortName());
 		}else {
 			return;	
 		}
@@ -158,7 +159,7 @@ public class HullVisitor implements ExpressionVisitor {
 	}
 
 	private void defaultHull(Expression exp) {
-		System.out.println("Hull - hull - defaultHull");
+		if (debHullMet) System.out.println("Hull - hull - defaultHull");
 		// The default hull of an expression is return an set or sequence that is 'Type.AllInstances'
 		Type type =null;
 		Type typeExp = exp.type();
@@ -209,7 +210,7 @@ public class HullVisitor implements ExpressionVisitor {
 				mapVarsByType.put(typeName, varsByType);
 			}
 
-			System.out.println("mapVarsByType "+mapVarsByType);
+			if (debHullMet) System.out.println("mapVarsByType "+mapVarsByType);
 		}
 	}
 	private void excludeDecl(VarDeclList decl) {
@@ -237,7 +238,7 @@ public class HullVisitor implements ExpressionVisitor {
 
 			}
 		}
-		System.out.println("mapVarsByType "+mapVarsByType);
+		if (debHullMet) System.out.println("mapVarsByType "+mapVarsByType);
 	}
 
 	public void wrongTypeError() throws RuntimeException {
@@ -261,18 +262,18 @@ public class HullVisitor implements ExpressionVisitor {
 	}
 
 	public void visitIncluding(ExpAllInstances exp) {
-		System.out.println("Hull - visitIncluding - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitIncluding - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 	}
 	
 	@Override
 	public void visitAllInstances(ExpAllInstances exp) {
-		System.out.println("Hull - visitAllInstances - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitAllInstances - exp ["+exp+"]");
 		if (mapVarsByType!=null) {
 			MClassifier cls = exp.getSourceType();
 			for (Map.Entry<String, List<VarDecl>> entry : mapVarsByType.entrySet()) {
 				String type = entry.getKey();
-				System.out.println("Tipo: " + type+ " classifier ["+cls.name()+"]");
+				if (debHullMet) System.out.println("Tipo: " + type+ " classifier ["+cls.name()+"]");
 				if (cls.name().equals(type)) {
 					List<VarDecl> vars = entry.getValue();
 					for (VarDecl var : vars) {
@@ -291,39 +292,39 @@ public class HullVisitor implements ExpressionVisitor {
 			}
 		}
 
-		System.out.println("hull - ExpAllInstances");
+		if (debHullMet) System.out.println("hull - ExpAllInstances");
 		defaultHull(exp);		
 
 	}
 
 	@Override
 	public void visitAny(ExpAny exp) {
-		System.out.println("Hull - visitAny - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitAny - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 
 	}
 
 	@Override
 	public void visitAsType(ExpAsType exp) {
-		System.out.println("Hull - visitAsType - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitAsType - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitAttrOp(ExpAttrOp exp) {
-		System.out.println("Hull - visitAttrOp - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitAttrOp - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitBagLiteral(ExpBagLiteral exp) {
-		System.out.println("Hull - visitBagLiteral - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitBagLiteral - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 	}
 
 	@Override
 	public void visitCollect(ExpCollect exp) {
-		System.out.println("Hull - ExpCollect - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - ExpCollect - exp ["+exp+"]");
 
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
@@ -347,7 +348,7 @@ public class HullVisitor implements ExpressionVisitor {
 			}
 		}
 
-		System.out.println("collect");
+		if (debHullMet) System.out.println("collect");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)); defaultHull(exp);
 
 		// Remove previously included decl elements from the map
@@ -357,61 +358,61 @@ public class HullVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitCollectNested(ExpCollectNested exp) {
-		System.out.println("Hull - visitCollectNested - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitCollectNested - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)); defaultHull(exp);
 	}
 
 	@Override
 	public void visitConstBoolean(ExpConstBoolean exp) {
-		System.out.println("Hull - visitConstBoolean - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitConstBoolean - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitConstEnum(ExpConstEnum exp) {
-		System.out.println("Hull - visitConstEnum - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitConstEnum - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitConstInteger(ExpConstInteger exp) {
-		System.out.println("Hull - visitConstInteger - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitConstInteger - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitConstReal(ExpConstReal exp) {
-		System.out.println("Hull - visitConstReal - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitConstReal - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitConstString(ExpConstString exp) {
-		System.out.println("Hull - visitConstString - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitConstString - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitEmptyCollection(ExpEmptyCollection exp) {
-		System.out.println("Hull - visitEmptyCollection - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitEmptyCollection - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)); defaultHull(exp);
 	}
 
 	@Override
 	public void visitExists(ExpExists exp) {
-		System.out.println("Hull - visitExists - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitExists - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitForAll(ExpForAll exp) {
-		System.out.println("Hull - visitForAll - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitForAll - exp ["+exp+"]");
 		assert (false);	
 	}
 
 	@Override
 	public void visitIf(ExpIf exp) {
-		System.out.println("Hull - visitIf - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitIf - exp ["+exp+"]");
 
 		Expression cond = exp.getCondition();
 		Expression thenExp = exp.getThenExpression();
@@ -440,25 +441,25 @@ public class HullVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitIsKindOf(ExpIsKindOf exp) {
-		System.out.println("Hull - visitIsKindOf - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitIsKindOf - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitIsTypeOf(ExpIsTypeOf exp) {
-		System.out.println("Hull - visitIsTypeOf - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitIsTypeOf - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitIsUnique(ExpIsUnique exp) {
-		System.out.println("Hull - visitIsUnique - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitIsUnique - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitIterate(ExpIterate exp) {
-		System.out.println("Hull - visitIterate - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitIterate - exp ["+exp+"]");
 		if (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)){
 			defaultHull(exp);
 		}
@@ -466,7 +467,7 @@ public class HullVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitLet(ExpLet exp) {
-		System.out.println("Hull - visitLet - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitLet - exp ["+exp+"]");
 		if (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)){
 			defaultHull(exp);
 		}
@@ -474,7 +475,7 @@ public class HullVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitNavigation(ExpNavigation exp) {
-		System.out.println("Hull - visitNavigation - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitNavigation - exp ["+exp+"]");
 		if (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)){
 			defaultHull(exp);
 		}
@@ -482,43 +483,43 @@ public class HullVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitObjAsSet(ExpObjAsSet exp) {
-		System.out.println("Hull - visitObjAsSet - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitObjAsSet - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 	}
 
 	@Override
 	public void visitObjOp(ExpObjOp exp) {
-		System.out.println("Hull - visitObjOp - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitObjOp - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 	}
 
 	@Override
 	public void visitObjRef(ExpObjRef exp) {
-		System.out.println("Hull - visitObjRef - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitObjRef - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitOne(ExpOne exp) {
-		System.out.println("Hull - visitOne - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitOne - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitOrderedSetLiteral(ExpOrderedSetLiteral exp) {
-		System.out.println("Hull - visitOrderedSetLiteral - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitOrderedSetLiteral - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 	}
 
 	@Override
 	public void visitQuery(ExpQuery exp) {
-		System.out.println("Hull - ExpQuery - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - ExpQuery - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitReject(ExpReject exp) {
-		System.out.println("Hull - visitReject - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitReject - exp ["+exp+"]");
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
 		VarDeclList decl = exp.getVariableDeclarations();
@@ -563,7 +564,7 @@ public class HullVisitor implements ExpressionVisitor {
 			}
 		}
 
-		System.out.println("reject");
+		if (debHullMet) System.out.println("reject");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 
 		// Remove previously included decl elements from the map
@@ -572,7 +573,7 @@ public class HullVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitWithValue(ExpressionWithValue exp) {
-		System.out.println("Hull - visitWithValue - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitWithValue - exp ["+exp+"]");
 		if (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)){
 			defaultHull(exp);
 		}
@@ -580,7 +581,7 @@ public class HullVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitSelect(ExpSelect exp) {
-		System.out.println("Hull - visitSelect - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitSelect - exp ["+exp+"]");
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
 		VarDeclList decl = exp.getVariableDeclarations();
@@ -623,7 +624,7 @@ public class HullVisitor implements ExpressionVisitor {
 			}
 		}
 
-		System.out.println("select");
+		if (debHullMet) System.out.println("select");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 
 		// Remove previously included decl elements from the map
@@ -634,30 +635,30 @@ public class HullVisitor implements ExpressionVisitor {
 	@Override
 	public void visitSequenceLiteral(ExpSequenceLiteral exp) {
 
-		System.out.println("Hull - visitSequenceLiteral - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitSequenceLiteral - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 	}
 
 	@Override
 	public void visitSetLiteral(ExpSetLiteral exp) {
 
-		System.out.println("Hull - visitSetLiteral - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitSetLiteral - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 	}
 
 	@Override
 	public void visitSortedBy(ExpSortedBy exp) {
-		System.out.println("Hull - visitSortedBy - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitSortedBy - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);	
 	}
 
 	private void mutateIsEmptyExp(ExpStdOp exp) {
-		System.out.println("Hull - mutateIsEmptyExp - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - mutateIsEmptyExp - exp ["+exp+"]");
 		assert(false);
 	}
 
 	private void mutateIncluding(ExpStdOp exp) {
-		System.out.println("Hull - mutateIncluding - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - mutateIncluding - exp ["+exp+"]");
 
 		Expression[] args = exp.args();
 		assert(args.length == 2);
@@ -683,7 +684,7 @@ public class HullVisitor implements ExpressionVisitor {
 	}
 
 	private void mutateExcluding(ExpStdOp exp) {
-		System.out.println("Hull - mutateExcluding - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - mutateExcluding - exp ["+exp+"]");
 
 		Expression[] args = exp.args();
 		assert(args.length == 2);
@@ -717,7 +718,7 @@ public class HullVisitor implements ExpressionVisitor {
 	}
 
 	private void mutateUnionProductIntersection(ExpStdOp exp, String opName) {
-		System.out.println("Hull - mutateUnionProductIntersection - exp ["+exp+"] , opName ["+opName+"]");
+		if (debHullMet) System.out.println("Hull - mutateUnionProductIntersection - exp ["+exp+"] , opName ["+opName+"]");
 
 		Expression[] args = exp.args();
 		assert(args.length == 2);
@@ -771,7 +772,7 @@ public class HullVisitor implements ExpressionVisitor {
 	}
 
 	private void mutateDifference(ExpStdOp exp) {
-		System.out.println("Hull - mutateDifference - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - mutateDifference - exp ["+exp+"]");
 
 		Expression[] args = exp.args();
 		assert(args.length == 2);
@@ -827,9 +828,9 @@ public class HullVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitStdOp(ExpStdOp exp) {
-		System.out.println("Hull - visitStdOp - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitStdOp - exp ["+exp+"]");
 		String opName = exp.opname();
-		System.out.println("Hull - visitStdOp - opName ["+opName+"] -----------------------------------");
+		if (debHullMet) System.out.println("Hull - visitStdOp - opName ["+opName+"] -----------------------------------");
 		switch(opName) {
 		case "isEmpty":
 			mutateIsEmptyExp(exp);
@@ -856,73 +857,73 @@ public class HullVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitTupleLiteral(ExpTupleLiteral exp) {
-		System.out.println("Hull - visitTupleLiteral - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitTupleLiteral - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitTupleSelectOp(ExpTupleSelectOp exp) {
-		System.out.println("Hull - visitTupleSelectOp - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitTupleSelectOp - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitUndefined(ExpUndefined exp) {
-		System.out.println("Hull - visitUndefined - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitUndefined - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitVariable(ExpVariable exp) {
-		System.out.println("Hull - visitVariable - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitVariable - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitClosure(ExpClosure exp) {
-		System.out.println("Hull - visitClosure - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitClosure - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)); defaultHull(exp);
 	}
 
 	@Override
 	public void visitOclInState(ExpOclInState exp) {
-		System.out.println("Hull - visitClosure - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitClosure - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitVarDeclList(VarDeclList varDeclList) {
-		System.out.println("Hull - visitVarDeclList - varDeclList ["+varDeclList+"]");
+		if (debHullMet) System.out.println("Hull - visitVarDeclList - varDeclList ["+varDeclList+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitVarDecl(VarDecl varDecl) {
-		System.out.println("Hull - visitVarDecl - varDecl ["+varDecl+"]");
+		if (debHullMet) System.out.println("Hull - visitVarDecl - varDecl ["+varDecl+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitObjectByUseId(ExpObjectByUseId exp) {
-		System.out.println("Hull - visitObjectByUseId - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitObjectByUseId - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitConstUnlimitedNatural(ExpConstUnlimitedNatural exp) {
-		System.out.println("Hull - visitConstUnlimitedNatural - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitConstUnlimitedNatural - exp ["+exp+"]");
 		assert (false);
 	}
 
 	@Override
 	public void visitSelectByKind(ExpSelectByKind exp) {
-		System.out.println("Hull - visitSelectByKind - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitSelectByKind - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 	}
 
 	@Override
 	public void visitExpSelectByType(ExpSelectByType exp) {
-		System.out.println("Hull - visitExpSelectByType - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitExpSelectByType - exp ["+exp+"]");
 		Type type =null;
 		Type typeExp = exp.type();
 		if (typeExp.isKindOfBag(Type.VoidHandling.EXCLUDE_VOID)) {
@@ -949,13 +950,13 @@ public class HullVisitor implements ExpressionVisitor {
 
 	@Override
 	public void visitRange(ExpRange exp) {
-		System.out.println("Hull - visitRange - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitRange - exp ["+exp+"]");
 		assert (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID));	defaultHull(exp);
 	}
 
 	@Override
 	public void visitNavigationClassifierSource(ExpNavigationClassifierSource exp) {
-		System.out.println("Hull - visitNavigationClassifierSource - exp ["+exp+"]");
+		if (debHullMet) System.out.println("Hull - visitNavigationClassifierSource - exp ["+exp+"]");
 		if (exp.type().isKindOfCollection(Type.VoidHandling.EXCLUDE_VOID)){
 			defaultHull(exp);
 		}

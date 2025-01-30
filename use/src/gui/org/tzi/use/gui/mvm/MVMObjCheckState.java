@@ -30,8 +30,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -1193,13 +1195,71 @@ public class MVMObjCheckState extends JDialog {
 		showPanelTableAlt(strInv, row);
 	}
 
-	private Map<String, String> doAlternatives(MClassInvariant oInv) {
+	private Map<String, String> doAlternativesOriginal(MClassInvariant oInv) {
 		Map<String, String> mapAlternatives = new HashMap<String, String>();
 		try {
 			Expression exp = oInv.bodyExpression();
 			List<Expression> ct = computeClassifyingTerms2(exp);
 			int nExpr=0;
 			for(Expression item: ct) {
+				String strNExpr = Integer.toString(nExpr);
+				mapAlternatives.put(strNExpr, item.toString());
+				nExpr+=1;
+			}
+		}catch (Exception e) {
+			// Do nothing
+		}
+
+
+		TreeMap<String, String> mapSorted = new TreeMap<>(mapAlternatives);
+		return mapSorted;
+	}
+
+	private Map<String, String> doAlternatives(MClassInvariant oInv) {
+		Map<String, String> mapAlternatives = new HashMap<String, String>();
+		try {
+			Expression exp = oInv.bodyExpression();
+			List<Expression> ct = computeClassifyingTerms2(exp);
+			// AQUI 
+			// Comprobación de las alternativas sin optimizar
+			System.out.println("====================================================================================================");			
+			System.out.println("Alternativas sin optimizar");
+			System.out.println("====================================================================================================");
+			int nExprC1=0;
+			for(Expression item: ct) {
+				String strNExpr = Integer.toString(nExprC1);
+				//				mapAlternatives.put(strNExpr, item.toString());
+				System.out.println("Num["+strNExpr+"] - ["+item.toString()+"]");
+				nExprC1+=1;
+			}
+			System.out.println("====================================================================================================");
+			// Optimizamos y simplificamos
+			List<Expression> uniqueExpList = new ArrayList<>();
+			Set<String> seenExpressions = new HashSet<>();
+
+			for(Expression item: ct) {
+				Expression expOpt = OptimizationVisitor.optimize(item);
+				String expString = expOpt.toString(); // Convertir a cadena para comparación
+
+				if (!seenExpressions.contains(expString)) {
+					seenExpressions.add(expString);
+					uniqueExpList.add(expOpt);
+				}				
+			}
+			System.out.println("====================================================================================================");			
+			System.out.println("Alternativas optimizadas");
+			System.out.println("====================================================================================================");
+			int nExprC2=0;
+			for(Expression item: uniqueExpList) {
+				String strNExpr = Integer.toString(nExprC2);
+				System.out.println("Num["+strNExpr+"] - ["+item.toString()+"]");
+				nExprC2+=1;
+			}
+			System.out.println("====================================================================================================");			
+
+			int nExpr=0;
+			//			for(Expression item: ct) { // Antes
+			for(Expression item: uniqueExpList) {
 				String strNExpr = Integer.toString(nExpr);
 				mapAlternatives.put(strNExpr, item.toString());
 				nExpr+=1;
