@@ -1,478 +1,168 @@
-	model pharma
+model shop
 
--- Definition of the Hospital class
-class Hospital 
+-- Definition of the Product class
+class Product 
     attributes
-        idHospital: String
-        name: String
-end
-
--- Definition of the Pharmacist class
-class Pharmacist 
-    attributes
-        idPharmacist: String
-        name: String
-end
-
--- Definition of the Dispensing class
-class Dispensing 
-    attributes
-        idDispensing: String
-        quantity: Integer
-end
-
--- Definition of the Patient class
-class Patient 
-    attributes
-        idPatient: String
-        name: String
-        age: Integer
-end
-
--- Definition of the Doctor class
-class Doctor 
-    attributes
-        idDoctor: String
-        name: String
-end
-
--- Definition of the Medication class
-class Medication 
-    attributes
-        idMedication: String
-        name: String
+        id: Integer
         description: String
-        availableQuantity: Integer
+        price: Integer
+        stock: Integer
 end
 
--- Definition of the Prescription class
-class Prescription 
+-- Definition of the Category class
+class Category 
     attributes
-        idPrescription: String
+        id: Integer
+        name: String
+end
+
+-- Definition of the Customer class
+class Customer 
+    attributes
+        id: Integer
+        blocked: Boolean
+end
+
+-- Definition of the Order class
+class Order 
+    attributes
+        id: Integer
+        total: Integer
+        finalized: Boolean
+end
+
+-- Definition of the OrderLine class
+class OrderLine 
+    attributes
         quantity: Integer
 end
 
--- Definition of the Inventory class
-class Inventory 
-    attributes
-        idInventory: String
-        location: String
+-- Association between Order and Customer
+association OrderCustomer between
+    Order[*] role order
+    Customer[1] role customer
 end
 
--- Definition of the Supplier class
-class Supplier 
-    attributes
-        idSupplier: String
-        name: String
-        quality: Integer
+-- Association between OrderLine and Order
+association OrderLineOrder between
+    OrderLine[1..*] role orderLine
+    Order[1] role order
 end
 
--- Definition of Incompatibilities
-class Incompatibility
-    attributes
-        idIncompatibility: String
-        idMedication1: String
-        idMedication2: String
+-- Association between Product and Category
+association ProductCategory between
+    Product[*] role product
+    Category[1] role category
 end
 
--- Association between Hospital and Pharmacist
-association HospitalPharmacist between
-    Hospital[1] role hospital
-    Pharmacist[*] role pharmacist
-end
-
--- Association between Hospital and Patient
-association HospitalPatient between
-    Hospital[1] role hospital
-    Patient[*] role patient
-end
-
--- Association between Hospital and Doctor
-association HospitalDoctor between
-    Hospital[1] role hospital
-    Doctor[*] role doctor
-end
-
--- Association between Doctor and Prescription
-association DoctorPrescription between
-    Doctor[1] role doctor
-    Prescription[*] role prescription
-end
-
--- Association between Pharmacist and Dispensing
-association PharmacistDispensing between
-    Pharmacist[1] role pharmacist
-    Dispensing[*] role dispensing
-end
-
--- Association between Patient and Prescription
-association PatientPrescription between
-    Patient[1] role patient
-    Prescription[*] role prescription
-end
-
--- Association between Dispensing and Medication
-association DispensingMedication between
-    Dispensing[1] role dispensing
-    Medication[1] role medication
-end
-
--- Association between Medication and Prescription
-association MedicationPrescription between
-    Medication[*] role medication
-    Prescription[*] role prescription
-end
-
--- Association between Medication and Inventory
-association MedicationInventory between
-    Medication[*] role medication
-    Inventory[1] role inventory
-end
-
--- Association between Medication and Supplier
-association MedicationSupplier between
-    Medication[*] role medication
-    Supplier[*] role supplier
-end
-
--- Association between Dispensing and Prescription
-association DispensingPrescription between
-    Dispensing[*] role dispensing
-    Prescription[1] role prescription
-end
-
--- Association between Inventory and Supplier
-association InventorySupplier between
-    Inventory[1] role inventory
-    Supplier[*] role supplier
-end
-
--- Association between Incompatibility and Medication
-association IncompatibilityMedication between
-    Incompatibility[1] role incompatibility
-    Medication[2] role medications
+-- Association between OrderLine and Product
+--association OrderLineProduct between
+--    OrderLine[*] role orderLine
+--    Product[1] role product
+--end
+-- [0..*] does not cause link error but [1..*] does (NEW)
+association OrderLineProduct between
+    OrderLine[0..*] role orderLine
+    Product[1] role product
 end
 
 constraints
 
--- Invariants for HOSPITAL
+-- Constraints block
 
--- A hospital must have a non-empty name.
-context Hospital inv hospitalHasName:
-    self.name <> ''
+-- Invariants for Product
+context Product inv idPositive:
+    self.id > 0
 
--- Hospital IDs must be unique across all hospitals.
-context Hospital inv uniqueHospitalId:--< Modify by MVM [Hospital.allInstances()->isUnique(h | h.idHospital)]
-true
--- A hospital must have at least one pharmacist assigned.
-context Hospital inv hospitalHasPharmacists:
-    self.pharmacist->notEmpty()
+context Product inv descriptionNotEmpty:
+    self.description.size() > 0
 
--- A hospital must have at least one patient assigned.
-context Hospital inv hospitalHasPatients:
-    self.patient->notEmpty()
+context Product inv priceNonNegative:
+    self.price >= 0
 
--- A hospital must have at least one doctor assigned.
-context Hospital inv hospitalHasDoctors:
-    self.doctor->notEmpty()
+context Product inv stockNonNegative:
+    self.stock >= 0 --(PROVIS)
+--    self.stock < 0
 
--- Invariants for PHARMACIST
+context Product inv stockReasonable:
+    self.stock <= (6000+4000)
 
--- Pharmacist IDs must be unique across all pharmacists.
-context Pharmacist inv uniquePharmacistId:
-    Pharmacist.allInstances()->isUnique(p | p.idPharmacist)
+context Product inv uniqueProductId:
+    Product.allInstances()->forAll(p | p <> self implies p.id <> self.id)
 
--- A pharmacist must have a non-empty name.
-context Pharmacist inv pharmacistHasName:
-    self.name <> ''
+--context Product inv sufficientStock:
+--    self.stock >= OrderLine.allInstances()
+--                    ->select(ol | ol.product = self)
+--                    ->collect(ol | ol.quantity)
+--                    ->sum()
 
--- A pharmacist must be assigned to at least one hospital.
-context Pharmacist inv pharmacistAssignedToHospital:
-    self.hospital->notEmpty()
-
--- A pharmacist must be related to at least one dispensing.
-context Pharmacist inv pharmacistHasDispensations:
-    self.dispensing->notEmpty()
-
--- Invariants for DISPENSING
-
--- Dispensing IDs must be unique across all dispensations.
-context Dispensing inv uniqueDispensingId:
-    Dispensing.allInstances()->isUnique(d | d.idDispensing)
-
--- A dispensing must reference at least one medication.
-context Dispensing inv dispensingReferencesMedication:
-    self.medication->notEmpty()
-
--- The quantity dispensed should not exceed the quantity prescribed in the prescription.
-context Dispensing inv dispensingWithinPrescription:
-    self.quantity <= self.prescription.quantity
-
--- Each dispensation must be associated with exactly one prescription.
-context Dispensing inv associatedWithPrescription:
-    self.prescription->notEmpty()
-
--- The sum of the dispensed quantities associated with a prescription must not exceed the prescribed quantity.
-context Dispensing inv dispensingDoesNotExceedPrescription:
-    self.prescription->notEmpty() and
-    Dispensing.allInstances()->select(d | d.prescription = self.prescription)
-        ->collect(d | d.quantity)
-        ->sum() <= self.prescription.quantity
-
--- Invariants for PATIENT
-
--- Patient IDs must be unique across all patients.
-context Patient inv uniquePatientId:
-    Patient.allInstances()->isUnique(p | p.idPatient)
-
--- A patient has a name
-context Patient inv patientHasName:
-    self.name <> ''
-
--- A patient's age must be greater than 0.
-context Patient inv patientAgeValid:
-    self.age > 0
-
--- A patient must be assigned a hospital
-context Patient inv patientAssignedToHospital:
-    self.hospital->notEmpty()
-
--- A patient must have prescriptions
-context Patient inv patientHasPrescriptions:
-    self.prescription->notEmpty()
-
--- A patient cannot have duplicate prescriptions with the same combination of medications
-context Patient inv uniqueRecipes:
-    self.prescription->forAll(r1, r2 | r1 <> r2 implies r1.medication->asSet() <> r2.medication->asSet())
-
--- Do not prescribe incompatible medications to the same patient.
-context Patient inv noConflictingMedicationsInPrescriptions:
-    self.prescription->forAll(p1, p2 |
-        p1 <> p2 implies
-        not Incompatibility.allInstances()->exists(i |
-            (p1.medication->exists(m1 | m1.idMedication = i.idMedication1) and
-             p2.medication->exists(m2 | m2.idMedication = i.idMedication2)) or
-            (p1.medication->exists(m1 | m1.idMedication = i.idMedication2) and
-             p2.medication->exists(m2 | m2.idMedication = i.idMedication1))
-        )
-    )
-
--- A patient under 18 years of age cannot receive medications whose dose is greater than 50 units per prescription.
-context Patient inv ageRestrictionForPrescriptions:
-    self.age < 18 implies 
-    self.prescription->forAll(p |
-        p.medication->forAll(m | 
-            p.quantity <= 50
-        )
-    )
-
--- Invariants for DOCTOR
-
--- Doctor IDs must be unique across all doctors.
-context Doctor inv uniqueDoctorId:
-    Doctor.allInstances()->isUnique(d | d.idDoctor)
-
--- A doctor must have a non-empty name.
-context Doctor inv doctorHasName:
-    self.name <> ''
-
--- A doctor must be associated with at least one hospital.
-context Doctor inv doctorAssignedToHospital:
-    self.hospital->notEmpty()
-
--- A doctor must be linked to at least one prescription.
-context Doctor inv doctorHasPrescriptions:
-    self.prescription->notEmpty()
-
--- Invariants for MEDICATION
-
--- Medication IDs must be unique across all medications.
-context Medication inv uniqueMedicationId:
-    Medication.allInstances()->isUnique(m | m.idMedication)
-
--- A medication must have a non-empty name.
-context Medication inv medicationHasName:
-    self.name <> ''
-
--- The available quantity of a medication in inventory cannot be negative
-context Medication inv medicationQuantityNonNegative:
-    self.availableQuantity >= 0
-
--- A medicine must be associated with at least one inventory
-context Medication inv associatedInventory:
-    not self.inventory->isEmpty()
-
--- A medication must have a non-empty description.
-context Medication inv medicationHasDescription:
-    self.description <> ''
-
--- A medication must be linked to at least one supplier.
-context Medication inv medicationLinkedToSupplier:
-    self.supplier->notEmpty()
-
--- A medicine cannot be dispensed if there is not enough quantity available in the inventory
-context Medication inv enoughQuantity:
-    self.prescription->collect(p | p.quantity)->sum() <= self.availableQuantity
-
--- A medication's total available quantity must be sufficient to cover all prescribed quantities.
-context Medication inv enoughQuantity2:
-    self.availableQuantity >= MedicationPrescription.allInstances()
-        ->select(mp | mp.medication = self)
-        ->collect(mp | mp.prescription)
-        ->collect(p | p.quantity)
+-- Invariant for Product ensuring sufficient stock for unfinished orders (NEW)
+context Product inv sufficientStockForUnfinishedOrders:
+    self.stock = OrderLine.allInstances()
+        ->select(ol | ol.product = self and ol.order.finalized = false)
+        ->collect(ol | ol.quantity)
         ->sum()
 
--- The available quantity of a medicine must be sufficient to satisfy the sum of the quantities prescribed in all the prescriptions.
-context Medication inv enoughQuantity3:
-    self.availableQuantity >= self.prescription->collect(p | p.quantity)->sum()
+context Product inv maxPetNoFinalizadas:
+    OrderLine.allInstances()
+        ->select(ol | ol.product = self and ol.order.finalized = false)->size() < 2
 
--- A medicine must not be involved in more than 10 incompatibilities.
-context Medication inv maxIncompatibilities:
-    Incompatibility.allInstances()->select(i | 
-        i.idMedication1 = self.idMedication or i.idMedication2 = self.idMedication
-    )->size() <= 10
+context Product inv stockLimits:--< Modify by MVM [self.stock >= 5 and self.stock <=10]
+(((self.stock + 1) >= 5) or (self.stock <= 10))
+-- Invariants for Category
+context Category inv idPositive:
+  self.id > 0
 
--- A medicine involved in an incompatibility must have at least one quantity available
-context Medication inv prescribedQuantityWithinLimit:
-    self.availableQuantity >= Prescription.allInstances()->select(p |
-        p.medication->includes(self)
-    )->collect(p | p.quantity)->sum()
+context Category inv nameNotEmpty:
+  self.name.size() > 0
 
+context Category inv nameUnique:
+  Category.allInstances()->forAll(c | c <> self implies c.name <> self.name)
 
--- The total quantity dispensed of a medication should not exceed its available quantity.
-context Medication inv totalDispensingWithinLimit:
-    self.availableQuantity >= Dispensing.allInstances()->select(d |
-        d.medication = self
-    )->collect(d | d.quantity)->sum()
+context Category inv nameValidLength:
+  self.name.size() <= 50
+  
+-- Invariants for Customer
+context Customer inv idPositive:
+    self.id > 0
 
--- Invariants for PRESCRIPTION
+context Customer inv customerNotBlocked:
+    self.order->notEmpty() implies self.blocked = false
+  
+-- Invariants for Order
+context Order inv idPositive:
+    self.id > 0
 
--- Prescription IDs must be unique across all prescriptions.
-context Prescription inv uniquePrescriptionId:
-    Prescription.allInstances()->isUnique(p | p.idPrescription)
+context Order inv customerAssigned:
+    self.customer->notEmpty()
 
--- A prescription must be linked to a patient.
-context Prescription inv prescriptionLinkedToPatient:
-    self.patient->notEmpty()
+context Order inv uniqueOrderId:
+    Order.allInstances()->forAll(o | o <> self implies o.id <> self.id)
 
--- A prescription must be linked to a doctor.
-context Prescription inv prescriptionLinkedToDoctor:
-    self.doctor->notEmpty()
+context Order inv calculateTotal:
+    self.total = self.orderLine
+       ->collect(ol | ol.quantity * ol.product.price)
+       ->sum()
 
--- A prescription must contain at least one medication.
-context Prescription inv prescriptionContainsMedication:
-    self.medication->notEmpty()
+context Order inv distinctProductInOrderLines:
+    self.orderLine->forAll(ol1, ol2 | ol1 <> ol2 implies ol1.product <> ol2.product)
 
--- A medical prescription must contain at least one medication
-context Prescription inv prescriptionContainsMedication2:
-    self.medication->size() > 0
+-- Invariant to ensure an Order has no associated OrderLine (NEW)
+--context Order inv noOrderLines:
+--    self.orderLine->size() < 0
 
--- A prescription must have at least one medication with a quantity greater than 0.
-context Prescription inv atLeastOneMedicationWithQuantity:
-    self.medication->exists(m | m.availableQuantity > 0)
+-- Invariant to ensure an Order has at least one OrderLine (NEW)
+--context Order inv hasAtLeastOneOrderLine:
+--    self.orderLine->size() >=1
 
--- The maximum quantity that can be prescribed of a medication is 100 units per prescription
-context Prescription inv maxMedicationQuantity:
-    self.medication->forAll(m | m.availableQuantity <= 100)
+-- Invariant for OrderLine ensuring positive quantity (NEW)
+context OrderLine inv positiveQuantity:
+    self.quantity <= 1
 
--- If two medicines are incompatible, they must not appear on the same prescription.
-context Prescription inv noConflictingMedications:
-    self.medication->forAll(m1, m2 |
-        m1 <> m2 implies not Incompatibility.allInstances()->exists(i |
-            (i.idMedication1 = m1.idMedication and i.idMedication2 = m2.idMedication) or
-            (i.idMedication1 = m2.idMedication and i.idMedication2 = m1.idMedication)
-        )
-    )
+-- Invariant for OrderLine ensuring negative quantity (NEW)
+--context OrderLine inv negativeQuantity:
+--    self.quantity < 0
 
--- If two medicines are incompatible, they must not appear on the same prescription. (REPETIDA2)
-context Prescription inv noConflictingMedications2:
-    self.medication->forAll(m1, m2 |
-        m1 = m2 or Incompatibility.allInstances()->forAll(i |
-            (i.idMedication1 <> m1.idMedication or i.idMedication2 <> m2.idMedication) and
-            (i.idMedication1 <> m2.idMedication or i.idMedication2 <> m1.idMedication)
-        )
-    )
-
--- The sum of the dispensed quantities associated with a prescription cannot exceed the quantity prescribed in said prescription.
-context Prescription inv totalDispensedNotExceedQuantity:
-    Dispensing.allInstances()
-        ->select(d | d.prescription = self)
-        ->collect(d | d.quantity)
-        ->sum() <= self.quantity
-
--- Invariants for INVENTORY
-
--- Inventory IDs must be unique across all inventories.
-context Inventory inv uniqueInventoryId:
-    Inventory.allInstances()->isUnique(i | i.idInventory)
-
--- An inventory must have a location defined.
-context Inventory inv inventoryHasLocation:
-    self.location <> ''
-
--- An inventory must contain at least one medication.
-context Inventory inv inventoryContainsMedication:
-    self.medication->notEmpty()
-
--- An inventory must be linked to at least one supplier.
-context Inventory inv inventoryLinkedToSupplier:
-    self.supplier->notEmpty()
-
--- All medications associated with an inventory have an available quantity greater than or equal to zero.
-context Inventory inv medicationQuantityMatchesInventory:
-    self.medication->forAll(m | m.availableQuantity >= 0)
-
--- The total prescribed quantity of each medication must be less than or equal to the quantity available in the inventory.
-context Inventory inv prescribedQuantityLimit:
-    self.medication->forAll(m |
-        m.prescription->collect(p | p.quantity)->sum() <= m.availableQuantity
-    )
-
--- An inventory associated with more than 5 medications must have at least 2 different suppliers
-context Inventory inv suppliersForLargeInventories:
-    self.medication->size() > 5 implies self.supplier->size() >= 2
-
--- Invariants for SUPPLIER
-
--- Supplier IDs must be unique across all suppliers.
-context Supplier inv uniqueSupplierId:
-    Supplier.allInstances()->isUnique(s | s.idSupplier)
-
--- A supplier must have a non-empty name.
-context Supplier inv supplierHasName:
-    self.name <> ''
-
---A supplier must have at least one associated medicine
-context Supplier inv supplierProvidesMedication:
-    self.medication->notEmpty()
-
--- A supplier must be linked to at least one inventory.
-context Supplier inv supplierLinkedToInventory:
-    self.inventory->notEmpty()
-
---The service rating must be between 0 and 5
-context Supplier inv supplierQualityValid:
-    self.quality >= 0 and self.quality <= 5
-
--- Invariants for INCOMPATIBILITY
-
--- An incompatibility cannot be created between a medicine and itself
-context Incompatibility inv noSelfIncompatibility:
-    self.idMedication1 <> self.idMedication2
-
--- Each incompatibility must be recorded only once (no duplicates in reverse order).
-context Incompatibility inv uniqueIncompatibility:
-    not Incompatibility.allInstances()->exists(i |
-        (i.idMedication1 = self.idMedication2 and i.idMedication2 = self.idMedication1)
-    )
-
--- The medications involved in an incompatibility must exist in the system
-context Incompatibility inv medicationsExist:
-    Medication.allInstances()->exists(m | m.idMedication = self.idMedication1) and
-    Medication.allInstances()->exists(m | m.idMedication = self.idMedication2)
-
--- Each medicine cannot be involved in more than 10 incompatibilities
-context Incompatibility inv maxIncompatibilitiesPerMedication:
-    Incompatibility.allInstances()->select(i | i.idMedication1 = self.idMedication1 or i.idMedication2 = self.idMedication1)->size() <= 10 and
-    Incompatibility.allInstances()->select(i | i.idMedication1 = self.idMedication2 or i.idMedication2 = self.idMedication2)->size() <= 10
-
+-- Invariant for OrderLine to ensure it is linked to only one Order (NEW)
+--context OrderLine inv uniqueOrderLink:
+--    Order.allInstances()->select(o | o.orderLine->includes(self))->size() = 1
