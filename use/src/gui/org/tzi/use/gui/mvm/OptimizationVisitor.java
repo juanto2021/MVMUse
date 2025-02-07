@@ -1,4 +1,5 @@
 package org.tzi.use.gui.mvm;
+
 import org.tzi.use.uml.ocl.expr.ExpAllInstances;
 import org.tzi.use.uml.ocl.expr.ExpAny;
 import org.tzi.use.uml.ocl.expr.ExpAsType;
@@ -55,7 +56,8 @@ import org.tzi.use.uml.ocl.value.UnlimitedNaturalValue;
 public class OptimizationVisitor extends BooleanVisitor {
 
 	private boolean debOptMet = false;
-	private boolean debShowTrace = false;
+	private boolean debShowTrace = true;
+	private boolean debShowOpt = true;
 
 	private Expression optExp;
 
@@ -327,6 +329,7 @@ public class OptimizationVisitor extends BooleanVisitor {
 			if (debOptMet) System.out.println("Collection is empty");
 			optExp = new ExpConstBoolean(true);
 			if (debShowTrace) showTrace("visitExists",exp,optExp);
+			if (debShowOpt) System.out.println("OPT-EXIST: 1 ~"+exp+"~"+query+"~"+queryOpt+"~"+range+"~"+rangeOpt+"~"+optExp);
 			return;
 		}
 
@@ -339,8 +342,10 @@ public class OptimizationVisitor extends BooleanVisitor {
 				// If the query is false, it is the same as asking that the range is empty
 				try {
 					Expression args[] = {rangeOpt};
-					optExp = ExpStdOp.create("isEmpty", args);
+					//					optExp = ExpStdOp.create("isEmpty", args);// PROVIS
+					optExp = ExpStdOp.create("notEmpty", args);
 					if (debShowTrace) showTrace("visitExists",exp,optExp);
+					if (debShowOpt) System.out.println("OPT-EXIST: 2 ~"+exp+"~"+query+"~"+queryOpt+"~"+range+"~"+rangeOpt+"~"+optExp);
 				} catch (ExpInvalidException e) {
 					e.printStackTrace();
 				}
@@ -349,6 +354,7 @@ public class OptimizationVisitor extends BooleanVisitor {
 				// If the query is false, the answer is true
 				optExp = new ExpConstBoolean(false);
 				if (debShowTrace) showTrace("visitExists",exp,optExp);
+				if (debShowOpt) System.out.println("OPT-EXIST: 3 ~"+exp+"~"+query+"~"+queryOpt+"~"+range+"~"+rangeOpt+"~"+optExp);
 				return;
 			}
 		}
@@ -621,7 +627,7 @@ public class OptimizationVisitor extends BooleanVisitor {
 
 				//	Es una expresión del tipo COLECCION->including(X)
 				if (opName.equals("including")) {
-					System.out.println("show Including ["+exp.toString()+"]");
+					//					System.out.println("show Including ["+exp.toString()+"]");
 					if (exp.toString().equals("self.orderLine->including(ol1)")) {
 						System.out.println("Aqui");
 					}
@@ -741,7 +747,7 @@ public class OptimizationVisitor extends BooleanVisitor {
 			return;
 		}else {
 			defaultOptimizing(exp);
-			//			Expression expRes = optimizeOpUnary(optCol, "notIsEmpty");
+			//			Expression expRes = optimizeOpUnary(optCol, "notEmpty");
 			//			optExp= expRes;
 			//			if (debShowTrace) showTrace("optimizeIsNotEmpty",exp,optExp);
 			//			return;
@@ -870,6 +876,7 @@ public class OptimizationVisitor extends BooleanVisitor {
 		if (optLeft.toString().equals(optRight.toString())) {
 			optExp = optLeft;
 			if (debShowTrace) showTrace("optimizeOrExp",exp,optExp);
+			if (debShowOpt) System.out.println("OPT-OR: 1 ~"+exp+"~"+left+"~"+optLeft+"~"+right+"~"+optRight+"~"+optExp);
 			return;
 		}
 
@@ -880,6 +887,7 @@ public class OptimizationVisitor extends BooleanVisitor {
 			boolean leftValue = ((ExpConstBoolean)optLeft).value();
 			boolean rightValue = ((ExpConstBoolean)optRight).value();
 			optExp = new ExpConstBoolean(leftValue || rightValue);
+			if (debShowOpt) System.out.println("OPT-OR: 2 ~"+exp+"~"+left+"~"+optLeft+"~"+right+"~"+optRight+"~"+optExp);
 			if (debShowTrace) showTrace("optimizeOrExp",exp,optExp);
 			return;
 		}
@@ -898,11 +906,13 @@ public class OptimizationVisitor extends BooleanVisitor {
 				// Result is always true
 				optExp = optLeft;
 				if (debShowTrace) showTrace("optimizeOrExp",exp,optExp);
+				if (debShowOpt) System.out.println("OPT-OR: 3 ~"+exp+"~"+left+"~"+optLeft+"~"+right+"~"+optRight+"~"+optExp);
 				return;
 			} else {
 				// Result is always the rightmost operator
 				optExp = optRight;
 				if (debShowTrace) showTrace("optimizeOrExp",exp,optExp);
+				if (debShowOpt) System.out.println("OPT-OR: 4 ~"+exp+"~"+left+"~"+optLeft+"~"+right+"~"+optRight+"~"+optExp);
 				return;
 			}
 		} 
@@ -951,7 +961,7 @@ public class OptimizationVisitor extends BooleanVisitor {
 
 		// Optimization 3: only one operator is a boolean constant
 		if (leftIsConstant || rightIsConstant) {
-//			System.out.println("Aqui optimizeAndExp");
+			System.out.println("Aqui optimizeAndExp");
 			// Assume the constant is the leftmost subexpression
 			// Otherwise swap them
 			if (rightIsConstant) { 
@@ -1059,6 +1069,12 @@ public class OptimizationVisitor extends BooleanVisitor {
 
 		boolean leftIsConstant  = optLeft instanceof ExpConstBoolean;
 		boolean rightIsConstant = optRight instanceof ExpConstBoolean;
+
+		if (leftIsConstant && rightIsConstant) {
+			optExp = new ExpConstBoolean(!((ExpConstBoolean) optLeft).value() || ((ExpConstBoolean) optRight).value());
+			if (debShowTrace) showTrace("optimizeImpliesExp",exp,optExp);
+			return;	
+		}	
 
 		//		X = cierto: "X implies Y" se simplifca como "Y"
 		if (leftIsConstant && ((ExpConstBoolean) optLeft).value()) {
@@ -1244,19 +1260,40 @@ public class OptimizationVisitor extends BooleanVisitor {
 		if (debOptMet) System.out.println("optLeft ["+optLeft+"]");
 		if (debOptMet) System.out.println("optRight ["+optRight+"]");
 
-		if (!optLeft.equals(left)||!optRight.equals(right)) {
-			Expression newArgs[] = {optLeft,optRight};
-			try {
-				Expression exprRes = ExpStdOp.create(opName, newArgs);
-				optExp = exprRes;
-				if (debShowTrace) showTrace("optimizeStdOp op->"+opName+" ",exp,optExp);
+		//		if (!optLeft.equals(left)||!optRight.equals(right)) {
+		//			Expression newArgs[] = {optLeft,optRight};
+		//			try {
+		//				Expression exprRes = ExpStdOp.create(opName, newArgs);
+		//				optExp = exprRes;
+		//				if (debShowTrace) showTrace("optimizeStdOp op->"+opName+" ",exp,optExp);
+		//				return;
+		//			} catch (ExpInvalidException e) {
+		//				e.printStackTrace();
+		//			}
+		//		}
+
+		//		defaultOptimizing(exp);
+
+		if (optLeft.toString().equals(optRight.toString())) {
+			//			=,>=, <= cierto
+			//			<>,<,> false
+			if (opName.equals("=")||opName.equals(">=")||opName.equals("<=")) {
+				optExp = new ExpConstBoolean(true);
+				if (debShowTrace) showTrace("optimizeStdOp ("+opName+")",exp,optExp);
 				return;
-			} catch (ExpInvalidException e) {
-				e.printStackTrace();
+			}else if (opName.equals("<>")||opName.equals("<")||opName.equals(">")) {
+				optExp = new ExpConstBoolean(false);
+				if (debShowTrace) showTrace("optimizeStdOp ("+opName+")",exp,optExp);
+				return;
 			}
+
 		}
 
-		defaultOptimizing(exp);
+
+		Expression expRes = optimizeOpBinary(optLeft, optRight, opName);
+		optExp= expRes;
+		if (debShowTrace) showTrace("optimizeStdOp ("+opName+")",exp,optExp);
+
 		return;
 	}
 
@@ -1865,4 +1902,3 @@ public class OptimizationVisitor extends BooleanVisitor {
 	}
 
 }
-	
