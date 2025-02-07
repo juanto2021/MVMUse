@@ -86,8 +86,11 @@ context Product inv uniqueProductId:
     Product.allInstances()->forAll(p | p <> self implies p.id <> self.id)
 
 -- Invariant for Product ensuring sufficient stock for unfinished orders (IMPORTANT)
-context Product inv sufficientStock:--< Modify by MVM [self.stock = OrderLine.allInstances()        ->select(ol | ol.product = self and ol.order.finalized = false)        ->collect(ol | ol.quantity)        ->sum()]
-(self.stock >= OrderLine.allInstances->select(ol : OrderLine | ((ol.product = self) and (ol.order.finalized = false)))->collect(ol : OrderLine | ol.quantity)->sum)
+context Product inv sufficientStock:
+    self.stock = OrderLine.allInstances()
+        ->select(ol | ol.product = self and ol.order.finalized = false)
+        ->collect(ol | ol.quantity)
+        ->sum()
 --provis
 --context Product inv maxPetNoFinalizadas:
 --    OrderLine.allInstances()

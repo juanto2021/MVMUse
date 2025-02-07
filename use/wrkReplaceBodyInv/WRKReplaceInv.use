@@ -56,13 +56,9 @@ association ProductCategory between
 end
 
 -- Association between OrderLine and Product
---association OrderLineProduct between
---    OrderLine[*] role orderLine
---    Product[1] role product
---end
--- [0..*] does not cause link error but [1..*] does (NEW)
+-- [*] does not cause link error but [1..*] does (IMPORTANT)
 association OrderLineProduct between
-    OrderLine[0..*] role orderLine
+    OrderLine[1..*] role orderLine
     Product[1] role product
 end
 
@@ -71,70 +67,60 @@ constraints
 -- Constraints block
 
 -- Invariants for Product
-context Product inv idPositive:
-    self.id > 0
+--context Product inv idPositive:
+--    self.id > 0
 
-context Product inv descriptionNotEmpty:
-    self.description.size() > 0
+---context Product inv descriptionNotEmpty:
+--    self.description.size() > 0
 
 context Product inv priceNonNegative:
     self.price >= 0
 
-context Product inv stockNonNegative:
-    self.stock >= 0 --(PROVIS)
---    self.stock < 0
+--context Product inv stockNonNegative:
+--    self.stock >= 0
 
-context Product inv stockReasonable:
-    self.stock <= (6000+4000)
+--context Product inv stockReasonable:
+--    self.stock <= 10000
 
 context Product inv uniqueProductId:
     Product.allInstances()->forAll(p | p <> self implies p.id <> self.id)
 
---context Product inv sufficientStock:
---    self.stock >= OrderLine.allInstances()
---                    ->select(ol | ol.product = self)
---                    ->collect(ol | ol.quantity)
---                    ->sum()
-
--- Invariant for Product ensuring sufficient stock for unfinished orders (NEW)
-context Product inv sufficientStockForUnfinishedOrders:
-    self.stock = OrderLine.allInstances()
-        ->select(ol | ol.product = self and ol.order.finalized = false)
-        ->collect(ol | ol.quantity)
-        ->sum()
-
-context Product inv maxPetNoFinalizadas:
-    OrderLine.allInstances()
-        ->select(ol | ol.product = self and ol.order.finalized = false)->size() < 2
+-- Invariant for Product ensuring sufficient stock for unfinished orders (IMPORTANT)
+context Product inv sufficientStock:--< Modify by MVM [self.stock = OrderLine.allInstances()        ->select(ol | ol.product = self and ol.order.finalized = false)        ->collect(ol | ol.quantity)        ->sum()]
+(self.stock >= OrderLine.allInstances->select(ol : OrderLine | ((ol.product = self) and (ol.order.finalized = false)))->collect(ol : OrderLine | ol.quantity)->sum)
+--provis
+--context Product inv maxPetNoFinalizadas:
+--    OrderLine.allInstances()
+--        ->select(ol | ol.product = self and ol.order.finalized = false)->size() < 2
 
 context Product inv stockLimits:--< Modify by MVM [self.stock >= 5 and self.stock <=10]
-(((self.stock + 1) >= 5) or (self.stock <= 10))
+(self.stock <= 10)
 -- Invariants for Category
-context Category inv idPositive:
-  self.id > 0
+--context Category inv idPositive:
+--  self.id > 0
 
-context Category inv nameNotEmpty:
-  self.name.size() > 0
+--context Category inv nameNotEmpty:
+--  self.name.size() > 0
 
 context Category inv nameUnique:
   Category.allInstances()->forAll(c | c <> self implies c.name <> self.name)
 
-context Category inv nameValidLength:
-  self.name.size() <= 50
+--context Category inv nameValidLength:
+--  self.name.size() <= 50
   
 -- Invariants for Customer
-context Customer inv idPositive:
-    self.id > 0
+--context Customer inv idPositive:
+--    self.id > 0
 
 context Customer inv customerNotBlocked:
     self.order->notEmpty() implies self.blocked = false
   
 -- Invariants for Order
-context Order inv idPositive:
-    self.id > 0
+--context Order inv idPositive:
+--    self.id > 0
 
-context Order inv customerAssigned:
-    self.customer->notEmpty()
+--context Order inv customerAssigned:
+--    self.customer->notEmpty()
 
 context Order inv uniqueOrderId:
     Order.allInstances()->forAll(o | o <> self implies o.id <> self.id)
@@ -147,22 +133,6 @@ context Order inv calculateTotal:
 context Order inv distinctProductInOrderLines:
     self.orderLine->forAll(ol1, ol2 | ol1 <> ol2 implies ol1.product <> ol2.product)
 
--- Invariant to ensure an Order has no associated OrderLine (NEW)
---context Order inv noOrderLines:
---    self.orderLine->size() < 0
-
--- Invariant to ensure an Order has at least one OrderLine (NEW)
---context Order inv hasAtLeastOneOrderLine:
---    self.orderLine->size() >=1
-
 -- Invariant for OrderLine ensuring positive quantity (NEW)
-context OrderLine inv positiveQuantity:
-    self.quantity <= 1
-
--- Invariant for OrderLine ensuring negative quantity (NEW)
---context OrderLine inv negativeQuantity:
---    self.quantity < 0
-
--- Invariant for OrderLine to ensure it is linked to only one Order (NEW)
---context OrderLine inv uniqueOrderLink:
---    Order.allInstances()->select(o | o.orderLine->includes(self))->size() = 1
+context OrderLine inv singleProductOrders:
+    self.quantity = 1
