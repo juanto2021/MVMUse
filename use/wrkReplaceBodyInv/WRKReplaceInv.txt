@@ -93,8 +93,9 @@ context Product inv sufficientStock:--< Modify by MVM [self.stock = OrderLine.al
 --    OrderLine.allInstances()
 --        ->select(ol | ol.product = self and ol.order.finalized = false)->size() < 2
 
-context Product inv stockLimits:--< Modify by MVM [self.stock >= 5 and self.stock <=10]
-(self.stock <= 10)
+context Product inv stockLimits:
+    self.stock >= 5 and self.stock <=10
+
 -- Invariants for Category
 --context Category inv idPositive:
 --  self.id > 0
