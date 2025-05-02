@@ -1,139 +1,184 @@
-model shop
+model LibraryManagement
 
--- Definition of the Product class
-class Product 
-    attributes
-        id: Integer
-        description: String
-        price: Integer
-        stock: Integer
+class Copy
+  attributes
+    id: Integer
+    condition: String
+    shelfNumber: Integer
+    usageCount: Integer
+    acquisitionYear: Integer
 end
 
--- Definition of the Category class
-class Category 
-    attributes
-        id: Integer
-        name: String
+class BookTitle
+  attributes
+    name: String
+    author: String
+    isbn: String
+    reservationNumber: Integer
+    pageCount: Integer
+    edition: Integer
+    publicationYear: Integer
 end
 
--- Definition of the Customer class
-class Customer 
-    attributes
-        id: Integer
-        blocked: Boolean
+class MagazineTitle
+  attributes
+    pendingTime: Integer
+    title: String
+    volume: Integer
+    issue: Integer
+    frequency: String
 end
 
--- Definition of the Order class
-class Order 
-    attributes
-        id: Integer
-        total: Integer
-        finalized: Boolean
+class BookLoan
+  attributes
+    loanDay: Integer
+    loanMonth: Integer
+    loanYear: Integer
+    durationDays: Integer
+    loanCode: String
 end
 
--- Definition of the OrderLine class
-class OrderLine 
-    attributes
-        quantity: Integer
+class BookReservation
+  attributes
+    reservationDay: Integer
+    reservationMonth: Integer
+    reservationYear: Integer
+    reservationCode: String
+    durationDays: Integer
 end
 
--- Association between Order and Customer
-association OrderCustomer between
-    Order[*] role order
-    Customer[1] role customer
+class BorrowerInfo
+  attributes
+    name: String
+    address: String
+    status: String
+    code: String
+    age: Integer
 end
 
--- Association between OrderLine and Order
-association OrderLineOrder between
-    OrderLine[1..*] role orderLine
-    Order[1] role order
+association CopyBookTitle between
+  Copy [0..*] role copiesRole
+  BookTitle [1] role bookTitleRole
 end
 
--- Association between Product and Category
-association ProductCategory between
-    Product[*] role product
-    Category[1] role category
+association BookTitleBookLoan between
+  BookTitle [0..1] role bookTitleRole
+  BookLoan [1] role bookLoanRole
 end
 
--- Association between OrderLine and Product
--- [*] does not cause link error but [1..*] does (IMPORTANT)
-association OrderLineProduct between
-    OrderLine[1..*] role orderLine
-    Product[1] role product
+association BookTitleMagazineTitle between
+  BookTitle [0..*] role bookTitlesRole
+  MagazineTitle [1] role magazineTitleRole
+end
+
+association BookTitleBookReservation between
+  BookTitle [0..*] role bookTitlesRole
+  BookReservation [1] role bookReservationRole
+end
+
+association BorrowerInfoBookLoan between
+  BorrowerInfo [0..*] role borrowersRole
+  BookLoan [1] role bookLoanRole
+end
+
+association BorrowerInfoBookReservation between
+  BorrowerInfo [0..*] role borrowersRole
+  BookReservation [1] role bookReservationRole
 end
 
 constraints
 
--- Constraints block
+context Copy inv idPositive:
+  self.id > 0
 
--- Invariants for Product
---context Product inv idPositive:
---    self.id > 0
+context Copy inv conditionNotEmpty:
+  self.condition <> ''
 
----context Product inv descriptionNotEmpty:
---    self.description.size() > 0
+context Copy inv shelfNumberPositive:
+  self.shelfNumber >= 0
 
-context Product inv priceNonNegative:
-    self.price >= 0
+context Copy inv usageCountNonNegative:
+  self.usageCount >= 0
 
---context Product inv stockNonNegative:
---    self.stock >= 0
+--context Copy inv acquisitionYearReasonable:
+--  self.acquisitionYear >= 1900 and self.acquisitionYear <= 2100
 
---context Product inv stockReasonable:
---    self.stock <= 10000
+context BookTitle inv nameNotEmpty:
+  self.name <> ''
 
-context Product inv uniqueProductId:
-    Product.allInstances()->forAll(p | p <> self implies p.id <> self.id)
+context BookTitle inv authorNotEmpty:
+  self.author <> ''
 
--- Invariant for Product ensuring sufficient stock for unfinished orders (IMPORTANT)
-context Product inv sufficientStock:--< Modify by MVM [self.stock = OrderLine.allInstances()        ->select(ol | ol.product = self and ol.order.finalized = false)        ->collect(ol | ol.quantity)        ->sum()]
-(self.stock >= OrderLine.allInstances->select(ol : OrderLine | ((ol.product = self) and (ol.order.finalized = false)))->collect(ol : OrderLine | ol.quantity)->sum)
---provis
---context Product inv maxPetNoFinalizadas:
---    OrderLine.allInstances()
---        ->select(ol | ol.product = self and ol.order.finalized = false)->size() < 2
+context BookTitle inv isbnNotEmpty:
+  self.isbn <> ''
 
-context Product inv stockLimits:
-    self.stock >= 5 and self.stock <=10
+context BookTitle inv reservationNumberNonNegative:
+  self.reservationNumber >= 0
 
--- Invariants for Category
---context Category inv idPositive:
---  self.id > 0
+context BookTitle inv pageCountPositive:
+  self.pageCount > 0
 
---context Category inv nameNotEmpty:
---  self.name.size() > 0
+context BookTitle inv editionPositive:
+  self.edition > 0
 
-context Category inv nameUnique:
-  Category.allInstances()->forAll(c | c <> self implies c.name <> self.name)
+--context BookTitle inv publicationYearValid:
+--  self.publicationYear >= 1450 and self.publicationYear <= 2100
 
---context Category inv nameValidLength:
---  self.name.size() <= 50
-  
--- Invariants for Customer
---context Customer inv idPositive:
---    self.id > 0
+context MagazineTitle inv pendingTimePositive:
+  self.pendingTime > 0
 
-context Customer inv customerNotBlocked:
-    self.order->notEmpty() implies self.blocked = false
-  
--- Invariants for Order
---context Order inv idPositive:
---    self.id > 0
+context MagazineTitle inv titleNotEmpty:
+  self.title <> ''
 
---context Order inv customerAssigned:
---    self.customer->notEmpty()
+context MagazineTitle inv volumePositive:
+  self.volume > 0
 
-context Order inv uniqueOrderId:
-    Order.allInstances()->forAll(o | o <> self implies o.id <> self.id)
+context MagazineTitle inv issuePositive:
+  self.issue > 0
 
-context Order inv calculateTotal:
-    self.total = self.orderLine
-       ->collect(ol | ol.quantity * ol.product.price)
-       ->sum()
+context MagazineTitle inv frequencyNotEmpty:
+  self.frequency <> ''
 
-context Order inv distinctProductInOrderLines:
-    self.orderLine->forAll(ol1, ol2 | ol1 <> ol2 implies ol1.product <> ol2.product)
+context BookLoan inv dayInMonth:
+  self.loanDay >= 1 and self.loanDay <= 31
 
--- Invariant for OrderLine ensuring positive quantity (NEW)
-context OrderLine inv singleProductOrders:
-    self.quantity = 1
+context BookLoan inv monthInYear:--< Modify by MVM [self.loanMonth >= 1 and self.loanMonth <= 12]
+((self.loanMonth >= 1) or ((self.loanMonth - 1) <= 12))
+--context BookLoan inv loanYearValid:
+--  self.loanYear >= 1900 and self.loanYear <= 2100
+
+context BookLoan inv durationPositive:
+  self.durationDays > 0
+
+context BookLoan inv codeNotEmpty:
+  self.loanCode <> ''
+
+context BookReservation inv dayInMonth:
+  self.reservationDay >= 1 and self.reservationDay <= 31
+
+context BookReservation inv monthInYear:
+  self.reservationMonth >= 1 and self.reservationMonth <= 12
+
+--context BookReservation inv yearValid:
+--  self.reservationYear >= 1900 and self.reservationYear <= 2100
+
+context BookReservation inv codeNotEmpty:
+  self.reservationCode <> ''
+
+context BookReservation inv durationPositive:
+  self.durationDays > 0
+
+context BorrowerInfo inv nameNotEmpty:
+  self.name <> ''
+
+context BorrowerInfo inv addressNotEmpty:
+  self.address <> ''
+
+context BorrowerInfo inv statusNotEmpty:
+  self.status <> ''
+
+context BorrowerInfo inv codeNotEmpty:
+  self.code <> ''
+
+context BorrowerInfo inv ageValid:
+  self.age >= 5 and self.age <= 120

@@ -130,7 +130,7 @@ public final class Main {
 				// close failed
 			}
 
-			// compile errors?
+			// compile erro	rs?
 			if (model == null) {
 				System.exit(1);
 			}
