@@ -56,7 +56,7 @@ import org.tzi.use.uml.ocl.value.UnlimitedNaturalValue;
 public class OptimizationVisitor extends BooleanVisitor {
 
 	private boolean debOptMet = false;
-	private boolean debShowTrace = true;
+	private boolean debShowTrace = false;
 	private boolean debShowOpt = false;
 
 	private Expression optExp;

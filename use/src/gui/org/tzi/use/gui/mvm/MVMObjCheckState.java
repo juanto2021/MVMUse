@@ -223,9 +223,10 @@ public class MVMObjCheckState extends JDialog {
 	private MModel fModel;
 	private String fileName;
 	private String fileNameModelInicial;
-	
+
 	private boolean debShowSin = false;
 	private boolean debShowCon = false;
+	private boolean debShowMetricas = false;
 
 	public MVMObjCheckState(WizardMVMView pThisMVMView, 
 			Map<MVMObject,Map<MClassInvariant,Boolean>> pMapObjects,
@@ -540,7 +541,7 @@ public class MVMObjCheckState extends JDialog {
 		pIndicatorAlt.add(lbIndicatorAlt, constraintsAlt);
 
 		panel.add(pIndicatorAlt);
-		
+
 		// Aqui
 		btnMetrics = new JButton("Metrics");
 		btnMetrics.addActionListener(new ActionListener() {
@@ -902,17 +903,17 @@ public class MVMObjCheckState extends JDialog {
 		}
 
 	}
-	private boolean testNewBodyInv() {
-		boolean bResTest=false;
 
+	private boolean testNewBodyInv(String newBody) {
+		boolean bResTest=false;
 		int nInv = tabInvs.getSelectedRow();
 		int nInvAnt=nInv;
 		int nObj = tabObjects.getSelectedRow();
 		int nObjAnt=nObj;
-		prepareContentNew();
+		prepareContentNew(newBody);
 		saveWorkFile(contentNew);
 		//----------------
-		String newBody=taExprInvNew.getText();
+		//		String newBody=taExprInvNew.getText();
 
 		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
 		String msgError=verifyContentModel(workFile);
@@ -961,8 +962,67 @@ public class MVMObjCheckState extends JDialog {
 		return bResTest;
 	}
 
-	private void prepareContentNew() {
+	private boolean testNewBodyInv() {
+		//		boolean bResTest=false;
+
+		//		int nInv = tabInvs.getSelectedRow();
+		//		int nInvAnt=nInv;
+		//		int nObj = tabObjects.getSelectedRow();
+		//		int nObjAnt=nObj;
+		//		prepareContentNew();
+		//		saveWorkFile(contentNew);
+		//		//----------------
 		String newBody=taExprInvNew.getText();
+		boolean bResTest=testNewBodyInv(newBody);
+		//
+		//		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
+		//		String msgError=verifyContentModel(workFile);
+		//		showViability(msgError);
+		//		if (msgError.equals("")) {
+		//			boolean bRes=ChangeContextSession(workFile);
+		//			// Restore nInv
+		//			nInv=nInvAnt;
+		//
+		//			if (bRes) {
+		//				// Stores result of the desired invariant
+		//				if (nInv>-1) {
+		//					//Provis
+		//					int nFilasInv=tabInvs.getModel().getRowCount();
+		//
+		//					if (nFilasInv>0) {
+		//						MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+		//						String texto = (String) oInv.bodyExpression().toString();
+		//						boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
+		//						showIndicatorAlt(stateInv);
+		//						bResTest=stateInv;
+		//					}
+		//				}
+		//			}else {
+		//				showIndicatorAlt(false);
+		//
+		//			}
+		//
+		//			// Restore original file 
+		//			bRes=ChangeContextSession(fileNameModelInicial);	
+		//			// Restore nInv
+		//			nInv=nInvAnt;
+		//			if (tabInvs.getModel().getRowCount()>0) {
+		//				tabInvs.setRowSelectionInterval(nInv, nInv);
+		//				loadListAttrs(nObjAnt);
+		//			}
+		//		}else {
+		//			// Restore nInv
+		//			showIndicatorAlt(false);
+		//			nInv=nInvAnt;
+		//			if (tabInvs.getModel().getRowCount()>0) {
+		//				tabInvs.setRowSelectionInterval(nInv, nInv);
+		//				loadListAttrs(nObjAnt);
+		//			}
+		//		}
+		return bResTest;
+	}
+	private void prepareContentNew(String newBody) {
+		//		String newBody=taExprInvNew.getText();
 		String sourceNew=contentFile;
 		int nInv = tabInvs.getSelectedRow();
 		if (tabInvs.getModel().getRowCount()<=0) {
@@ -997,35 +1057,127 @@ public class MVMObjCheckState extends JDialog {
 		}
 		contentNew=sourceNew;
 	}
-	
+
+	private void prepareContentNew() {
+		String newBody=taExprInvNew.getText();
+		//		String sourceNew=contentFile;
+		prepareContentNew(newBody);
+		//		int nInv = tabInvs.getSelectedRow();
+		//		if (tabInvs.getModel().getRowCount()<=0) {
+		//			return;
+		//		}
+		//		MClassInvariant oInvTab = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+		//		if (oInvTab==null) {
+		//			return;
+		//		}
+		//		String nameClassTabInv=oInvTab.cls().name();
+		//		String nameInvTabInv=oInvTab.name();
+		//		if(listInv.size()>0 && nInv>-1) {
+		//			// You have to search for oInv by comparing inv name and not based on listInv
+		//			for (int i=0;i<listInv.size();i++) {
+		//				MVMDefInv oInv = listInv.get(i);
+		//				String nameClassoInv=oInv.getNameClass();
+		//				String nameInvoInv=oInv.getNameInv();
+		//				if(nameClassoInv.equals(nameClassTabInv)&&
+		//						nameInvoInv.equals(nameInvTabInv)) {
+		//
+		//					int iniBodyExpr=oInv.getIniBodyExpression();
+		//					int finBodyExpr=oInv.getFinBodyExpression();
+		//					String strLeft=contentFile.substring(0,iniBodyExpr);
+		//					String strRight=contentFile.substring(finBodyExpr, contentFile.length());
+		//					String strChange=contentFile.substring(iniBodyExpr, finBodyExpr);
+		//					String strChanged = strChange.replace("\r\n","").replace("\n", "").trim();
+		//					String strModified="--< Modify by MVM ["+strChanged+"]\r\n" +newBody+"\r\n"; // Simple
+		//					sourceNew=strLeft + strModified.trim() +"\r\n" + strRight;
+		//					break;
+		//				}
+		//			}
+		//		}
+		//		contentNew=sourceNew;
+	}
+
 	private void showMetrics() {
 		System.out.println("====================================");
 		System.out.println("Model metrics [" + fModel.name()+"]");
 		System.out.println("====================================");
-		
+		debShowMetricas=true;
 		int nObj=0;
 		for (Map.Entry<MVMObject, Map<MClassInvariant, Boolean>> entry : mapObjects.entrySet()) {
 
 			MVMObject oObjKey = entry.getKey();
-//			boolean allOk=true;
+			//			boolean allOk=true;
 
 			Map<MClassInvariant, Boolean> innerMap = entry.getValue();
 			// Determines whether all invs are ok or not
 
 			for (Map.Entry<MClassInvariant, Boolean> innerEntry : innerMap.entrySet()) {
 				MClassInvariant inv = innerEntry.getKey();
-				System.out.println("obj [" + oObjKey.getName()+ "] inv [" + inv.name()+"]");
+//				System.out.println("obj [" + oObjKey.getName()+ "] inv [" + inv.name()+"]");
 				Map<String, String> mapSorted = new TreeMap<>();
 				mapSorted = doAlternatives(inv);
-				System.out.println("count keys ["+mapSorted.size()+"]");
-//				for (Map.Entry<String, String> alt : mapSorted.entrySet()) {
-//					System.out.println("value ["+alt.getValue()+"]");
-//				}
-//				System.out.println("aqui");
+//				System.out.println("count keys ["+mapSorted.size()+"]");
+				Object[][] data;
+				data=calSolMetrics(mapSorted);
+				int nCorrects=0;
+				int nInCorrects=0;
+				for (int i = 0; i < data.length; i++) {
+					//					System.out.println(data[i][1]);
+					String newBody=(String) data[i][1];
+	
+					String textResult=(String) data[i][2];
+					//					System.out.println(textResult);
+					if (textResult.equals("Correct")) {
+						nCorrects+=1;
+					}else if (textResult.equals("Incorrect")) {
+						nInCorrects+=1;
+					}
+				}
+				System.out.println("$ALT$  |obj|" + oObjKey.getName()+ "|inv|"+inv.name()+"|Corrects|"+nCorrects+"|Incorrets|"+nInCorrects+"|"); // Salto de línea al final de cada fila
+				System.out.println();
 			}
 		}
+		debShowMetricas=false;
 	}
 
+	private Object[][] calSolMetrics(Map<String, String> mapSorted) {
+		Object[][] data = {};
+		//		mapAlt=pMapAlt;
+		int nFilas = mapSorted.size();
+		data = new Object[nFilas][3];
+		int nFila=0;
+
+		int nCorrects=0;
+		int nIncorrects=0;
+		for (Map.Entry<String, String> entry : mapSorted.entrySet()) {
+			String newBody = entry.getValue();
+			// Calculate with the alternative to see the result
+			String textResult="Incorrect";
+			boolean bRes=false;
+			if (!contentNew.equals("")) {
+				bRes=testNewBodyInv(newBody);
+			}
+			if (bRes) {
+				textResult="Correct";
+			}
+
+			if (textResult.equals("Correct")) {
+				nCorrects+=1;
+			}else if (!textResult.equals("Correct")) {
+				nIncorrects+=1;
+			}
+
+			data[nFila][0]=false;
+			data[nFila][1]=newBody;
+			data[nFila][2]=textResult;
+			nFila++;
+			//			}
+
+		}
+		//		System.out.println("aqui salgo de calcular");
+		return data;
+	}
+
+	//}
 	private void showSource() {
 
 		prepareContentNew();
@@ -1258,7 +1410,7 @@ public class MVMObjCheckState extends JDialog {
 		TreeMap<String, String> mapSorted = new TreeMap<>(mapAlternatives);
 		return mapSorted;
 	}
-//Aqui
+	//Aqui
 	private Map<String, String> doAlternatives(MClassInvariant oInv) {
 		Map<String, String> mapAlternatives = new HashMap<String, String>();
 		try {
@@ -1267,7 +1419,7 @@ public class MVMObjCheckState extends JDialog {
 			// AQUI 
 			// Comprobación de las alternativas sin optimizar
 			if (debShowSin) System.out.println("====================================================================================================");			
-			System.out.println("$$ Alternativas sin optimizar ["+ct.size()+"]");
+			if (debShowSin)System.out.println("$$ Alternativas sin optimizar ["+ct.size()+"]");
 			if (debShowSin) System.out.println("====================================================================================================");
 			int nExprC1=0;
 			for(Expression item: ct) {
@@ -1291,7 +1443,7 @@ public class MVMObjCheckState extends JDialog {
 				}				
 			}
 			if (debShowCon) System.out.println("====================================================================================================");			
-			System.out.println("$$ Alternativas optimizadas   ["+uniqueExpList.size()+"]");
+			if (debShowCon)System.out.println("$$ Alternativas optimizadas   ["+uniqueExpList.size()+"]");
 			if (debShowCon) System.out.println("====================================================================================================");
 			int nExprC2=0;
 			for(Expression item: uniqueExpList) {
@@ -1301,6 +1453,11 @@ public class MVMObjCheckState extends JDialog {
 			}
 			if (debShowCon) System.out.println("====================================================================================================");			
 
+			if (debShowMetricas) {
+				System.out.println("$OPT$|"+oInv.name()+"|alt sin optimizar|"+ct.size()+"|Alt optimizadas|"+uniqueExpList.size()+"|");
+			}
+			
+			
 			int nExpr=0;
 			//			for(Expression item: ct) { // Antes
 			for(Expression item: uniqueExpList) {

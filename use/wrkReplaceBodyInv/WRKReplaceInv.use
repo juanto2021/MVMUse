@@ -109,11 +109,11 @@ context Order inv numberOfItemsReasonable:
 context Customer inv customerNameLength:
   self.name.size > 2
 
-context Customer inv hasPlacedOrders:--< Modify by MVM [self.orders->size > 0]
-true
-context Customer inv allOrdersHaveADate:
-  self.orders->notEmpty() and self.orders->forAll(o | o.date.size > 0)
+context Customer inv hasPlacedOrders:
+  self.orders->size > 0
 
+context Customer inv allOrdersHaveADate:--< Modify by MVM [self.orders->notEmpty() and self.orders->forAll(o | o.date.size > 0)]
+true
 --context Customer inv nameStartsWithCapital:
 --  self.name.size() > 0 and self.name.substring(1, 1) >= 'A' and self.name.substring(1, 1) <= 'Z'
 
