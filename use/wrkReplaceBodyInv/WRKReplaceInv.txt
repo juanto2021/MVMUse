@@ -1,184 +1,148 @@
-model LibraryManagement
+model RestaurantManagement
 
-class Copy
+class Restaurant
   attributes
-    id: Integer
-    condition: String
-    shelfNumber: Integer
-    usageCount: Integer
-    acquisitionYear: Integer
+    name : String
+    address : String
 end
 
-class BookTitle
+class MenuItem
   attributes
-    name: String
-    author: String
-    isbn: String
-    reservationNumber: Integer
-    pageCount: Integer
-    edition: Integer
-    publicationYear: Integer
+    name : String
+    price : Integer
 end
 
-class MagazineTitle
+class Order
   attributes
-    pendingTime: Integer
-    title: String
-    volume: Integer
-    issue: Integer
-    frequency: String
+    orderNumber : Integer
+    date : String
 end
 
-class BookLoan
+class Customer
   attributes
-    loanDay: Integer
-    loanMonth: Integer
-    loanYear: Integer
-    durationDays: Integer
-    loanCode: String
+    name : String
+    email : String
 end
 
-class BookReservation
+class Staff
   attributes
-    reservationDay: Integer
-    reservationMonth: Integer
-    reservationYear: Integer
-    reservationCode: String
-    durationDays: Integer
+    name : String
+    nomrole : String
 end
 
-class BorrowerInfo
+class Table
   attributes
-    name: String
-    address: String
-    status: String
-    code: String
-    age: Integer
+    tableNumber : Integer
+    capacity : Integer
 end
 
-association CopyBookTitle between
-  Copy [0..*] role copiesRole
-  BookTitle [1] role bookTitleRole
+association RestaurantMenu between
+  Restaurant[1] role restaurant
+  MenuItem[*] role menuItems
 end
 
-association BookTitleBookLoan between
-  BookTitle [0..1] role bookTitleRole
-  BookLoan [1] role bookLoanRole
+association OrderItems between
+  Order[1] role order
+  MenuItem[*] role items
 end
 
-association BookTitleMagazineTitle between
-  BookTitle [0..*] role bookTitlesRole
-  MagazineTitle [1] role magazineTitleRole
+association CustomerOrders between
+  Customer[1] role customer
+  Order[*] role orders
 end
 
-association BookTitleBookReservation between
-  BookTitle [0..*] role bookTitlesRole
-  BookReservation [1] role bookReservationRole
+association OrderTable between
+  Order[1] role order
+  Table[1] role table
 end
 
-association BorrowerInfoBookLoan between
-  BorrowerInfo [0..*] role borrowersRole
-  BookLoan [1] role bookLoanRole
+association RestaurantTables between
+  Restaurant[1] role restaurant
+  Table[*] role tables
 end
 
-association BorrowerInfoBookReservation between
-  BorrowerInfo [0..*] role borrowersRole
-  BookReservation [1] role bookReservationRole
+association RestaurantStaff between
+  Restaurant[1] role restaurant
+  Staff[*] role staff
 end
 
 constraints
 
-context Copy inv idPositive:
-  self.id > 0
+-- Restaurant
+context Restaurant inv restaurantNameSize:
+  self.name.size > 3
 
-context Copy inv conditionNotEmpty:
-  self.condition <> ''
+context Restaurant inv restaurantAddressLength:
+  self.address.size > 5 and self.address.size < 50
 
-context Copy inv shelfNumberPositive:
-  self.shelfNumber >= 0
+context Restaurant inv allMenuItemsHaveNames:
+  self.menuItems->notEmpty() and self.menuItems->forAll(mi | mi.name.size > 1)
 
-context Copy inv usageCountNonNegative:
-  self.usageCount >= 0
+context Restaurant inv numberOfTablesReasonable:
+  self.tables->size <= 20
 
---context Copy inv acquisitionYearReasonable:
---  self.acquisitionYear >= 1900 and self.acquisitionYear <= 2100
+context Restaurant inv allStaffAssignedRole:
+  self.staff->notEmpty() and self.staff->forAll(s | s.nomrole.size > 2)
 
-context BookTitle inv nameNotEmpty:
-  self.name <> ''
+-- MenuItem
+context MenuItem inv itemNameLength:
+  self.name.size > 2 and self.name.size < 30
 
-context BookTitle inv authorNotEmpty:
-  self.author <> ''
+context MenuItem inv itemPricePositive:
+  self.price > 0
 
-context BookTitle inv isbnNotEmpty:
-  self.isbn <> ''
+context MenuItem inv notTooExpensive:
+  Restaurant.allInstances()->exists(r | r.menuItems->exists(mi | mi = self and mi.price < 50))
 
-context BookTitle inv reservationNumberNonNegative:
-  self.reservationNumber >= 0
+-- Order
 
-context BookTitle inv pageCountPositive:
-  self.pageCount > 0
+context Order inv allOrderedItemsHavePositivePrice:
+  self.items->notEmpty() and self.items->forAll(item | item.price > 0)
 
-context BookTitle inv editionPositive:
-  self.edition > 0
+context Order inv orderRelatedToCustomer:
+  Customer.allInstances()->exists(c | c.orders->includes(self))
 
---context BookTitle inv publicationYearValid:
---  self.publicationYear >= 1450 and self.publicationYear <= 2100
+context Order inv numberOfItemsReasonable:
+  self.items->size <= 15
 
-context MagazineTitle inv pendingTimePositive:
-  self.pendingTime > 0
+-- Customer
+context Customer inv customerNameLength:
+  self.name.size > 2
 
-context MagazineTitle inv titleNotEmpty:
-  self.title <> ''
+context Customer inv hasPlacedOrders:--< Modify by MVM [self.orders->size > 0]
+true
+context Customer inv allOrdersHaveADate:
+  self.orders->notEmpty() and self.orders->forAll(o | o.date.size > 0)
 
-context MagazineTitle inv volumePositive:
-  self.volume > 0
+--context Customer inv nameStartsWithCapital:
+--  self.name.size() > 0 and self.name.substring(1, 1) >= 'A' and self.name.substring(1, 1) <= 'Z'
 
-context MagazineTitle inv issuePositive:
-  self.issue > 0
+-- Staff
+context Staff inv staffNameLength:
+  self.name.size > 2
 
-context MagazineTitle inv frequencyNotEmpty:
-  self.frequency <> ''
+context Staff inv staffRoleLength:
+  self.nomrole.size > 1
 
-context BookLoan inv dayInMonth:
-  self.loanDay >= 1 and self.loanDay <= 31
+context Staff inv worksAtARestaurant:
+  Restaurant.allInstances()->exists(r | r.staff->includes(self))
 
-context BookLoan inv monthInYear:--< Modify by MVM [self.loanMonth >= 1 and self.loanMonth <= 12]
-((self.loanMonth >= 1) or ((self.loanMonth - 1) <= 12))
---context BookLoan inv loanYearValid:
---  self.loanYear >= 1900 and self.loanYear <= 2100
+context Staff inv roleNotTooLong:
+  self.nomrole.size < 20
 
-context BookLoan inv durationPositive:
-  self.durationDays > 0
+--context Staff inv nameIncludesSpace:
+--  self.name.indexOf(' ') > 0
 
-context BookLoan inv codeNotEmpty:
-  self.loanCode <> ''
+-- Table
+context Table inv tableNumberPositiveValue:
+  self.tableNumber > 0
 
-context BookReservation inv dayInMonth:
-  self.reservationDay >= 1 and self.reservationDay <= 31
+context Table inv capacityNotExceedingLimit:
+  self.capacity <= 8
 
-context BookReservation inv monthInYear:
-  self.reservationMonth >= 1 and self.reservationMonth <= 12
+context Table inv assignedToAnOrder:
+  Order.allInstances()->exists(o | o.table = self)
 
---context BookReservation inv yearValid:
---  self.reservationYear >= 1900 and self.reservationYear <= 2100
+context Table inv belongsToARestaurant:
+  Restaurant.allInstances()->exists(r | r.tables->includes(self))
 
-context BookReservation inv codeNotEmpty:
-  self.reservationCode <> ''
-
-context BookReservation inv durationPositive:
-  self.durationDays > 0
-
-context BorrowerInfo inv nameNotEmpty:
-  self.name <> ''
-
-context BorrowerInfo inv addressNotEmpty:
-  self.address <> ''
-
-context BorrowerInfo inv statusNotEmpty:
-  self.status <> ''
-
-context BorrowerInfo inv codeNotEmpty:
-  self.code <> ''
-
-context BorrowerInfo inv ageValid:
-  self.age >= 5 and self.age <= 120

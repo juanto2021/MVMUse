@@ -57,7 +57,7 @@ public class OptimizationVisitor extends BooleanVisitor {
 
 	private boolean debOptMet = false;
 	private boolean debShowTrace = true;
-	private boolean debShowOpt = true;
+	private boolean debShowOpt = false;
 
 	private Expression optExp;
 
@@ -628,7 +628,7 @@ public class OptimizationVisitor extends BooleanVisitor {
 				//	Es una expresión del tipo COLECCION->including(X)
 				if (opName.equals("including")) {
 					//					System.out.println("show Including ["+exp.toString()+"]");
-					if (exp.toString().equals("self.orderLine->including(ol1)")) {
+					if (exp.toString().contains("self.orders->including(o)")) {
 						System.out.println("Aqui");
 					}
 					bRes=true;
@@ -961,7 +961,7 @@ public class OptimizationVisitor extends BooleanVisitor {
 
 		// Optimization 3: only one operator is a boolean constant
 		if (leftIsConstant || rightIsConstant) {
-			System.out.println("Aqui optimizeAndExp");
+//			System.out.println("Aqui optimizeAndExp");
 			// Assume the constant is the leftmost subexpression
 			// Otherwise swap them
 			if (rightIsConstant) { 

@@ -153,6 +153,7 @@ public class MVMObjCheckState extends JDialog {
 	private JButton btnSaveFile;
 	private JButton btnTest;
 	private JButton btnShowSource;
+	private JButton btnMetrics;
 
 	private Map<MVMObject, Map<MClassInvariant, Boolean>> mapObjects;
 	private boolean checkAllObjs=true;
@@ -222,6 +223,9 @@ public class MVMObjCheckState extends JDialog {
 	private MModel fModel;
 	private String fileName;
 	private String fileNameModelInicial;
+	
+	private boolean debShowSin = false;
+	private boolean debShowCon = false;
 
 	public MVMObjCheckState(WizardMVMView pThisMVMView, 
 			Map<MVMObject,Map<MClassInvariant,Boolean>> pMapObjects,
@@ -536,6 +540,18 @@ public class MVMObjCheckState extends JDialog {
 		pIndicatorAlt.add(lbIndicatorAlt, constraintsAlt);
 
 		panel.add(pIndicatorAlt);
+		
+		// Aqui
+		btnMetrics = new JButton("Metrics");
+		btnMetrics.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				showMetrics();
+			}
+		});
+		btnMetrics.setBounds(900, filGroupTab1+20, 110, 30);
+		panel.add(btnMetrics);
 
 		loadTabObjects();
 
@@ -981,6 +997,34 @@ public class MVMObjCheckState extends JDialog {
 		}
 		contentNew=sourceNew;
 	}
+	
+	private void showMetrics() {
+		System.out.println("====================================");
+		System.out.println("Model metrics [" + fModel.name()+"]");
+		System.out.println("====================================");
+		
+		int nObj=0;
+		for (Map.Entry<MVMObject, Map<MClassInvariant, Boolean>> entry : mapObjects.entrySet()) {
+
+			MVMObject oObjKey = entry.getKey();
+//			boolean allOk=true;
+
+			Map<MClassInvariant, Boolean> innerMap = entry.getValue();
+			// Determines whether all invs are ok or not
+
+			for (Map.Entry<MClassInvariant, Boolean> innerEntry : innerMap.entrySet()) {
+				MClassInvariant inv = innerEntry.getKey();
+				System.out.println("obj [" + oObjKey.getName()+ "] inv [" + inv.name()+"]");
+				Map<String, String> mapSorted = new TreeMap<>();
+				mapSorted = doAlternatives(inv);
+				System.out.println("count keys ["+mapSorted.size()+"]");
+//				for (Map.Entry<String, String> alt : mapSorted.entrySet()) {
+//					System.out.println("value ["+alt.getValue()+"]");
+//				}
+//				System.out.println("aqui");
+			}
+		}
+	}
 
 	private void showSource() {
 
@@ -1214,7 +1258,7 @@ public class MVMObjCheckState extends JDialog {
 		TreeMap<String, String> mapSorted = new TreeMap<>(mapAlternatives);
 		return mapSorted;
 	}
-
+//Aqui
 	private Map<String, String> doAlternatives(MClassInvariant oInv) {
 		Map<String, String> mapAlternatives = new HashMap<String, String>();
 		try {
@@ -1222,17 +1266,17 @@ public class MVMObjCheckState extends JDialog {
 			List<Expression> ct = computeClassifyingTerms2(exp);
 			// AQUI 
 			// Comprobación de las alternativas sin optimizar
-			System.out.println("====================================================================================================");			
-			System.out.println("Alternativas sin optimizar");
-			System.out.println("====================================================================================================");
+			if (debShowSin) System.out.println("====================================================================================================");			
+			System.out.println("$$ Alternativas sin optimizar ["+ct.size()+"]");
+			if (debShowSin) System.out.println("====================================================================================================");
 			int nExprC1=0;
 			for(Expression item: ct) {
 				String strNExpr = Integer.toString(nExprC1);
 				//				mapAlternatives.put(strNExpr, item.toString());
-				System.out.println("Num["+strNExpr+"] - ["+item.toString()+"]");
+				if (debShowSin) System.out.println("Num["+strNExpr+"] - ["+item.toString()+"]");
 				nExprC1+=1;
 			}
-			System.out.println("====================================================================================================");
+			if (debShowSin) System.out.println("====================================================================================================");
 			// Optimizamos y simplificamos
 			List<Expression> uniqueExpList = new ArrayList<>();
 			Set<String> seenExpressions = new HashSet<>();
@@ -1246,16 +1290,16 @@ public class MVMObjCheckState extends JDialog {
 					uniqueExpList.add(expOpt);
 				}				
 			}
-			System.out.println("====================================================================================================");			
-			System.out.println("Alternativas optimizadas");
-			System.out.println("====================================================================================================");
+			if (debShowCon) System.out.println("====================================================================================================");			
+			System.out.println("$$ Alternativas optimizadas   ["+uniqueExpList.size()+"]");
+			if (debShowCon) System.out.println("====================================================================================================");
 			int nExprC2=0;
 			for(Expression item: uniqueExpList) {
 				String strNExpr = Integer.toString(nExprC2);
-				System.out.println("Num["+strNExpr+"] - ["+item.toString()+"]");
+				if (debShowCon) System.out.println("Num["+strNExpr+"] - ["+item.toString()+"]");
 				nExprC2+=1;
 			}
-			System.out.println("====================================================================================================");			
+			if (debShowCon) System.out.println("====================================================================================================");			
 
 			int nExpr=0;
 			//			for(Expression item: ct) { // Antes

@@ -276,7 +276,7 @@ public class WeakenVisitor extends BooleanVisitor {
 
 		// Include the declarations and their type in the map	
 		includeDecl(decl);
-
+//Aqui
 		// Generate mutants for the query
 		List<Expression> queryMutants = weaken(query, mapVarsByType);
 
@@ -499,6 +499,8 @@ public class WeakenVisitor extends BooleanVisitor {
 
 		// Remove previously included decl elements from the map
 		excludeDecl(decl);
+		
+		
 	}
 
 	@Override

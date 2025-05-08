@@ -138,22 +138,22 @@ public class HullVisitor implements ExpressionVisitor {
 
 				// The declarations to use are those of 'map' - mapVarsByType
 				List<VarDecl> decl = mapVarsByType.getOrDefault(typeClass.name(), new ArrayList<>());
-
-				for (VarDecl var : decl) {
-					Type varType = var.type();
-					if(varType.conformsTo(colType)) {
-						// See if the variable is the same type as the collection
-						String varName = var.name();
-						ExpVariable expVar = new ExpVariable(varName, mClass);
-						Expression newArgs[] = {exp, expVar};
-						try {
-							Expression mutantNew = ExpStdOp.create("including", newArgs);
-							mutatedExpr.add(mutantNew);
-						} catch (ExpInvalidException e) {
-							e.printStackTrace();
-						}	
-					}
-				}
+// Prueba JG
+//				for (VarDecl var : decl) {
+//					Type varType = var.type();
+//					if(varType.conformsTo(colType)) {
+//						// See if the variable is the same type as the collection
+//						String varName = var.name();
+//						ExpVariable expVar = new ExpVariable(varName, mClass);
+//						Expression newArgs[] = {exp, expVar};
+//						try {
+//							Expression mutantNew = ExpStdOp.create("including", newArgs);
+//							mutatedExpr.add(mutantNew);
+//						} catch (ExpInvalidException e) {
+//							e.printStackTrace();
+//						}	
+//					}
+//				}
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 package org.tzi.use.gui.mvm;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,61 @@ public class StrengthenVisitor extends BooleanVisitor {
 		Expression mutant = new ExpConstBoolean(false);
 		mutatedExpr.add(mutant);
 	}
+	private void includeDecl(VarDeclList decl) {
+
+		int nDecs = decl.size();
+		for (int nDec=0;nDec<nDecs;nDec++) {
+			VarDecl v = decl.varDecl(nDec); 
+			String typeName = v.type().shortName();
+
+			List<VarDecl> varsByType = mapVarsByType.getOrDefault(typeName, new ArrayList<>());
+
+			// Check if the variable is already in the list
+			boolean exists = false;
+			for (VarDecl existingVar : varsByType) {
+				if (existingVar.name().equals(v.name())) {
+					exists = true;
+					break;
+				}
+			}
+
+			// If the variable does not exist, add it to the list and update the map
+			if (!exists) {
+				varsByType.add(v);
+				mapVarsByType.put(typeName, varsByType);
+			}
+
+			System.out.println("strengthen includeDecl mapVarsByType "+mapVarsByType);
+		}
+	}
+	private void excludeDecl(VarDeclList decl) {
+		int nDecs = decl.size();
+		for (int nDec=0;nDec<nDecs;nDec++) {
+			VarDecl v = decl.varDecl(nDec); 
+			String typeName = v.type().shortName();
+			List<VarDecl> varsByType = mapVarsByType.getOrDefault(typeName, new ArrayList<>());
+
+			// Check if the variable is already in the list
+			boolean exists = false;
+			for (VarDecl existingVar : varsByType) {
+				if (existingVar.name().equals(v.name())) {
+					exists = true;
+					break;
+				}
+			}
+			if (exists) {
+				varsByType.remove(v);
+				if (varsByType.size()>0) {
+					mapVarsByType.replace(typeName, varsByType);
+				}else {
+					mapVarsByType.remove(typeName);
+				}
+
+			}
+		}
+		System.out.println("strength excludeDecl mapVarsByType "+mapVarsByType);
+	}
+
 
 	// These expression have already been considered in BooleanVisitor
 	// public void visitAllInstances(ExpAllInstances exp) 
@@ -135,6 +191,9 @@ public class StrengthenVisitor extends BooleanVisitor {
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
 		VarDeclList decl = exp.getVariableDeclarations();
+		
+		// Include the declarations and their type in the map
+		includeDecl(decl);
 
 		// Generate mutants for the query
 		List<Expression> queryMutants = strengthen(query);
@@ -204,6 +263,9 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 		// Mutation 8: replace by "false"
 		defaultStrengthening();	
+		
+		// Remove previously included decl elements from the map
+		excludeDecl(decl);	
 	}
 
 	@Override
@@ -211,7 +273,10 @@ public class StrengthenVisitor extends BooleanVisitor {
 //		System.out.println("Strengthening - visitForAll");
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
-		VarDeclList decl = exp.getVariableDeclarations();		
+		VarDeclList decl = exp.getVariableDeclarations();
+		
+		// Include the declarations and their type in the map	
+		includeDecl(decl);
 
 		// Generate mutants for the query
 		List<Expression> queryMutants = strengthen(query);
@@ -259,6 +324,9 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 		// Mutation 4: replace by "false"
 		defaultStrengthening();
+
+		// Remove previously included decl elements from the map
+		excludeDecl(decl);		
 	}
 
 	@Override
@@ -326,6 +394,9 @@ public class StrengthenVisitor extends BooleanVisitor {
 		Expression query = exp.getQueryExpression();
 		Expression range = exp.getRangeExpression();
 		VarDeclList decl = exp.getVariableDeclarations();
+		
+		// Include the declarations and their type in the map
+		includeDecl(decl);
 
 		Map<String, List<VarDecl>> mapVarsByType = HullVisitor.createVarsByType(decl);
 
@@ -361,6 +432,9 @@ public class StrengthenVisitor extends BooleanVisitor {
 
 		// Mutation 4: replace by "false"
 		defaultStrengthening();
+		
+		// Remove previously included decl elements from the map
+		excludeDecl(decl);
 	}
 
 	@Override
