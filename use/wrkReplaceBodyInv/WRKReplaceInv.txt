@@ -1,148 +1,161 @@
-model RestaurantManagement
+model TestResultsSystem
 
-class Restaurant
+-- Classes
+class Test
   attributes
-    name : String
-    address : String
+    testId: Integer
+    duration: Integer
+    numberOfQuestions: Integer
+    totalMarks: Integer
 end
 
-class MenuItem
+class Examiner
   attributes
-    name : String
-    price : Integer
+    examinerId: Integer
+    employeeCode: Integer
+    yearsOfExperience: Integer
 end
 
-class Order
+class TestPaper
   attributes
-    orderNumber : Integer
-    date : String
+    testPaperId: Integer
+    questionNumber: Integer
+    marksAllocated: Integer
 end
 
-class Customer
+class Result
   attributes
-    name : String
-    email : String
+    marksObtained: Integer
+    ranking: Integer
 end
 
-class Staff
+class Student
   attributes
-    name : String
-    nomrole : String
+    studentId: Integer
 end
 
-class Table
+class Admin
   attributes
-    tableNumber : Integer
-    capacity : Integer
+    adminId: Integer
+    accessLevel: Integer
 end
 
-association RestaurantMenu between
-  Restaurant[1] role restaurant
-  MenuItem[*] role menuItems
+class Answer
+  attributes
+    isCorrect: Integer
+    marksAwarded: Integer
 end
 
-association OrderItems between
-  Order[1] role order
-  MenuItem[*] role items
+-- Associations
+association ExaminerPreparesTestPaper between
+  Examiner [1] role prepares
+  TestPaper [1..*] role preparedBy
 end
 
-association CustomerOrders between
-  Customer[1] role customer
-  Order[*] role orders
+association StudentGivesAnswer between
+  Student [1] role gives
+  Answer [1..*] role givenBy
 end
 
-association OrderTable between
-  Order[1] role order
-  Table[1] role table
+association TestPaperHasAnswer between
+  TestPaper [1] role paper
+  Answer [1..*] role answer
 end
 
-association RestaurantTables between
-  Restaurant[1] role restaurant
-  Table[*] role tables
+association ExaminerDeclaresResult between
+  Examiner [1] role declares
+  Result [1..*] role declaredBy
 end
 
-association RestaurantStaff between
-  Restaurant[1] role restaurant
-  Staff[*] role staff
+association StudentChecksResult between
+  Student [1] role checks
+  Result [1..*] role checkedBy
+end
+
+association AdminSendsEmailToStudent between
+  Admin [1] role sendsEmail
+  Student [1..*] role receivesEmail
+end
+
+association AdminSendsResultToStudent between
+  Admin [1] role sendsResult
+  Result [1..*] role receivesResult
 end
 
 constraints
 
--- Restaurant
-context Restaurant inv restaurantNameSize:
-  self.name.size > 3
+-- Restricciones sobre la clase Test
+context Test inv testIdPositiveUnique:
+  self.testId > 0 and Test.allInstances()->isUnique(t | t.testId)
 
-context Restaurant inv restaurantAddressLength:
-  self.address.size > 5 and self.address.size < 50
+context Test inv durationPositive:
+  self.duration > 0
 
-context Restaurant inv allMenuItemsHaveNames:
-  self.menuItems->notEmpty() and self.menuItems->forAll(mi | mi.name.size > 1)
+context Test inv questionsPositive:
+  self.numberOfQuestions > 0
 
-context Restaurant inv numberOfTablesReasonable:
-  self.tables->size <= 20
+context Test inv totalMarksPositive:
+  self.totalMarks > 0
 
-context Restaurant inv allStaffAssignedRole:
-  self.staff->notEmpty() and self.staff->forAll(s | s.nomrole.size > 2)
+context Test inv averageMarksPerQuestionReasonable:
+  if self.numberOfQuestions > 0 then self.totalMarks / self.numberOfQuestions <= 20 else true endif
 
--- MenuItem
-context MenuItem inv itemNameLength:
-  self.name.size > 2 and self.name.size < 30
+-- Restricciones sobre la clase Examiner
+context Examiner inv examinerIdPositiveUnique:
+  self.examinerId > 0 and Examiner.allInstances()->isUnique(e | e.examinerId)
 
-context MenuItem inv itemPricePositive:
-  self.price > 0
+context Examiner inv employeeCodePositiveUnique:
+  self.employeeCode > 0 and Examiner.allInstances()->isUnique(e | e.employeeCode)
 
-context MenuItem inv notTooExpensive:
-  Restaurant.allInstances()->exists(r | r.menuItems->exists(mi | mi = self and mi.price < 50))
+context Examiner inv yearsOfExperienceNonNegative:
+  self.yearsOfExperience >= 0
 
--- Order
+-- Restricciones sobre la clase TestPaper
+context TestPaper inv testPaperIdPositiveUnique:
+  self.testPaperId > 0 and TestPaper.allInstances()->isUnique(tp | tp.testPaperId)
 
-context Order inv allOrderedItemsHavePositivePrice:
-  self.items->notEmpty() and self.items->forAll(item | item.price > 0)
+context TestPaper inv questionNumberPositive:
+  self.questionNumber > 0
 
-context Order inv orderRelatedToCustomer:
-  Customer.allInstances()->exists(c | c.orders->includes(self))
+context TestPaper inv marksAllocatedNonNegative:
+  self.marksAllocated >= 0
 
-context Order inv numberOfItemsReasonable:
-  self.items->size <= 15
+context TestPaper inv hasAnswersWithNonNegativeMarks:
+  self.answer->forAll(a | a.marksAwarded >= 0)
 
--- Customer
-context Customer inv customerNameLength:
-  self.name.size > 2
+context TestPaper inv marksAllocatedReasonable:
+  self.marksAllocated <= 20
 
-context Customer inv hasPlacedOrders:
-  self.orders->size > 0
+-- Restricciones sobre la clase Result
+context Result inv marksObtainedNonNegative:
+  self.marksObtained >= 0
 
-context Customer inv allOrdersHaveADate:--< Modify by MVM [self.orders->notEmpty() and self.orders->forAll(o | o.date.size > 0)]
+context Result inv rankingPositive:
+  self.ranking > 0
+
+context Result inv rankingComparedToMarks:
+  self.ranking <= Result.allInstances()->select(r | r.marksObtained >= self.marksObtained)->size()
+
+-- Restricciones sobre la clase Student
+context Student inv studentIdPositiveUnique:
+  self.studentId > 0 and Student.allInstances()->isUnique(s | s.studentId)
+
+-- Restricciones sobre la clase Admin
+context Admin inv adminIdPositiveUnique:
+  self.adminId > 0 and Admin.allInstances()->isUnique(a | a.adminId)
+
+context Admin inv accessLevelNonNegative:--< Modify by MVM [self.accessLevel >= 0]
 true
---context Customer inv nameStartsWithCapital:
---  self.name.size() > 0 and self.name.substring(1, 1) >= 'A' and self.name.substring(1, 1) <= 'Z'
+-- Restricciones sobre la clase Answer
+context Answer inv isCorrectBooleanLike:
+  self.isCorrect >= 0 and self.isCorrect <= 1
 
--- Staff
-context Staff inv staffNameLength:
-  self.name.size > 2
+context Answer inv marksAwardedNonNegative:
+  self.marksAwarded >= 0
 
-context Staff inv staffRoleLength:
-  self.nomrole.size > 1
+context Answer inv marksAwardedZeroIfNotCorrect:
+  if self.isCorrect = 0 then self.marksAwarded = 0 else true endif
 
-context Staff inv worksAtARestaurant:
-  Restaurant.allInstances()->exists(r | r.staff->includes(self))
-
-context Staff inv roleNotTooLong:
-  self.nomrole.size < 20
-
---context Staff inv nameIncludesSpace:
---  self.name.indexOf(' ') > 0
-
--- Table
-context Table inv tableNumberPositiveValue:
-  self.tableNumber > 0
-
-context Table inv capacityNotExceedingLimit:
-  self.capacity <= 8
-
-context Table inv assignedToAnOrder:
-  Order.allInstances()->exists(o | o.table = self)
-
-context Table inv belongsToARestaurant:
-  Restaurant.allInstances()->exists(r | r.tables->includes(self))
+context Answer inv belongsToAPaperWithPositiveMarksAllocated:
+  self.paper.marksAllocated > 0
 
