@@ -1,161 +1,193 @@
-model TestResultsSystem
+model HotelManagement
 
 -- Classes
-class Test
+class Manager
   attributes
-    testId: Integer
-    duration: Integer
-    numberOfQuestions: Integer
-    totalMarks: Integer
-end
-
-class Examiner
-  attributes
-    examinerId: Integer
-    employeeCode: Integer
+    managerId: Integer
     yearsOfExperience: Integer
+    employeeCount: Integer
 end
 
-class TestPaper
+class Owner
   attributes
-    testPaperId: Integer
-    questionNumber: Integer
-    marksAllocated: Integer
+    ownerId: Integer
+    numberOfHotels: Integer
+    investmentAmount: Integer
+    sharesPercentage: Integer
 end
 
-class Result
+class Inventory
   attributes
-    marksObtained: Integer
-    ranking: Integer
+    inventoryId: Integer
+    quantity: Integer
+    purchasePrice: Integer
 end
 
-class Student
+class Guest
   attributes
-    studentId: Integer
+    guestId: Integer
+    roomNumber: Integer
+    numberOfNights: Integer
+    loyaltyPoints: Integer
 end
 
-class Admin
+class Room
   attributes
-    adminId: Integer
-    accessLevel: Integer
+    roomNumber: Integer
+    capacity: Integer
+    ratePerNight: Integer
+    floorNumber: Integer
 end
 
-class Answer
+class FoodItem
   attributes
-    isCorrect: Integer
-    marksAwarded: Integer
+    foodItemId: Integer
+    price: Integer
+    preparationTime: Integer
+    calories: Integer
+end
+
+class Invoice
+  attributes
+    invoiceNumber: Integer
+    totalAmount: Integer
+    discountApplied: Integer
+end
+
+class Receptionist
+  attributes
+    receptionistId: Integer
+    yearsOfService: Integer
+    hourlyRate: Integer
+    shiftStartTime: Integer
+    shiftEndTime: Integer
 end
 
 -- Associations
-association ExaminerPreparesTestPaper between
-  Examiner [1] role prepares
-  TestPaper [1..*] role preparedBy
+association ManagesInventory between
+  Manager [1] role managerRole
+  Inventory [0..1] role inventoryRole
 end
 
-association StudentGivesAnswer between
-  Student [1] role gives
-  Answer [1..*] role givenBy
+association OwnsGuests between
+  Owner [1] role ownerRole
+  Guest [1..*] role guestRole
 end
 
-association TestPaperHasAnswer between
-  TestPaper [1] role paper
-  Answer [1..*] role answer
+association StaysInRoom between
+  Guest [1] role guestRole
+  Room [1] role roomRole
 end
 
-association ExaminerDeclaresResult between
-  Examiner [1] role declares
-  Result [1..*] role declaredBy
+association InvoiceHasFoodItems between
+  Invoice [0..1] role invoiceRole
+  FoodItem [1..*] role foodItemRole
 end
 
-association StudentChecksResult between
-  Student [1] role checks
-  Result [1..*] role checkedBy
+association GuestHasInvoice between
+  Guest [1] role guestRole
+  Invoice [1] role invoiceRole
 end
 
-association AdminSendsEmailToStudent between
-  Admin [1] role sendsEmail
-  Student [1..*] role receivesEmail
+association HandlesGuest between
+  Receptionist [1] role receptionistRole
+  Guest [0..1] role guestRole
 end
 
-association AdminSendsResultToStudent between
-  Admin [1] role sendsResult
-  Result [1..*] role receivesResult
-end
-
+-- Constraints
 constraints
+-- Manager
+context Manager inv uniqueManagerId:
+  Manager.allInstances()->isUnique(m | m.managerId)
+context Manager inv experienceMoreThanEmployees:
+  self.yearsOfExperience >= self.employeeCount
+context Manager inv managesInventoryIfExperienced:
+  self.yearsOfExperience > 5 implies self.inventoryRole->size() > 0
+context Manager inv employeeCountReasonable:
+  self.employeeCount <= 100
+context Manager inv managesAtMostOneInventory:
+  self.inventoryRole->size() <= 1
 
--- Restricciones sobre la clase Test
-context Test inv testIdPositiveUnique:
-  self.testId > 0 and Test.allInstances()->isUnique(t | t.testId)
+-- Owner
+context Owner inv uniqueOwnerId:
+  Owner.allInstances()->isUnique(o | o.ownerId)
+context Owner inv sharesPercentageCap:
+  self.sharesPercentage <= 100
+context Owner inv investmentRelatesToHotels:
+  self.numberOfHotels > 0 implies self.investmentAmount > 10000
+context Owner inv ownsGuestsCount:
+  self.guestRole->size() >= self.numberOfHotels
+context Owner inv ownsAtLeastOneGuest:
+  self.guestRole->size() >= 1
 
-context Test inv durationPositive:
-  self.duration > 0
+-- Inventory
+context Inventory inv uniqueInventoryId:
+  Inventory.allInstances()->isUnique(i | i.inventoryId)
+context Inventory inv pricePositive:
+  self.purchasePrice > 0
+context Inventory inv quantityPositive:
+  self.quantity > 0
+context Inventory inv inventoryManaged:
+  Inventory.allInstances()->exists(i | i.managerRole->size() > 0)
+context Inventory inv reasonableQuantityPrice:
+  self.quantity * self.purchasePrice < 100000
 
-context Test inv questionsPositive:
-  self.numberOfQuestions > 0
+-- Guest
+context Guest inv uniqueGuestId:
+  Guest.allInstances()->isUnique(g | g.guestId)
+context Guest inv nightsNonNegative:
+  self.numberOfNights >= 0
+context Guest inv loyaltyPointsBound:
+  self.loyaltyPoints <= 1000
+context Guest inv hasInvoice:
+  self.invoiceRole->size() = 1
+context Guest inv staysInRoom:
+  self.roomRole->size() = 1
 
-context Test inv totalMarksPositive:
-  self.totalMarks > 0
+-- Room
+context Room inv uniqueRoomNumber:
+  Room.allInstances()->isUnique(r | r.roomNumber)
+context Room inv positiveCapacity:
+  self.capacity > 0
+context Room inv rateAboveMinimum:--< Modify by MVM [self.ratePerNight >= 30]
+((self.ratePerNight + 1) >= 30)
+context Room inv guestsBelowCapacity:
+  Guest.allInstances()->select(g | g.roomRole = self)->size() <= self.capacity
+context Room inv roomFloorValid:
+  self.floorNumber >= 0 and self.floorNumber <= 50
 
-context Test inv averageMarksPerQuestionReasonable:
-  if self.numberOfQuestions > 0 then self.totalMarks / self.numberOfQuestions <= 20 else true endif
+-- FoodItem
+context FoodItem inv uniqueFoodItemId:
+  FoodItem.allInstances()->isUnique(f | f.foodItemId)
+context FoodItem inv nonFreeFood:
+  self.price > 0
+context FoodItem inv caloriesPositive:
+  self.calories > 0
+context FoodItem inv fastPreparationIfLowCalories:
+  self.calories < 300 implies self.preparationTime <= 15
+--context FoodItem inv linkedToInvoice:
+--  Invoice.allInstances()->exists(inv | inv.foodItemRole->includes(self))
 
--- Restricciones sobre la clase Examiner
-context Examiner inv examinerIdPositiveUnique:
-  self.examinerId > 0 and Examiner.allInstances()->isUnique(e | e.examinerId)
+-- Invoice
+context Invoice inv uniqueInvoiceNumber:
+  Invoice.allInstances()->isUnique(i | i.invoiceNumber)
+context Invoice inv amountNonNegative:
+  self.totalAmount >= 0
+context Invoice inv discountWithinLimit:
+  self.discountApplied >= 0 and self.discountApplied <= 50
+context Invoice inv atLeastOneFoodItem:
+  self.foodItemRole->size() >= 1
+context Invoice inv invoiceLinkedToGuest:
+  Guest.allInstances()->exists(g | g.invoiceRole = self)
 
-context Examiner inv employeeCodePositiveUnique:
-  self.employeeCode > 0 and Examiner.allInstances()->isUnique(e | e.employeeCode)
-
-context Examiner inv yearsOfExperienceNonNegative:
-  self.yearsOfExperience >= 0
-
--- Restricciones sobre la clase TestPaper
-context TestPaper inv testPaperIdPositiveUnique:
-  self.testPaperId > 0 and TestPaper.allInstances()->isUnique(tp | tp.testPaperId)
-
-context TestPaper inv questionNumberPositive:
-  self.questionNumber > 0
-
-context TestPaper inv marksAllocatedNonNegative:
-  self.marksAllocated >= 0
-
-context TestPaper inv hasAnswersWithNonNegativeMarks:
-  self.answer->forAll(a | a.marksAwarded >= 0)
-
-context TestPaper inv marksAllocatedReasonable:
-  self.marksAllocated <= 20
-
--- Restricciones sobre la clase Result
-context Result inv marksObtainedNonNegative:
-  self.marksObtained >= 0
-
-context Result inv rankingPositive:
-  self.ranking > 0
-
-context Result inv rankingComparedToMarks:
-  self.ranking <= Result.allInstances()->select(r | r.marksObtained >= self.marksObtained)->size()
-
--- Restricciones sobre la clase Student
-context Student inv studentIdPositiveUnique:
-  self.studentId > 0 and Student.allInstances()->isUnique(s | s.studentId)
-
--- Restricciones sobre la clase Admin
-context Admin inv adminIdPositiveUnique:
-  self.adminId > 0 and Admin.allInstances()->isUnique(a | a.adminId)
-
-context Admin inv accessLevelNonNegative:--< Modify by MVM [self.accessLevel >= 0]
-true
--- Restricciones sobre la clase Answer
-context Answer inv isCorrectBooleanLike:
-  self.isCorrect >= 0 and self.isCorrect <= 1
-
-context Answer inv marksAwardedNonNegative:
-  self.marksAwarded >= 0
-
-context Answer inv marksAwardedZeroIfNotCorrect:
-  if self.isCorrect = 0 then self.marksAwarded = 0 else true endif
-
-context Answer inv belongsToAPaperWithPositiveMarksAllocated:
-  self.paper.marksAllocated > 0
-
+-- Receptionist
+context Receptionist inv uniqueReceptionistId:
+  Receptionist.allInstances()->isUnique(r | r.receptionistId)
+context Receptionist inv shiftTimeValid:
+  self.shiftStartTime < self.shiftEndTime
+context Receptionist inv serviceYearsMatchRate:
+  self.yearsOfService > 10 implies self.hourlyRate >= 20
+context Receptionist inv maxOneGuestHandled:
+  self.guestRole->size() <= 1
+context Receptionist inv workingHoursReasonable:
+  self.shiftEndTime - self.shiftStartTime <= 12
