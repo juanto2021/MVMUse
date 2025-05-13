@@ -139,6 +139,7 @@ public class HullVisitor implements ExpressionVisitor {
 				// The declarations to use are those of 'map' - mapVarsByType
 				List<VarDecl> decl = mapVarsByType.getOrDefault(typeClass.name(), new ArrayList<>());
 // Prueba JG
+				// Pendiente resolver problema 'including' con variables fuera de contexto (PRINCL)
 //				for (VarDecl var : decl) {
 //					Type varType = var.type();
 //					if(varType.conformsTo(colType)) {
@@ -274,21 +275,22 @@ public class HullVisitor implements ExpressionVisitor {
 			for (Map.Entry<String, List<VarDecl>> entry : mapVarsByType.entrySet()) {
 				String type = entry.getKey();
 				if (debHullMet) System.out.println("Tipo: " + type+ " classifier ["+cls.name()+"]");
-				if (cls.name().equals(type)) {
-					List<VarDecl> vars = entry.getValue();
-					for (VarDecl var : vars) {
-						String varName = var.name();
-						ExpVariable expVar = new ExpVariable(varName, cls);
-						Expression newArgs[] = {exp, expVar};
-						try {
-							Expression mutantNew = ExpStdOp.create("including", newArgs);
-							mutatedExpr.add(mutantNew);
-						} catch (ExpInvalidException e) {
-							e.printStackTrace();
-						}
-
-					}
-				}
+				// Pendiente resolver problema 'including' con variables fuera de contexto (PRINCL)
+//				if (cls.name().equals(type)) {
+//					List<VarDecl> vars = entry.getValue();
+//					for (VarDecl var : vars) {
+//						String varName = var.name();
+//						ExpVariable expVar = new ExpVariable(varName, cls);
+//						Expression newArgs[] = {exp, expVar};
+//						try {
+//							Expression mutantNew = ExpStdOp.create("including", newArgs);
+//							mutatedExpr.add(mutantNew);
+//						} catch (ExpInvalidException e) {
+//							e.printStackTrace();
+//						}
+//
+//					}
+//				}
 			}
 		}
 
