@@ -409,7 +409,7 @@ public class MVMObjCheckState extends JDialog {
 						stateAlt=StatesAlt.ALL;
 					}
 				}
-				// Aqui1
+
 				int nInv = tabInvs.getSelectedRow();
 				int nObj = tabObjects.getSelectedRow();
 				int nInvAnt=nInv;
@@ -542,7 +542,7 @@ public class MVMObjCheckState extends JDialog {
 
 		panel.add(pIndicatorAlt);
 
-		// Aqui
+
 		btnMetrics = new JButton("Metrics");
 		btnMetrics.addActionListener(new ActionListener() {
 
@@ -904,22 +904,23 @@ public class MVMObjCheckState extends JDialog {
 
 	}
 
-	private boolean testNewBodyInv(String newBody) {
+
+	private boolean testNewBodyInv(String newBody, int nInv, int nObj) {
 		boolean bResTest=false;
-		int nInv = tabInvs.getSelectedRow();
+		//		int nInv = tabInvs.getSelectedRow();
 		int nInvAnt=nInv;
-		int nObj = tabObjects.getSelectedRow();
+		//		int nObj = tabObjects.getSelectedRow();
 		int nObjAnt=nObj;
 		prepareContentNew(newBody);
 		saveWorkFile(contentNew);
-		//----------------
-		//		String newBody=taExprInvNew.getText();
 
 		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
 		String msgError=verifyContentModel(workFile);
 		showViability(msgError);
 		if (msgError.equals("")) {
 			boolean bRes=ChangeContextSession(workFile);
+			// volver a cargar tabInvs
+			loadListInvs(nObj);//provis JG
 			// Restore nInv
 			nInv=nInvAnt;
 
@@ -965,15 +966,15 @@ public class MVMObjCheckState extends JDialog {
 	private boolean testNewBodyInv() {
 		//		boolean bResTest=false;
 
-		//		int nInv = tabInvs.getSelectedRow();
-		//		int nInvAnt=nInv;
-		//		int nObj = tabObjects.getSelectedRow();
-		//		int nObjAnt=nObj;
+		int nInv = tabInvs.getSelectedRow();
+		int nInvAnt=nInv;
+		int nObj = tabObjects.getSelectedRow();
+		int nObjAnt=nObj;
 		//		prepareContentNew();
 		//		saveWorkFile(contentNew);
 		//		//----------------
 		String newBody=taExprInvNew.getText();
-		boolean bResTest=testNewBodyInv(newBody);
+		boolean bResTest=testNewBodyInv(newBody,nInv,nObj );
 		//
 		//		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
 		//		String msgError=verifyContentModel(workFile);
@@ -1021,6 +1022,119 @@ public class MVMObjCheckState extends JDialog {
 		//		}
 		return bResTest;
 	}
+
+	private boolean testNewBodyInvFromMetrics(String newBody,MClassInvariant oInv, MVMObject oObjKey) {
+		boolean bResTest=false;
+		//		int nInv = tabInvs.getSelectedRow();
+		//		int nInvAnt=nInv;
+		//		int nObj = tabObjects.getSelectedRow();
+		//		int nObjAnt=nObj;
+		prepareContentNewFromMetrics(newBody, oInv);
+		saveWorkFile(contentNew);
+
+		String workFile = dirWkr+"/"+fileNameWork+"."+strExtension;
+		String msgError=verifyContentModel(workFile);
+		showViability(msgError);
+		if (msgError.equals("")) {
+			//Aqui
+			boolean bRes=ChangeContextSession(workFile);
+			bResTest=bRes;
+			// tal vez hacer un loadinvs del objeto en curso
+			if (oInv.name().equals("mobileMinLength")) {
+				System.out.println("Aqui");
+			}
+			//aqui
+			int nObj=-1;
+			for (int row = 0; row < tabObjects.getRowCount(); row++) {
+				// "Object", "Class", "Satisfied "
+
+				String nameObj = (String) tabObjects.getValueAt(row, 0);
+				String nameClass = (String) tabObjects.getValueAt(row, 1);
+				if (oObjKey.getClassName().equals(nameClass)&& 
+						oObjKey.getName().equals(nameObj)) {
+					nObj=row;
+					if (oInv.name().equals("mobileMinLength")) {
+						System.out.println("Aqui");
+					}					
+					break;
+				}
+			}
+			if (nObj!=-1) {
+				loadListInvs(nObj);
+			}
+
+
+
+			// para cargar tabInvs hace falta conocer el nObj de tabObjs
+			// Por tanto, tal vez tengamos que conseguir el objeto en curso y buscar la posicion en la tabla
+
+			if (oInv.name().equals("mobileMinLength")) {
+				System.out.println("Aqui");
+			}
+
+
+			// Hay que localizar la invariante en tabinvs
+			for (int row = 0; row < tabInvs.getRowCount(); row++) {
+				//			    for (int col = 0; col < tabInvs.getColumnCount(); col++) {
+				MClassInvariant oInvTab = (MClassInvariant) tabInvs.getModel().getValueAt(row, 0);
+				if (oInv.cls().name().equals(oInvTab.cls().name())&&
+						oInv.name().equals(oInvTab.name())) {
+
+					if (oInv.name().equals("mobileMinLength")) {
+						System.out.println("Aqui");
+					}
+
+					boolean stateInv = (boolean) tabInvs.getModel().getValueAt(row, 1);
+					bResTest=stateInv;
+					break;
+				}
+				//			        System.out.println("Fila " + row + ", Columna " + col + ": " + value);
+				//			    }
+			}
+
+			//			bResTest=bRes;
+			// Restore nInv
+			//			nInv=nInvAnt;
+
+			//			if (bRes) {
+			////				// Stores result of the desired invariant
+			////				if (nInv>-1) {
+			////					//Provis
+			////					int nFilasInv=tabInvs.getModel().getRowCount();
+			////
+			////					if (nFilasInv>0) {
+			////						MClassInvariant oInv = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+			//						String texto = (String) oInv.bodyExpression().toString();
+			//						boolean stateInv = (boolean) tabInvs.getModel().getValueAt(nInv, 1);
+			//						showIndicatorAlt(stateInv);
+			//						bResTest=stateInv;
+			////					}
+			//				}
+			//			}else {
+			//				showIndicatorAlt(false);
+			//
+			//			}
+
+			// Restore original file 
+			//			bRes=ChangeContextSession(fileNameModelInicial);	
+			// Restore nInv
+			//			nInv=nInvAnt;
+			//			if (tabInvs.getModel().getRowCount()>0) {
+			//				tabInvs.setRowSelectionInterval(nInv, nInv);
+			//				loadListAttrs(nObjAnt);
+			//			}
+		}else {
+			//			// Restore nInv
+			//			showIndicatorAlt(false);
+			//			nInv=nInvAnt;
+			//			if (tabInvs.getModel().getRowCount()>0) {
+			//				tabInvs.setRowSelectionInterval(nInv, nInv);
+			//				loadListAttrs(nObjAnt);
+			//			}
+		}
+		return bResTest;
+	}
+
 	private void prepareContentNew(String newBody) {
 		//		String newBody=taExprInvNew.getText();
 		String sourceNew=contentFile;
@@ -1057,6 +1171,49 @@ public class MVMObjCheckState extends JDialog {
 		}
 		contentNew=sourceNew;
 	}
+	//---
+	private void prepareContentNewFromMetrics(String newBody, MClassInvariant oInvTab) {
+		//		String newBody=taExprInvNew.getText();
+		String sourceNew=contentFile;
+		//		int nInv = tabInvs.getSelectedRow();
+		//		if (tabInvs.getModel().getRowCount()<=0) {
+		//			return;
+		//		}
+		//		MClassInvariant oInvTab = (MClassInvariant) tabInvs.getModel().getValueAt(nInv, 0);
+		//		if (oInvTab==null) {
+		//			return;
+		//		}
+		String nameClassTabInv=oInvTab.cls().name();
+		String nameInvTabInv=oInvTab.name();
+		if(listInv.size()>0) {
+			// You have to search for oInv by comparing inv name and not based on listInv
+			for (int i=0;i<listInv.size();i++) {
+				MVMDefInv oInv = listInv.get(i);
+				String nameClassoInv=oInv.getNameClass();
+				String nameInvoInv=oInv.getNameInv();
+				if(nameClassoInv.equals(nameClassTabInv)&&
+						nameInvoInv.equals(nameInvTabInv)) {
+
+					int iniBodyExpr=oInv.getIniBodyExpression();
+					int finBodyExpr=oInv.getFinBodyExpression();
+					String strLeft=contentFile.substring(0,iniBodyExpr);
+					String strRight=contentFile.substring(finBodyExpr, contentFile.length());
+					String strChange=contentFile.substring(iniBodyExpr, finBodyExpr);
+					String strChanged = strChange.replace("\r\n","").replace("\n", "").trim();
+					String strModified="--< Modify by MVM ["+strChanged+"]\r\n" +newBody+"\r\n"; // Simple
+					sourceNew=strLeft + strModified.trim() +"\r\n" + strRight;
+					break;
+				}
+			}
+		}
+		contentNew=sourceNew;
+	}
+
+
+	//---
+
+
+
 
 	private void prepareContentNew() {
 		String newBody=taExprInvNew.getText();
@@ -1112,18 +1269,22 @@ public class MVMObjCheckState extends JDialog {
 
 			for (Map.Entry<MClassInvariant, Boolean> innerEntry : innerMap.entrySet()) {
 				MClassInvariant inv = innerEntry.getKey();
-//				System.out.println("obj [" + oObjKey.getName()+ "] inv [" + inv.name()+"]");
+				//				System.out.println("obj [" + oObjKey.getName()+ "] inv [" + inv.name()+"]");
 				Map<String, String> mapSorted = new TreeMap<>();
 				mapSorted = doAlternatives(inv);
-//				System.out.println("count keys ["+mapSorted.size()+"]");
+				//				System.out.println("count keys ["+mapSorted.size()+"]");
 				Object[][] data;
-				data=calSolMetrics(mapSorted);
+				// Aqui hay que pasar el nObj y nInv o bien, el objeto y el MClassInv
+				if (inv.name().contains("mobileMinLength")){
+					System.out.println("inv.name() ["+inv.name()+"]");
+				}
+				data=calSolMetrics(mapSorted, inv,oObjKey);
 				int nCorrects=0;
 				int nInCorrects=0;
 				for (int i = 0; i < data.length; i++) {
 					//					System.out.println(data[i][1]);
 					String newBody=(String) data[i][1];
-	
+
 					String textResult=(String) data[i][2];
 					//					System.out.println(textResult);
 					if (textResult.equals("Correct")) {
@@ -1139,22 +1300,26 @@ public class MVMObjCheckState extends JDialog {
 		debShowMetricas=false;
 	}
 
-	private Object[][] calSolMetrics(Map<String, String> mapSorted) {
+	private Object[][] calSolMetrics(Map<String, String> mapSorted, MClassInvariant oInv, MVMObject oObjKey) {
 		Object[][] data = {};
 		//		mapAlt=pMapAlt;
 		int nFilas = mapSorted.size();
 		data = new Object[nFilas][3];
 		int nFila=0;
-
+		// Aqui falla JG
 		int nCorrects=0;
 		int nIncorrects=0;
+		// 
+		//		if (oInv.name().contains("MenuItem")||oInv.name().contains("Customer")) {
+		//			System.out.println("oInv.name() ["+oInv.name()+"]");
+		//		}
 		for (Map.Entry<String, String> entry : mapSorted.entrySet()) {
 			String newBody = entry.getValue();
 			// Calculate with the alternative to see the result
 			String textResult="Incorrect";
 			boolean bRes=false;
 			if (!contentNew.equals("")) {
-				bRes=testNewBodyInv(newBody);
+				bRes=testNewBodyInvFromMetrics(newBody, oInv, oObjKey);
 			}
 			if (bRes) {
 				textResult="Correct";
@@ -1162,7 +1327,8 @@ public class MVMObjCheckState extends JDialog {
 
 			if (textResult.equals("Correct")) {
 				nCorrects+=1;
-			}else if (!textResult.equals("Correct")) {
+				//			}else if (!textResult.equals("Correct")) {
+			}else if (textResult.equals("Incorrect")) {
 				nIncorrects+=1;
 			}
 
@@ -1456,8 +1622,8 @@ public class MVMObjCheckState extends JDialog {
 			if (debShowMetricas) {
 				System.out.println("$OPT$|"+oInv.name()+"|alt sin optimizar|"+ct.size()+"|Alt optimizadas|"+uniqueExpList.size()+"|");
 			}
-			
-			
+
+
 			int nExpr=0;
 			//			for(Expression item: ct) { // Antes
 			for(Expression item: uniqueExpList) {

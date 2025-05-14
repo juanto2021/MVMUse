@@ -1,148 +1,200 @@
-model RestaurantManagement
+model AirlineReservationSystem
 
-class Restaurant
+-- Classes
+class Profile
   attributes
-    name : String
-    address : String
+    profileId: Integer
+    profileTitle: String
+    userCount: Integer
 end
 
-class MenuItem
+class Permission
   attributes
-    name : String
-    price : Integer
+    permissionId: Integer
+    permissionTitle: String
+    accessLevel: Integer
 end
 
-class Order
+class Reservation
   attributes
-    orderNumber : Integer
-    date : String
+    reservationId: Integer
+    description: String
+    type: String
+    passengerCount: Integer
+    confirmationNumber: Integer
 end
 
-class Customer
+class User
   attributes
-    name : String
-    email : String
+    userId: Integer
+    name: String
+    email: String
+    age: Integer
+    reservationCount: Integer
 end
 
-class Staff
+class Employee
   attributes
-    name : String
-    nomrole : String
+    employeeId: Integer
+    name: String
+    mobileNumber: String
+    yearsOfService: Integer
 end
 
-class Table
+class AirlineQuery
   attributes
-    tableNumber : Integer
-    capacity : Integer
+    queryId: Integer
+    title: String
+    priorityLevel: Integer
 end
 
-association RestaurantMenu between
-  Restaurant[1] role restaurant
-  MenuItem[*] role menuItems
+class Passenger
+  attributes
+    passengerId: Integer
+    name: String
+    mobileNumber: String
+    frequentFlyerPoints: Integer
 end
 
-association OrderItems between
-  Order[1] role order
-  MenuItem[*] role items
+class Airline
+  attributes
+    airlineId: Integer
+    type: String
+    flightCount: Integer
+    rating: Integer
 end
 
-association CustomerOrders between
-  Customer[1] role customer
-  Order[*] role orders
+-- Associations
+association ProfilePermission between
+  Profile [1] role profileRole
+  Permission [*] role permissionRole
 end
 
-association OrderTable between
-  Order[1] role order
-  Table[1] role table
+association UserProfile between
+  User [1] role userRole
+  Profile [1] role profileRole
 end
 
-association RestaurantTables between
-  Restaurant[1] role restaurant
-  Table[*] role tables
+association EmployeeProfile between
+  Employee [1] role employeeRole
+  Profile [1] role profileRole
 end
 
-association RestaurantStaff between
-  Restaurant[1] role restaurant
-  Staff[*] role staff
+association UserMakesReservation between
+  User [1..*] role makingUser
+  Reservation [*] role madeReservation
 end
 
+association EmployeeHandlesQuery between
+  Employee [1] role handler
+  AirlineQuery [*] role handledQuery
+end
+
+association PassengerMakesReservation between
+  Passenger [1..*] role passengerRole
+  Reservation [1] role passengerReservation
+end
+
+association AirlineOffersReservation between
+  Airline [1] role offeringAirline
+  Reservation [*] role offeredReservation
+end
+
+-- Constraints
 constraints
 
--- Restaurant
-context Restaurant inv restaurantNameSize:
-  self.name.size > 3
+-- Profile
+context Profile inv profileIdPositive:
+  self.profileId > 0
+context Profile inv profileTitleMinLength:
+  self.profileTitle.size() >= 3
+context Profile inv userCountNonNegative:
+  self.userCount >= 0
+context Profile inv hasPermissions:
+  self.permissionRole->size() >= 1
+context Profile inv uniqueProfileTitle:
+  Profile.allInstances()->isUnique(p | p.profileTitle)
 
-context Restaurant inv restaurantAddressLength:
-  self.address.size > 5 and self.address.size < 50
+-- Permission
+context Permission inv permissionIdPositive:
+  self.permissionId > 0
+context Permission inv permissionTitleMinLength:
+  self.permissionTitle.size() >= 4
+context Permission inv accessLevelInRange:
+  self.accessLevel >= 1 and self.accessLevel <= 10
+context Permission inv usedByProfiles:
+  self.profileRole->size() >= 1
+context Permission inv uniquePermissionTitle:
+  Permission.allInstances()->isUnique(p | p.permissionTitle)
 
-context Restaurant inv allMenuItemsHaveNames:
-  self.menuItems->notEmpty() and self.menuItems->forAll(mi | mi.name.size > 1)
+-- Reservation
+context Reservation inv reservationIdPositive:
+  self.reservationId > 0
+context Reservation inv passengerCountPositive:
+  self.passengerCount > 0
+context Reservation inv hasAirline:
+  Airline.allInstances()->exists(a | a.offeredReservation->includes(self))
+context Reservation inv madeByUserOrPassenger:
+  User.allInstances()->exists(u | u.madeReservation->includes(self)) or Passenger.allInstances()->exists(p | p.passengerReservation = self)
+context Reservation inv uniqueConfirmationNumber:
+  Reservation.allInstances()->isUnique(r | r.confirmationNumber)
 
-context Restaurant inv numberOfTablesReasonable:
-  self.tables->size <= 20
+-- User
+context User inv userIdPositive:--< Modify by MVM [self.userId > 0]
+true
+context User inv nameMinLength:
+  self.name.size() >= 3
+context User inv emailContainsAt:
+  self.email.indexOf('@') >= 0
+context User inv hasProfile:
+  self.profileRole <> null
+context User inv uniqueEmail:
+  User.allInstances()->isUnique(u | u.email)
 
-context Restaurant inv allStaffAssignedRole:
-  self.staff->notEmpty() and self.staff->forAll(s | s.nomrole.size > 2)
+-- Employee
+context Employee inv employeeIdPositive:
+  self.employeeId > 0
+context Employee inv nameMinLength:
+  self.name.size() >= 3
+context Employee inv mobileMinLength:
+  self.mobileNumber.size() >= 9
+context Employee inv handlesQueries:
+  self.handledQuery->size() >= 1
+context Employee inv yearsOfServiceNonNegative:
+  self.yearsOfService >= 0
 
--- MenuItem
-context MenuItem inv itemNameLength:
-  self.name.size > 2 and self.name.size < 30
+-- AirlineQuery
+context AirlineQuery inv queryIdPositive:
+  self.queryId > 0
+context AirlineQuery inv titleMinLength:
+  self.title.size() >= 5
+context AirlineQuery inv priorityLevelValid:
+  self.priorityLevel >= 1 and self.priorityLevel <= 5
+context AirlineQuery inv hasHandler:
+  Employee.allInstances()->exists(e | e.handledQuery->includes(self))
+context AirlineQuery inv uniqueTitle:
+  AirlineQuery.allInstances()->isUnique(q | q.title)
 
-context MenuItem inv itemPricePositive:
-  self.price > 0
+-- Passenger
+context Passenger inv passengerIdPositive:
+  self.passengerId > 0
+context Passenger inv nameMinLength:
+  self.name.size() >= 3
+context Passenger inv mobileMinLength:
+  self.mobileNumber.size() >= 9
+context Passenger inv flyerPointsNonNegative:
+  self.frequentFlyerPoints >= 0
+context Passenger inv hasReservation:
+  self.passengerReservation <> null
 
-context MenuItem inv notTooExpensive:
-  Restaurant.allInstances()->exists(r | r.menuItems->exists(mi | mi = self and mi.price < 50))
-
--- Order
-
-context Order inv allOrderedItemsHavePositivePrice:
-  self.items->notEmpty() and self.items->forAll(item | item.price > 0)
-
-context Order inv orderRelatedToCustomer:
-  Customer.allInstances()->exists(c | c.orders->includes(self))
-
-context Order inv numberOfItemsReasonable:
-  self.items->size <= 15
-
--- Customer
-context Customer inv customerNameLength:
-  self.name.size > 2
-
-context Customer inv hasPlacedOrders:
-  self.orders->size > 0
-
-context Customer inv allOrdersHaveADate:--< Modify by MVM [self.orders->notEmpty() and self.orders->forAll(o | o.date.size > 0)]
-(Order.allInstances->notEmpty and self.orders->forAll(o : Order | (o.date.size > 0)))
---context Customer inv nameStartsWithCapital:
---  self.name.size() > 0 and self.name.substring(1, 1) >= 'A' and self.name.substring(1, 1) <= 'Z'
-
--- Staff
-context Staff inv staffNameLength:
-  self.name.size > 2
-
-context Staff inv staffRoleLength:
-  self.nomrole.size > 1
-
-context Staff inv worksAtARestaurant:
-  Restaurant.allInstances()->exists(r | r.staff->includes(self))
-
-context Staff inv roleNotTooLong:
-  self.nomrole.size < 20
-
---context Staff inv nameIncludesSpace:
---  self.name.indexOf(' ') > 0
-
--- Table
-context Table inv tableNumberPositiveValue:
-  self.tableNumber > 0
-
-context Table inv capacityNotExceedingLimit:
-  self.capacity <= 8
-
-context Table inv assignedToAnOrder:
-  Order.allInstances()->exists(o | o.table = self)
-
-context Table inv belongsToARestaurant:
-  Restaurant.allInstances()->exists(r | r.tables->includes(self))
-
+-- Airline
+context Airline inv airlineIdPositive:
+  self.airlineId > 0
+context Airline inv typeMinLength:
+  self.type.size() >= 3
+context Airline inv flightCountNonNegative:
+  self.flightCount >= 0
+context Airline inv ratingValid:
+  self.rating >= 1 and self.rating <= 5
+context Airline inv hasReservations:
+  self.offeredReservation->size() >= 1
