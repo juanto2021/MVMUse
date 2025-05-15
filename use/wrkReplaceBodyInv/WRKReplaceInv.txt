@@ -1,200 +1,114 @@
-model AirlineReservationSystem
+model SeminarSystem
 
--- Classes
-class Profile
+class Students
   attributes
-    profileId: Integer
-    profileTitle: String
-    userCount: Integer
-end
-
-class Permission
-  attributes
-    permissionId: Integer
-    permissionTitle: String
-    accessLevel: Integer
-end
-
-class Reservation
-  attributes
-    reservationId: Integer
-    description: String
-    type: String
-    passengerCount: Integer
-    confirmationNumber: Integer
-end
-
-class User
-  attributes
-    userId: Integer
     name: String
-    email: String
-    age: Integer
-    reservationCount: Integer
+    studentnumber: String
+    averagemark: Integer
+    numberOfCourses: Integer
 end
 
-class Employee
+class Seminar
   attributes
+    name: String
+    seminarNumber: String
+    fees: Integer
+    capacity: Integer
+    creditsOffered: Integer
+end
+
+class Professor
+  attributes
+    name: String
+    salary: Integer
     employeeId: Integer
-    name: String
-    mobileNumber: String
-    yearsOfService: Integer
+    rank: String
 end
 
-class AirlineQuery
+class Enrollment
   attributes
-    queryId: Integer
-    title: String
-    priorityLevel: Integer
+    enrollmentId: Integer
+    grade: Integer
+    attendancePercentage: Integer
 end
 
-class Passenger
-  attributes
-    passengerId: Integer
-    name: String
-    mobileNumber: String
-    frequentFlyerPoints: Integer
+-- Relaciones
+association StudentHasEnrollments between
+  Students [1] role hasStudent
+  Enrollment [1..*] role hasEnrollment
 end
 
-class Airline
-  attributes
-    airlineId: Integer
-    type: String
-    flightCount: Integer
-    rating: Integer
+association EnrollmentForSeminar between
+  Enrollment [1] role isForEnrollment
+  Seminar [1] role hasSeminar
 end
 
--- Associations
-association ProfilePermission between
-  Profile [1] role profileRole
-  Permission [*] role permissionRole
+association SeminarHasWaitingList between
+  Seminar [0..*] role hasSeminarWaiting
+  Students [0..*] role onWaitingList
 end
 
-association UserProfile between
-  User [1] role userRole
-  Profile [1] role profileRole
+association SeminarIsInstructedBy between
+  Seminar [0..*] role isLedBy
+  Professor [0..1] role instructs
 end
 
-association EmployeeProfile between
-  Employee [1] role employeeRole
-  Profile [1] role profileRole
-end
-
-association UserMakesReservation between
-  User [1..*] role makingUser
-  Reservation [*] role madeReservation
-end
-
-association EmployeeHandlesQuery between
-  Employee [1] role handler
-  AirlineQuery [*] role handledQuery
-end
-
-association PassengerMakesReservation between
-  Passenger [1..*] role passengerRole
-  Reservation [1] role passengerReservation
-end
-
-association AirlineOffersReservation between
-  Airline [1] role offeringAirline
-  Reservation [*] role offeredReservation
-end
-
--- Constraints
 constraints
 
--- Profile
-context Profile inv profileIdPositive:
-  self.profileId > 0
-context Profile inv profileTitleMinLength:
-  self.profileTitle.size() >= 3
-context Profile inv userCountNonNegative:
-  self.userCount >= 0
-context Profile inv hasPermissions:
-  self.permissionRole->size() >= 1
-context Profile inv uniqueProfileTitle:
-  Profile.allInstances()->isUnique(p | p.profileTitle)
+-- Restricciones sobre la clase Students
+context Students inv studentNumberNonEmptyUnique:
+  self.studentnumber.size() > 0 and Students.allInstances()->isUnique(s | s.studentnumber)
 
--- Permission
-context Permission inv permissionIdPositive:
-  self.permissionId > 0
-context Permission inv permissionTitleMinLength:
-  self.permissionTitle.size() >= 4
-context Permission inv accessLevelInRange:
-  self.accessLevel >= 1 and self.accessLevel <= 10
-context Permission inv usedByProfiles:
-  self.profileRole->size() >= 1
-context Permission inv uniquePermissionTitle:
-  Permission.allInstances()->isUnique(p | p.permissionTitle)
+context Students inv averageMarkReasonable:
+  self.averagemark >= 0 and self.averagemark <= 10
 
--- Reservation
-context Reservation inv reservationIdPositive:
-  self.reservationId > 0
-context Reservation inv passengerCountPositive:
-  self.passengerCount > 0
-context Reservation inv hasAirline:
-  Airline.allInstances()->exists(a | a.offeredReservation->includes(self))
-context Reservation inv madeByUserOrPassenger:
-  User.allInstances()->exists(u | u.madeReservation->includes(self)) or Passenger.allInstances()->exists(p | p.passengerReservation = self)
-context Reservation inv uniqueConfirmationNumber:
-  Reservation.allInstances()->isUnique(r | r.confirmationNumber)
+context Students inv numberOfCoursesPositive:
+  self.numberOfCourses >= 0
 
--- User
-context User inv userIdPositive:--< Modify by MVM [self.userId > 0]
+context Students inv hasSomeEnrollmentsWithPassingGrade:
+  self.hasEnrollment->exists(e | e.grade >= 5)
+
+context Students inv averageMarkComparedToCoursesTaken:--< Modify by MVM [if self.numberOfCourses > 0 then self.averagemark * 10 >= self.numberOfCourses else true endif]
 true
-context User inv nameMinLength:
-  self.name.size() >= 3
-context User inv emailContainsAt:
-  self.email.indexOf('@') >= 0
-context User inv hasProfile:
-  self.profileRole <> null
-context User inv uniqueEmail:
-  User.allInstances()->isUnique(u | u.email)
+-- Restricciones sobre la clase Seminar
+context Seminar inv seminarNumberNonEmptyUnique:
+  self.seminarNumber.size() > 0 and Seminar.allInstances()->isUnique(s | s.seminarNumber)
 
--- Employee
-context Employee inv employeeIdPositive:
-  self.employeeId > 0
-context Employee inv nameMinLength:
-  self.name.size() >= 3
-context Employee inv mobileMinLength:
-  self.mobileNumber.size() >= 9
-context Employee inv handlesQueries:
-  self.handledQuery->size() >= 1
-context Employee inv yearsOfServiceNonNegative:
-  self.yearsOfService >= 0
+context Seminar inv feesNonNegative:
+  self.fees >= 0
 
--- AirlineQuery
-context AirlineQuery inv queryIdPositive:
-  self.queryId > 0
-context AirlineQuery inv titleMinLength:
-  self.title.size() >= 5
-context AirlineQuery inv priorityLevelValid:
-  self.priorityLevel >= 1 and self.priorityLevel <= 5
-context AirlineQuery inv hasHandler:
-  Employee.allInstances()->exists(e | e.handledQuery->includes(self))
-context AirlineQuery inv uniqueTitle:
-  AirlineQuery.allInstances()->isUnique(q | q.title)
+context Seminar inv capacityReasonable:
+  self.capacity > 5
 
--- Passenger
-context Passenger inv passengerIdPositive:
-  self.passengerId > 0
-context Passenger inv nameMinLength:
-  self.name.size() >= 3
-context Passenger inv mobileMinLength:
-  self.mobileNumber.size() >= 9
-context Passenger inv flyerPointsNonNegative:
-  self.frequentFlyerPoints >= 0
-context Passenger inv hasReservation:
-  self.passengerReservation <> null
+context Seminar inv numberOfEnrolledStudentsWithinCapacity:
+  Enrollment.allInstances()->select(e | e.hasSeminar = self)->size() <= self.capacity
 
--- Airline
-context Airline inv airlineIdPositive:
-  self.airlineId > 0
-context Airline inv typeMinLength:
-  self.type.size() >= 3
-context Airline inv flightCountNonNegative:
-  self.flightCount >= 0
-context Airline inv ratingValid:
-  self.rating >= 1 and self.rating <= 5
-context Airline inv hasReservations:
-  self.offeredReservation->size() >= 1
+
+-- Restricciones sobre la clase Professor
+context Professor inv nameNonEmpty:
+  self.name.size() > 0
+
+context Professor inv employeeIdPositiveUnique:
+  self.employeeId > 0 and Professor.allInstances()->isUnique(p | p.employeeId)
+
+context Professor inv salaryNonNegative:
+  self.salary >= 0
+
+context Professor inv rankLengthReasonable:
+  self.rank.size() < 30
+
+-- Restricciones sobre la clase Enrollment
+context Enrollment inv enrollmentIdPositiveUnique:
+  self.enrollmentId > 0 and Enrollment.allInstances()->isUnique(e | e.enrollmentId)
+
+context Enrollment inv gradeValid:
+  self.grade >= 0 and self.grade <= 10
+
+context Enrollment inv attendancePercentageValid:
+  self.attendancePercentage >= 0 and self.attendancePercentage <= 100
+
+context Enrollment inv belongsToStudentWithNameNotEmpty:
+  self.hasStudent.name.size() > 0
+
+context Enrollment inv isForSeminarWithPositiveFees:
+  self.hasSeminar.fees >= 0

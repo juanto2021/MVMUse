@@ -2379,17 +2379,17 @@ public class MainWindow extends JFrame {
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < cols && ((i * cols) + j < count); j++) {
 					JInternalFrame f = allframes[(i * cols) + j];
-if (f!=null) {//Provis
-					if (f.isIcon() && !f.isClosed()) {
-						try {
-							f.setIcon(false);
-						} catch (PropertyVetoException ex) {
-							// ignored
+					if (f!=null) {//Provis
+						if (f.isIcon() && !f.isClosed()) {
+							try {
+								f.setIcon(false);
+							} catch (PropertyVetoException ex) {
+								// ignored
+							}
 						}
-					}
-					fDesk.getDesktopManager().resizeFrame(f, x, y, w, h);
-					x += w;
-}//Provis
+						fDesk.getDesktopManager().resizeFrame(f, x, y, w, h);
+						x += w;
+					}//Provis
 				}
 				y += h; // start the next row
 				x = 0;

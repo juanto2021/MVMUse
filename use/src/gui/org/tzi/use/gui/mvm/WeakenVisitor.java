@@ -948,7 +948,7 @@ public class WeakenVisitor extends BooleanVisitor {
 	}
 
 	private void mutateNotExp(ExpStdOp exp) {
-		System.out.println("Weaken - mutateNotExp");
+//		System.out.println("Weaken - mutateNotExp");
 		Expression[] args = exp.args();
 
 		// Retrieve subexpressions
