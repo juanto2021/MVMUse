@@ -1,114 +1,228 @@
-model SeminarSystem
+model CarModeling
 
-class Students
+-- Classes
+class CarModelingProject
+  attributes
+    title: String
+    projectId: Integer
+    budget: Integer
+end
+
+class GearboxType
   attributes
     name: String
-    studentnumber: String
-    averagemark: Integer
-    numberOfCourses: Integer
+    typeId: Integer
+    maxGears: Integer
 end
 
-class Seminar
+class Gearbox
   attributes
-    name: String
-    seminarNumber: String
-    fees: Integer
-    capacity: Integer
-    creditsOffered: Integer
+    currentGear: Integer
+    numberOfGears: Integer
+    gearboxId: Integer
 end
 
-class Professor
+class Car
   attributes
-    name: String
-    salary: Integer
-    employeeId: Integer
-    rank: String
+    registrationNumber: String
+    vin: String
+    numberOfSeats: Integer
 end
 
-class Enrollment
+class Engine
   attributes
-    enrollmentId: Integer
-    grade: Integer
-    attendancePercentage: Integer
+    engineId: Integer
+    horsepower: Integer
 end
 
--- Relaciones
-association StudentHasEnrollments between
-  Students [1] role hasStudent
-  Enrollment [1..*] role hasEnrollment
+class Suspension
+  attributes
+    suspensionId: Integer
+    loadCapacity: Integer
 end
 
-association EnrollmentForSeminar between
-  Enrollment [1] role isForEnrollment
-  Seminar [1] role hasSeminar
+class Wheel
+  attributes
+    wheelId: Integer
+    rimSize: Integer
 end
 
-association SeminarHasWaitingList between
-  Seminar [0..*] role hasSeminarWaiting
-  Students [0..*] role onWaitingList
+class Tire
+  attributes
+    tireId: Integer
+    treadDepth: Real
 end
 
-association SeminarIsInstructedBy between
-  Seminar [0..*] role isLedBy
-  Professor [0..1] role instructs
+class Brake
+  attributes
+    brakeId: Integer
+    numberOfPistons: Integer
 end
 
+class Body
+  attributes
+    numberOfDoors: Integer
+    materialStrength: Integer
+end
+
+-- Associations
+association GearboxTypeHasGearbox between
+  GearboxType [1] role gearboxTypeRole
+  Gearbox [1..*] role gearboxesRole
+end
+
+association CarHasGearbox between
+  Car [1] role carRole
+  Gearbox [1] role gearboxRole
+end
+
+association CarHasEngine between
+  Car [1] role carRole
+  Engine [1] role engineRole
+end
+
+association CarHasSuspension between
+  Car [1] role carRole
+  Suspension [1..*] role suspensionsRole
+end
+
+association SuspensionHasWheel between
+  Suspension [1] role suspensionRole
+  Wheel [1] role wheelRole
+end
+
+association WheelHasTire between
+  Wheel [1] role wheelRole
+  Tire [1] role tireRole
+end
+
+association CarHasBrake between
+  Car [1] role carRole
+  Brake [1] role brakeRole
+end
+
+association CarHasBody between
+  Car [1] role carRole
+  Body [1] role bodyRole
+end
+
+-- OCL Constraints
 constraints
 
--- Restricciones sobre la clase Students
-context Students inv studentNumberNonEmptyUnique:
-  self.studentnumber.size() > 0 and Students.allInstances()->isUnique(s | s.studentnumber)
+-- CarModelingProject
+context CarModelingProject inv titleNotEmpty:
+  self.title <> ''
+context CarModelingProject inv budgetComparison:
+  self.budget > self.projectId
+context CarModelingProject inv hasManyGearboxes:
+  Gearbox.allInstances()->exists(g | g.gearboxId = self.projectId)
+context CarModelingProject inv allProjectsUnique:
+  CarModelingProject.allInstances()->isUnique(p | p.projectId)
+context CarModelingProject inv budgetValid:
+  self.budget >= 0
 
-context Students inv averageMarkReasonable:
-  self.averagemark >= 0 and self.averagemark <= 10
+-- GearboxType
+context GearboxType inv nameNotEmpty:
+  self.name <> ''
+context GearboxType inv moreThanOneGearbox:
+  self.gearboxesRole->size() > 0
+context GearboxType inv automationVsGears:
+  self.maxGears >= 4
+context GearboxType inv typeIdUnique:
+  GearboxType.allInstances()->isUnique(g | g.typeId)
+context GearboxType inv hasManualOrAuto:
+  self.maxGears > 0 implies self.name <> ''
 
-context Students inv numberOfCoursesPositive:
-  self.numberOfCourses >= 0
+-- Gearbox
+context Gearbox inv currentGearValid:
+  self.currentGear <= self.numberOfGears
+context Gearbox inv associatedTypeMaxGears:
+  self.gearboxTypeRole.maxGears >= self.numberOfGears
+context Gearbox inv gearboxIdUnique:
+  Gearbox.allInstances()->isUnique(g | g.gearboxId)
+context Gearbox inv gearDifference:
+  self.numberOfGears - self.currentGear >= 0
+context Gearbox inv mustHaveGearboxType:
+  self.gearboxTypeRole.name <> ''
 
-context Students inv hasSomeEnrollmentsWithPassingGrade:
-  self.hasEnrollment->exists(e | e.grade >= 5)
+-- Car
+context Car inv vinNotEmpty:
+  self.vin <> ''
+context Car inv uniqueVin:
+  Car.allInstances()->isUnique(c | c.vin)
+context Car inv seatsReasonable:
+  self.numberOfSeats >= 2 and self.numberOfSeats <= 9
+context Car inv engineHorsepowerMatch:
+  self.engineRole.horsepower > 0
+context Car inv atLeastOneSuspension:
+  self.suspensionsRole->size() >= 1
 
-context Students inv averageMarkComparedToCoursesTaken:--< Modify by MVM [if self.numberOfCourses > 0 then self.averagemark * 10 >= self.numberOfCourses else true endif]
+-- Engine
+context Engine inv engineIdUnique:
+  Engine.allInstances()->isUnique(e | e.engineId)
+context Engine inv horsepowerPositive:
+  self.horsepower > 0
+context Engine inv horsepowerGreaterThanCylinders:
+  self.horsepower > 50
+context Engine inv usedInCars:
+  Car.allInstances()->exists(c | c.engineRole = self)
+context Engine inv idGreaterThanHorsepower:
+  self.engineId < self.horsepower
+
+-- Suspension
+context Suspension inv loadCapacityPositive:
+  self.loadCapacity > 0
+context Suspension inv suspensionIdUnique:
+  Suspension.allInstances()->isUnique(s | s.suspensionId)
+context Suspension inv hasWheelAttached:
+  self.wheelRole.wheelId > 0
+context Suspension inv loadCapacityHigherThanRim:
+  self.loadCapacity > self.wheelRole.rimSize
+context Suspension inv hasValidWheel:
+  self.wheelRole.rimSize > 10
+
+-- Wheel
+context Wheel inv wheelIdUnique:
+  Wheel.allInstances()->isUnique(w | w.wheelId)
+context Wheel inv rimSizePositive:
+  self.rimSize > 0
+context Wheel inv hasTireAttached:--< Modify by MVM [self.tireRole.tireId > 0]
 true
--- Restricciones sobre la clase Seminar
-context Seminar inv seminarNumberNonEmptyUnique:
-  self.seminarNumber.size() > 0 and Seminar.allInstances()->isUnique(s | s.seminarNumber)
+context Wheel inv hasLargeRim:
+  self.rimSize > 13
 
-context Seminar inv feesNonNegative:
-  self.fees >= 0
+-- Tire
+context Tire inv treadDepthPositive:
+  self.treadDepth > 0.0
+context Tire inv tireIdUnique:
+  Tire.allInstances()->isUnique(t | t.tireId)
+context Tire inv treadDepthLimit:
+  self.treadDepth < 15.0
+context Tire inv hasValidWheel:
+  Wheel.allInstances()->exists(w | w.tireRole = self)
+context Tire inv treadDepthAboveMinimum:
+  self.treadDepth >= 1.6
 
-context Seminar inv capacityReasonable:
-  self.capacity > 5
+-- Brake
+context Brake inv brakeIdUnique:
+  Brake.allInstances()->isUnique(b | b.brakeId)
+context Brake inv pistonsMoreThanOne:
+  self.numberOfPistons > 1
+context Brake inv brakeUsedInCar:
+  Car.allInstances()->exists(c | c.brakeRole = self)
+--context Brake inv numberOfPistonsEven:
+--  self.numberOfPistons mod 2 = 0
+context Brake inv pistonsVsBodyStrength:
+  self.numberOfPistons < self.carRole.bodyRole.materialStrength
 
-context Seminar inv numberOfEnrolledStudentsWithinCapacity:
-  Enrollment.allInstances()->select(e | e.hasSeminar = self)->size() <= self.capacity
-
-
--- Restricciones sobre la clase Professor
-context Professor inv nameNonEmpty:
-  self.name.size() > 0
-
-context Professor inv employeeIdPositiveUnique:
-  self.employeeId > 0 and Professor.allInstances()->isUnique(p | p.employeeId)
-
-context Professor inv salaryNonNegative:
-  self.salary >= 0
-
-context Professor inv rankLengthReasonable:
-  self.rank.size() < 30
-
--- Restricciones sobre la clase Enrollment
-context Enrollment inv enrollmentIdPositiveUnique:
-  self.enrollmentId > 0 and Enrollment.allInstances()->isUnique(e | e.enrollmentId)
-
-context Enrollment inv gradeValid:
-  self.grade >= 0 and self.grade <= 10
-
-context Enrollment inv attendancePercentageValid:
-  self.attendancePercentage >= 0 and self.attendancePercentage <= 100
-
-context Enrollment inv belongsToStudentWithNameNotEmpty:
-  self.hasStudent.name.size() > 0
-
-context Enrollment inv isForSeminarWithPositiveFees:
-  self.hasSeminar.fees >= 0
+-- Body
+context Body inv numberOfDoorsValid:
+  self.numberOfDoors >= 2 and self.numberOfDoors <= 5
+context Body inv materialStrengthPositive:
+  self.materialStrength > 0
+context Body inv uniqueMaterialStrength:
+  Body.allInstances()->isUnique(b | b.materialStrength)
+context Body inv doorStrengthRelation:
+  self.materialStrength > self.numberOfDoors
+context Body inv usedInCar:
+  Car.allInstances()->exists(c | c.bodyRole = self)
