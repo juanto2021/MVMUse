@@ -1059,7 +1059,7 @@ public class MVMObjCheckState extends JDialog {
 		}
 		contentNew=sourceNew;
 	}
-	//--- from metrics
+	//--- from metrics juanto2025
 	private void prepareContentNewFromMetrics(String newBody, MClassInvariant oInvTab) {
 
 		String sourceNew=contentFile;
