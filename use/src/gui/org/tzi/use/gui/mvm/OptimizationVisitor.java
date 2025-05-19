@@ -1829,6 +1829,9 @@ public class OptimizationVisitor extends BooleanVisitor {
 		case "excludesAll":
 			optimizeExcludesAll(exp);
 			break;	
+		case "isUndefined":
+			defaultOptimizing(exp);
+			break;			
 		case "+":
 			optimizeAddExp(exp);
 			break;	

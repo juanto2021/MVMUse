@@ -1421,6 +1421,9 @@ public class MVMObjCheckState extends JDialog {
 				String strNExpr = Integer.toString(nExprC1);
 				//				mapAlternatives.put(strNExpr, item.toString());
 				if (debShowSin) System.out.println("Num["+strNExpr+"] - ["+item.toString()+"]");
+//				if (oInv.name().equals("ValidDayMonthRange")) {
+//					System.out.println("ValidDayMonthRange - Num["+strNExpr+"] - ["+item.toString()+"]");
+//				}
 				nExprC1+=1;
 			}
 			if (debShowSin) System.out.println("====================================================================================================");
@@ -1461,6 +1464,7 @@ public class MVMObjCheckState extends JDialog {
 			}
 		}catch (Exception e) {
 			// Do nothing
+			System.out.println("e ["+e.getMessage()+"]");
 		}
 
 
