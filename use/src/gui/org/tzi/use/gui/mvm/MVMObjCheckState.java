@@ -994,9 +994,7 @@ public class MVMObjCheckState extends JDialog {
 				if (oObjKey.getClassName().equals(nameClass)&& 
 						oObjKey.getName().equals(nameObj)) {
 					nObj=row;
-//					if (oInv.name().equals("mobileMinLength")) {
-//						System.out.println("Aqui");
-//					}					
+				
 					break;
 				}
 			}
@@ -1114,14 +1112,11 @@ public class MVMObjCheckState extends JDialog {
 				mapSorted = doAlternatives(inv);
 				Object[][] data;
 
-//				if (inv.name().contains("mobileMinLength")){
-//					System.out.println("inv.name() ["+inv.name()+"]");
-//				}
 				data=calSolMetrics(mapSorted, inv,oObjKey);
 				int nCorrects=0;
 				int nInCorrects=0;
 				for (int i = 0; i < data.length; i++) {
-//					String newBody=(String) data[i][1];
+					//					String newBody=(String) data[i][1];
 					String textResult=(String) data[i][2];
 					if (textResult.equals("Correct")) {
 						nCorrects+=1;
@@ -1141,9 +1136,6 @@ public class MVMObjCheckState extends JDialog {
 		int nFilas = mapSorted.size();
 		data = new Object[nFilas][3];
 		int nFila=0;
-		// Aqui falla JG
-//		int nCorrects=0;
-//		int nIncorrects=0;
 
 		for (Map.Entry<String, String> entry : mapSorted.entrySet()) {
 			String newBody = entry.getValue();
@@ -1157,18 +1149,10 @@ public class MVMObjCheckState extends JDialog {
 				textResult="Correct";
 			}
 
-//			if (textResult.equals("Correct")) {
-//				nCorrects+=1;
-//				//			}else if (!textResult.equals("Correct")) {
-//			}else if (textResult.equals("Incorrect")) {
-//				nIncorrects+=1;
-//			}
-
 			data[nFila][0]=false;
 			data[nFila][1]=newBody;
 			data[nFila][2]=textResult;
 			nFila++;
-			//			}
 
 		}
 		return data;
@@ -1386,26 +1370,6 @@ public class MVMObjCheckState extends JDialog {
 		showPanelTableAlt(strInv, row);
 	}
 
-//	private Map<String, String> doAlternativesOriginal(MClassInvariant oInv) {
-//		Map<String, String> mapAlternatives = new HashMap<String, String>();
-//		try {
-//			Expression exp = oInv.bodyExpression();
-//			List<Expression> ct = computeClassifyingTerms2(exp);
-//			int nExpr=0;
-//			for(Expression item: ct) {
-//				String strNExpr = Integer.toString(nExpr);
-//				mapAlternatives.put(strNExpr, item.toString());
-//				nExpr+=1;
-//			}
-//		}catch (Exception e) {
-//			// Do nothing
-//		}
-//
-//
-//		TreeMap<String, String> mapSorted = new TreeMap<>(mapAlternatives);
-//		return mapSorted;
-//	}
-	//Aqui
 	private Map<String, String> doAlternatives(MClassInvariant oInv) {
 		Map<String, String> mapAlternatives = new HashMap<String, String>();
 		try {
@@ -1419,11 +1383,7 @@ public class MVMObjCheckState extends JDialog {
 			int nExprC1=0;
 			for(Expression item: ct) {
 				String strNExpr = Integer.toString(nExprC1);
-				//				mapAlternatives.put(strNExpr, item.toString());
 				if (debShowSin) System.out.println("Num["+strNExpr+"] - ["+item.toString()+"]");
-//				if (oInv.name().equals("ValidDayMonthRange")) {
-//					System.out.println("ValidDayMonthRange - Num["+strNExpr+"] - ["+item.toString()+"]");
-//				}
 				nExprC1+=1;
 			}
 			if (debShowSin) System.out.println("====================================================================================================");
@@ -1933,7 +1893,7 @@ public class MVMObjCheckState extends JDialog {
 		if (posiHYPHEN>0) {
 			resto=resto.substring(0, posiHYPHEN);
 		}
-		//		body=resto.replace("\r\n","").replace("\n", "").trim();//Old
+
 		body=resto;
 		return body;
 	}

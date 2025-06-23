@@ -32,6 +32,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -215,6 +220,7 @@ public class WizardMVMView extends JPanel implements View {
 	private JButton btnRefreshComponents;
 
 	private JButton btnActions;
+	private JButton btnSuggestions;
 	private JButton btnReset;
 
 	private JSeparator separator0 = new JSeparator();
@@ -257,6 +263,9 @@ public class WizardMVMView extends JPanel implements View {
 	protected Expression fQueryExp;
 
 	private LayoutThread fLayoutThread;
+
+	private StringBuilder blockForAssocFailOpenAI;
+	private StringBuilder blockForInvsFailOpenAI;
 
 	/**
 	 * The table model.
@@ -662,15 +671,18 @@ public class WizardMVMView extends JPanel implements View {
 		lAssocs.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent evt) {
 				MAssociation oAssoc = lAssocs.getSelectedValue();
-				setComposAssoc(oAssoc);
+				if (oAssoc!=null) {
+					setComposAssoc(oAssoc);
+				}
+
 			}
 		});
 
 		scrollPaneAssoc = new JScrollPane();
 		scrollPaneAssoc.setViewportView(lAssocs);
 		scrollPaneAssoc.setBounds(10, 215, 120, 140);
-		   
-//		panel.add(lAssocs);
+
+		//		panel.add(lAssocs);
 		panel.add(scrollPaneAssoc);
 
 		btnRefreshComponents = new JButton("Refresh");
@@ -719,6 +731,23 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 		panel.add(btnActions);
+
+		//---
+
+		btnSuggestions = new JButton("Suggestions");
+		//		btnSuggestions.setBounds(300, 450, 155, 60);
+		btnSuggestions.setBounds(105, 384, 95, 60);
+		btnSuggestions.setVerticalAlignment(SwingConstants.CENTER);
+		btnSuggestions.setHorizontalAlignment(SwingConstants.CENTER);
+		btnSuggestions.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				callOpenAI1();
+			}
+		});
+		panel.add(btnSuggestions);
+
+
+		//---
 
 		btnReset = new JButton("Reset");
 
@@ -1009,6 +1038,75 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 
+	private void callOpenAI1() {
+
+		StringBuilder blockForOpenAI=new StringBuilder();
+		blockForOpenAI.append("In this model: ");	
+		String fileName = fSystem.model().filename();
+		StringBuilder contentModel = new StringBuilder();
+
+		try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				contentModel.append(line).append("\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace(); // o maneja el error según necesites
+		}
+
+		blockForOpenAI.append(contentModel);
+		//		blockForAssocFailOpenAI=buffer.toString
+
+		blockForOpenAI.append(System.lineSeparator());
+		blockForOpenAI.append(System.lineSeparator());
+		blockForOpenAI.append("I have these errors in association links: ");
+		blockForOpenAI.append(System.lineSeparator());
+
+		getErrorsEstructure();
+
+		blockForOpenAI.append(blockForAssocFailOpenAI);
+
+		blockForOpenAI.append(System.lineSeparator());
+		blockForOpenAI.append("I have these objects with these invariants where some are true and others are not: ");
+		blockForOpenAI.append(System.lineSeparator());
+		blockForOpenAI.append(System.lineSeparator());
+
+		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
+		blockForInvsFailOpenAI= new StringBuilder();
+		for (Map.Entry<MVMObject, Map<MClassInvariant, Boolean>> entry : mapaOrdenado.entrySet()) {
+			MVMObject obj = entry.getKey();
+			Map<MClassInvariant, Boolean> invariants = entry.getValue();
+
+			blockForInvsFailOpenAI.append("Objeto: ").append(obj.getName())
+			.append(" (Clase: ").append(obj.getClassName()).append(")\n");
+
+			for (MVMAttribute attr : obj.getAttributes()) {
+				blockForInvsFailOpenAI.append("   Atributo: ").append(attr.getName())
+				.append(" = ").append(attr.getValue()).append("\n");
+			}
+
+			for (Map.Entry<MClassInvariant, Boolean> invEntry : invariants.entrySet()) {
+				MClassInvariant invariant = invEntry.getKey();
+				Boolean valor = invEntry.getValue();
+				blockForInvsFailOpenAI.append("   Invariante: ").append(invariant.name())
+				.append(" -> ").append(valor ? "Cumple" : "NO cumple").append("\n");
+			}
+
+			blockForInvsFailOpenAI.append("-------------------------------------------\n");
+		}
+		blockForOpenAI.append(blockForInvsFailOpenAI);
+
+		blockForOpenAI.append(System.lineSeparator());
+		blockForOpenAI.append("What can I do to obtain an instance of this model that fulfills the greatest number of invariants and identifies those that cannot be fulfilled?\n"
+				+ "Please provide the output as a plain text explanation in English and in JSON format, with a field named \"content\" containing the full explanation.");
+
+		System.out.println("--------------------------------------------");
+		System.out.println("BLOCK TO OPENAI");
+		System.out.println(blockForOpenAI);
+		System.out.println("--------------------------------------------");	
+
+	}
+
 	/**
 	 * Delete all existing objects and links
 	 */
@@ -1065,7 +1163,10 @@ public class WizardMVMView extends JPanel implements View {
 		lAssocs.setSelectedIndex(0);
 
 		MAssociation oAssoc = lAssocs.getSelectedValue();
-		setComposAssoc(oAssoc);
+		if (oAssoc!=null) {
+			setComposAssoc(oAssoc);
+		}
+
 
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
@@ -1861,6 +1962,9 @@ public class WizardMVMView extends JPanel implements View {
 		PrintWriter out = new PrintWriter(buffer);
 		boolean reportAllErrors=true;
 		lAssocsWizard = fSession.system().state().checkStructureErrors( out,reportAllErrors);
+
+		blockForAssocFailOpenAI = new StringBuilder(buffer.toString());
+
 		return;
 	}
 
