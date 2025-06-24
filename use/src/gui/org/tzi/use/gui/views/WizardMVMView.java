@@ -1186,26 +1186,26 @@ public class WizardMVMView extends JPanel implements View {
 		return json;
 
 	}
-	 public static String analysisJsonToString1(String jsonString) {
-	        JSONObject root;
-	        String result="";
-			try {
-				root = new JSONObject(jsonString);
-		        JSONArray choices = root.getJSONArray("choices");
-	        JSONObject firstChoice = choices.getJSONObject(0);
-	        JSONObject message = firstChoice.getJSONObject("message");
-	        String innerContent = message.getString("content");
+	public static String analysisJsonToString1(String jsonString) {
+		JSONObject root;
+		String result="";
+		try {
+			root = new JSONObject(jsonString);
+			JSONArray choices = root.getJSONArray("choices");
+			JSONObject firstChoice = choices.getJSONObject(0);
+			JSONObject message = firstChoice.getJSONObject("message");
+			String innerContent = message.getString("content");
 
-	        // Ahora 'innerContent' es otro JSON con campo 'content'
-	        JSONObject innerJson = new JSONObject(innerContent);
-	        result=innerJson.getString("content");
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			// Ahora 'innerContent' es otro JSON con campo 'content'
+			JSONObject innerJson = new JSONObject(innerContent);
+			result=innerJson.getString("content");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-	        return result;
-	    }
+		return result;
+	}
 	public static String analysisJsonToString1_old(String jsonContent) {
 		StringBuilder sb = new StringBuilder();
 
