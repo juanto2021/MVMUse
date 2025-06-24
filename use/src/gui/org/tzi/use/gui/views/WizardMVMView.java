@@ -1082,7 +1082,7 @@ public class WizardMVMView extends JPanel implements View {
 		String responseBody="";
 		MVMConfigManager config = new MVMConfigManager("config.properties");
 
-		API_KEY = System.getenv("OPENAI_API_KEY"); 
+		API_KEY = System.getenv("OPENAI_API_KEY");  
 		API_URL = config.get("endpoint");
 
 		OkHttpClient client = new OkHttpClient();
