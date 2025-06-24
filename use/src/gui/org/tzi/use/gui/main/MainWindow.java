@@ -147,6 +147,8 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import org.json.JSONException;
+
 /**
  * The main application window of USE.
  * 

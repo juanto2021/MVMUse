@@ -90,9 +90,11 @@ import org.tzi.use.gui.mvm.LinkWizard;
 import org.tzi.use.gui.mvm.MVMAction;
 import org.tzi.use.gui.mvm.MVMAssocWizard;
 import org.tzi.use.gui.mvm.MVMAttribute;
+import org.tzi.use.gui.mvm.MVMConfigManager;
 import org.tzi.use.gui.mvm.MVMLink;
 import org.tzi.use.gui.mvm.MVMObjCheckState;
 import org.tzi.use.gui.mvm.MVMObject;
+import org.tzi.use.gui.mvm.MVMShowResponseOpenAI;
 import org.tzi.use.gui.mvm.MVMWizardActions;
 import org.tzi.use.gui.mvm.MVMWizardAssoc;
 import org.tzi.use.gui.util.ExtendedJTable;
@@ -137,6 +139,22 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+//import okhttp3.MediaType;
+//import okhttp3.OkHttpClient;
+//import okhttp3.Request;
+//import okhttp3.RequestBody;
+//import okhttp3.Response;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /** 
  * A view for showing and changing object properties (attributes).
@@ -266,6 +284,10 @@ public class WizardMVMView extends JPanel implements View {
 
 	private StringBuilder blockForAssocFailOpenAI;
 	private StringBuilder blockForInvsFailOpenAI;
+
+	private static String API_KEY;
+	private static String API_URL;
+	//	private static String MODEL = "Animals.use";
 
 	/**
 	 * The table model.
@@ -741,7 +763,7 @@ public class WizardMVMView extends JPanel implements View {
 		btnSuggestions.setHorizontalAlignment(SwingConstants.CENTER);
 		btnSuggestions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				callOpenAI1();
+				runAnalisis();
 			}
 		});
 		panel.add(btnSuggestions);
@@ -1038,7 +1060,54 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 
-	private void callOpenAI1() {
+	private void runAnalisis() {
+
+		try {
+			String json = builJsonRequest1();
+			// Llamada API
+			String jsonContent=callAPIOpenAI(json);
+			// Analisis json
+			String resultado;
+			resultado = analysisJsonToString1(jsonContent);
+			// Muestra resultado
+			showResponseOpenAI(resultado);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+	}
+	public static String callAPIOpenAI(String json) {
+		String responseBody="";
+		MVMConfigManager config = new MVMConfigManager("config.properties");
+
+		//		API_KEY = config.get("api_key");
+		API_KEY = System.getenv("OPENAI_API_KEY");
+		API_URL = config.get("endpoint");
+
+		OkHttpClient client = new OkHttpClient();
+
+		RequestBody body = RequestBody.create(MediaType.parse("application/json"), json);
+
+		Request request = new Request.Builder()
+				.url(API_URL)
+				.header("Authorization", "Bearer " + API_KEY)
+				.post(body)
+				.build();
+		try (Response response = client.newCall(request).execute()) {
+
+			if (response.body() != null) {
+				responseBody = response.body().string();
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return responseBody;
+
+	}
+	public String builJsonRequest1(){
 
 		StringBuilder blockForOpenAI=new StringBuilder();
 		blockForOpenAI.append("In this model: ");	
@@ -1051,7 +1120,7 @@ public class WizardMVMView extends JPanel implements View {
 				contentModel.append(line).append("\n");
 			}
 		} catch (IOException e) {
-			e.printStackTrace(); // o maneja el error según necesites
+			e.printStackTrace();
 		}
 
 		blockForOpenAI.append(contentModel);
@@ -1098,13 +1167,96 @@ public class WizardMVMView extends JPanel implements View {
 
 		blockForOpenAI.append(System.lineSeparator());
 		blockForOpenAI.append("What can I do to obtain an instance of this model that fulfills the greatest number of invariants and identifies those that cannot be fulfilled?\n"
-				+ "Please provide the output as a plain text explanation in English and in JSON format, with a field named \"content\" containing the full explanation.");
+				+ "Please provide the output as a  JSON format, with a field named \"content\" containing the full explanation.");
 
 		System.out.println("--------------------------------------------");
 		System.out.println("BLOCK TO OPENAI");
 		System.out.println(blockForOpenAI);
 		System.out.println("--------------------------------------------");	
 
+		//		showResponseOpenAI(blockForOpenAI.toString());
+
+		String json = "{"
+				+ "\"model\": \"gpt-3.5-turbo\","
+				+ "\"messages\": [{\"role\": \"user\", \"content\": " + JSONObject.quote(blockForOpenAI.toString()) + "}]"
+				+ "}";
+
+		//		String json=blockForOpenAI.toString();
+
+		return json;
+
+	}
+	 public static String analysisJsonToString1(String jsonString) {
+	        JSONObject root;
+	        String result="";
+			try {
+				root = new JSONObject(jsonString);
+		        JSONArray choices = root.getJSONArray("choices");
+	        JSONObject firstChoice = choices.getJSONObject(0);
+	        JSONObject message = firstChoice.getJSONObject("message");
+	        String innerContent = message.getString("content");
+
+	        // Ahora 'innerContent' es otro JSON con campo 'content'
+	        JSONObject innerJson = new JSONObject(innerContent);
+	        result=innerJson.getString("content");
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+	        return result;
+	    }
+	public static String analysisJsonToString1_old(String jsonContent) {
+		StringBuilder sb = new StringBuilder();
+
+		try {
+			JSONObject root = new JSONObject(jsonContent);
+			JSONArray choices = root.getJSONArray("choices");
+			if (choices.length() > 0) {
+				JSONObject firstChoice = choices.getJSONObject(0);
+				JSONObject message = firstChoice.getJSONObject("message");
+				sb.append(message.getString("content").trim());
+			} else {
+				sb.append("No choices found in the response.");
+			}
+		} catch (JSONException e) {
+			sb.append("Error parsing OpenAI response: " + e.getMessage());
+		}
+
+		return sb.toString();
+	}
+
+	public static String builJsonRequest2(String modelo, String invariants, 
+			String invariantsFail, String associationsFail, String combinationsFail) {
+
+		String request="Can you analyze and explain why they fail and how to fix them?\r\n"
+				+ "When writing your answer, write the invariant first, then its definition or association, followed by a line break, and then its comment.";
+
+		String mensaje = String.format(
+				"Here is a model definition:\n%s\n\n" +
+						"Total invariants:\n%s\n\n" +
+						"Failing invariants:\n%s\n\n" +
+						"Problematic associations:\n%s\n\n" +
+						"Conflicting combinations:\n%s\n\n" +
+						request, modelo, invariants, invariantsFail, associationsFail, combinationsFail
+				);
+
+		String json = "{"
+				+ "\"model\": \"gpt-3.5-turbo\","
+				+ "\"messages\": [{\"role\": \"user\", \"content\": " + JSONObject.quote(mensaje) + "}]"
+				+ "}";
+
+
+		return json;
+
+	}
+
+	private void showResponseOpenAI(String result) {
+		MVMShowResponseOpenAI dialog = new MVMShowResponseOpenAI(result);
+		dialog.setSize(1055, 645);
+		dialog.setLocationRelativeTo(null);
+		dialog.setModal(true);
+		dialog.setVisible(true);
 	}
 
 	/**

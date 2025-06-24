@@ -23,5 +23,9 @@
 	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/jackson-annotations-2.16.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/jackson-core-2.16.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/jackson-databind-2.16.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/java-json.jar"/>
+	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/json-20210307.jar"/>
+	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/okhttp-3.9.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/okio-1.13.0.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
