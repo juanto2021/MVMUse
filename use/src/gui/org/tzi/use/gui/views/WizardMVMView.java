@@ -1061,23 +1061,19 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	private void runAnalisis() {
-
 		try {
-			String json = builJsonRequest1();
-			// Llamada API
-			String jsonContent=callAPIOpenAI(json);
-			// Analisis json
-			String resultado;
-			resultado = analysisJsonToString1(jsonContent);
-			// Muestra resultado
+			String strJson = builJsonRequest1();
+			// Call API
+			String jsonContent=callAPIOpenAI(strJson);
+			// Analysis jsonContent
+			String resultado = analysisJsonToString1(jsonContent);
+			// Show result
 			showResponseOpenAI(resultado);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-
 	}
+	
 	public static String callAPIOpenAI(String json) {
 		String responseBody="";
 		MVMConfigManager config = new MVMConfigManager("config.properties");
