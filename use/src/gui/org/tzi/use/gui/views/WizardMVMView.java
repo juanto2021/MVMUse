@@ -33,6 +33,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -763,7 +764,8 @@ public class WizardMVMView extends JPanel implements View {
 		btnSuggestions.setHorizontalAlignment(SwingConstants.CENTER);
 		btnSuggestions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				runAnalisis();
+				//				runAnalisis1();
+				runAnalisis2();
 			}
 		});
 		panel.add(btnSuggestions);
@@ -1060,7 +1062,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 
-	private void runAnalisis() {
+	private void runAnalisis1() {
 		try {
 			String strJson = builJsonRequest1();
 			// Call API
@@ -1073,7 +1075,21 @@ public class WizardMVMView extends JPanel implements View {
 			e.printStackTrace();
 		}
 	}
-	
+
+	private void runAnalisis2() {
+		try {
+			String strJson = builJsonRequest2();
+			// Call API
+			String jsonContent=callAPIOpenAI(strJson);
+			// Analysis jsonContent
+			String resultado = analysisJsonToString2(jsonContent);
+			// Show result
+			showResponseOpenAI(resultado);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static String callAPIOpenAI(String json) {
 		String responseBody="";
 		MVMConfigManager config = new MVMConfigManager("config.properties");
@@ -1141,19 +1157,19 @@ public class WizardMVMView extends JPanel implements View {
 			MVMObject obj = entry.getKey();
 			Map<MClassInvariant, Boolean> invariants = entry.getValue();
 
-			blockForInvsFailOpenAI.append("Objeto: ").append(obj.getName())
-			.append(" (Clase: ").append(obj.getClassName()).append(")\n");
+			blockForInvsFailOpenAI.append("Object: ").append(obj.getName())
+			.append(" (Class: ").append(obj.getClassName()).append(")\n");
 
 			for (MVMAttribute attr : obj.getAttributes()) {
-				blockForInvsFailOpenAI.append("   Atributo: ").append(attr.getName())
+				blockForInvsFailOpenAI.append("   Attribute: ").append(attr.getName())
 				.append(" = ").append(attr.getValue()).append("\n");
 			}
 
 			for (Map.Entry<MClassInvariant, Boolean> invEntry : invariants.entrySet()) {
 				MClassInvariant invariant = invEntry.getKey();
 				Boolean valor = invEntry.getValue();
-				blockForInvsFailOpenAI.append("   Invariante: ").append(invariant.name())
-				.append(" -> ").append(valor ? "Cumple" : "NO cumple").append("\n");
+				blockForInvsFailOpenAI.append("   Invariant: ").append(invariant.name())
+				.append(" -> ").append(valor ? "Complies" : "Does not comply").append("\n");
 			}
 
 			blockForInvsFailOpenAI.append("-------------------------------------------\n");
@@ -1161,7 +1177,8 @@ public class WizardMVMView extends JPanel implements View {
 		blockForOpenAI.append(blockForInvsFailOpenAI);
 
 		blockForOpenAI.append(System.lineSeparator());
-		blockForOpenAI.append("What can I do to obtain an instance of this model that fulfills the greatest number of invariants and identifies those that cannot be fulfilled?\n"
+		blockForOpenAI.append("What can I do to obtain an instance of this model that satisfies the largest number of invariants"
+				+ "and identify those that cannot be met, and what values should I assign to which objects to solve this?\n"
 				+ "Please provide the output as a  JSON format, with a field named \"content\" containing the full explanation.");
 
 		System.out.println("--------------------------------------------");
@@ -1181,6 +1198,119 @@ public class WizardMVMView extends JPanel implements View {
 		return json;
 
 	}
+
+	public String builJsonRequest2(){
+
+		String LF = "\n";
+		StringBuilder blockForOpenAI=new StringBuilder();
+		blockForOpenAI.append("Your role is to assist a software developer to whom you have given advice"
+				+" on how to correct a software model and understand the errors that may exist in it.\n");
+
+		String filePath = fSystem.model().filename();
+		File file = new File(filePath);
+		String fileName = file.getName(); // devuelve "SchoolManagement.use"
+
+		//		String fileName = fSystem.model().filename();		
+		getErrorsEstructure();
+		// Averiguar como detectar posibles errores
+
+
+		// El error se halla dentro de la variable blockForAssocFailOpenAI
+		int nLinesFail=0;
+		String contenido = blockForAssocFailOpenAI.toString();
+		String[] lineas = contenido.split("\\R"); // "\\R" captura cualquier tipo de salto de línea (\r\n, \n, \r)
+		nLinesFail= lineas.length;
+		boolean ErrorsExist=nLinesFail > 2;
+
+		blockForOpenAI.append("I am going to provide you with the following information" + LF
+				+ "- " + fileName + " : " 
+				+"contains the definition of the model in USE format (University of Bremen)" + LF
+				+"- List of objects and links" + LF);		
+		blockForOpenAI.append(System.lineSeparator());
+
+		// Si hay errores de extructura
+		if (ErrorsExist) {
+			blockForOpenAI.append("- Errors detected in association links" + LF);
+		}
+
+		StringBuilder contentModel = new StringBuilder();
+
+		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				contentModel.append(line).append(LF);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		blockForOpenAI.append(contentModel);
+		//		blockForAssocFailOpenAI=buffer.toString
+
+		blockForOpenAI.append(System.lineSeparator());
+		blockForOpenAI.append("I have these objects with these invariants where some are true and others are not: " + LF);
+		blockForOpenAI.append(System.lineSeparator());
+
+		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
+		blockForInvsFailOpenAI= new StringBuilder();
+		for (Map.Entry<MVMObject, Map<MClassInvariant, Boolean>> entry : mapaOrdenado.entrySet()) {
+			MVMObject obj = entry.getKey();
+			Map<MClassInvariant, Boolean> invariants = entry.getValue();
+
+			blockForInvsFailOpenAI.append("Object: ").append(obj.getName())
+			.append(" (Class: ").append(obj.getClassName()).append(")" + LF);
+
+			for (MVMAttribute attr : obj.getAttributes()) {
+				blockForInvsFailOpenAI.append("   Attribute: ").append(attr.getName())
+				.append(" = ").append(attr.getValue()).append(LF);
+			}
+
+			for (Map.Entry<MClassInvariant, Boolean> invEntry : invariants.entrySet()) {
+				MClassInvariant invariant = invEntry.getKey();
+				Boolean valor = invEntry.getValue();
+				blockForInvsFailOpenAI.append("   Invariant: ").append(invariant.name())
+				.append(" -> ").append(valor ? "Complies" : "Does not comply").append(LF);
+			}
+
+			blockForInvsFailOpenAI.append("-------------------------------------------" + LF);
+		}
+		blockForOpenAI.append(blockForInvsFailOpenAI);
+
+		if (ErrorsExist) {
+			blockForOpenAI.append(System.lineSeparator());
+			blockForOpenAI.append("Errors detected in association links: " + LF);
+			blockForOpenAI.append(System.lineSeparator());
+			blockForOpenAI.append(blockForAssocFailOpenAI);
+		}
+
+		blockForOpenAI.append(System.lineSeparator());
+		blockForOpenAI.append(System.lineSeparator());
+//		blockForOpenAI.append("Please provide the output as a  JSON format with a textual explanation of what the problem is"
+//				+ " and what elements it is in." + LF
+//				+ "It also indicates where there are consistency issues." + LF
+//				+ "Leave this explanation in a tag named \"contentProblem\"" + LF);
+
+		blockForOpenAI.append("Please provide the result in JSON format with only two tags:" + LF
+				+ "\"contentProblem\" tag for a textual explanation of the problem and its elements,"
+				+ " indicating where there are consistency issues." + LF
+				+ "\"contentSolution\" tag to provide a textual explanation for correcting the problems,"
+				+ " detailing which objects, attributes, and links need to be created or modified."
+				+ "Introduce a line break for each object or link you explain.");
+
+		System.out.println("--------------------------------------------");
+		System.out.println("BLOCK TO OPENAI");
+		System.out.println(blockForOpenAI);
+		System.out.println("--------------------------------------------");	
+
+		String json = "{"
+				+ "\"model\": \"gpt-3.5-turbo\","
+				+ "\"messages\": [{\"role\": \"user\", \"content\": " + JSONObject.quote(blockForOpenAI.toString()) + "}]"
+				+ "}";
+
+		return json;
+
+	}
+
 	public static String analysisJsonToString1(String jsonString) {
 		JSONObject root;
 		String result="";
@@ -1201,6 +1331,58 @@ public class WizardMVMView extends JPanel implements View {
 
 		return result;
 	}
+
+
+	public static String analysisJsonToString2(String jsonString) {
+		String LF = "\n";
+		String result = "";
+		String result1 = "";
+		String result2 = "";
+		try {
+			// Parseo del JSON principal
+			JSONObject root = new JSONObject(jsonString);
+			JSONArray choices = root.getJSONArray("choices");
+			JSONObject firstChoice = choices.getJSONObject(0);
+			JSONObject message = firstChoice.getJSONObject("message");
+
+			// Contenido con el JSON embebido
+			String innerContentRaw = message.getString("content");
+
+			// Buscar y extraer solo el JSON dentro del bloque ```json ... ```
+			int start = innerContentRaw.indexOf("{");
+			int end = innerContentRaw.lastIndexOf("}");
+
+			if (start >= 0 && end > start) {
+				String innerJsonStr = innerContentRaw.substring(start, end + 1);
+
+				// Parsear ese bloque como JSON
+				JSONObject innerJson = new JSONObject(innerJsonStr);
+				result1 = innerJson.getString("contentProblem");
+				result2 = innerJson.getString("contentSolution");
+
+				result = "Cause: " + LF;
+				result += result1+ LF + LF;
+				result += "Solution: "+ LF;
+				result += result2+ LF;
+
+			} else {
+				result = "No se encontró un bloque JSON válido dentro de content.";
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+			result = "Error al procesar el JSON: " + e.getMessage();
+		}
+		
+		System.out.println("--------------------------------------------");
+		System.out.println("Result");
+		System.out.println(result);
+		System.out.println("--------------------------------------------");
+
+		return result;
+	}
+
+
+
 	public static String analysisJsonToString1_old(String jsonContent) {
 		StringBuilder sb = new StringBuilder();
 

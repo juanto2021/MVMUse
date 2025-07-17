@@ -63,7 +63,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 		panel.add(scrollPaneOri);
 
-		btnExit = new JButton("Exit");
+		btnExit = new JButton("Close");
 		btnExit.addActionListener(new ActionListener() {
 
 			@Override
