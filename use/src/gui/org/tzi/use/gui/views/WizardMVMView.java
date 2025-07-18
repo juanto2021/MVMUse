@@ -592,7 +592,7 @@ public class WizardMVMView extends JPanel implements View {
 		btnCreateObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				initNewObject();
-				iniObjDiagramAssoc();//aqui
+				iniObjDiagramAssoc();
 				if (chkAutoLayout.isSelected()) {
 					if (odvAssoc!=null) {
 						if (fLayoutThread!=null) {
@@ -771,7 +771,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(btnSuggestions);
 
 
-		//---
+		//--- AQUI
 
 		btnReset = new JButton("Reset");
 
@@ -1285,10 +1285,10 @@ public class WizardMVMView extends JPanel implements View {
 
 		blockForOpenAI.append(System.lineSeparator());
 		blockForOpenAI.append(System.lineSeparator());
-//		blockForOpenAI.append("Please provide the output as a  JSON format with a textual explanation of what the problem is"
-//				+ " and what elements it is in." + LF
-//				+ "It also indicates where there are consistency issues." + LF
-//				+ "Leave this explanation in a tag named \"contentProblem\"" + LF);
+		//		blockForOpenAI.append("Please provide the output as a  JSON format with a textual explanation of what the problem is"
+		//				+ " and what elements it is in." + LF
+		//				+ "It also indicates where there are consistency issues." + LF
+		//				+ "Leave this explanation in a tag named \"contentProblem\"" + LF);
 
 		blockForOpenAI.append("Please provide the result in JSON format with only two tags:" + LF
 				+ "\"contentProblem\" tag for a textual explanation of the problem and its elements,"
@@ -1372,7 +1372,7 @@ public class WizardMVMView extends JPanel implements View {
 			e.printStackTrace();
 			result = "Error al procesar el JSON: " + e.getMessage();
 		}
-		
+
 		System.out.println("--------------------------------------------");
 		System.out.println("Result");
 		System.out.println(result);
@@ -2660,6 +2660,14 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	private void setComposAssoc(MAssociation oAssoc) {
 
+		// Provis -----
+		txOriAssocRole.setText("");
+		txMultiOri.setText("");
+		txDesAssocRole.setText("");
+		txMultiDes.setText("");		
+		//-------------
+
+
 		Set<MLink> links = fSystem.state().linksOfAssociation(oAssoc).links();
 		// If there are no links, the combos must be initialized based on the AssociationEnds
 		int nLink=0;
@@ -2787,6 +2795,13 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}
 		setResCheckStructure();
+
+		// Aqui revisualizar listas de links y objetos asociados--------------
+		//		MAssociation oAssoc = lAssocs.getSelectedValue();
+		if (association!=null) {
+			setComposAssoc(association);
+		}
+		//-------------------------
 	}
 	/**
 	 * Remove link in association
@@ -2797,6 +2812,10 @@ public class WizardMVMView extends JPanel implements View {
 		MObject oOri = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
 		MObject oDes = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
 		deleteLink(oAssoc, oOri, oDes);
+		// Aqui revisualizar listas de links y objetos asociados
+		if (oAssoc!=null) {
+			setComposAssoc(oAssoc);
+		}
 	}
 
 	/**
@@ -2836,6 +2855,9 @@ public class WizardMVMView extends JPanel implements View {
 
 		if(oLinkTOdel!=null) {
 			deleteLink(oLinkTOdel);
+			if (oAssoc!=null) {
+				setComposAssoc(oAssoc);
+			}
 		}
 
 	}
