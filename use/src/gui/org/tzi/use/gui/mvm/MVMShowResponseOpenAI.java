@@ -1,5 +1,8 @@
 package org.tzi.use.gui.mvm;
 import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -22,6 +25,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 	private JPanel panel;
 	private JButton btnExit;
+	private JButton btnCopy ;
 	private JLabel lbModelOri = new JLabel("Comments");
 	private JTextArea taModelOri = new JTextArea();
 	private JTextArea taModelNew = new JTextArea();
@@ -75,14 +79,34 @@ public class MVMShowResponseOpenAI extends JDialog {
 			}
 		});
 
-		btnExit.setBounds(15, ROW_TA+HEIGHT_TA+30, 250, 40);
+		btnExit.setBounds(864, ROW_TA+HEIGHT_TA+30, 150, 40);
 		panel.add(btnExit);
+		
+		btnCopy  = new JButton("Copy");
+		btnCopy .addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				copyTextAreaToClipboard();
+			}
+		});
+
+//		btnCopy .setBounds(270, ROW_TA+HEIGHT_TA+30, 250, 40);
+		btnCopy.setBounds(15, ROW_TA+HEIGHT_TA+30, 150, 40);
+		panel.add(btnCopy );
 
 		getContentPane().add(panel);
 
 	}
 	public String getContentNew() {
 		return contentNew;
+	}
+	
+	public void copyTextAreaToClipboard() {
+	    String text = taModelOri.getText();
+	    StringSelection selection = new StringSelection(text);
+	    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+	    clipboard.setContents(selection, null);
 	}
 
 }
