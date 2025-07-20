@@ -2446,6 +2446,17 @@ public class MainWindow extends JFrame {
 
 		return opv;
 	}
+	//Aqui3
+	public void destroyMVMWizard() {
+		// Buscar wizard y eliminar
+	}
+	
+	public void refreshMVMWizard() {
+		// Buscar wizard y eliminar
+		wizardMVMView.refreshComponents();
+	}
+	
+	
 
 	/**
 	 * Creates some initial views and tiles them.

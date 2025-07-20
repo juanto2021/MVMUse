@@ -4,7 +4,7 @@
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundat	ion; either version 2 of the
+ * published by the Free Software Foundation; either version 2 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
@@ -81,6 +81,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 
+//import org.tzi.mvm.ParamDialogValidator;
 import org.tzi.use.config.Options;
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.gui.main.ModelBrowserSorting;
@@ -103,6 +104,7 @@ import org.tzi.use.gui.views.diagrams.DiagramView.LayoutThread;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.QualifierInputView;
+//import org.tzi.use.kodkod.plugin.gui.ValidatorMVMDialogSimple;
 import org.tzi.use.main.Session;
 import org.tzi.use.parser.ocl.OCLCompiler;
 import org.tzi.use.uml.mm.MAssociation;
@@ -237,6 +239,7 @@ public class WizardMVMView extends JPanel implements View {
 	private JButton btnShowIndividuals;
 	private JButton btnShowCheckStructure;
 	private JButton btnRefreshComponents;
+	private JButton btnViewCmbs;
 
 	private JButton btnActions;
 	private JButton btnSuggestions;
@@ -729,7 +732,7 @@ public class WizardMVMView extends JPanel implements View {
 		panel.add(lbTitleActions);
 
 		btnActions = new JButton("Actions");
-		btnActions.setBounds(10, 384, 90, 60);
+		btnActions.setBounds(10, 384, 95, 60);
 		btnActions.setVerticalAlignment(SwingConstants.CENTER);
 		btnActions.setHorizontalAlignment(SwingConstants.CENTER);
 		btnActions.addActionListener(new ActionListener() {
@@ -759,7 +762,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		btnSuggestions = new JButton("Suggestions");
 		//		btnSuggestions.setBounds(300, 450, 155, 60);
-		btnSuggestions.setBounds(105, 384, 95, 60);
+		btnSuggestions.setBounds(107, 384, 95, 60);
 		btnSuggestions.setVerticalAlignment(SwingConstants.CENTER);
 		btnSuggestions.setHorizontalAlignment(SwingConstants.CENTER);
 		btnSuggestions.addActionListener(new ActionListener() {
@@ -769,8 +772,28 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 		panel.add(btnSuggestions);
+		
+//		btnViewCmbs = new JButton("MSS/MUS");
+//		//		btnSuggestions.setBounds(300, 450, 155, 60);
+//		btnViewCmbs.setBounds(10, 450, 95, 60);
+//		btnViewCmbs.setVerticalAlignment(SwingConstants.CENTER);
+//		btnViewCmbs.setHorizontalAlignment(SwingConstants.CENTER);
+//		btnViewCmbs.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				//				runAnalisis1();
+//				//AQUI2
+////				ParamDialogValidator param = new ParamDialogValidator();
+////				ValidatorMVMDialogSimple validatorMVMDialog= 
+////						new ValidatorMVMDialogSimple(param);	
+////				validatorMVMDialog.setVisible(true);//JG
+//				
+//			}
+//		});
+//		panel.add(btnViewCmbs);		
 
-
+//btnViewCmbs
+		
+		
 		//--- AQUI
 
 		btnReset = new JButton("Reset");
@@ -1061,6 +1084,8 @@ public class WizardMVMView extends JPanel implements View {
 		setResCheckStructure();
 
 	}
+	
+	
 
 	private void runAnalisis1() {
 		try {
