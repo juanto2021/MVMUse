@@ -1,5 +1,6 @@
 package org.tzi.use.gui.mvm;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -61,6 +62,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 		taModelOri.setCaretPosition(0);
 		taModelOri.setEditable(false);
 		taModelOri.setBorder(border);
+		taModelOri.setFont(new Font("Monospaced", Font.PLAIN, 16));
 
 		scrollPaneOri = new JScrollPane(taModelOri);
 		scrollPaneOri.setBounds(15, ROW_TA + 20, WIDTH_TA, HEIGHT_TA);
