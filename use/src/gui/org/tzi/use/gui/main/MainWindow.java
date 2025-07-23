@@ -24,10 +24,13 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Polygon;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -64,6 +67,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -85,6 +89,12 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import org.tzi.kodkod.KodkodModelValidator;
+//import org.tzi.kodkod.EventThreads;
+//import org.tzi.kodkod.KodkodModelValidator;
+//import org.tzi.kodkod.EventThreads.IEventEnded;
+//import org.tzi.kodkod.EventThreads.IEventStarted;
+//import org.tzi.kodkod.EventThreads;
 //import org.tzi.kodkod.model.iface.IModel;
 import org.tzi.use.config.Options;
 import org.tzi.use.config.RecentItems;
@@ -112,6 +122,8 @@ import org.tzi.use.gui.views.diagrams.behavior.shared.VisibleDataManager;
 import org.tzi.use.gui.views.diagrams.classdiagram.ClassDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.statemachine.StateMachineDiagramView;
+import org.tzi.use.kodkod.UseKodkodModelValidator;
+import org.tzi.use.kodkod.plugin.gui.ValidatorMVMDialogSimple;
 import org.tzi.use.main.ChangeEvent;
 import org.tzi.use.main.ChangeListener;
 import org.tzi.use.main.Session;
@@ -146,6 +158,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
+//import org.tzi.kodkod.EventThreads;
 
 import org.json.JSONException;
 
@@ -159,6 +172,11 @@ import org.json.JSONException;
  */
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
+	
+	private KodkodModelValidator fKodkod;
+
+	private JDialog validatorDialog;
+
 	private final Session fSession;
 
 	private final StatusBar fStatusBar;
@@ -201,12 +219,16 @@ public class MainWindow extends JFrame {
 
 	public boolean existDiagram=false;
 	public boolean existWizard=false;
+	public boolean existDialogMVM=false;
 
 	private static final String STATE_EVAL_OCL = "Evaluate OCL expression";
 
 	private PageFormat fPageFormat;
 
 	private static MainWindow fInstance; // global instance of main window
+
+	//	public static EventThreads hiloGreedy;
+	//	public static KodkodModelValidator varKodKod;
 
 	private JMenu recentFilesMenu;
 
@@ -236,6 +258,8 @@ public class MainWindow extends JFrame {
 		}
 		fInstance = this;
 		fSession = session;
+
+		//		UseKodkodModelValidator uk = new UseKodkodModelValidator(session);
 
 		// create toolbar
 		fToolBar = new JToolBar();
@@ -636,6 +660,34 @@ public class MainWindow extends JFrame {
 						});
 					}});
 	}
+
+	// Métodos para acceder al diálogo desde otras clases
+	public JDialog getValidatorDialog() {
+		return validatorDialog;
+	}
+
+	public void setValidatorDialog(JDialog dialog) {
+		this.validatorDialog = dialog;
+		if (wizardMVMView!=null) {
+			wizardMVMView.enableBtnViewCmbs();
+		}
+	}
+	
+	//--
+	// Métodos para acceder al diálogo desde otras clases
+	public KodkodModelValidator getKodKod() {
+		return fKodkod;
+	}
+
+	public void setKodKod(KodkodModelValidator pKodKod) {
+		this.fKodkod = pKodKod;
+//		if (wizardMVMView!=null) {
+//			wizardMVMView.enableBtnViewCmbs();
+//		}
+	}
+	
+	//--
+	
 
 	public void createSequenceDiagram(VisibleDataManager visibleDataManger) {
 		SequenceDiagramView sv = SequenceDiagramView.createSequenceDiagramView(
@@ -1211,6 +1263,22 @@ public class MainWindow extends JFrame {
 
 			Options.getRecentFiles().push(f.toAbsolutePath().toString());
 			wasUsed = true;
+			if (validatorDialog!=null) {
+				validatorDialog.dispose();
+			}
+			validatorDialog = null;
+			//			for (Window window : getWindows()) {
+			//			    if (window instanceof JDialog) {
+			//			        JDialog dialog = (JDialog) window;
+			//			        if ("ValidatorMVMDialogSimple".equals(dialog.getName())) {
+			//			        	remove(dialog);
+			//			            dialog.dispose(); // Cierra el diálogo
+			//			            remove(window);
+			//			            
+			//			            break;
+			//			        }
+			//			    }
+			//			}	
 		}
 
 		protected boolean validateOpenPossible() {
@@ -1285,6 +1353,10 @@ public class MainWindow extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			if (!validateOpenPossible()) return;
 			compile(fileName);
+			if (validatorDialog!=null) {
+				validatorDialog.dispose();
+			}
+			validatorDialog = null;
 		}
 	}
 
@@ -1301,6 +1373,10 @@ public class MainWindow extends JFrame {
 
 			if (file != null) {
 				compile(file);
+				if (validatorDialog!=null) {
+					validatorDialog.dispose();
+				}
+				validatorDialog = null;
 			}
 		}
 	}
@@ -2008,6 +2084,60 @@ public class MainWindow extends JFrame {
 		}
 		return;
 	}
+	//---
+	public Window checkExistDialog() {
+		//		JDialog resD=null;
+		Window resW=null;
+		existDialogMVM=false;
+		Window[] ws = getOwnedWindows();
+		for (Window wItem: ws) {
+			String nameW=wItem.getName();
+			System.out.println ("wItem - nameW " + nameW);
+			if (nameW.equals("ValidatorMVMDialogSimple")) {
+				existDialogMVM=true;
+				resW=wItem;
+				//				ValidatorMVMDialogSimple vMVM = (ValidatorMVMDialogSimple) resW;
+
+				return wItem;
+			}
+			//			if (ifr.getName().equals(NAMEFRAMEMVMWIZARD)) {
+			//				existWizard=true;
+			//			}
+		}
+		return resW;
+	}
+	public JDialog checkExistDialogD() {
+		JDialog resD=null;
+		Window resW=null;
+		existDialogMVM=false;
+		Window[] ws = getOwnedWindows();
+		Window[] ws2 = getOwnerlessWindows();
+		Frame[] allFrames = getFrames();
+		for (Frame fItem:allFrames) {
+			String nameF=fItem.getName();
+			System.out.println ("fItem - nameF " + nameF);
+		}
+		for (Window wItem: ws) {
+			String nameW=wItem.getName();
+			System.out.println ("wItem - nameW " + nameW);
+			if (nameW.equals("ValidatorMVMDialogSimple")) {
+				existDialogMVM=true;
+				resW=wItem;
+				//				ValidatorMVMDialogSimple vMVM = (ValidatorMVMDialogSimple) resW;
+				resD= (JDialog) wItem;
+				//				ValidatorMVMDialogSimple resJ = (ValidatorMVMDialogSimple) wItem;
+				return resD;
+			}
+			//			if (ifr.getName().equals(NAMEFRAMEMVMWIZARD)) {
+			//				existWizard=true;
+			//			}
+		}
+		return resD;
+	}
+
+	//---
+
+
 	private void createObjDiagram() {
 		NewObjectDiagramView odv = new NewObjectDiagramView(this, fSession.system());
 		ViewFrame f = new ViewFrame("Object diagram", odv, "ObjectDiagram.gif");
@@ -2450,13 +2580,14 @@ public class MainWindow extends JFrame {
 	public void destroyMVMWizard() {
 		// Buscar wizard y eliminar
 	}
-	
+
 	public void refreshMVMWizard() {
 		// Buscar wizard y eliminar
 		wizardMVMView.refreshComponents();
+		
 	}
-	
-	
+
+
 
 	/**
 	 * Creates some initial views and tiles them.
@@ -2514,3 +2645,54 @@ public class MainWindow extends JFrame {
 		return new ImageIcon(Options.getIconPath(name).toString());
 	}
 }
+//abstract class EventThreads extends Thread {
+//
+//	private List<IEventStarted> listenersStarted = new ArrayList<>();
+//	private List<IEventEnded> listenersEnded = new ArrayList<>();
+//
+//	public EventThreads() {
+//		this(false);
+//	}
+//
+//	public EventThreads(final boolean isDaemon) {
+//		this.setDaemon(isDaemon);
+//	}
+//
+//	public void run () {
+//		for (IEventStarted o : listenersStarted) {
+//			o.started();
+//		}
+//
+//		operacionesRun();
+//
+//		for (IEventEnded o : listenersEnded) {
+//			o.finalizado();
+//		}
+//	}
+//
+//	public abstract void operacionesRun();
+//
+//	public void addListenerStarted(IEventStarted IEventStarted) {
+//		listenersStarted.add(IEventStarted);
+//	}
+//
+//	public void removeListenerStarted(IEventStarted escuchador) {
+//		listenersStarted.remove(escuchador);
+//	}
+//
+//	public void addListenerEnded(IEventEnded escuchador) {
+//		listenersEnded.add(escuchador);
+//	}
+//
+//	public void removeListenerEnded(IEventEnded escuchador) {
+//		listenersEnded.remove(escuchador);
+//	}
+//
+//	public interface IEventStarted {
+//		void started();
+//	}
+//
+//	public interface IEventEnded {
+//		void finalizado();
+//	}
+//}

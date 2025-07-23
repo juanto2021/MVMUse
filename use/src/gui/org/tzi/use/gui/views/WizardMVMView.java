@@ -23,6 +23,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -34,8 +35,6 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyVetoException;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -66,6 +65,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
@@ -80,8 +80,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
-
-//import org.tzi.mvm.ParamDialogValidator;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.tzi.use.config.Options;
 import org.tzi.use.gui.main.MainWindow;
 import org.tzi.use.gui.main.ModelBrowserSorting;
@@ -104,7 +105,6 @@ import org.tzi.use.gui.views.diagrams.DiagramView.LayoutThread;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.QualifierInputView;
-//import org.tzi.use.kodkod.plugin.gui.ValidatorMVMDialogSimple;
 import org.tzi.use.main.Session;
 import org.tzi.use.parser.ocl.OCLCompiler;
 import org.tzi.use.uml.mm.MAssociation;
@@ -148,16 +148,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-
-//import okhttp3.MediaType;
-//import okhttp3.OkHttpClient;
-//import okhttp3.Request;
-//import okhttp3.RequestBody;
-//import okhttp3.Response;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /** 
  * A view for showing and changing object properties (attributes).
@@ -376,6 +366,7 @@ public class WizardMVMView extends JPanel implements View {
 		super(new BorderLayout());
 		lActions = new ArrayList<MVMAction>();
 		fMainWindow = parent;
+
 		fSession = session;
 		fSystem = session.system();
 		fSystem.registerRequiresAllDerivedValues();
@@ -512,8 +503,8 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 		panel.add(btnNewObjectAuto);
+		
 		// masmas
-
 		btnNewObjectSampleAuto = new JButton("Fill");
 		Font defaultFont = btnNewObjectSampleAuto.getFont();
 		Font smallerFont = defaultFont.deriveFont(defaultFont.getSize() * 0.75f);		
@@ -707,8 +698,6 @@ public class WizardMVMView extends JPanel implements View {
 		scrollPaneAssoc = new JScrollPane();
 		scrollPaneAssoc.setViewportView(lAssocs);
 		scrollPaneAssoc.setBounds(10, 215, 120, 140);
-
-		//		panel.add(lAssocs);
 		panel.add(scrollPaneAssoc);
 
 		btnRefreshComponents = new JButton("Refresh");
@@ -761,7 +750,6 @@ public class WizardMVMView extends JPanel implements View {
 		//---
 
 		btnSuggestions = new JButton("Suggestions");
-		//		btnSuggestions.setBounds(300, 450, 155, 60);
 		btnSuggestions.setBounds(107, 384, 95, 60);
 		btnSuggestions.setVerticalAlignment(SwingConstants.CENTER);
 		btnSuggestions.setHorizontalAlignment(SwingConstants.CENTER);
@@ -772,32 +760,31 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 		panel.add(btnSuggestions);
-		
-//		btnViewCmbs = new JButton("MSS/MUS");
-//		//		btnSuggestions.setBounds(300, 450, 155, 60);
-//		btnViewCmbs.setBounds(10, 450, 95, 60);
-//		btnViewCmbs.setVerticalAlignment(SwingConstants.CENTER);
-//		btnViewCmbs.setHorizontalAlignment(SwingConstants.CENTER);
-//		btnViewCmbs.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				//				runAnalisis1();
-//				//AQUI2
-////				ParamDialogValidator param = new ParamDialogValidator();
-////				ValidatorMVMDialogSimple validatorMVMDialog= 
-////						new ValidatorMVMDialogSimple(param);	
-////				validatorMVMDialog.setVisible(true);//JG
-//				
-//			}
-//		});
-//		panel.add(btnViewCmbs);		
 
-//btnViewCmbs
-		
-		
-		//--- AQUI
+		btnViewCmbs = new JButton("MSS/MUS");
+		//		btnSuggestions.setBounds(300, 450, 155, 60);
+		btnViewCmbs.setBounds(10, 450, 95, 60);
+		btnViewCmbs.setVerticalAlignment(SwingConstants.CENTER);
+		btnViewCmbs.setHorizontalAlignment(SwingConstants.CENTER);
+		btnViewCmbs.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (Window window : MainWindow.getWindows()) {
+					if (window instanceof JDialog) {
+						JDialog dialog = (JDialog) window;
+						if (("ValidatorMVMDialogSimple".equals(dialog.getName()) && fMainWindow.getValidatorDialog() !=null)) {
+							fMainWindow.getValidatorDialog().setVisible(true);
+							break;
+						}
+					}
+				}
+			}
+		});
+
+		btnViewCmbs.setEnabled(fMainWindow.getValidatorDialog()!=null);
+
+		panel.add(btnViewCmbs);		
 
 		btnReset = new JButton("Reset");
-
 		btnReset.setBounds(400, 160, 95, 25);		
 		btnReset.setVerticalAlignment(SwingConstants.CENTER);
 		btnReset.setHorizontalAlignment(SwingConstants.CENTER);
@@ -868,8 +855,6 @@ public class WizardMVMView extends JPanel implements View {
 				MObject oRel = findAssocEnd(oSel);
 				if (oRel!=null) {
 					cmbObjectDes.setSelectedItem(oRel);
-					//				}else {
-					//					//					System.out.println("["+oSel.name()+"] No tiene extremo");
 				}
 			}
 		});
@@ -1020,7 +1005,7 @@ public class WizardMVMView extends JPanel implements View {
 				if (!existWizard) {
 					fMainWindow.showMVMWizard(NAMEFRAMEMVMWIZARD);
 				}
-				//--- aqui0
+
 				searchObjDiagramAssociated();
 				//--
 				if (!existDiagram) {
@@ -1084,8 +1069,8 @@ public class WizardMVMView extends JPanel implements View {
 		setResCheckStructure();
 
 	}
-	
-	
+
+
 
 	private void runAnalisis1() {
 		try {
@@ -1211,15 +1196,10 @@ public class WizardMVMView extends JPanel implements View {
 		System.out.println(blockForOpenAI);
 		System.out.println("--------------------------------------------");	
 
-		//		showResponseOpenAI(blockForOpenAI.toString());
-
 		String json = "{"
 				+ "\"model\": \"gpt-3.5-turbo\","
 				+ "\"messages\": [{\"role\": \"user\", \"content\": " + JSONObject.quote(blockForOpenAI.toString()) + "}]"
 				+ "}";
-
-		//		String json=blockForOpenAI.toString();
-
 		return json;
 
 	}
@@ -1233,17 +1213,13 @@ public class WizardMVMView extends JPanel implements View {
 
 		String filePath = fSystem.model().filename();
 		File file = new File(filePath);
-		String fileName = file.getName(); // devuelve "SchoolManagement.use"
-
-		//		String fileName = fSystem.model().filename();		
+		String fileName = file.getName(); 
 		getErrorsEstructure();
-		// Averiguar como detectar posibles errores
 
-
-		// El error se halla dentro de la variable blockForAssocFailOpenAI
+		// The error is in the variable blockForAssocFailOpenAI
 		int nLinesFail=0;
 		String contenido = blockForAssocFailOpenAI.toString();
-		String[] lineas = contenido.split("\\R"); // "\\R" captura cualquier tipo de salto de línea (\r\n, \n, \r)
+		String[] lineas = contenido.split("\\R"); // "\\R" captures any type of line break (\r\n, \n, \r)
 		nLinesFail= lineas.length;
 		boolean ErrorsExist=nLinesFail > 2;
 
@@ -1253,7 +1229,7 @@ public class WizardMVMView extends JPanel implements View {
 				+"- List of objects and links" + LF);		
 		blockForOpenAI.append(System.lineSeparator());
 
-		// Si hay errores de extructura
+		// If there are structural errors
 		if (ErrorsExist) {
 			blockForOpenAI.append("- Errors detected in association links" + LF);
 		}
@@ -1270,8 +1246,6 @@ public class WizardMVMView extends JPanel implements View {
 		}
 
 		blockForOpenAI.append(contentModel);
-		//		blockForAssocFailOpenAI=buffer.toString
-
 		blockForOpenAI.append(System.lineSeparator());
 		blockForOpenAI.append("I have these objects with these invariants where some are true and others are not: " + LF);
 		blockForOpenAI.append(System.lineSeparator());
@@ -1310,16 +1284,12 @@ public class WizardMVMView extends JPanel implements View {
 
 		blockForOpenAI.append(System.lineSeparator());
 		blockForOpenAI.append(System.lineSeparator());
-		//		blockForOpenAI.append("Please provide the output as a  JSON format with a textual explanation of what the problem is"
-		//				+ " and what elements it is in." + LF
-		//				+ "It also indicates where there are consistency issues." + LF
-		//				+ "Leave this explanation in a tag named \"contentProblem\"" + LF);
-
 		blockForOpenAI.append("Please provide the result in JSON format with only two tags:" + LF
 				+ "\"contentProblem\" tag for a textual explanation of the problem and its elements,"
 				+ " indicating where there are consistency issues." + LF
 				+ "\"contentSolution\" tag to provide a textual explanation for correcting the problems,"
-				+ " detailing which objects, attributes, and links need to be created or modified."
+				+ " detailing which objects, attributes and links need to be created,  modified or deleted, or, alternatively,"
+				+ "which invariants need to be rewritten.\r\n"
 				+ "Introduce a line break for each object or link you explain.");
 
 		System.out.println("--------------------------------------------");
@@ -1346,11 +1316,10 @@ public class WizardMVMView extends JPanel implements View {
 			JSONObject message = firstChoice.getJSONObject("message");
 			String innerContent = message.getString("content");
 
-			// Ahora 'innerContent' es otro JSON con campo 'content'
+			// Now 'innerContent' is another JSON with field 'content'
 			JSONObject innerJson = new JSONObject(innerContent);
 			result=innerJson.getString("content");
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -1700,7 +1669,13 @@ public class WizardMVMView extends JPanel implements View {
 			}
 			storeAction("CL", "Creation link ["+oClassAssocEnd.name()+"] - ["+oOri.name()+"]/["+oDes.name()+"]");
 		}
+		//		JDialog v = fMainWindow.getValidatorDialog();
+		btnViewCmbs.setEnabled(fMainWindow.getValidatorDialog()!=null);
 	}
+	public void enableBtnViewCmbs(){
+		btnViewCmbs.setEnabled(fMainWindow.getValidatorDialog()!=null);
+	}
+
 	/**
 	 * Searches for object corresponding to the end of an association
 	 * @param oFindAssoc
