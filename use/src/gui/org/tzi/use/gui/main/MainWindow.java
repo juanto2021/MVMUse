@@ -173,7 +173,7 @@ import org.json.JSONException;
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
 	
-	private KodkodModelValidator fKodkod;
+	private UseKodkodModelValidator fKodkod;
 
 	private JDialog validatorDialog;
 
@@ -675,11 +675,11 @@ public class MainWindow extends JFrame {
 	
 	//--
 	// Métodos para acceder al diálogo desde otras clases
-	public KodkodModelValidator getKodKod() {
+	public UseKodkodModelValidator getKodKod() {
 		return fKodkod;
 	}
 
-	public void setKodKod(KodkodModelValidator pKodKod) {
+	public void setKodKod(UseKodkodModelValidator pKodKod) {
 		this.fKodkod = pKodKod;
 //		if (wizardMVMView!=null) {
 //			wizardMVMView.enableBtnViewCmbs();
