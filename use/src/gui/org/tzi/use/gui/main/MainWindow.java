@@ -90,12 +90,6 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import org.tzi.kodkod.KodkodModelValidator;
-//import org.tzi.kodkod.EventThreads;
-//import org.tzi.kodkod.KodkodModelValidator;
-//import org.tzi.kodkod.EventThreads.IEventEnded;
-//import org.tzi.kodkod.EventThreads.IEventStarted;
-//import org.tzi.kodkod.EventThreads;
-//import org.tzi.kodkod.model.iface.IModel;
 import org.tzi.use.config.Options;
 import org.tzi.use.config.RecentItems;
 import org.tzi.use.config.RecentItems.RecentItemsObserver;
@@ -158,8 +152,6 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
-//import org.tzi.kodkod.EventThreads;
-
 import org.json.JSONException;
 
 /**
@@ -227,9 +219,6 @@ public class MainWindow extends JFrame {
 
 	private static MainWindow fInstance; // global instance of main window
 
-	//	public static EventThreads hiloGreedy;
-	//	public static KodkodModelValidator varKodKod;
-
 	private JMenu recentFilesMenu;
 
 	private JButton addToToolBar(JToolBar toolBar, AbstractAction action, String toolTip) {
@@ -258,8 +247,6 @@ public class MainWindow extends JFrame {
 		}
 		fInstance = this;
 		fSession = session;
-
-		//		UseKodkodModelValidator uk = new UseKodkodModelValidator(session);
 
 		// create toolbar
 		fToolBar = new JToolBar();
@@ -1267,18 +1254,14 @@ public class MainWindow extends JFrame {
 				validatorDialog.dispose();
 			}
 			validatorDialog = null;
-			//			for (Window window : getWindows()) {
-			//			    if (window instanceof JDialog) {
-			//			        JDialog dialog = (JDialog) window;
-			//			        if ("ValidatorMVMDialogSimple".equals(dialog.getName())) {
-			//			        	remove(dialog);
-			//			            dialog.dispose(); // Cierra el diálogo
-			//			            remove(window);
-			//			            
-			//			            break;
-			//			        }
-			//			    }
-			//			}	
+
+			// Si hay un hilo en ejecución, lo para
+			// Ver kod
+			if (fKodkod != null) {
+				fKodkod.stopThreadCmb();
+			}
+			
+			
 		}
 
 		protected boolean validateOpenPossible() {
