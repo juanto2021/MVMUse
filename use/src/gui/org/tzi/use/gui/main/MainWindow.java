@@ -51,6 +51,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -164,7 +165,7 @@ import org.json.JSONException;
  */
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
-	
+
 	private UseKodkodModelValidator fKodkod;
 
 	private JDialog validatorDialog;
@@ -659,7 +660,7 @@ public class MainWindow extends JFrame {
 			wizardMVMView.enableBtnViewCmbs();
 		}
 	}
-	
+
 	//--
 	// Métodos para acceder al diálogo desde otras clases
 	public UseKodkodModelValidator getKodKod() {
@@ -668,13 +669,13 @@ public class MainWindow extends JFrame {
 
 	public void setKodKod(UseKodkodModelValidator pKodKod) {
 		this.fKodkod = pKodKod;
-//		if (wizardMVMView!=null) {
-//			wizardMVMView.enableBtnViewCmbs();
-//		}
+		//		if (wizardMVMView!=null) {
+		//			wizardMVMView.enableBtnViewCmbs();
+		//		}
 	}
-	
+
 	//--
-	
+
 
 	public void createSequenceDiagram(VisibleDataManager visibleDataManger) {
 		SequenceDiagramView sv = SequenceDiagramView.createSequenceDiagramView(
@@ -1260,8 +1261,8 @@ public class MainWindow extends JFrame {
 			if (fKodkod != null) {
 				fKodkod.stopThreadCmb();
 			}
-			
-			
+
+
 		}
 
 		protected boolean validateOpenPossible() {
@@ -2567,7 +2568,7 @@ public class MainWindow extends JFrame {
 	public void refreshMVMWizard() {
 		// Buscar wizard y eliminar
 		wizardMVMView.refreshComponents();
-		
+
 	}
 
 
