@@ -605,7 +605,81 @@ public class MainWindow extends JFrame {
 				}
 			}
 		}
+//--- AQUI
+		String targetId = "StopCalcCmb";
+//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
+//			Map<String, String> keyMap = entry.getKey();
+//			PluginActionProxy action = entry.getValue();
+//
+//			if (keyMap.containsValue(targetId)) {
+//				action.setEnabled(false); // o true para activarla
+//				break;
+//			}
+//		}
+//
+//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
+//			Map<String, String> actionInfo = entry.getKey();
+//
+//			for (Map.Entry<String, String> infoEntry : actionInfo.entrySet()) {
+//				String key = infoEntry.getKey();
+//				String value = infoEntry.getValue();
+//				System.out.println("Clave: " + key + " → Valor: " + value);
+//				if (value.equals(targetId)) {
+//					PluginActionProxy action = entry.getValue();
+//					action.setEnabled(false);  // o true para habilitar
+//					System.out.println("Desactivada la acción: " + targetId);
+//					break;
+//				}
+//			}
+//		}
 
+//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
+//		    Map<String, String> actionInfo = entry.getKey();
+//
+//		    for (Map.Entry<String, String> infoEntry : actionInfo.entrySet()) {
+//		        String key = infoEntry.getKey();
+//		        String value = infoEntry.getValue();
+//		        // Puedes imprimir todo si necesitas depurar
+//		        System.out.println("Clave: " + key + " → Valor: " + value);
+//
+//		        if (key.equals("menuitem") && value.equals("StopCalcCmb")) {
+//		            PluginActionProxy action = entry.getValue();
+//		            action.setEnabled(false);  // o true para habilitar
+//		            System.out.println("Desactivada la acción con ID: " + targetId);
+//		            break;
+//		        }
+//		    }
+//		}
+		
+		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
+		    Map<String, String> actionInfo = entry.getKey();
+		    String menuItem = actionInfo.get("menuitem");
+
+		    if ("StopCalcCmb".equals(menuItem)) {
+		        PluginActionProxy action = entry.getValue();
+		        System.out.println("Desactivando acción: " + menuItem);
+
+		        action.setEnabled(false); // Esto desactiva la acción
+		    }
+		}
+		
+//		String targetMenuItem = "StopCalcCmb";
+//
+//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
+//		    Map<String, String> actionInfo = entry.getKey();
+//
+//		    // Comprobamos si la clave "menuitem" existe y si su valor es el que buscamos
+//		    if (targetMenuItem.equals(actionInfo.get("menuitem"))) {
+//		        PluginActionProxy action = entry.getValue();
+//		        action.setEnabled(false);  // Desactiva la acción
+//		        System.out.println("Acción desactivada: " + targetMenuItem);
+//		        break;
+//		    }
+//		}
+		
+		
+//---		
+		
 		// -- GUI Plugin integration (end)
 
 		// `Help' submenu
