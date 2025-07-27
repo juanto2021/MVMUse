@@ -62,6 +62,7 @@ import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
+import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -85,11 +86,13 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import org.tzi.kodkod.EventThreads;
 import org.tzi.kodkod.KodkodModelValidator;
 import org.tzi.use.config.Options;
 import org.tzi.use.config.RecentItems;
@@ -127,6 +130,7 @@ import org.tzi.use.main.runtime.IRuntime;
 import org.tzi.use.main.shell.Shell;
 import org.tzi.use.parser.use.USECompiler;
 import org.tzi.use.runtime.gui.impl.PluginActionProxy;
+import org.tzi.use.runtime.util.ActionRegistry;
 import org.tzi.use.uml.mm.MClass;
 import org.tzi.use.uml.mm.MModel;
 import org.tzi.use.uml.mm.ModelFactory;
@@ -605,81 +609,27 @@ public class MainWindow extends JFrame {
 				}
 			}
 		}
-//--- AQUI
-		String targetId = "StopCalcCmb";
-//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
-//			Map<String, String> keyMap = entry.getKey();
-//			PluginActionProxy action = entry.getValue();
-//
-//			if (keyMap.containsValue(targetId)) {
-//				action.setEnabled(false); // o true para activarla
-//				break;
-//			}
-//		}
-//
-//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
-//			Map<String, String> actionInfo = entry.getKey();
-//
-//			for (Map.Entry<String, String> infoEntry : actionInfo.entrySet()) {
-//				String key = infoEntry.getKey();
-//				String value = infoEntry.getValue();
-//				System.out.println("Clave: " + key + " → Valor: " + value);
-//				if (value.equals(targetId)) {
-//					PluginActionProxy action = entry.getValue();
-//					action.setEnabled(false);  // o true para habilitar
-//					System.out.println("Desactivada la acción: " + targetId);
-//					break;
-//				}
-//			}
-//		}
+		//--- AQUI
+		//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
+		//			Map<String, String> actionInfo = entry.getKey();
+		//			String menuItem = actionInfo.get("menuitem");
+		//			System.out.println("menuitem "+menuItem);
+		//			if ("StopCalcCmb".equals(menuItem)) {
+		//				for (Component comp : fToolBar.getComponents()) {
+		//					if (comp instanceof JButton) {
+		//						JButton btn = (JButton) comp;
+		//						System.out.println("tooltip: [" + btn.getToolTipText()+"]");
+		//						if ("Test to stop calculating combinations.".equals(btn.getToolTipText())) {
+		//							// Lo encontraste — puedes desactivarlo o cambiar su icono
+		//							btn.setEnabled(false);
+		//							btn.setDisabledIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/stopCmb_disabled.png")));
+		//						}
+		//					}
+		//				}
+		//			}
+		//		}
+		//---		
 
-//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
-//		    Map<String, String> actionInfo = entry.getKey();
-//
-//		    for (Map.Entry<String, String> infoEntry : actionInfo.entrySet()) {
-//		        String key = infoEntry.getKey();
-//		        String value = infoEntry.getValue();
-//		        // Puedes imprimir todo si necesitas depurar
-//		        System.out.println("Clave: " + key + " → Valor: " + value);
-//
-//		        if (key.equals("menuitem") && value.equals("StopCalcCmb")) {
-//		            PluginActionProxy action = entry.getValue();
-//		            action.setEnabled(false);  // o true para habilitar
-//		            System.out.println("Desactivada la acción con ID: " + targetId);
-//		            break;
-//		        }
-//		    }
-//		}
-		
-		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
-		    Map<String, String> actionInfo = entry.getKey();
-		    String menuItem = actionInfo.get("menuitem");
-
-		    if ("StopCalcCmb".equals(menuItem)) {
-		        PluginActionProxy action = entry.getValue();
-		        System.out.println("Desactivando acción: " + menuItem);
-
-		        action.setEnabled(false); // Esto desactiva la acción
-		    }
-		}
-		
-//		String targetMenuItem = "StopCalcCmb";
-//
-//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
-//		    Map<String, String> actionInfo = entry.getKey();
-//
-//		    // Comprobamos si la clave "menuitem" existe y si su valor es el que buscamos
-//		    if (targetMenuItem.equals(actionInfo.get("menuitem"))) {
-//		        PluginActionProxy action = entry.getValue();
-//		        action.setEnabled(false);  // Desactiva la acción
-//		        System.out.println("Acción desactivada: " + targetMenuItem);
-//		        break;
-//		    }
-//		}
-		
-		
-//---		
-		
 		// -- GUI Plugin integration (end)
 
 		// `Help' submenu
@@ -721,6 +671,52 @@ public class MainWindow extends JFrame {
 							}
 						});
 					}});
+
+		//--- AQUI
+		//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
+		//			Map<String, String> actionInfo = entry.getKey();
+		//			String menuItem = actionInfo.get("menuitem");
+		//			System.out.println("menuitem "+menuItem);
+		//			if ("StopCalcCmb".equals(menuItem)) {
+		//				for (Component comp : fToolBar.getComponents()) {
+		//					if (comp instanceof JButton) {
+		//						JButton btn = (JButton) comp;
+		//						System.out.println("tooltip: [" + btn.getToolTipText()+"]");
+		//						if ("Test to stop calculating combinations.".equals(btn.getToolTipText())) {
+		//							// Lo encontraste — puedes desactivarlo o cambiar su icono
+		//							btn.setEnabled(false);
+		////							btn.setDisabledIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/stopCmb_disabled.png")));
+		//						}
+		//					}
+		//				}
+		//			}
+		//		}
+		enableAction("StopCalcCmb","stopCmb", false);
+		//---	
+
+	}
+	public void enableAction(String nameAction, String nameIcon,boolean bEnabled) {
+		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
+			Map<String, String> actionInfo = entry.getKey();
+			String menuItem = actionInfo.get("menuitem");
+			System.out.println("menuitem "+menuItem);
+			if (nameAction.equals(menuItem)) {
+				for (Component comp : fToolBar.getComponents()) {
+					if (comp instanceof JButton) {
+						JButton btn = (JButton) comp;
+						String name = btn.getIcon().toString();
+						System.out.println("name: [" + name+"]");
+						System.out.println("tooltip: [" + btn.getToolTipText()+"]");
+						//						if ("Stop calculating combinations".equals(btn.getToolTipText())) {
+						if (name.contains(nameIcon)) {
+							// Lo encontraste — puedes desactivarlo o cambiar su icono
+							btn.setEnabled(bEnabled);
+							//							btn.setDisabledIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/stopCmb_disabled.png")));
+						}
+					}
+				}
+			}
+		}
 	}
 
 	// Métodos para acceder al diálogo desde otras clases
@@ -1304,6 +1300,27 @@ public class MainWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (!validateOpenPossible()) return;
+			//AQUI
+			EventThreads threadGreedy = fKodkod.getThreadGreedy();
+			if (fKodkod != null && threadGreedy != null) {
+				int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
+						"Do you really want to stop the current calculation?",
+						"Confirm Stop",
+						JOptionPane.YES_NO_OPTION,
+						JOptionPane.QUESTION_MESSAGE);
+
+				if (respuesta == JOptionPane.YES_OPTION) {
+					// Si hay un hilo en ejecución, lo para
+					// Ver kod y fthread AQQUI
+					if (fKodkod != null) {
+						fKodkod.stopThreadCmb();
+					}
+					enableAction("StopCalcCmb","stopCmb", false);
+				}else {
+					return;
+				}
+			}
+
 
 			JFileChooser fChooser = new JFileChooser(Options.getLastDirectory().toFile());
 			ExtFileFilter filter = new ExtFileFilter("use", "USE specifications");
@@ -1330,12 +1347,24 @@ public class MainWindow extends JFrame {
 			}
 			validatorDialog = null;
 
-			// Si hay un hilo en ejecución, lo para
-			// Ver kod
-			if (fKodkod != null) {
-				fKodkod.stopThreadCmb();
-			}
-
+//			if (fKodkod != null) {
+//				int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
+//						"Do you really want to stop the current calculation?",
+//						"Confirm Stop",
+//						JOptionPane.YES_NO_OPTION,
+//						JOptionPane.QUESTION_MESSAGE);
+//
+//				if (respuesta == JOptionPane.YES_OPTION) {
+//					// Si hay un hilo en ejecución, lo para
+//					// Ver kod
+//					if (fKodkod != null) {
+//						fKodkod.stopThreadCmb();
+//					}
+//					enableAction("StopCalcCmb","stopCmb", false);
+//				}else {
+//					return;
+//				}
+//			}
 
 		}
 
@@ -1410,11 +1439,49 @@ public class MainWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (!validateOpenPossible()) return;
+			EventThreads threadGreedy = fKodkod.getThreadGreedy();
+			if (fKodkod != null && threadGreedy != null) {
+				int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
+						"Do you really want to stop the current calculation?",
+						"Confirm Stop",
+						JOptionPane.YES_NO_OPTION,
+						JOptionPane.QUESTION_MESSAGE);
+
+				if (respuesta == JOptionPane.YES_OPTION) {
+					// Si hay un hilo en ejecución, lo para
+					// Ver kod
+					if (fKodkod != null) {
+						fKodkod.stopThreadCmb();
+					}
+					enableAction("StopCalcCmb","stopCmb", false);
+				}else {
+					return;
+				}
+			}
+			
 			compile(fileName);
+			
 			if (validatorDialog!=null) {
 				validatorDialog.dispose();
 			}
 			validatorDialog = null;
+//			if (fKodkod != null) {
+//				int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
+//						"Do you really want to stop the current calculation?",
+//						"Confirm Stop",
+//						JOptionPane.YES_NO_OPTION,
+//						JOptionPane.QUESTION_MESSAGE);
+//
+//				if (respuesta == JOptionPane.YES_OPTION) {
+//					// Si hay un hilo en ejecución, lo para
+//					// Ver kod
+//					if (fKodkod != null) {
+//						fKodkod.stopThreadCmb();
+//					}
+//					enableAction("StopCalcCmb","stopCmb", false);
+//				}
+//			}
+
 		}
 	}
 
