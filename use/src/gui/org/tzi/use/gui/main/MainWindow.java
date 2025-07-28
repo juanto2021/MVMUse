@@ -117,6 +117,7 @@ import org.tzi.use.gui.views.diagrams.classdiagram.ClassDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.statemachine.StateMachineDiagramView;
 import org.tzi.use.kodkod.UseKodkodModelValidator;
+import org.tzi.use.kodkod.plugin.gui.ValidatorMVMDialogSimple;
 import org.tzi.use.main.ChangeEvent;
 import org.tzi.use.main.ChangeListener;
 import org.tzi.use.main.Session;
@@ -165,7 +166,9 @@ public class MainWindow extends JFrame {
 
 	private UseKodkodModelValidator fKodkod;
 
-	private JDialog validatorDialog;
+	//	private JDialog validatorDialog;
+
+	private ValidatorMVMDialogSimple validatorDialog;
 
 	private final Session fSession;
 
@@ -696,16 +699,31 @@ public class MainWindow extends JFrame {
 	}
 
 	// Methods to access the dialog from other classes
-	public JDialog getValidatorDialog() {
+	//	public JDialog getValidatorDialog() {
+	//		return validatorDialog;
+	//	}
+	//
+	//	public void setValidatorDialog(JDialog dialog) {
+	//		this.validatorDialog = dialog;
+	//		if (wizardMVMView!=null) {
+	//			wizardMVMView.enableBtnViewCmbs();
+	//		}
+	//	}
+
+	//---
+	public ValidatorMVMDialogSimple getValidatorDialog() {
 		return validatorDialog;
 	}
 
-	public void setValidatorDialog(JDialog dialog) {
+	public void setValidatorDialog(ValidatorMVMDialogSimple dialog) {
 		this.validatorDialog = dialog;
 		if (wizardMVMView!=null) {
 			wizardMVMView.enableBtnViewCmbs();
 		}
 	}
+
+
+	//---
 
 	// Métodos para acceder al diálogo desde otras clases
 	public UseKodkodModelValidator getKodKod() {
@@ -1270,23 +1288,27 @@ public class MainWindow extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			if (!validateOpenPossible()) return;
 			//AQUI
-			EventThreads threadGreedy = fKodkod.getThreadGreedy();
-			if (fKodkod != null && threadGreedy != null) {
-				int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
-						"Do you really want to stop the current calculation?",
-						"Confirm Stop",
-						JOptionPane.YES_NO_OPTION,
-						JOptionPane.QUESTION_MESSAGE);
 
-				if (respuesta == JOptionPane.YES_OPTION) {
-					// Si hay un hilo en ejecución, lo para
-					// Ver kod y fthread AQQUI
-					if (fKodkod != null) {
-						fKodkod.stopThreadCmb();
+			if (fKodkod != null) {
+
+				EventThreads threadGreedy = fKodkod.getThreadGreedy();
+				if (threadGreedy != null) {
+					int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
+							"Do you really want to stop the current calculation?",
+							"Confirm Stop",
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE);
+
+					if (respuesta == JOptionPane.YES_OPTION) {
+						// Si hay un hilo en ejecución, lo para
+						// Ver kod y fthread AQQUI
+						if (fKodkod != null) {
+							fKodkod.stopThreadCmb();
+						}
+						enableAction("StopCalcCmb", false);
+					}else {
+						return;
 					}
-					enableAction("StopCalcCmb", false);
-				}else {
-					return;
 				}
 			}
 
@@ -1330,9 +1352,9 @@ public class MainWindow extends JFrame {
 				return true;
 			}
 		}
-//		public void launchCompile( Path f){
-//			compile(f);
-//		}
+		//		public void launchCompile( Path f){
+		//			compile(f);
+		//		}
 
 		protected boolean compile(final Path f) {
 			fLogPanel.clear();
@@ -2163,7 +2185,7 @@ public class MainWindow extends JFrame {
 		Window resW=null;
 		existDialogMVM=false;
 		Window[] ws = getOwnedWindows();
-//		Window[] ws2 = getOwnerlessWindows();
+		//		Window[] ws2 = getOwnerlessWindows();
 		Frame[] allFrames = getFrames();
 		for (Frame fItem:allFrames) {
 			String nameF=fItem.getName();
@@ -2183,33 +2205,33 @@ public class MainWindow extends JFrame {
 	}
 
 
-//	private void createObjDiagram() {
-//		NewObjectDiagramView odv = new NewObjectDiagramView(this, fSession.system());
-//		ViewFrame f = new ViewFrame("Object diagram", odv, "ObjectDiagram.gif");
-//		f.setName(NAMEFRAMEMVMDIAGRAM);
-//
-//		int OBJECTS_LARGE_SYSTEM = 100;
-//
-//		// Many objects. Ask user if all objects should be hidden
-//		if (fSession.system().state().allObjects().size() > OBJECTS_LARGE_SYSTEM) {
-//
-//			int option = JOptionPane.showConfirmDialog(new JPanel(),
-//					"The current system state contains more then " + OBJECTS_LARGE_SYSTEM + " instances." +
-//							"This can slow down the object diagram.\r\nDo you want to start with an empty object diagram?",
-//							"Large system state", JOptionPane.YES_NO_OPTION);
-//
-//			if (option == JOptionPane.YES_OPTION) {
-//				odv.getDiagram().hideAll();
-//			}
-//		}
-//
-//		JComponent c = (JComponent) f.getContentPane();
-//		c.setLayout(new BorderLayout());
-//		c.add(odv, BorderLayout.CENTER);
-//		this.addNewViewFrame(f);
-//		this.getObjectDiagrams().add(odv);
-//
-//	}
+	//	private void createObjDiagram() {
+	//		NewObjectDiagramView odv = new NewObjectDiagramView(this, fSession.system());
+	//		ViewFrame f = new ViewFrame("Object diagram", odv, "ObjectDiagram.gif");
+	//		f.setName(NAMEFRAMEMVMDIAGRAM);
+	//
+	//		int OBJECTS_LARGE_SYSTEM = 100;
+	//
+	//		// Many objects. Ask user if all objects should be hidden
+	//		if (fSession.system().state().allObjects().size() > OBJECTS_LARGE_SYSTEM) {
+	//
+	//			int option = JOptionPane.showConfirmDialog(new JPanel(),
+	//					"The current system state contains more then " + OBJECTS_LARGE_SYSTEM + " instances." +
+	//							"This can slow down the object diagram.\r\nDo you want to start with an empty object diagram?",
+	//							"Large system state", JOptionPane.YES_NO_OPTION);
+	//
+	//			if (option == JOptionPane.YES_OPTION) {
+	//				odv.getDiagram().hideAll();
+	//			}
+	//		}
+	//
+	//		JComponent c = (JComponent) f.getContentPane();
+	//		c.setLayout(new BorderLayout());
+	//		c.add(odv, BorderLayout.CENTER);
+	//		this.addNewViewFrame(f);
+	//		this.getObjectDiagrams().add(odv);
+	//
+	//	}
 	/**
 	 * Creates a new object diagram view.
 	 */
@@ -2272,7 +2294,7 @@ public class MainWindow extends JFrame {
 	}
 
 	public void doActionViewTile() {
-//		ActionViewTile fActionViewTileMVM = new ActionViewTile();
+		//		ActionViewTile fActionViewTileMVM = new ActionViewTile();
 		ActionViewTile fActionViewTile = new ActionViewTile();
 
 		int uniqueId = (int) System.currentTimeMillis();
