@@ -29,7 +29,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Polygon;
-import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -51,7 +50,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -86,14 +84,12 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import org.tzi.kodkod.EventThreads;
-import org.tzi.kodkod.KodkodModelValidator;
 import org.tzi.use.config.Options;
 import org.tzi.use.config.RecentItems;
 import org.tzi.use.config.RecentItems.RecentItemsObserver;
@@ -121,7 +117,6 @@ import org.tzi.use.gui.views.diagrams.classdiagram.ClassDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.statemachine.StateMachineDiagramView;
 import org.tzi.use.kodkod.UseKodkodModelValidator;
-import org.tzi.use.kodkod.plugin.gui.ValidatorMVMDialogSimple;
 import org.tzi.use.main.ChangeEvent;
 import org.tzi.use.main.ChangeListener;
 import org.tzi.use.main.Session;
@@ -130,7 +125,6 @@ import org.tzi.use.main.runtime.IRuntime;
 import org.tzi.use.main.shell.Shell;
 import org.tzi.use.parser.use.USECompiler;
 import org.tzi.use.runtime.gui.impl.PluginActionProxy;
-import org.tzi.use.runtime.util.ActionRegistry;
 import org.tzi.use.uml.mm.MClass;
 import org.tzi.use.uml.mm.MModel;
 import org.tzi.use.uml.mm.ModelFactory;
@@ -157,7 +151,6 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
-import org.json.JSONException;
 
 /**
  * The main application window of USE.
@@ -609,26 +602,6 @@ public class MainWindow extends JFrame {
 				}
 			}
 		}
-		//--- AQUI
-		//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
-		//			Map<String, String> actionInfo = entry.getKey();
-		//			String menuItem = actionInfo.get("menuitem");
-		//			System.out.println("menuitem "+menuItem);
-		//			if ("StopCalcCmb".equals(menuItem)) {
-		//				for (Component comp : fToolBar.getComponents()) {
-		//					if (comp instanceof JButton) {
-		//						JButton btn = (JButton) comp;
-		//						System.out.println("tooltip: [" + btn.getToolTipText()+"]");
-		//						if ("Test to stop calculating combinations.".equals(btn.getToolTipText())) {
-		//							// Lo encontraste — puedes desactivarlo o cambiar su icono
-		//							btn.setEnabled(false);
-		//							btn.setDisabledIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/stopCmb_disabled.png")));
-		//						}
-		//					}
-		//				}
-		//			}
-		//		}
-		//---		
 
 		// -- GUI Plugin integration (end)
 
@@ -670,48 +643,51 @@ public class MainWindow extends JFrame {
 								setUndoRedoButtons();
 							}
 						});
-					}});
+					}
+				});
 
-		//--- AQUI
-		//		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
-		//			Map<String, String> actionInfo = entry.getKey();
-		//			String menuItem = actionInfo.get("menuitem");
-		//			System.out.println("menuitem "+menuItem);
-		//			if ("StopCalcCmb".equals(menuItem)) {
-		//				for (Component comp : fToolBar.getComponents()) {
-		//					if (comp instanceof JButton) {
-		//						JButton btn = (JButton) comp;
-		//						System.out.println("tooltip: [" + btn.getToolTipText()+"]");
-		//						if ("Test to stop calculating combinations.".equals(btn.getToolTipText())) {
-		//							// Lo encontraste — puedes desactivarlo o cambiar su icono
-		//							btn.setEnabled(false);
-		////							btn.setDisabledIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/stopCmb_disabled.png")));
-		//						}
-		//					}
-		//				}
-		//			}
-		//		}
-		enableAction("StopCalcCmb","stopCmb", false);
-		//---	
+		enableAction("StopCalcCmb", false);
 
 	}
-	public void enableAction(String nameAction, String nameIcon,boolean bEnabled) {
+	public void enableAction(String nameAction, boolean bEnabled) {
 		for (Map.Entry<Map<String, String>, PluginActionProxy> entry : pluginActions.entrySet()) {
 			Map<String, String> actionInfo = entry.getKey();
+
 			String menuItem = actionInfo.get("menuitem");
-			System.out.println("menuitem "+menuItem);
 			if (nameAction.equals(menuItem)) {
 				for (Component comp : fToolBar.getComponents()) {
 					if (comp instanceof JButton) {
 						JButton btn = (JButton) comp;
-						String name = btn.getIcon().toString();
-						System.out.println("name: [" + name+"]");
-						System.out.println("tooltip: [" + btn.getToolTipText()+"]");
-						//						if ("Stop calculating combinations".equals(btn.getToolTipText())) {
-						if (name.contains(nameIcon)) {
-							// Lo encontraste — puedes desactivarlo o cambiar su icono
+						Action ac = btn.getAction();
+						Object oa = ac.getValue("Name");
+						String name = oa.toString();
+						if (name.equals(nameAction)) {
 							btn.setEnabled(bEnabled);
-							//							btn.setDisabledIcon(new ImageIcon(getClass().getClassLoader().getResource("resources/stopCmb_disabled.png")));
+						}
+					}
+				}
+
+				for (int i = 0; i < fMenuBar.getMenuCount(); i++) {
+					JMenu menu = fMenuBar.getMenu(i);
+					if (menu != null) {
+						String name = menu.getText();
+						for (int j = 0; j < menu.getItemCount(); j++) {
+							JMenuItem item = menu.getItem(j);
+							if (item!=null) {
+								String nameItem = item.getText();
+								if (nameItem.equals("ValidationMVM")) {
+									JMenu menuMVM = (JMenu) item;
+									for (int k = 0; k < menuMVM.getItemCount(); k++) {
+										JMenuItem itemMVM = menuMVM.getItem(k);
+										if (itemMVM!=null) {
+											String nameItemMVM = itemMVM.getText();
+											if (nameItemMVM.equals(nameAction)) {
+												itemMVM.setEnabled(bEnabled); // o cualquier otra acción
+											}				
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -719,7 +695,7 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	// Métodos para acceder al diálogo desde otras clases
+	// Methods to access the dialog from other classes
 	public JDialog getValidatorDialog() {
 		return validatorDialog;
 	}
@@ -731,7 +707,6 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	//--
 	// Métodos para acceder al diálogo desde otras clases
 	public UseKodkodModelValidator getKodKod() {
 		return fKodkod;
@@ -739,13 +714,7 @@ public class MainWindow extends JFrame {
 
 	public void setKodKod(UseKodkodModelValidator pKodKod) {
 		this.fKodkod = pKodKod;
-		//		if (wizardMVMView!=null) {
-		//			wizardMVMView.enableBtnViewCmbs();
-		//		}
 	}
-
-	//--
-
 
 	public void createSequenceDiagram(VisibleDataManager visibleDataManger) {
 		SequenceDiagramView sv = SequenceDiagramView.createSequenceDiagramView(
@@ -1315,7 +1284,7 @@ public class MainWindow extends JFrame {
 					if (fKodkod != null) {
 						fKodkod.stopThreadCmb();
 					}
-					enableAction("StopCalcCmb","stopCmb", false);
+					enableAction("StopCalcCmb", false);
 				}else {
 					return;
 				}
@@ -1346,26 +1315,6 @@ public class MainWindow extends JFrame {
 				validatorDialog.dispose();
 			}
 			validatorDialog = null;
-
-//			if (fKodkod != null) {
-//				int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
-//						"Do you really want to stop the current calculation?",
-//						"Confirm Stop",
-//						JOptionPane.YES_NO_OPTION,
-//						JOptionPane.QUESTION_MESSAGE);
-//
-//				if (respuesta == JOptionPane.YES_OPTION) {
-//					// Si hay un hilo en ejecución, lo para
-//					// Ver kod
-//					if (fKodkod != null) {
-//						fKodkod.stopThreadCmb();
-//					}
-//					enableAction("StopCalcCmb","stopCmb", false);
-//				}else {
-//					return;
-//				}
-//			}
-
 		}
 
 		protected boolean validateOpenPossible() {
@@ -1381,9 +1330,9 @@ public class MainWindow extends JFrame {
 				return true;
 			}
 		}
-		public void launchCompile( Path f){
-			compile(f);
-		}
+//		public void launchCompile( Path f){
+//			compile(f);
+//		}
 
 		protected boolean compile(final Path f) {
 			fLogPanel.clear();
@@ -1453,35 +1402,18 @@ public class MainWindow extends JFrame {
 					if (fKodkod != null) {
 						fKodkod.stopThreadCmb();
 					}
-					enableAction("StopCalcCmb","stopCmb", false);
+					enableAction("StopCalcCmb", false);
 				}else {
 					return;
 				}
 			}
-			
+
 			compile(fileName);
-			
+
 			if (validatorDialog!=null) {
 				validatorDialog.dispose();
 			}
 			validatorDialog = null;
-//			if (fKodkod != null) {
-//				int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
-//						"Do you really want to stop the current calculation?",
-//						"Confirm Stop",
-//						JOptionPane.YES_NO_OPTION,
-//						JOptionPane.QUESTION_MESSAGE);
-//
-//				if (respuesta == JOptionPane.YES_OPTION) {
-//					// Si hay un hilo en ejecución, lo para
-//					// Ver kod
-//					if (fKodkod != null) {
-//						fKodkod.stopThreadCmb();
-//					}
-//					enableAction("StopCalcCmb","stopCmb", false);
-//				}
-//			}
-
 		}
 	}
 
@@ -1895,11 +1827,11 @@ public class MainWindow extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			CreateObjectDialog dlg = new CreateObjectDialog(fSession, MainWindow.this);
 			dlg.setVisible(true);
-			// Si existe wizard, se ha de hacer un refresh
+			// If there is a wizard, a refresh must be done
 			checkExistObjDiagramAndWizard();
 			if (existWizard) {
 				if (wizardMVMView!=null) {
-					// Se han de crear los objetos nuevos que se hayan creado
+					// New objects that have been created must be created.
 					wizardMVMView.refreshComponents();
 				}
 			}
@@ -2187,11 +2119,11 @@ public class MainWindow extends JFrame {
 			objectDiagrams.add(odv);
 		}
 	}
-	//Aqui
+
 	public void checkExistObjDiagramAndWizard() {
 		existDiagram=false;
 		existWizard=false; 
-		//		Ver frames
+
 		JDesktopPane fDesk = getFdesk();
 		JInternalFrame[] allframes = fDesk.getAllFrames();
 		for (JInternalFrame ifr: allframes) {
@@ -2221,13 +2153,8 @@ public class MainWindow extends JFrame {
 			if (nameW.equals("ValidatorMVMDialogSimple")) {
 				existDialogMVM=true;
 				resW=wItem;
-				//				ValidatorMVMDialogSimple vMVM = (ValidatorMVMDialogSimple) resW;
-
-				return wItem;
+				return resW;
 			}
-			//			if (ifr.getName().equals(NAMEFRAMEMVMWIZARD)) {
-			//				existWizard=true;
-			//			}
 		}
 		return resW;
 	}
@@ -2236,7 +2163,7 @@ public class MainWindow extends JFrame {
 		Window resW=null;
 		existDialogMVM=false;
 		Window[] ws = getOwnedWindows();
-		Window[] ws2 = getOwnerlessWindows();
+//		Window[] ws2 = getOwnerlessWindows();
 		Frame[] allFrames = getFrames();
 		for (Frame fItem:allFrames) {
 			String nameF=fItem.getName();
@@ -2248,48 +2175,41 @@ public class MainWindow extends JFrame {
 			if (nameW.equals("ValidatorMVMDialogSimple")) {
 				existDialogMVM=true;
 				resW=wItem;
-				//				ValidatorMVMDialogSimple vMVM = (ValidatorMVMDialogSimple) resW;
 				resD= (JDialog) wItem;
-				//				ValidatorMVMDialogSimple resJ = (ValidatorMVMDialogSimple) wItem;
 				return resD;
 			}
-			//			if (ifr.getName().equals(NAMEFRAMEMVMWIZARD)) {
-			//				existWizard=true;
-			//			}
 		}
 		return resD;
 	}
 
-	//---
 
-
-	private void createObjDiagram() {
-		NewObjectDiagramView odv = new NewObjectDiagramView(this, fSession.system());
-		ViewFrame f = new ViewFrame("Object diagram", odv, "ObjectDiagram.gif");
-		f.setName(NAMEFRAMEMVMDIAGRAM);
-
-		int OBJECTS_LARGE_SYSTEM = 100;
-
-		// Many objects. Ask user if all objects should be hidden
-		if (fSession.system().state().allObjects().size() > OBJECTS_LARGE_SYSTEM) {
-
-			int option = JOptionPane.showConfirmDialog(new JPanel(),
-					"The current system state contains more then " + OBJECTS_LARGE_SYSTEM + " instances." +
-							"This can slow down the object diagram.\r\nDo you want to start with an empty object diagram?",
-							"Large system state", JOptionPane.YES_NO_OPTION);
-
-			if (option == JOptionPane.YES_OPTION) {
-				odv.getDiagram().hideAll();
-			}
-		}
-
-		JComponent c = (JComponent) f.getContentPane();
-		c.setLayout(new BorderLayout());
-		c.add(odv, BorderLayout.CENTER);
-		this.addNewViewFrame(f);
-		this.getObjectDiagrams().add(odv);
-
-	}
+//	private void createObjDiagram() {
+//		NewObjectDiagramView odv = new NewObjectDiagramView(this, fSession.system());
+//		ViewFrame f = new ViewFrame("Object diagram", odv, "ObjectDiagram.gif");
+//		f.setName(NAMEFRAMEMVMDIAGRAM);
+//
+//		int OBJECTS_LARGE_SYSTEM = 100;
+//
+//		// Many objects. Ask user if all objects should be hidden
+//		if (fSession.system().state().allObjects().size() > OBJECTS_LARGE_SYSTEM) {
+//
+//			int option = JOptionPane.showConfirmDialog(new JPanel(),
+//					"The current system state contains more then " + OBJECTS_LARGE_SYSTEM + " instances." +
+//							"This can slow down the object diagram.\r\nDo you want to start with an empty object diagram?",
+//							"Large system state", JOptionPane.YES_NO_OPTION);
+//
+//			if (option == JOptionPane.YES_OPTION) {
+//				odv.getDiagram().hideAll();
+//			}
+//		}
+//
+//		JComponent c = (JComponent) f.getContentPane();
+//		c.setLayout(new BorderLayout());
+//		c.add(odv, BorderLayout.CENTER);
+//		this.addNewViewFrame(f);
+//		this.getObjectDiagrams().add(odv);
+//
+//	}
 	/**
 	 * Creates a new object diagram view.
 	 */
@@ -2352,11 +2272,10 @@ public class MainWindow extends JFrame {
 	}
 
 	public void doActionViewTile() {
-		ActionViewTile fActionViewTileMVM = new ActionViewTile();
+//		ActionViewTile fActionViewTileMVM = new ActionViewTile();
 		ActionViewTile fActionViewTile = new ActionViewTile();
-		// Aqui7
+
 		int uniqueId = (int) System.currentTimeMillis();
-		//		System.currentTimeMillis();
 		String commandName = "";
 		ActionEvent ev = new ActionEvent(this, uniqueId, commandName);
 		fActionViewTile.actionPerformed(ev);
@@ -2565,7 +2484,7 @@ public class MainWindow extends JFrame {
 	public JInternalFrame[] sortInternalFrames(JInternalFrame[] allframes) {
 		int nFrames = allframes.length;
 		JInternalFrame[] allframesRes = new JInternalFrame[nFrames];
-		// En primer lugar coloca el frame de Wizard
+		// First place the Wizard frame
 		int nfs=0;
 		for (int nf = 0; nf < nFrames; nf++) {
 			JInternalFrame f = allframes[nf];
@@ -2580,7 +2499,7 @@ public class MainWindow extends JFrame {
 			}
 
 		}
-		// Luego coloca el resto
+		// Then place the rest
 		for (int nf = 0; nf < nFrames; nf++) {
 			JInternalFrame f = allframes[nf];
 			if (f.getName()==null&&f.getTitle().equals("Object diagram")){
@@ -2770,54 +2689,4 @@ public class MainWindow extends JFrame {
 		return new ImageIcon(Options.getIconPath(name).toString());
 	}
 }
-//abstract class EventThreads extends Thread {
-//
-//	private List<IEventStarted> listenersStarted = new ArrayList<>();
-//	private List<IEventEnded> listenersEnded = new ArrayList<>();
-//
-//	public EventThreads() {
-//		this(false);
-//	}
-//
-//	public EventThreads(final boolean isDaemon) {
-//		this.setDaemon(isDaemon);
-//	}
-//
-//	public void run () {
-//		for (IEventStarted o : listenersStarted) {
-//			o.started();
-//		}
-//
-//		operacionesRun();
-//
-//		for (IEventEnded o : listenersEnded) {
-//			o.finalizado();
-//		}
-//	}
-//
-//	public abstract void operacionesRun();
-//
-//	public void addListenerStarted(IEventStarted IEventStarted) {
-//		listenersStarted.add(IEventStarted);
-//	}
-//
-//	public void removeListenerStarted(IEventStarted escuchador) {
-//		listenersStarted.remove(escuchador);
-//	}
-//
-//	public void addListenerEnded(IEventEnded escuchador) {
-//		listenersEnded.add(escuchador);
-//	}
-//
-//	public void removeListenerEnded(IEventEnded escuchador) {
-//		listenersEnded.remove(escuchador);
-//	}
-//
-//	public interface IEventStarted {
-//		void started();
-//	}
-//
-//	public interface IEventEnded {
-//		void finalizado();
-//	}
-//}
+
