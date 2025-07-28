@@ -178,12 +178,12 @@ public class WizardMVMView extends JPanel implements View {
 	private JLabel lbClass;
 	private JLabel lbObjects;
 	private JLabel lbAttrs;
-	private JLabel lbAssoc;
+//	private JLabel lbAssoc;
 	private JLabel lbObj;
 	private JLabel lbFrom;
 	private JLabel lbTo;
-	private JLabel lbFromClass;
-	private JLabel lbToClass;
+//	private JLabel lbFromClass;
+//	private JLabel lbToClass;
 	private JLabel lbAclass;	
 	private JLabel lbAobject;	
 	private JLabel lbAmultiplicity;	
@@ -268,7 +268,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	public WizardMVMView thisMVMView=this;
 
-	private boolean fEnableEvalTree = false;
+//	private boolean fEnableEvalTree = false;
 	private EvalContext fEvalContext;
 	protected Expression fRangeExp;
 	protected VarDeclList fElemVarDecls;
@@ -3442,7 +3442,7 @@ public class WizardMVMView extends JPanel implements View {
 				MSystemState postState=state;
 				VarBindings bindings=new VarBindings();
 
-				fEnableEvalTree = true;
+//				fEnableEvalTree = true;
 				fEvalContext = new SimpleEvalContext(preState, postState, bindings);
 				EvalContext ctx=fEvalContext;
 

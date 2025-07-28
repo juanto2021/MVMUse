@@ -2204,34 +2204,6 @@ public class MainWindow extends JFrame {
 		return resD;
 	}
 
-
-	//	private void createObjDiagram() {
-	//		NewObjectDiagramView odv = new NewObjectDiagramView(this, fSession.system());
-	//		ViewFrame f = new ViewFrame("Object diagram", odv, "ObjectDiagram.gif");
-	//		f.setName(NAMEFRAMEMVMDIAGRAM);
-	//
-	//		int OBJECTS_LARGE_SYSTEM = 100;
-	//
-	//		// Many objects. Ask user if all objects should be hidden
-	//		if (fSession.system().state().allObjects().size() > OBJECTS_LARGE_SYSTEM) {
-	//
-	//			int option = JOptionPane.showConfirmDialog(new JPanel(),
-	//					"The current system state contains more then " + OBJECTS_LARGE_SYSTEM + " instances." +
-	//							"This can slow down the object diagram.\r\nDo you want to start with an empty object diagram?",
-	//							"Large system state", JOptionPane.YES_NO_OPTION);
-	//
-	//			if (option == JOptionPane.YES_OPTION) {
-	//				odv.getDiagram().hideAll();
-	//			}
-	//		}
-	//
-	//		JComponent c = (JComponent) f.getContentPane();
-	//		c.setLayout(new BorderLayout());
-	//		c.add(odv, BorderLayout.CENTER);
-	//		this.addNewViewFrame(f);
-	//		this.getObjectDiagrams().add(odv);
-	//
-	//	}
 	/**
 	 * Creates a new object diagram view.
 	 */
@@ -2519,7 +2491,6 @@ public class MainWindow extends JFrame {
 					nfs+=1;
 				}
 			}
-
 		}
 		// Then place the rest
 		for (int nf = 0; nf < nFrames; nf++) {
