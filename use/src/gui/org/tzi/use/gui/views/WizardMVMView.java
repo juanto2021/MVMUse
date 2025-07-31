@@ -178,12 +178,12 @@ public class WizardMVMView extends JPanel implements View {
 	private JLabel lbClass;
 	private JLabel lbObjects;
 	private JLabel lbAttrs;
-//	private JLabel lbAssoc;
+	//	private JLabel lbAssoc;
 	private JLabel lbObj;
 	private JLabel lbFrom;
 	private JLabel lbTo;
-//	private JLabel lbFromClass;
-//	private JLabel lbToClass;
+	//	private JLabel lbFromClass;
+	//	private JLabel lbToClass;
 	private JLabel lbAclass;	
 	private JLabel lbAobject;	
 	private JLabel lbAmultiplicity;	
@@ -268,7 +268,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	public WizardMVMView thisMVMView=this;
 
-//	private boolean fEnableEvalTree = false;
+	//	private boolean fEnableEvalTree = false;
 	private EvalContext fEvalContext;
 	protected Expression fRangeExp;
 	protected VarDeclList fElemVarDecls;
@@ -503,7 +503,7 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 		panel.add(btnNewObjectAuto);
-		
+
 		// masmas
 		btnNewObjectSampleAuto = new JButton("Fill");
 		Font defaultFont = btnNewObjectSampleAuto.getFont();
@@ -1067,6 +1067,12 @@ public class WizardMVMView extends JPanel implements View {
 		refreshComponents();
 		setResClassInvariants();
 		setResCheckStructure();
+		
+		// AQUI Provis. Controlar nulos
+		
+		lClass.setSelectedIndex(0);
+		lObjects.setSelectedIndex(0);
+		lAssocs.setSelectedIndex(0);
 
 	}
 
@@ -1671,6 +1677,14 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		//		JDialog v = fMainWindow.getValidatorDialog();
 		btnViewCmbs.setEnabled(fMainWindow.getValidatorDialog()!=null);
+		
+//		lClass.requestFocusInWindow();;
+		lClass.requestFocus();
+		lClass.setSelectedIndex(0);
+		lObjects.setSelectedIndex(0);
+		lAssocs.setSelectedIndex(0);		
+		
+		
 	}
 	public void enableBtnViewCmbs(){
 		btnViewCmbs.setEnabled(fMainWindow.getValidatorDialog()!=null);
@@ -3442,7 +3456,7 @@ public class WizardMVMView extends JPanel implements View {
 				MSystemState postState=state;
 				VarBindings bindings=new VarBindings();
 
-//				fEnableEvalTree = true;
+				//				fEnableEvalTree = true;
 				fEvalContext = new SimpleEvalContext(preState, postState, bindings);
 				EvalContext ctx=fEvalContext;
 

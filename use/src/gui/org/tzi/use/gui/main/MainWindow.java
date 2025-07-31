@@ -1292,7 +1292,9 @@ public class MainWindow extends JFrame {
 			if (fKodkod != null) {
 
 				EventThreads threadGreedy = fKodkod.getThreadGreedy();
-				if (threadGreedy != null) {
+				boolean calOn=fKodkod.getCalON();
+
+				if (threadGreedy != null || calOn) {
 					int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
 							"Do you really want to stop the current calculation?",
 							"Confirm Stop",
@@ -1306,6 +1308,13 @@ public class MainWindow extends JFrame {
 							fKodkod.stopThreadCmb();
 						}
 						enableAction("StopCalcCmb", false);
+						enableAction("ValidationMVMG", true);
+						enableAction("ValidationMVMB", true);
+						
+						if (validatorDialog!=null) {
+							validatorDialog.dispose();
+						}
+						validatorDialog = null;
 					}else {
 						return;
 					}
@@ -1410,32 +1419,43 @@ public class MainWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (!validateOpenPossible()) return;
-			EventThreads threadGreedy = fKodkod.getThreadGreedy();
-			if (fKodkod != null && threadGreedy != null) {
-				int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
-						"Do you really want to stop the current calculation?",
-						"Confirm Stop",
-						JOptionPane.YES_NO_OPTION,
-						JOptionPane.QUESTION_MESSAGE);
+			if (fKodkod != null) {
 
-				if (respuesta == JOptionPane.YES_OPTION) {
-					// Si hay un hilo en ejecución, lo para
-					// Ver kod
-					if (fKodkod != null) {
-						fKodkod.stopThreadCmb();
+				EventThreads threadGreedy = fKodkod.getThreadGreedy();
+				boolean calOn=fKodkod.getCalON();
+				if (threadGreedy != null || calOn) {
+					int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
+							"Do you really want to stop the current calculation?",
+							"Confirm Stop",
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE);
+
+					if (respuesta == JOptionPane.YES_OPTION) {
+						// Si hay un hilo en ejecución, lo para
+						// Ver kod
+						if (fKodkod != null) {
+							fKodkod.stopThreadCmb();
+						}
+						enableAction("StopCalcCmb", false);
+						enableAction("ValidationMVMG", true);
+						enableAction("ValidationMVMB", true);
+						
+						if (validatorDialog!=null) {
+							validatorDialog.dispose();
+						}
+						validatorDialog = null;
+					}else {
+						return;
 					}
-					enableAction("StopCalcCmb", false);
-				}else {
-					return;
 				}
 			}
 
 			compile(fileName);
 
-			if (validatorDialog!=null) {
-				validatorDialog.dispose();
-			}
-			validatorDialog = null;
+//			if (validatorDialog!=null) {
+//				validatorDialog.dispose();
+//			}
+//			validatorDialog = null;
 		}
 	}
 
@@ -1447,6 +1467,36 @@ public class MainWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (!validateOpenPossible()) return;
+			//---------
+			if (fKodkod != null) {
+
+				EventThreads threadGreedy = fKodkod.getThreadGreedy();
+				boolean calOn=fKodkod.getCalON();
+				
+				if (threadGreedy != null || calOn) {
+					int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
+							"Do you really want to stop the current calculation?",
+							"Confirm Stop",
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE);
+
+					if (respuesta == JOptionPane.YES_OPTION) {
+						// Si hay un hilo en ejecución, lo para
+						// Ver kod y fthread AQQUI
+						if (fKodkod != null) {
+							fKodkod.stopThreadCmb();
+						}
+						enableAction("StopCalcCmb", false);
+						enableAction("ValidationMVMG", true);
+						enableAction("ValidationMVMB", true);
+					}else {
+						return;
+					}
+				}
+			}
+			
+			
+			//---------
 
 			Path file = Options.getRecentFile("use");
 
@@ -2217,6 +2267,7 @@ public class MainWindow extends JFrame {
 			checkExistObjDiagramAndWizard();
 			if (!existWizard) {
 				showMVMWizard(NAMEFRAMEMVMWIZARD);
+				
 			}else {
 				String mensaje = "It is not necessary to open Wizard because it is already open.";
 				JOptionPane.showMessageDialog(null, mensaje, "MVM Wizard",JOptionPane.INFORMATION_MESSAGE);
@@ -2610,12 +2661,25 @@ public class MainWindow extends JFrame {
 		String commandName = "";
 		ActionEvent ev = new ActionEvent(this, uniqueId, commandName);
 		fActionViewTile.actionPerformed(ev);
+		wizardMVMView.refreshComponents();// JG
+//		frameWizard.requestFocus();
+//		frameWizard.requestFocusInWindow();
 
+		
+		//---
+		
+//		JFrame wizardFrame = wizardMVMView.frame; // o como se exponga
+//
+//		wizardFrame.setVisible(true);
+//		SwingUtilities.invokeLater(() -> {
+//		    wizardFrame.requestFocusInWindow();
+//		});
+
+		//---
+		
+		
+		
 		return opv;
-	}
-	//Aqui3
-	public void destroyMVMWizard() {
-		// Buscar wizard y eliminar
 	}
 
 	public void refreshMVMWizard() {
