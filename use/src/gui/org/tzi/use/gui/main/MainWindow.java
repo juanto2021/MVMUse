@@ -166,8 +166,6 @@ public class MainWindow extends JFrame {
 
 	private UseKodkodModelValidator fKodkod;
 
-	//	private JDialog validatorDialog;
-
 	private ValidatorMVMDialogSimple validatorDialog;
 
 	private final Session fSession;
@@ -207,7 +205,7 @@ public class MainWindow extends JFrame {
 	private static int DEFAULT_HEIGHT_MVM = 800;
 	private static final String NAMEFRAMEMVMDIAGRAM = "MVM";
 	private static final String NAMEFRAMEMVMWIZARD = "MVMWizard";
-	private static ViewFrame frameWizard;
+	public static ViewFrame frameWizard;
 	public static WizardMVMView wizardMVMView;
 
 	public boolean existDiagram=false;
@@ -502,11 +500,10 @@ public class MainWindow extends JFrame {
 		// put the three panels into split panes
 		JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 				fModelBrowser, fDesk);
-		//		sp.setDividerLocation((int) (0.25 * Options.DEFAULT_WIDTH));//FIXME 200); 
-		//		sp.setDividerLocation((int) (0.25 * DEFAULT_WIDTH_MVM));//FIXME 200); // Amplio ancho pantalla para MVM
+
 		sp.setDividerLocation((int) (0.13 * DEFAULT_WIDTH_MVM));//FIXME 200); // Amplio ancho pantalla para MVM
 		fTopSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sp, fLogPanel); 
-		//		fTopSplitPane.setDividerLocation((int) (0.72 * Options.DEFAULT_HEIGHT));//FIXME 400);
+
 		fTopSplitPane.setDividerLocation((int) (0.72 * DEFAULT_HEIGHT_MVM));//FIXME 400);
 		fTopSplitPane.setOneTouchExpandable(true);
 		fTopSplitPane.setResizeWeight(.8d);
@@ -514,7 +511,6 @@ public class MainWindow extends JFrame {
 		// Layout and set the content pane
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BorderLayout());
-		//		contentPane.setPreferredSize(new Dimension(Options.DEFAULT_WIDTH, Options.DEFAULT_HEIGHT));// FIXME 800, 550));
 		contentPane.setPreferredSize(new Dimension(DEFAULT_WIDTH_MVM, DEFAULT_HEIGHT_MVM));// FIXME 800, 550));// Amplio ancho pantalla para MVM
 		contentPane.add(fToolBar, BorderLayout.NORTH);
 		contentPane.add(fTopSplitPane, BorderLayout.CENTER);
@@ -674,7 +670,7 @@ public class MainWindow extends JFrame {
 				for (int i = 0; i < fMenuBar.getMenuCount(); i++) {
 					JMenu menu = fMenuBar.getMenu(i);
 					if (menu != null) {
-						String name = menu.getText();
+						//						String name = menu.getText();
 						for (int j = 0; j < menu.getItemCount(); j++) {
 							JMenuItem item = menu.getItem(j);
 							if (item!=null) {
@@ -698,25 +694,12 @@ public class MainWindow extends JFrame {
 			}
 		}
 	}
-
-	// Methods to access the dialog from other classes
-	//	public JDialog getValidatorDialog() {
-	//		return validatorDialog;
-	//	}
-	//
-	//	public void setValidatorDialog(JDialog dialog) {
-	//		this.validatorDialog = dialog;
-	//		if (wizardMVMView!=null) {
-	//			wizardMVMView.enableBtnViewCmbs();
-	//		}
-	//	}
-
 	//---
-	
+
 	public void showDialogCmb() {
 		validatorDialog.setVisible(true);
 	}
-	
+
 	public ValidatorMVMDialogSimple getValidatorDialog() {
 		return validatorDialog;
 	}
@@ -727,9 +710,6 @@ public class MainWindow extends JFrame {
 			wizardMVMView.enableBtnViewCmbs();
 		}
 	}
-
-
-	//---
 
 	// Métodos para acceder al diálogo desde otras clases
 	public UseKodkodModelValidator getKodKod() {
@@ -1293,7 +1273,6 @@ public class MainWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (!validateOpenPossible()) return;
-			//AQUI
 
 			if (fKodkod != null) {
 
@@ -1308,15 +1287,15 @@ public class MainWindow extends JFrame {
 							JOptionPane.QUESTION_MESSAGE);
 
 					if (respuesta == JOptionPane.YES_OPTION) {
-						// Si hay un hilo en ejecución, lo para
-						// Ver kod y fthread AQQUI
+						// If there is a thread running, stop it
+
 						if (fKodkod != null) {
 							fKodkod.stopThreadCmb();
 						}
 						enableAction("StopCalcCmb", false);
 						enableAction("ValidationMVMG", true);
 						enableAction("ValidationMVMB", true);
-						
+
 						if (validatorDialog!=null) {
 							validatorDialog.dispose();
 							enableAction("ShowDiaCmb", false);
@@ -1369,9 +1348,6 @@ public class MainWindow extends JFrame {
 				return true;
 			}
 		}
-		//		public void launchCompile( Path f){
-		//			compile(f);
-		//		}
 
 		protected boolean compile(final Path f) {
 			fLogPanel.clear();
@@ -1447,7 +1423,7 @@ public class MainWindow extends JFrame {
 						enableAction("StopCalcCmb", false);
 						enableAction("ValidationMVMG", true);
 						enableAction("ValidationMVMB", true);
-						
+
 						if (validatorDialog!=null) {
 							validatorDialog.dispose();
 							enableAction("ShowDiaCmb", false);
@@ -1461,10 +1437,6 @@ public class MainWindow extends JFrame {
 
 			compile(fileName);
 
-//			if (validatorDialog!=null) {
-//				validatorDialog.dispose();
-//			}
-//			validatorDialog = null;
 		}
 	}
 
@@ -1481,7 +1453,7 @@ public class MainWindow extends JFrame {
 
 				EventThreads threadGreedy = fKodkod.getThreadGreedy();
 				boolean calOn=fKodkod.getCalON();
-				
+
 				if (threadGreedy != null || calOn) {
 					int respuesta = JOptionPane.showConfirmDialog(MainWindow.this,
 							"Do you really want to stop the current calculation?",
@@ -1490,8 +1462,7 @@ public class MainWindow extends JFrame {
 							JOptionPane.QUESTION_MESSAGE);
 
 					if (respuesta == JOptionPane.YES_OPTION) {
-						// Si hay un hilo en ejecución, lo para
-						// Ver kod y fthread AQQUI
+						//						If there is a thread running, stop it
 						if (fKodkod != null) {
 							fKodkod.stopThreadCmb();
 						}
@@ -1503,9 +1474,6 @@ public class MainWindow extends JFrame {
 					}
 				}
 			}
-			
-			
-			//---------
 
 			Path file = Options.getRecentFile("use");
 
@@ -1881,7 +1849,7 @@ public class MainWindow extends JFrame {
 				checkExistObjDiagramAndWizard();
 				if (existWizard) {
 					if (wizardMVMView!=null) {
-						// Se han de crear los objetos nuevos que se hayan creado
+						// New objects that have been created must be created.
 						wizardMVMView.refreshComponents();
 					}
 				}
@@ -2241,10 +2209,10 @@ public class MainWindow extends JFrame {
 	}
 	public JDialog checkExistDialogD() {
 		JDialog resD=null;
-		Window resW=null;
+		//		Window resW=null;
 		existDialogMVM=false;
 		Window[] ws = getOwnedWindows();
-		//		Window[] ws2 = getOwnerlessWindows();
+
 		Frame[] allFrames = getFrames();
 		for (Frame fItem:allFrames) {
 			String nameF=fItem.getName();
@@ -2255,7 +2223,7 @@ public class MainWindow extends JFrame {
 			System.out.println ("wItem - nameW " + nameW);
 			if (nameW.equals("ValidatorMVMDialogSimple")) {
 				existDialogMVM=true;
-				resW=wItem;
+				//				resW=wItem;
 				resD= (JDialog) wItem;
 				return resD;
 			}
@@ -2276,7 +2244,7 @@ public class MainWindow extends JFrame {
 			checkExistObjDiagramAndWizard();
 			if (!existWizard) {
 				showMVMWizard(NAMEFRAMEMVMWIZARD);
-				
+
 			}else {
 				String mensaje = "It is not necessary to open Wizard because it is already open.";
 				JOptionPane.showMessageDialog(null, mensaje, "MVM Wizard",JOptionPane.INFORMATION_MESSAGE);
@@ -2326,7 +2294,7 @@ public class MainWindow extends JFrame {
 	}
 
 	public void doActionViewTile() {
-		//		ActionViewTile fActionViewTileMVM = new ActionViewTile();
+
 		ActionViewTile fActionViewTile = new ActionViewTile();
 
 		int uniqueId = (int) System.currentTimeMillis();
@@ -2580,6 +2548,7 @@ public class MainWindow extends JFrame {
 		public void actionPerformed(ActionEvent ev) {
 			// How many frames do we have?
 			JInternalFrame[] allframes = sortInternalFrames(fDesk.getAllFrames());
+			//			JInternalFrame wz = null;
 			int count = allframes.length;
 			if (count == 0)
 				return;
@@ -2616,14 +2585,34 @@ public class MainWindow extends JFrame {
 								// ignored
 							}
 						}
+
+						//---
+						System.out.println("titulo "+f.getTitle());
+						//						if ("MVM Wizard".equals(f.getTitle())) {
+						//							wz=f;
+						//							//				            try {
+						//							//				            	System.out.println("Aqui2");
+						//							//				                f.setIcon(false);
+						//							//				                f.moveToFront();
+						//							//				                f.setSelected(true);
+						//							//				                wz=f;
+						//							//				            } catch (PropertyVetoException ex) {
+						//							//				                ex.printStackTrace();
+						//							//				            }
+						//						}
+						//---
+
+
+
 						fDesk.getDesktopManager().resizeFrame(f, x, y, w, h);
 						x += w;
-					}//Provis
+					}
 				}
 				y += h; // start the next row
 				x = 0;
 			}
 		}
+
 	}
 
 	/**
@@ -2671,32 +2660,17 @@ public class MainWindow extends JFrame {
 		ActionEvent ev = new ActionEvent(this, uniqueId, commandName);
 		fActionViewTile.actionPerformed(ev);
 		wizardMVMView.refreshComponents();// JG
-//		frameWizard.requestFocus();
-//		frameWizard.requestFocusInWindow();
 
-		
-		//---
-		
-//		JFrame wizardFrame = wizardMVMView.frame; // o como se exponga
-//
-//		wizardFrame.setVisible(true);
-//		SwingUtilities.invokeLater(() -> {
-//		    wizardFrame.requestFocusInWindow();
-//		});
-
-		//---
-		
-		
-		
 		return opv;
 	}
 
 	public void refreshMVMWizard() {
-		// Buscar wizard y eliminar
 		wizardMVMView.refreshComponents();
-
 	}
 
+	public WizardMVMView getMVMWizard() {
+		return wizardMVMView;
+	}
 
 
 	/**

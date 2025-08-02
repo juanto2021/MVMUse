@@ -23,15 +23,19 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyVetoException;
 import java.io.BufferedReader;
 import java.io.File;
@@ -80,6 +84,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -116,7 +121,6 @@ import org.tzi.use.uml.mm.MModel;
 import org.tzi.use.uml.mm.MMultiplicity;
 import org.tzi.use.uml.ocl.expr.EvalContext;
 import org.tzi.use.uml.ocl.expr.ExpForAll;
-import org.tzi.use.uml.ocl.expr.ExpStdOp;
 import org.tzi.use.uml.ocl.expr.Expression;
 import org.tzi.use.uml.ocl.expr.MultiplicityViolationException;
 import org.tzi.use.uml.ocl.expr.SimpleEvalContext;
@@ -364,6 +368,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 	public WizardMVMView(MainWindow parent, Session session, PrintWriter logWriter) {
 		super(new BorderLayout());
+		this.setFocusable(true);
 		lActions = new ArrayList<MVMAction>();
 		fMainWindow = parent;
 
@@ -747,8 +752,6 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnActions);
 
-		//---
-
 		btnSuggestions = new JButton("Suggestions");
 		btnSuggestions.setBounds(107, 384, 95, 60);
 		btnSuggestions.setVerticalAlignment(SwingConstants.CENTER);
@@ -871,8 +874,6 @@ public class WizardMVMView extends JPanel implements View {
 				MObject oRel = findAssocEnd(oSel);
 				if (oRel!=null) {
 					cmbObjectDes.setSelectedItem(oRel);
-					//				}else {
-					//					//					System.out.println("["+oSel.name()+"] No tiene extremo");
 				}
 			}
 		});
@@ -986,7 +987,7 @@ public class WizardMVMView extends JPanel implements View {
 
 				boolean existDiagram=false;
 				boolean existWizard=false; 
-				//		Ver frames
+
 				JDesktopPane fDesk = fMainWindow.getFdesk();
 				JInternalFrame[] allframes = fDesk.getAllFrames();
 				for (JInternalFrame ifr: allframes) {
@@ -1012,7 +1013,6 @@ public class WizardMVMView extends JPanel implements View {
 					createObjDiagram();
 				}
 			}
-
 		});
 		panel.add(btnShowIndividuals);
 
@@ -1067,30 +1067,79 @@ public class WizardMVMView extends JPanel implements View {
 		refreshComponents();
 		setResClassInvariants();
 		setResCheckStructure();
-		
+
 		// AQUI Provis. Controlar nulos
-		
+
 		lClass.setSelectedIndex(0);
 		lObjects.setSelectedIndex(0);
 		lAssocs.setSelectedIndex(0);
 
+		//Causes display of objects when Wizard is invoked from other classes with UI
+		this.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				int index = 0;
+
+				lClass.setSelectedIndex(index);
+				Rectangle cellBounds = lClass.getCellBounds(index, index);
+
+				MouseEvent me1 = new MouseEvent(
+						lClass, 
+						MouseEvent.MOUSE_CLICKED, 
+						System.currentTimeMillis(),
+						0, // modifiers
+						cellBounds.x + 1, 
+						cellBounds.y + 1, 
+						1, // click count
+						false
+						);
+
+				for (MouseListener ml : lClass.getMouseListeners()) {
+					ml.mouseClicked(me1);
+				}
+
+				lAssocs.setSelectedIndex(0);
+				cellBounds = lAssocs.getCellBounds(index, index);
+
+				MouseEvent me2 = new MouseEvent(
+						lClass, 
+						MouseEvent.MOUSE_CLICKED, 
+						System.currentTimeMillis(),
+						0, // modifiers
+						cellBounds.x + 1, 
+						cellBounds.y + 1, 
+						1, // click count
+						false
+						);
+
+				for (MouseListener ml : lAssocs.getMouseListeners()) {
+					ml.mouseClicked(me2);
+				}
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				// Do nothing
+			}
+		});
+
 	}
 
 
 
-	private void runAnalisis1() {
-		try {
-			String strJson = builJsonRequest1();
-			// Call API
-			String jsonContent=callAPIOpenAI(strJson);
-			// Analysis jsonContent
-			String resultado = analysisJsonToString1(jsonContent);
-			// Show result
-			showResponseOpenAI(resultado);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	//	private void runAnalisis1() {
+	//		try {
+	//			String strJson = builJsonRequest1();
+	//			// Call API
+	//			String jsonContent=callAPIOpenAI(strJson);
+	//			// Analysis jsonContent
+	//			String resultado = analysisJsonToString1(jsonContent);
+	//			// Show result
+	//			showResponseOpenAI(resultado);
+	//		} catch (Exception e) {
+	//			e.printStackTrace();
+	//		}
+	//	}
 
 	private void runAnalisis2() {
 		try {
@@ -1339,23 +1388,23 @@ public class WizardMVMView extends JPanel implements View {
 		String result1 = "";
 		String result2 = "";
 		try {
-			// Parseo del JSON principal
+			// Main JSON parsing
 			JSONObject root = new JSONObject(jsonString);
 			JSONArray choices = root.getJSONArray("choices");
 			JSONObject firstChoice = choices.getJSONObject(0);
 			JSONObject message = firstChoice.getJSONObject("message");
 
-			// Contenido con el JSON embebido
+			// Content with embedded JSON
 			String innerContentRaw = message.getString("content");
 
-			// Buscar y extraer solo el JSON dentro del bloque ```json ... ```
+			// Find and extract only the JSON inside the ```json ...``` block
 			int start = innerContentRaw.indexOf("{");
 			int end = innerContentRaw.lastIndexOf("}");
 
 			if (start >= 0 && end > start) {
 				String innerJsonStr = innerContentRaw.substring(start, end + 1);
 
-				// Parsear ese bloque como JSON
+				// Parse that block as JSON
 				JSONObject innerJson = new JSONObject(innerJsonStr);
 				result1 = innerJson.getString("contentProblem");
 				result2 = innerJson.getString("contentSolution");
@@ -1366,11 +1415,11 @@ public class WizardMVMView extends JPanel implements View {
 				result += result2+ LF;
 
 			} else {
-				result = "No se encontró un bloque JSON válido dentro de content.";
+				result = "No valid JSON block found within content.";
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-			result = "Error al procesar el JSON: " + e.getMessage();
+			result = "Error processing JSON: " + e.getMessage();
 		}
 
 		System.out.println("--------------------------------------------");
@@ -1675,16 +1724,15 @@ public class WizardMVMView extends JPanel implements View {
 			}
 			storeAction("CL", "Creation link ["+oClassAssocEnd.name()+"] - ["+oOri.name()+"]/["+oDes.name()+"]");
 		}
-		//		JDialog v = fMainWindow.getValidatorDialog();
+
 		btnViewCmbs.setEnabled(fMainWindow.getValidatorDialog()!=null);
-		
-//		lClass.requestFocusInWindow();;
+
 		lClass.requestFocus();
 		lClass.setSelectedIndex(0);
 		lObjects.setSelectedIndex(0);
 		lAssocs.setSelectedIndex(0);		
-		
-		
+
+
 	}
 	public void enableBtnViewCmbs(){
 		btnViewCmbs.setEnabled(fMainWindow.getValidatorDialog()!=null);
@@ -2199,7 +2247,7 @@ public class WizardMVMView extends JPanel implements View {
 	 * @return
 	 */
 	public boolean check_inv_state() {
-		boolean bRes = false;
+		//		boolean bRes = false;
 		mapObjects = new HashMap<>();
 
 		MModel fModel = fSystem.model();
@@ -2425,7 +2473,7 @@ public class WizardMVMView extends JPanel implements View {
 			int canAssig = 0;
 			int mustCreate = 0;
 			String objectNameToSolve = lw.getObject();//Object to solve
-			String nomClass = lw.getNomClass(); //Main object class
+			//			String nomClass = lw.getNomClass(); //Main object class
 			String classNeeded = lw.getOfClass(); // Class of the object needed
 			// Find how many necessary objects are available
 
@@ -2810,12 +2858,10 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		setResCheckStructure();
 
-		// Aqui revisualizar listas de links y objetos asociados--------------
-		//		MAssociation oAssoc = lAssocs.getSelectedValue();
 		if (association!=null) {
 			setComposAssoc(association);
 		}
-		//-------------------------
+
 	}
 	/**
 	 * Remove link in association
@@ -2826,7 +2872,7 @@ public class WizardMVMView extends JPanel implements View {
 		MObject oOri = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
 		MObject oDes = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
 		deleteLink(oAssoc, oOri, oDes);
-		// Aqui revisualizar listas de links y objetos asociados
+
 		if (oAssoc!=null) {
 			setComposAssoc(oAssoc);
 		}
@@ -3465,7 +3511,7 @@ public class WizardMVMView extends JPanel implements View {
 				VarDeclList elemVarDecls=null;
 				Expression rangeExp=null;
 				Expression queryExp=null;
-				Expression exp;
+				//				Expression exp;
 				String simpleName = cl.getSimpleName();
 				if (simpleName.equals("ExpForAll")) {
 					ExpForAll exp2 = (ExpForAll) expr;
@@ -3474,9 +3520,10 @@ public class WizardMVMView extends JPanel implements View {
 					rangeExp=exp2.getRangeExpression();
 					queryExp=exp2.getQueryExpression();
 					fQueryExp=queryExp;
-					exp = (ExpForAll) expr;
+					//					exp = (ExpForAll) expr;
 				}else {
-					exp = (ExpStdOp) expr;
+					//					exp = (ExpStdOp) expr;
+					// Do nothing
 				}
 
 				fRangeExp=rangeExp;
