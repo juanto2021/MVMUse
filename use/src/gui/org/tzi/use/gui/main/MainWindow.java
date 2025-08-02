@@ -650,6 +650,7 @@ public class MainWindow extends JFrame {
 				});
 
 		enableAction("StopCalcCmb", false);
+		enableAction("ShowDiaCmb", false);
 
 	}
 	public void enableAction(String nameAction, boolean bEnabled) {
@@ -711,6 +712,11 @@ public class MainWindow extends JFrame {
 	//	}
 
 	//---
+	
+	public void showDialogCmb() {
+		validatorDialog.setVisible(true);
+	}
+	
 	public ValidatorMVMDialogSimple getValidatorDialog() {
 		return validatorDialog;
 	}
@@ -1313,6 +1319,7 @@ public class MainWindow extends JFrame {
 						
 						if (validatorDialog!=null) {
 							validatorDialog.dispose();
+							enableAction("ShowDiaCmb", false);
 						}
 						validatorDialog = null;
 					}else {
@@ -1344,6 +1351,7 @@ public class MainWindow extends JFrame {
 			wasUsed = true;
 			if (validatorDialog!=null) {
 				validatorDialog.dispose();
+				enableAction("ShowDiaCmb", false);
 			}
 			validatorDialog = null;
 		}
@@ -1442,6 +1450,7 @@ public class MainWindow extends JFrame {
 						
 						if (validatorDialog!=null) {
 							validatorDialog.dispose();
+							enableAction("ShowDiaCmb", false);
 						}
 						validatorDialog = null;
 					}else {
