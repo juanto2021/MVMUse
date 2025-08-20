@@ -21,6 +21,8 @@ package org.tzi.use.gui.views;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -279,6 +281,8 @@ public class WizardMVMView extends JPanel implements View {
 	protected Expression fQueryExp;
 
 	private LayoutThread fLayoutThread;
+	
+	private NewObjectDiagramView odvGral=null;
 
 	private StringBuilder blockForAssocFailOpenAI;
 	private StringBuilder blockForInvsFailOpenAI;
@@ -585,7 +589,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		nomObj = (String) lObjects.getSelectedValue();
 		txNewObject.setText(nomObj);
-
+//AQUI
 		btnCreateObject = new JButton("New Obj");
 		btnCreateObject.setBounds(400, 70, 95, 25);
 		btnCreateObject.addActionListener(new ActionListener() {
@@ -3031,11 +3035,26 @@ public class WizardMVMView extends JPanel implements View {
 		// Ver frames
 		JDesktopPane fDesk = fMainWindow.getFdesk();
 		allframes = fDesk.getAllFrames();
+		
+		//---
+//		fDesk.getComponents();
+//		for (Component cc: fDesk.getComponents()) {
+//			String nameC=cc.getName();
+//			System.out.println("nameC "+nameC);
+//			if (nameC.equals(NAMEFRAMEMVMDIAGRAM)) {
+//				
+//				NewObjectDiagram odv = (NewObjectDiagram) cc;
+//				System.out.println("odv "+odv.toString());
+//			}
+//		}
+		
+		//---
 
 		for (JInternalFrame ifr: allframes) {
 			if (ifr.getName()!=null ) {
 				if (ifr.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 					existDiagram=true;
+//					Component[] c = ifr.getComponents();//PROVIS
 					for (NewObjectDiagramView newObj: fMainWindow.getObjectDiagrams()) {
 						if (newObj.getDiagram().getName()==null) {
 							newObj.setName(NAMEFRAMEMVMDIAGRAM);
@@ -3158,6 +3177,11 @@ public class WizardMVMView extends JPanel implements View {
 		int idx = selectObject(nomObjDel);
 		MSystemState state = fSystem.state();
 
+		//---
+		checkExistObjDiagram();
+		//---
+		
+		
 		boolean existDiagram=false;
 
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
@@ -3168,7 +3192,7 @@ public class WizardMVMView extends JPanel implements View {
 			}
 			if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 				existDiagram=true;
-
+odv.repaint();//PROVIS JG
 				break;
 			}
 		}
