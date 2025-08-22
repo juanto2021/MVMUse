@@ -2641,6 +2641,18 @@ public class MainWindow extends JFrame {
 		addNewViewFrame(f);
 		return opv;
 	}
+	//JG
+	public void selObjFromDia(String strObj) {
+		System.out.println("Seleccionar obj ["+strObj+"]");
+	}
+	public void selObjFromDia(MObject obj) {
+		System.out.println("Seleccionar obj ["+obj.name()+"]");
+	}
+	public void selObjFromDia(String nomObj, String nomClass) {
+		System.out.println("Seleccionar nomObj ["+nomObj+"] nomClass ["+nomClass+"]");
+		// Buscar clase dentro de lClass
+		// Buscar obj dentro de lObjects
+	}
 
 	public WizardMVMView showMVMWizard(String name) {
 		// Abrir vista si no hay ninguna creada previamente

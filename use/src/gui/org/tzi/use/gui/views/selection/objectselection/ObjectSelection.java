@@ -166,6 +166,7 @@ public class ObjectSelection {
 			EdgeBase o = it.next();
 
 			if (o instanceof BinaryAssociationOrLinkEdge) {
+
 				BinaryAssociationOrLinkEdge edge = (BinaryAssociationOrLinkEdge) o;
 
 				if (edge.getAssociation() != null && edge.getAssociation().equals(node)) {

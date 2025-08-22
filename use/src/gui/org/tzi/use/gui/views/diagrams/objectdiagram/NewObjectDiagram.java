@@ -481,6 +481,7 @@ public class NewObjectDiagram extends DiagramViewWithObjectNode implements Highl
 		if (obj instanceof MLinkObject) {
 			assocs.add((MAssociation) obj.cls());
 			isLinkObject = true;
+			//			System.out.println("aqui ["+(MAssociation) obj.cls()+"]");//JG
 		}
 
 		// Show all links the object participates in,
@@ -1072,6 +1073,44 @@ public class NewObjectDiagram extends DiagramViewWithObjectNode implements Highl
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
+			//--- provis AQUI
+			PlaceableNode pickedObjectNodeJG = findNode(e.getX(), e.getY());
+			if (pickedObjectNodeJG!=null) {
+//				String nomObj = pickedObjectNodeJG.name();
+				ObjectNode obj = (ObjectNode) pickedObjectNodeJG;
+				String nomClass = obj.cls().name();
+				String nomObj = obj.name();
+				System.out.println("Seleccionar obj ["+nomObj+"]");
+//				MObject obj = (MObject) pickedObjectNodeJG;
+//				MainWindow.instance().selObjFromDia(nomObj);
+//				MainWindow.instance().selObjFromDia(nomObj,nomClass);
+				MainWindow.instance().getMVMWizard().selObjFromDia(nomObj, nomClass);
+//				selObjFromDia(String strObj)
+			}else {
+				for (EdgeBase selectedEdge : fEdgeSelection) {
+					if (selectedEdge instanceof LinkEdge) {
+						LinkEdge aEdge = (LinkEdge) selectedEdge;
+						MLink link = aEdge.getLink();
+						//						selectedLinks.add(link);
+						//						selectedObjectsOfAssociation.addAll(link.linkedObjects());
+						String nomAssoc = selectedEdge.getName();
+						System.out.println("Seleccionar Assoc ["+nomAssoc+"]");//JG
+						//						System.out.println("links ["+link.linkEnds().stream()+"]");
+						//						linkedObjects
+						//						link.linkedObjects()
+						for (MObject obj : link.linkedObjects()) {
+							String nomObj = obj.name();
+							System.out.println("Objeto: " + nomObj);
+							// Aquí puedes llamar a otros métodos de MObject
+						}
+						//						for (MLinkEnd end : link.linkEnds()) {
+						//						    System.out.println("Rol: " + end.associationEnd());
+						//						}
+						//						System.out.println("Ya");
+					}
+				}
+			}
+			//---
 			if (e.getClickCount() == 2) {
 				// mouse over node?
 				PlaceableNode pickedObjectNode = findNode(e.getX(), e.getY());
@@ -1103,6 +1142,7 @@ public class NewObjectDiagram extends DiagramViewWithObjectNode implements Highl
 			if (node instanceof ObjectNode) {
 				selectedObjects.add(((ObjectNode) node).object());
 			} else if (node instanceof AssociationName) {
+				//				System.out.println("aqui ["+node.name()+"]");//JG
 				MLink link = ((AssociationName) node).getLink();
 				selectedObjectsOfAssociation.addAll(link.linkedObjects());
 				selectedLinks.add(link);
@@ -1115,6 +1155,7 @@ public class NewObjectDiagram extends DiagramViewWithObjectNode implements Highl
 				MLink link = aEdge.getLink();
 				selectedLinks.add(link);
 				selectedObjectsOfAssociation.addAll(link.linkedObjects());
+				//				System.out.println("aqui ["+selectedEdge.getName()+"]");//JG
 			}
 		}
 
@@ -1214,6 +1255,7 @@ public class NewObjectDiagram extends DiagramViewWithObjectNode implements Highl
 
 		// Hide / crop / show links
 		if (!selectedLinks.isEmpty() || !selectedObjects.isEmpty() || !selectedObjectsOfAssociation.isEmpty()) {
+			//			System.out.println("aqui ["+selectedLinks.stream()+"]");//JG
 			String labelHide = "";
 			String labelCrop = "";
 

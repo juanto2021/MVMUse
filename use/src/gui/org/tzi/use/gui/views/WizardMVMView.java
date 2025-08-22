@@ -3464,12 +3464,35 @@ public class WizardMVMView extends JPanel implements View {
 		for (int nObj=0;nObj<nObjs;nObj++) {
 			if (lObjects.getModel().getElementAt(nObj).equals(objName)) {
 				lObjects.setSelectedIndex(nObj);
+				nomObj=objName;
 				idx=nObj;
 				return idx;
 			}
 		}
 		return idx;
 	}
+	
+	public int selectClass(String className) {
+		int idx = -1;
+//		MSystemState state = fSystem.state();
+//		fObject = state.objectByName(objName);
+//		fTableModel.update();
+
+		// Search in list
+		lClass.setSelectedIndex(0);
+		int nObjs= lClass.getModel().getSize();
+		for (int nObj=0;nObj<nObjs;nObj++) {
+			if (lClass.getModel().getElementAt(nObj).name().equals(className)) {
+				lClass.setSelectedIndex(nObj);
+				nomClass=className;
+				lObjects.setModel(loadListObjects(nomClass));
+				idx=nObj;
+				return idx;
+			}
+		}
+		return idx;
+	}
+	
 
 	/**
 	 * Search for an object by name
@@ -3498,6 +3521,15 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return oRes;
 	}
+	public void selObjFromDia(String nomObj, String nomClass) {
+		System.out.println("Seleccionar nomObj ["+nomObj+"] nomClass ["+nomClass+"]");
+		
+		// Buscar clase dentro de lClass
+		selectClass(nomClass);
+		// Buscar obj dentro de lObjects
+		selectObject(nomObj);
+	}
+	
 
 	/**
 	 * Search for an Association by name
