@@ -85,6 +85,8 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 
 import org.json.JSONArray;
@@ -281,7 +283,7 @@ public class WizardMVMView extends JPanel implements View {
 	protected Expression fQueryExp;
 
 	private LayoutThread fLayoutThread;
-	
+
 	private NewObjectDiagramView odvGral=null;
 
 	private StringBuilder blockForAssocFailOpenAI;
@@ -449,18 +451,37 @@ public class WizardMVMView extends JPanel implements View {
 						lClass.setSelectedIndex(index);
 						nomClass = oClass.name();
 						lObjects.setModel(loadListObjects(nomClass));
+
+						//-- provis
+						nomObj="";
+						btnSaveObject.setEnabled(false);
+						btnCancelObject.setEnabled(false);
+						//						btnCreateObject.setEnabled(false);
+						//						btnNewObjectAuto.setEnabled(false);
+						//--
 						if (oClass.isAbstract()) {
-							nomObj="";
-							btnSaveObject.setEnabled(false);
+							//							nomObj="";
+							//							btnSaveObject.setEnabled(false);//Provis
 							btnCreateObject.setEnabled(false);
 							btnNewObjectAuto.setEnabled(false);
 						}else {
-							lObjects.setSelectedIndex(0);
-							nomObj = (String) lObjects.getSelectedValue();
-							selectObject( nomObj);
-							btnSaveObject.setEnabled(true);
-							btnCreateObject.setEnabled(true);
-							btnNewObjectAuto.setEnabled(true);
+							//Aqui
+							int nObjects = lObjects.getModel().getSize();
+							if (nObjects>0) {
+								lObjects.setSelectedIndex(0);
+								nomObj = (String) lObjects.getSelectedValue();
+								selectObject( nomObj);
+								btnSaveObject.setEnabled(true);
+								btnCancelObject.setEnabled(true);
+								btnCreateObject.setEnabled(true);
+								btnNewObjectAuto.setEnabled(true);
+							}
+							//							lObjects.setSelectedIndex(0);
+							//							nomObj = (String) lObjects.getSelectedValue();
+							//							selectObject( nomObj);
+							//							btnSaveObject.setEnabled(true);
+							//							btnCreateObject.setEnabled(true);
+							//							btnNewObjectAuto.setEnabled(true);
 						}
 						lObjects.setSelectedIndex(0);
 						nomObj = (String) lObjects.getSelectedValue();
@@ -495,9 +516,13 @@ public class WizardMVMView extends JPanel implements View {
 				txNewObject.setEnabled(false);
 			}
 		});
+
+
 		scrollPaneObj = new JScrollPane();
 		scrollPaneObj.setViewportView(lObjects);
 		scrollPaneObj.setBounds(107, 40, 90, 110);
+
+
 		// masmas
 		btnNewObjectAuto = new JButton("+");
 		Font newFont = new Font(btnNewObjectAuto.getFont().getName(), Font.BOLD, 10);
@@ -575,21 +600,54 @@ public class WizardMVMView extends JPanel implements View {
 		txNewObject = new JTextField(20);
 		txNewObject.setBounds(400, 40, 95, 25);
 		txNewObject.setEnabled(false);
-		txNewObject.addKeyListener(new KeyAdapter() {
-			public void keyReleased(KeyEvent e) { //watch for key strokes
-				if(txNewObject.getText().length() == 0 )
-					btnSaveObject.setEnabled(false);
-				else
-				{
-					btnSaveObject.setEnabled(true);
-				}
-			}
-		});
-		panel.add(txNewObject);
 
-		nomObj = (String) lObjects.getSelectedValue();
-		txNewObject.setText(nomObj);
-//AQUI
+		// Provis-------------------------------------------------------------------
+		//		txNewObject.addKeyListener(new KeyAdapter() {
+		//			public void keyReleased(KeyEvent e) { //watch for key strokes
+		//				if(txNewObject.getText().length() == 0 )
+		//					btnSaveObject.setEnabled(false);
+		//				else
+		//				{
+		//					btnSaveObject.setEnabled(true);
+		//				}
+		//			}
+		//		});
+		// Provis-------------------------------------------------------------------
+
+		//---
+
+		//		// Escuchar cambios en el contenido del JTextField
+		//		txNewObject.getDocument().addDocumentListener(new DocumentListener() {
+		//			public void insertUpdate(DocumentEvent e) {
+		//				actualizarBotones();
+		//			}
+		//
+		//			public void removeUpdate(DocumentEvent e) {
+		//				actualizarBotones();
+		//			}
+		//
+		//			public void changedUpdate(DocumentEvent e) {
+		//				// Este método solo se usa con campos de texto con estilo (no aplica aquí)
+		//			}
+		//
+		//			private void actualizarBotones() {
+		//				boolean hayTexto = !txNewObject.getText().trim().isEmpty();
+		//				btnSaveObject.setEnabled(hayTexto);
+		//				btnCancelObject.setEnabled(hayTexto);
+		//				btnDeleteObject.setEnabled(hayTexto);
+		//				// Aquí puedes inhabilitar otros botones si lo deseas
+		//				// btnCancelar.setEnabled(hayTexto);
+		//			}
+		//		});
+		//
+		//		//---
+		//
+		//		panel.add(txNewObject);
+		//		nomObj = (String) lObjects.getSelectedValue();
+		//		txNewObject.setText(nomObj);
+
+
+		//AQUI
 		btnCreateObject = new JButton("New Obj");
 		btnCreateObject.setBounds(400, 70, 95, 25);
 		btnCreateObject.addActionListener(new ActionListener() {
@@ -669,6 +727,46 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 		panel.add(btnDeleteObject);
+
+		//----------------
+
+		// Escuchar cambios en el contenido del JTextField
+		txNewObject.getDocument().addDocumentListener(new DocumentListener() {
+			public void insertUpdate(DocumentEvent e) {
+				actualizarBotones();
+			}
+
+			public void removeUpdate(DocumentEvent e) {
+				actualizarBotones();
+			}
+
+			public void changedUpdate(DocumentEvent e) {
+				// Este método solo se usa con campos de texto con estilo (no aplica aquí)
+			}
+
+			private void actualizarBotones() {
+				boolean hayTexto = !txNewObject.getText().trim().isEmpty();
+				btnSaveObject.setEnabled(hayTexto);
+				btnCancelObject.setEnabled(hayTexto);
+				btnDeleteObject.setEnabled(hayTexto);
+				// Aquí puedes inhabilitar otros botones si lo deseas
+				// btnCancelar.setEnabled(hayTexto);
+			}
+		});
+
+		//---
+
+		panel.add(txNewObject);
+		nomObj = (String) lObjects.getSelectedValue();
+		txNewObject.setText(nomObj);
+
+
+		//------------------
+
+
+
+
+
 
 		separator1.setOrientation(SwingConstants.HORIZONTAL);
 		separator1.setBounds(127, 195, 459, 10);
@@ -1014,7 +1112,7 @@ public class WizardMVMView extends JPanel implements View {
 				searchObjDiagramAssociated();
 				//--
 				if (!existDiagram) {
-					createObjDiagram();
+					createObjDiagram("");
 				}
 			}
 		});
@@ -1077,6 +1175,11 @@ public class WizardMVMView extends JPanel implements View {
 		lClass.setSelectedIndex(0);
 		lObjects.setSelectedIndex(0);
 		lAssocs.setSelectedIndex(0);
+
+		boolean hayTexto = !txNewObject.getText().trim().isEmpty();
+		btnSaveObject.setEnabled(hayTexto);
+		btnCancelObject.setEnabled(hayTexto);
+		btnDeleteObject.setEnabled(hayTexto);
 
 		//Causes display of objects when Wizard is invoked from other classes with UI
 		this.addFocusListener(new FocusListener() {
@@ -2974,11 +3077,15 @@ public class WizardMVMView extends JPanel implements View {
 	/**
 	 * Create object diagram
 	 */
-	public void createObjDiagram() {
+	public void createObjDiagram(String strTitle) {
 		NewObjectDiagramView odv = new NewObjectDiagramView(fMainWindow, fSession.system());
 		ViewFrame f = new ViewFrame("Object diagram", odv, "ObjectDiagram.gif");
 		f.setName(NAMEFRAMEMVMDIAGRAM);
 		odv.setName(NAMEFRAMEMVMDIAGRAM);
+		if (strTitle.equals("")) {
+			strTitle="Object diagram";
+		}
+		f.setTitle(strTitle);
 
 		int OBJECTS_LARGE_SYSTEM = 100;
 
@@ -3035,31 +3142,18 @@ public class WizardMVMView extends JPanel implements View {
 		// Ver frames
 		JDesktopPane fDesk = fMainWindow.getFdesk();
 		allframes = fDesk.getAllFrames();
-		
-		//---
-//		fDesk.getComponents();
-//		for (Component cc: fDesk.getComponents()) {
-//			String nameC=cc.getName();
-//			System.out.println("nameC "+nameC);
-//			if (nameC.equals(NAMEFRAMEMVMDIAGRAM)) {
-//				
-//				NewObjectDiagram odv = (NewObjectDiagram) cc;
-//				System.out.println("odv "+odv.toString());
-//			}
-//		}
-		
-		//---
 
+		String strTite="";
 		for (JInternalFrame ifr: allframes) {
 			if (ifr.getName()!=null ) {
 				if (ifr.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 					existDiagram=true;
-//					Component[] c = ifr.getComponents();//PROVIS
 					for (NewObjectDiagramView newObj: fMainWindow.getObjectDiagrams()) {
 						if (newObj.getDiagram().getName()==null) {
 							newObj.setName(NAMEFRAMEMVMDIAGRAM);
 						}
 						if (newObj.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
+							strTite=ifr.getTitle();
 							fMainWindow.getObjectDiagrams().remove(newObj);
 							iniObjDiagramAssoc();
 							break;
@@ -3071,7 +3165,7 @@ public class WizardMVMView extends JPanel implements View {
 		}
 
 		if (!existDiagram) {
-			createObjDiagram();
+			createObjDiagram(strTite);
 		}
 		return existDiagram;
 	}
@@ -3177,25 +3271,9 @@ public class WizardMVMView extends JPanel implements View {
 		int idx = selectObject(nomObjDel);
 		MSystemState state = fSystem.state();
 
-		//---
+		txNewObject.setText("");
 		checkExistObjDiagram();
-		//---
-		
-		
 		boolean existDiagram=false;
-
-		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
-			// If it is null, it is given NAMEFRAMEMVMDIAGRAM
-
-			if (odv.getDiagram().getName()==null) {
-				odv.setName(NAMEFRAMEMVMDIAGRAM);
-			}
-			if (odv.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
-				existDiagram=true;
-odv.repaint();//PROVIS JG
-				break;
-			}
-		}
 
 		if(!existDiagram && allframes!=null) {
 			for (JInternalFrame ifr: allframes) {
@@ -3205,15 +3283,16 @@ odv.repaint();//PROVIS JG
 				if (ifr.getName()!=null){
 					if (ifr.getName().equals(NAMEFRAMEMVMDIAGRAM)) {
 						existDiagram=true;
-
-						ifr.dispose();
-						createObjDiagram();
+						JDesktopPane fDesk = fMainWindow.getFdesk();
+						String ifrName = ifr.getName();
+						String strTitle = ifr.getTitle();
+						fDesk.remove(ifr);
+						createObjDiagram(strTitle);
 					}
 				}
 			}
 		}
 
-		// Locate diagram and see if it can be updated
 		for (NewObjectDiagramView odv: fMainWindow.getObjectDiagrams()) {
 			// If it is null, it is given NAMEFRAMEMVMDIAGRAM
 
@@ -3225,6 +3304,7 @@ odv.repaint();//PROVIS JG
 				odv.repaint();
 			}
 		}
+
 		state.deleteObject(fObject);
 		storeAction("DO", "Delete object ["+nomObjDel+"] of ["+fObject.name()+"]");	
 
@@ -3244,6 +3324,21 @@ odv.repaint();//PROVIS JG
 		}
 		setResClassInvariants();
 		setResCheckStructure();
+
+		//-- provis
+
+		MAssociation oAssoc = lAssocs.getSelectedValue();
+		if (oAssoc!=null) {
+			setComposAssoc(oAssoc);
+		}
+
+		//-- provis
+
+		boolean hayTexto = !txNewObject.getText().trim().isEmpty();
+		btnSaveObject.setEnabled(hayTexto);
+		btnCancelObject.setEnabled(hayTexto);
+		btnDeleteObject.setEnabled(hayTexto);
+
 	}
 
 	/**
