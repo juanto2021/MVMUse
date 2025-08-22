@@ -798,7 +798,9 @@ public class WizardMVMView extends JPanel implements View {
 				if (oAssoc!=null) {
 					setComposAssoc(oAssoc);
 				}
-
+				int nObjOri = cmbObjectOri.getModel().getSize();
+				int nObjDes = cmbObjectDes.getModel().getSize();
+				btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
 			}
 		});
 
@@ -2247,6 +2249,12 @@ public class WizardMVMView extends JPanel implements View {
 		cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 		cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 		selectObject( nomObj);
+		//-- provis
+		lAssocs.setSelectedIndex(lAssocs.getSelectedIndex());
+		int nObjOri = cmbObjectOri.getModel().getSize();
+		int nObjDes = cmbObjectDes.getModel().getSize();
+		btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
+		//-- provis	
 	}
 	public void newObjectSampleAuto() {
 		int nElems=lClass.getModel().getSize();
@@ -2834,10 +2842,24 @@ public class WizardMVMView extends JPanel implements View {
 		txMultiOri.setText("");
 		txDesAssocRole.setText("");
 		txMultiDes.setText("");		
+
+		//AQUIB
+
+		int nObjOri = cmbObjectOri.getModel().getSize();
+		int nObjDes = cmbObjectDes.getModel().getSize();
+		btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
+
+
 		//-------------
 
 
 		Set<MLink> links = fSystem.state().linksOfAssociation(oAssoc).links();
+
+		//-- provis
+		//		btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
+		btnDeleteLink.setEnabled(links.size()>0);	
+		//--
+
 		// If there are no links, the combos must be initialized based on the AssociationEnds
 		int nLink=0;
 		if (links.size()==0) {
@@ -3260,7 +3282,12 @@ public class WizardMVMView extends JPanel implements View {
 		}else {
 			storeAction("MA", "Modification object ["+nomObj+"] of ["+oClass.name()+"]");	
 		}
-
+		//-- provis
+		lAssocs.setSelectedIndex(lAssocs.getSelectedIndex());
+		int nObjOri = cmbObjectOri.getModel().getSize();
+		int nObjDes = cmbObjectDes.getModel().getSize();
+		btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
+		//-- provis				 
 	}
 
 	/**
@@ -3338,6 +3365,10 @@ public class WizardMVMView extends JPanel implements View {
 		btnSaveObject.setEnabled(hayTexto);
 		btnCancelObject.setEnabled(hayTexto);
 		btnDeleteObject.setEnabled(hayTexto);
+
+		int nObjOri = cmbObjectOri.getModel().getSize();
+		int nObjDes = cmbObjectDes.getModel().getSize();
+		btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
 
 	}
 
