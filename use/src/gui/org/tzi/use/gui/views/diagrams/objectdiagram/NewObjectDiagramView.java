@@ -169,7 +169,7 @@ implements View, PrintableView, SortChangeListener {
 
 		fObjectDiagram.addObject(e.getCreatedObject());
 		fObjectDiagram.invalidateContent(true);
-		System.out.println("Obj onObjectCeated "+e.getCreatedObject().name());//JG
+//		System.out.println("Obj onObjectCeated "+e.getCreatedObject().name());//JG
 	}
 
 	@Subscribe
@@ -186,7 +186,7 @@ implements View, PrintableView, SortChangeListener {
 	public void onAttributeAssigned(AttributeAssignedEvent e) {
 		fObjectDiagram.updateObject(e.getObject());
 		fObjectDiagram.invalidateContent(true);
-		System.out.println("Obj onAttributeAssigned "+e.getObject().name());//JG
+//		System.out.println("Obj onAttributeAssigned "+e.getObject().name());//JG
 	}
 
 	@Subscribe
@@ -196,7 +196,7 @@ implements View, PrintableView, SortChangeListener {
 		}
 		fObjectDiagram.addLink(e.getLink());
 		fObjectDiagram.invalidateContent(true);
-		System.out.println("Obj onLinkCeated "+e.getLink().linkEnds().toString());//JG
+//		System.out.println("Obj onLinkCeated "+e.getLink().linkEnds().toString());//JG
 	}
 
 	@Subscribe

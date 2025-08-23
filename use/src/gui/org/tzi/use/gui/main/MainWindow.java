@@ -1293,6 +1293,7 @@ public class MainWindow extends JFrame {
 							fKodkod.stopThreadCmb();
 						}
 						enableAction("StopCalcCmb", false);
+						enableAction("ShowDiaCmb", false);
 						enableAction("ValidationMVMG", true);
 						enableAction("ValidationMVMB", true);
 
@@ -1330,9 +1331,10 @@ public class MainWindow extends JFrame {
 			wasUsed = true;
 			if (validatorDialog!=null) {
 				validatorDialog.dispose();
-				enableAction("ShowDiaCmb", false);
+//				enableAction("ShowDiaCmb", false);
 			}
 			validatorDialog = null;
+			enableAction("ShowDiaCmb", false);
 		}
 
 		protected boolean validateOpenPossible() {
@@ -1421,22 +1423,25 @@ public class MainWindow extends JFrame {
 							fKodkod.stopThreadCmb();
 						}
 						enableAction("StopCalcCmb", false);
+//						enableAction("ShowDiaCmb", false);
 						enableAction("ValidationMVMG", true);
 						enableAction("ValidationMVMB", true);
 
 						if (validatorDialog!=null) {
 							validatorDialog.dispose();
-							enableAction("ShowDiaCmb", false);
+//							enableAction("ShowDiaCmb", false);
 						}
 						validatorDialog = null;
+//						enableAction("ShowDiaCmb", false);
 					}else {
 						return;
 					}
+//					enableAction("ShowDiaCmb", false);
 				}
 			}
 
 			compile(fileName);
-
+			enableAction("ShowDiaCmb", false);
 		}
 	}
 
@@ -1467,6 +1472,7 @@ public class MainWindow extends JFrame {
 							fKodkod.stopThreadCmb();
 						}
 						enableAction("StopCalcCmb", false);
+//						enableAction("ShowDiaCmb", false);
 						enableAction("ValidationMVMG", true);
 						enableAction("ValidationMVMB", true);
 					}else {
@@ -1483,6 +1489,7 @@ public class MainWindow extends JFrame {
 					validatorDialog.dispose();
 				}
 				validatorDialog = null;
+				enableAction("ShowDiaCmb", false);
 			}
 		}
 	}
