@@ -111,6 +111,8 @@ import org.tzi.use.gui.mvm.MVMWizardActions;
 import org.tzi.use.gui.mvm.MVMWizardAssoc;
 import org.tzi.use.gui.util.ExtendedJTable;
 import org.tzi.use.gui.views.diagrams.DiagramView.LayoutThread;
+import org.tzi.use.gui.views.diagrams.elements.edges.EdgeBase;
+import org.tzi.use.gui.views.diagrams.elements.edges.LinkEdge;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagram;
 import org.tzi.use.gui.views.diagrams.objectdiagram.NewObjectDiagramView;
 import org.tzi.use.gui.views.diagrams.objectdiagram.QualifierInputView;
@@ -120,6 +122,7 @@ import org.tzi.use.uml.mm.MAssociation;
 import org.tzi.use.uml.mm.MAssociationEnd;
 import org.tzi.use.uml.mm.MAttribute;
 import org.tzi.use.uml.mm.MClass;
+import org.tzi.use.uml.mm.MClassImpl;
 import org.tzi.use.uml.mm.MClassInvariant;
 import org.tzi.use.uml.mm.MModel;
 import org.tzi.use.uml.mm.MMultiplicity;
@@ -137,6 +140,7 @@ import org.tzi.use.uml.ocl.value.VarBindings;
 import org.tzi.use.uml.sys.MLink;
 import org.tzi.use.uml.sys.MLinkEnd;
 import org.tzi.use.uml.sys.MObject;
+import org.tzi.use.uml.sys.MObjectImpl;
 import org.tzi.use.uml.sys.MObjectState;
 import org.tzi.use.uml.sys.MSystem;
 import org.tzi.use.uml.sys.MSystemException;
@@ -3471,28 +3475,46 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return idx;
 	}
-	
+
 	public int selectClass(String className) {
 		int idx = -1;
-//		MSystemState state = fSystem.state();
-//		fObject = state.objectByName(objName);
-//		fTableModel.update();
 
 		// Search in list
 		lClass.setSelectedIndex(0);
-		int nObjs= lClass.getModel().getSize();
-		for (int nObj=0;nObj<nObjs;nObj++) {
-			if (lClass.getModel().getElementAt(nObj).name().equals(className)) {
-				lClass.setSelectedIndex(nObj);
+		int nClss= lClass.getModel().getSize();
+		for (int nCls=0;nCls<nClss;nCls++) {
+			if (lClass.getModel().getElementAt(nCls).name().equals(className)) {
+				lClass.setSelectedIndex(nCls);
 				nomClass=className;
 				lObjects.setModel(loadListObjects(nomClass));
-				idx=nObj;
+				idx=nCls;
 				return idx;
 			}
 		}
 		return idx;
 	}
-	
+
+	public int selectAssoc(String assocName) {
+		int idx = -1;
+
+		// Search in list
+
+		lAssocs.setSelectedIndex(0);
+		int nClss= lAssocs.getModel().getSize();
+		for (int nCls=0;nCls<nClss;nCls++) {
+			if (lAssocs.getModel().getElementAt(nCls).name().equals(assocName)) {
+				lAssocs.setSelectedIndex(nCls);
+				MAssociation oAssoc = lAssocs.getSelectedValue();
+				setComposAssoc(oAssoc);
+				//				nomClass=assocName;
+				//				lAssocs.setModel(loadListObjects(nomClass));
+				idx=nCls;
+				return idx;
+			}
+		}
+		return idx;
+	}
+
 
 	/**
 	 * Search for an object by name
@@ -3522,14 +3544,57 @@ public class WizardMVMView extends JPanel implements View {
 		return oRes;
 	}
 	public void selObjFromDia(String nomObj, String nomClass) {
-		System.out.println("Seleccionar nomObj ["+nomObj+"] nomClass ["+nomClass+"]");
-		
+//		System.out.println("Seleccionar nomObj ["+nomObj+"] nomClass ["+nomClass+"]");
+
 		// Buscar clase dentro de lClass
 		selectClass(nomClass);
 		// Buscar obj dentro de lObjects
 		selectObject(nomObj);
 	}
-	
+
+	public void selLinkFromDia(EdgeBase selectedEdge) {
+
+		LinkEdge aEdge = (LinkEdge) selectedEdge;
+		MLink link = aEdge.getLink();
+		String nomAssoc = selectedEdge.getName();
+
+		selectAssoc(nomAssoc);
+
+//		int nLink=0;
+		for (MLinkEnd oLE : link.linkEnds()) {
+			MClass oClass = oLE.associationEnd().cls();
+			MObject obj = oLE.object();
+
+			String className = oClass.name();
+//			System.out.println("Class: " + className);
+
+			String nomObj = obj.name();
+//			System.out.println("Objeto: " + nomObj);
+//			System.out.println("Ya");
+
+			Object objRef = cmbObjectOri.getModel().getElementAt(0);
+
+			MObject objeto = (MObject) objRef; // Cast al tipo real
+			MClassImpl cls = (MClassImpl) objeto.cls(); // Acceder al campo fClass
+			String nameClassRef = cls.name(); // Obtener el nombre
+//			System.out.println("Nombre de la clase: " + nameClassRef);
+		
+			if (className.equals(nameClassRef)) {
+				selectObjInCombo(cmbObjectOri,nomObj);
+			}else {
+				selectObjInCombo(cmbObjectDes,nomObj);
+			}
+
+		}
+//		for (MObject obj : link.linkedObjects()) {
+//			String nomObj = obj.name();
+//			System.out.println("Objeto: " + nomObj);
+//			// Aquí puedes llamar a otros métodos de MObject
+//
+//		}
+
+	}
+
 
 	/**
 	 * Search for an Association by name
@@ -3559,6 +3624,20 @@ public class WizardMVMView extends JPanel implements View {
 		for (int nObj=0;nObj<nObjs;nObj++) {
 			MClass cl = (MClass) cmb.getModel().getElementAt(nObj);
 			if (cl.name().equals(className)) {
+				cmb.setSelectedIndex(nObj);
+				return;
+			}
+		}
+		return;
+	}
+
+	public void selectObjInCombo(JComboBox<MObject> cmb, String objName) {
+
+		// Search in list
+		int nObjs= cmb.getModel().getSize();
+		for (int nObj=0;nObj<nObjs;nObj++) {
+			MObject obj = (MObject) cmb.getModel().getElementAt(nObj);
+			if (obj.name().equals(objName)) {
 				cmb.setSelectedIndex(nObj);
 				return;
 			}

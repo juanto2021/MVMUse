@@ -2587,7 +2587,7 @@ public class MainWindow extends JFrame {
 						}
 
 						//---
-						System.out.println("titulo "+f.getTitle());
+//						System.out.println("titulo "+f.getTitle());
 						//						if ("MVM Wizard".equals(f.getTitle())) {
 						//							wz=f;
 						//							//				            try {
@@ -2642,14 +2642,14 @@ public class MainWindow extends JFrame {
 		return opv;
 	}
 	//JG
-	public void selObjFromDia(String strObj) {
-		System.out.println("Seleccionar obj ["+strObj+"]");
-	}
-	public void selObjFromDia(MObject obj) {
-		System.out.println("Seleccionar obj ["+obj.name()+"]");
-	}
+//	public void selObjFromDia(String strObj) {
+//		System.out.println("Seleccionar obj ["+strObj+"]");
+//	}
+//	public void selObjFromDia(MObject obj) {
+//		System.out.println("Seleccionar obj ["+obj.name()+"]");
+//	}
 	public void selObjFromDia(String nomObj, String nomClass) {
-		System.out.println("Seleccionar nomObj ["+nomObj+"] nomClass ["+nomClass+"]");
+//		System.out.println("Seleccionar nomObj ["+nomObj+"] nomClass ["+nomClass+"]");
 		// Buscar clase dentro de lClass
 		// Buscar obj dentro de lObjects
 	}
