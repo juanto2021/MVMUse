@@ -21,8 +21,7 @@ package org.tzi.use.gui.views;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -33,8 +32,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -45,12 +42,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +62,9 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -107,6 +110,7 @@ import org.tzi.use.gui.mvm.MVMLink;
 import org.tzi.use.gui.mvm.MVMObjCheckState;
 import org.tzi.use.gui.mvm.MVMObject;
 import org.tzi.use.gui.mvm.MVMShowResponseOpenAI;
+import org.tzi.use.gui.mvm.MVMShowResponseOpenAI3;
 import org.tzi.use.gui.mvm.MVMWizardActions;
 import org.tzi.use.gui.mvm.MVMWizardAssoc;
 import org.tzi.use.gui.util.ExtendedJTable;
@@ -140,7 +144,6 @@ import org.tzi.use.uml.ocl.value.VarBindings;
 import org.tzi.use.uml.sys.MLink;
 import org.tzi.use.uml.sys.MLinkEnd;
 import org.tzi.use.uml.sys.MObject;
-import org.tzi.use.uml.sys.MObjectImpl;
 import org.tzi.use.uml.sys.MObjectState;
 import org.tzi.use.uml.sys.MSystem;
 import org.tzi.use.uml.sys.MSystemException;
@@ -150,6 +153,7 @@ import org.tzi.use.uml.sys.soil.MAttributeAssignmentStatement;
 import org.tzi.use.uml.sys.soil.MLinkDeletionStatement;
 import org.tzi.use.uml.sys.soil.MLinkInsertionStatement;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -295,7 +299,31 @@ public class WizardMVMView extends JPanel implements View {
 
 	private static String API_KEY;
 	private static String API_URL;
-	//	private static String MODEL = "Animals.use";
+
+	// --- INI New OPenAI
+	private static String strDefModel;
+	private static String strDefProperties;
+	private static String strInvariants;
+	private static String strMUS;
+	private static String strMSS;
+	private static String strObjects;
+	private static String strLinks;
+
+	private static String LINEASEP = "-------------------------------------------------\n";
+	private static String mensaje;
+	private static String jsonPretty;
+	private static String jsonResult;
+
+	// PROVIS ini -----------------------------------------------------------------------------------
+	private static String strNameModel= "Animals.use";
+	private static String strNameProperties = strNameModel.replace(".use", ".properties");
+	private static String urlModel="C:\\Temp";
+	private static String pathModel = urlModel+"\\"+strNameModel;
+	private static String pathProperties = urlModel+"\\"+strNameProperties;
+
+	// PROVIS fin -----------------------------------------------------------------------------------
+	// --- FIN New OPenAI
+
 
 	/**
 	 * The table model.
@@ -384,6 +412,13 @@ public class WizardMVMView extends JPanel implements View {
 
 		fSession = session;
 		fSystem = session.system();
+
+		strNameModel= fSystem.model().name()+".use";
+		strNameProperties = strNameModel.replace(".use", ".properties");
+		urlModel=fSystem.model().getModelDirectory().getPath();
+		pathModel = urlModel+"\\"+strNameModel;
+		pathProperties = urlModel+"\\"+strNameProperties;
+
 		fSystem.registerRequiresAllDerivedValues();
 		fSystem.getEventBus().register(this);
 		fLogWriter=logWriter;
@@ -469,7 +504,6 @@ public class WizardMVMView extends JPanel implements View {
 							btnCreateObject.setEnabled(false);
 							btnNewObjectAuto.setEnabled(false);
 						}else {
-							//Aqui
 							int nObjects = lObjects.getModel().getSize();
 							if (nObjects>0) {
 								lObjects.setSelectedIndex(0);
@@ -480,12 +514,6 @@ public class WizardMVMView extends JPanel implements View {
 								btnCreateObject.setEnabled(true);
 								btnNewObjectAuto.setEnabled(true);
 							}
-							//							lObjects.setSelectedIndex(0);
-							//							nomObj = (String) lObjects.getSelectedValue();
-							//							selectObject( nomObj);
-							//							btnSaveObject.setEnabled(true);
-							//							btnCreateObject.setEnabled(true);
-							//							btnNewObjectAuto.setEnabled(true);
 						}
 						lObjects.setSelectedIndex(0);
 						nomObj = (String) lObjects.getSelectedValue();
@@ -605,53 +633,6 @@ public class WizardMVMView extends JPanel implements View {
 		txNewObject.setBounds(400, 40, 95, 25);
 		txNewObject.setEnabled(false);
 
-		// Provis-------------------------------------------------------------------
-		//		txNewObject.addKeyListener(new KeyAdapter() {
-		//			public void keyReleased(KeyEvent e) { //watch for key strokes
-		//				if(txNewObject.getText().length() == 0 )
-		//					btnSaveObject.setEnabled(false);
-		//				else
-		//				{
-		//					btnSaveObject.setEnabled(true);
-		//				}
-		//			}
-		//		});
-		// Provis-------------------------------------------------------------------
-
-		//---
-
-		//		// Escuchar cambios en el contenido del JTextField
-		//		txNewObject.getDocument().addDocumentListener(new DocumentListener() {
-		//			public void insertUpdate(DocumentEvent e) {
-		//				actualizarBotones();
-		//			}
-		//
-		//			public void removeUpdate(DocumentEvent e) {
-		//				actualizarBotones();
-		//			}
-		//
-		//			public void changedUpdate(DocumentEvent e) {
-		//				// Este método solo se usa con campos de texto con estilo (no aplica aquí)
-		//			}
-		//
-		//			private void actualizarBotones() {
-		//				boolean hayTexto = !txNewObject.getText().trim().isEmpty();
-		//				btnSaveObject.setEnabled(hayTexto);
-		//				btnCancelObject.setEnabled(hayTexto);
-		//				btnDeleteObject.setEnabled(hayTexto);
-		//				// Aquí puedes inhabilitar otros botones si lo deseas
-		//				// btnCancelar.setEnabled(hayTexto);
-		//			}
-		//		});
-		//
-		//		//---
-		//
-		//		panel.add(txNewObject);
-		//		nomObj = (String) lObjects.getSelectedValue();
-		//		txNewObject.setText(nomObj);
-
-
-		//AQUI
 		btnCreateObject = new JButton("New Obj");
 		btnCreateObject.setBounds(400, 70, 95, 25);
 		btnCreateObject.addActionListener(new ActionListener() {
@@ -753,24 +734,13 @@ public class WizardMVMView extends JPanel implements View {
 				btnSaveObject.setEnabled(hayTexto);
 				btnCancelObject.setEnabled(hayTexto);
 				btnDeleteObject.setEnabled(hayTexto);
-				// Aquí puedes inhabilitar otros botones si lo deseas
 				// btnCancelar.setEnabled(hayTexto);
 			}
 		});
 
-		//---
-
 		panel.add(txNewObject);
 		nomObj = (String) lObjects.getSelectedValue();
 		txNewObject.setText(nomObj);
-
-
-		//------------------
-
-
-
-
-
 
 		separator1.setOrientation(SwingConstants.HORIZONTAL);
 		separator1.setBounds(127, 195, 459, 10);
@@ -867,13 +837,13 @@ public class WizardMVMView extends JPanel implements View {
 		btnSuggestions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//				runAnalisis1();
-				runAnalisis2();
+				//				runAnalisis2();
+				runAnalisis3();				
 			}
 		});
 		panel.add(btnSuggestions);
 
 		btnViewCmbs = new JButton("MSS/MUS");
-		//		btnSuggestions.setBounds(300, 450, 155, 60);
 		btnViewCmbs.setBounds(10, 450, 95, 60);
 		btnViewCmbs.setVerticalAlignment(SwingConstants.CENTER);
 		btnViewCmbs.setHorizontalAlignment(SwingConstants.CENTER);
@@ -1238,35 +1208,536 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 
-
-
-	//	private void runAnalisis1() {
+	//	private void runAnalisis2() {
 	//		try {
-	//			String strJson = builJsonRequest1();
+	//			String strJson = builJsonRequest2();
 	//			// Call API
 	//			String jsonContent=callAPIOpenAI(strJson);
 	//			// Analysis jsonContent
-	//			String resultado = analysisJsonToString1(jsonContent);
+	//			String resultado = analysisJsonToString2(jsonContent);
 	//			// Show result
 	//			showResponseOpenAI(resultado);
 	//		} catch (Exception e) {
 	//			e.printStackTrace();
 	//		}
 	//	}
+	//INI --- New OpenAI ---------------------------------------------
 
-	private void runAnalisis2() {
+	public static String getStrDefModel() {
+		String sDefModel="";
+
 		try {
-			String strJson = builJsonRequest2();
-			// Call API
-			String jsonContent=callAPIOpenAI(strJson);
-			// Analysis jsonContent
-			String resultado = analysisJsonToString2(jsonContent);
-			// Show result
-			showResponseOpenAI(resultado);
+			sDefModel = new String(Files.readAllBytes(Paths.get(pathModel)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return sDefModel;
+	}
+
+	public static String getStrDefProperties() {
+		String sDefProperties="DefProperties";
+		try {
+			sDefProperties = new String(Files.readAllBytes(Paths.get(pathProperties)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return sDefProperties;
+	}
+	public static String getStrInvariants() {
+
+		List<String> invariants = new ArrayList<>();
+		invariants = extractInvariants(strDefModel);
+
+		return String.join("\r\n", invariants);
+	}
+	public static List<String> extractInvariants(String modelText) {
+		List<String> invariants = new ArrayList<String>();
+
+		Pattern p = Pattern.compile(
+				"\\bcontext\\s+(\\w+)\\s+inv\\s+(\\w+)\\s*:",
+				Pattern.CASE_INSENSITIVE
+				);
+		Matcher m = p.matcher(modelText);
+
+		int counter = 1;
+		while (m.find()) {
+			String className = m.group(1);
+			String invName   = m.group(2);
+			String entry = counter + "-" + className + "::" + invName ;
+			invariants.add(entry);
+			counter++;
+		}
+
+		return invariants;
+	}
+	public static String getStrMUS() {
+
+		String gMUS = ""; // en fomato 1-2,3-4-5
+		List<String> groups = new ArrayList<>();
+		groups = buildInvariantGroups(strInvariants, gMUS);
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < groups.size(); i++) {
+			sb.append(groups.get(i).trim());
+			if (i < groups.size() - 1) {
+				sb.append("\n"); // salto de línea entre grupos
+			}
+		}
+
+		return sb.toString();
+	}
+	public static List<String> buildInvariantGroups(String strInvariants, String gMSS) {
+
+		List<String> result = new ArrayList<>();
+
+		// 1) Convertir lista de invariantes en un mapa id → texto
+		Map<String, String> mapInv = new LinkedHashMap<>();
+
+		String[] lines = strInvariants.split("\n");
+		for (int i = 0; i < lines.length; i++) {
+			String line = lines[i].trim();
+			if (line.isEmpty()) continue;
+
+			int idx = line.indexOf("-");
+			if (idx > 0) {
+				String id = line.substring(0, idx).trim();
+				mapInv.put(id, line);
+			}
+		}
+
+		// 2) Procesar los grupos MUS
+		String[] groups = gMSS.split(",");
+		if (groups.length<=0 || groups[0].toString().equals("")) {
+			return result;
+		}
+		for (int i = 0; i < groups.length; i++) {
+
+			String group = groups[i].trim();   // ejemplo: "1-2"
+			String[] ids = group.split("-");
+
+			StringBuilder sb = new StringBuilder();
+			sb.append("Grupo").append(i + 1).append(": ");
+
+			for (int j = 0; j < ids.length; j++) {
+				String id = ids[j].trim();
+				String inv = mapInv.get(id);
+
+				if (inv != null) {
+					sb.append(inv);
+					if (j < ids.length - 1) sb.append(",");
+				}
+			}
+
+			result.add(sb.toString());
+		}
+
+		return result;
+	}
+
+	public static String getStrMSS() {
+
+		String gMSS = ""; // en fomato 1-2,3-4-5
+		List<String> groups = new ArrayList<>();
+		groups = buildInvariantGroups(strInvariants, gMSS);
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < groups.size(); i++) {
+			sb.append(groups.get(i).trim());
+			if (i < groups.size() - 1) {
+				sb.append("\n".toUpperCase()); // salto de línea entre grupos
+			}
+		}
+
+		return sb.toString();
+	}	
+	public static String getStrObjects() {
+
+		List<String> lObjects = new ArrayList<>();
+		return String.join("\r\n", lObjects);
+	}
+
+	public static String getStrLinks() {
+
+		List<String> lLinks = new ArrayList<>();
+		return String.join("\r\n", lLinks);
+	}
+
+	public static String builJsonRequest3(String strNameModel, String strDefModel, 
+			String strDefProperties, String strInvariants, String strMUS, String strMSS,
+			String strObjects, String strLinks) {
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("We are analyzing the satisfiability of the model that I am going to provide to you, and for this purpose we are using the ");
+		sb.append("USE tool (UML-Based Specification Environment) developed by the University of Bremen.\n");
+		sb.append("The goal is to create a valid instance and, if this is not possible, determine where the errors to be corrected are located and ");
+		sb.append("what must be done to fix them.\n");
+		sb.append("That is, if the problem lies in one or more invariants, you must indicate which invariants they are and how to correct them.\n");
+		sb.append("If the problem is that a link is missing or there is an extra one, or that one of the links is incorrectly defined or does not have ");
+		sb.append("the necessary objects for proper functioning, you should also indicate which link(s) are affected and how to redefine or remove them if appropriate.\n");
+		sb.append("I provide you with the following information:\n\n");
+
+		String request1 = sb.toString();
+
+		StringBuilder sb2 = new StringBuilder();
+		sb2.append("Taking into account that with the actions you propose I will delete all existing objects and links in the current instance,"); 
+		sb2.append("I need you to return the following in JSON format:\n");
+		//		sb2.append("- A list of modifications to be made (if applicable) to the properties (<"+strNameModel+">.properties, whose content is defined in 'Properties').");
+		sb2.append("- The properties tag only refers to the properties that exist in <"+strNameModel+">.properties.\n");
+		//		sb2.append(" Do not limit yourself to the original properties if an alternative configuration exists that allows a valid instance of the model.");
+		sb2.append(" If there are no properties to modify, it indicates that no properties need to be modified\n");
+		sb2.append("- A list of objects with their corresponding values as if the modified properties had already been applied."); 
+		sb2.append(" Please return the same field names indicated in the request corresponding to each class.");
+		sb2.append(" Please ensure that when defining objects, you normalize the output using the tags 'class', 'name', and 'attributes'.");
+		sb2.append(" If there are no objects to modify or create, indicate that it is not necessary to handle objects.\n");
+		sb2.append("- A list of links that satisfy the relationships defined in the model, with their respective parameters. If there are no links to modify or create,");
+		sb2.append(" indicate that link handling is not necessary.");
+		sb2.append(" Please return the same field names specified in the request.");
+		sb2.append(" If you do need to handle links, always specify the `from` and `to` clauses.\n");
+		// Si no hay MUS y MSS se las pido.
+		if (strMUS.equals("")) {
+			sb2.append("Please calculate MUS (Minimal Unsatisfiable Subset) and MSS (Maximal Satisfiable Subset) and include the result in a paragraph-style subsection within the resulting 'Comment' block.\n");
+
+		}
+		sb2.append("- An explanation of 'how to correct the model', considering the properties that have been indicated for correction as");
+		sb2.append(" if they were already corrected.\n");
+		sb2.append("- I need a JSON structure that my program can process in order to create the proposed objects and links, display the properties to be modified,");
+		sb2.append(" and show an explanation indicating where the error(s) are and everything that must be done to fix them.\n");
+		sb2.append("- Please return only the JSON structure without any additional explanation, since the result must be delivered to an application.\n");
+		sb2.append("- Therefore, the JSON structure must contain the following parts:\n");
+		sb2.append("  - Properties: properties to be modified\n");
+		sb2.append("  - Objects: for each object, specify class name, object name, field name, field value\n");
+		sb2.append("  - Links: for each link, specify association, source object, target object\n");
+		sb2.append("  - Comment: Explanation of 'how to correct the model', taking into account the properties that have been indicated for correction as");
+		sb2.append(" if they were already corrected.\n");
+		sb2.append("\nThe only tags to return should be: Properties, Objects, Links, and Comment.\n");
+		sb2.append("Do not omit the creation of objects or links.\n");
+		sb2.append("Return ONLY valid JSON.\n");
+		sb2.append("Do not include markdown.\n");
+		//		if (strMUS.equals("")) {
+		sb2.append("Don't forget to include the MUS (Minimal Unsatisfiable Subset) and MSS (Maximal Satisfiable Subset) in the 'Comment' tag using the following format: "
+				+ LINEASEP
+				+ "Minimal Unsatisfiable Subset:\n"
+				+ " - Group1:\n"
+				+ "   invariant1\n"
+				+ " \n - Group2:\n"
+				+ "   invariant2\n"
+				+ "   invariant3\n"
+				+ "\n"
+				+ LINEASEP
+				+ "Maximal Satisfiable Subset:\n"
+				+ " - Group1:\n"
+				+ "   invariant4\n"
+				+ "   invariant5\n"
+				+ "   invariant6\n"
+				+ "   invariant7\n"
+				+ " \n - Group2:\n"
+				+ "   invariant8\n"
+				+ "   invariant9\n"
+				+ " \n - Group3:\n"
+				+ "   invariant10\n"
+				+ "   invariant11\n\n"
+				+ " Remember that in the example I use the names invariant1, etc., but you must use the actual name of the invariant and"
+				+ " its associated invariant number from the invariant list provided earlier. Only invariants should be used here, not other object names or links."
+				+ " And please include the invariant number that appears in the list.\n"
+				+LINEASEP);
+		sb2.append("\n");
+		//		}
+		sb2.append("In the 'Comment' tag included in the result of the request, we must display each sentence ending with a '.' on a different line. ");
+		sb2.append("In other words, it displays the comments as if you were listing them.\n");
+
+		String request2 = sb2.toString();
+
+		mensaje = request1;
+		mensaje += "Here is a name of model: "+strNameModel+"\n";
+		mensaje += LINEASEP;
+		mensaje += "Model definition:\n "+strDefModel+"\n";	
+		mensaje += LINEASEP;
+		mensaje += "Properties: " +strDefProperties+"\n";
+		mensaje += LINEASEP;
+		mensaje += "List of invariants:\r\n"+ strInvariants+"\r\n";
+		mensaje += LINEASEP;
+		if (!strMUS.equals("")) {
+			mensaje += "\r\nList of MUS:\r\n"+strMUS +"\r\n";
+			mensaje += LINEASEP;
+			mensaje +="List of MSS:\r\n"+strMSS +"\r\n";
+			mensaje += LINEASEP;
+		}
+		mensaje +="List of objects:"+strObjects+"\r\n";
+		mensaje += LINEASEP;
+		mensaje +="List of links:"+strLinks+"\r\n";
+		mensaje += LINEASEP;
+		mensaje +=request2+"\r\n";
+
+		System.out.println("Mensaje 1 =================================================================");
+		System.out.println(mensaje);
+		System.out.println("Mensaje 2 =================================================================");
+
+		String json = buildRequest3(mensaje);
+
+		return json;
+	}
+
+	public static String buildRequest3(String prompt) {
+
+		JSONObject root = new JSONObject();
+
+		try {
+			root.put("model", "gpt-4o-mini");
+			root.put("temperature", 0);
+
+			JSONObject responseFormat = new JSONObject();
+			responseFormat.put("type", "json_object");
+			root.put("response_format", responseFormat);
+
+			JSONArray messages = new JSONArray();
+
+			JSONObject userMessage = new JSONObject();
+			userMessage.put("role", "user");
+			userMessage.put("content", prompt);
+
+			messages.put(userMessage);
+
+			root.put("messages", messages);
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		return root.toString();
+	}
+
+	public static String formatJson(String json) {
+		json = json.trim();
+
+		try {
+			// Si empieza por [, es un array
+			if (json.startsWith("[")) {
+				JSONArray arr = new JSONArray(json);
+				return arr.toString(2); // indentación de 2 espacios
+			} 
+			// Si empieza por {, es un objeto
+			else if (json.startsWith("{")) {
+				JSONObject obj = new JSONObject(json);
+				return obj.toString(2);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		// Si no es JSON válido, lo devolvemos tal cual
+		return json;
 	}
+
+	public static String analysisJsonToString(String jsonContent) {
+		StringBuilder sb = new StringBuilder();
+
+		try {
+			JSONObject root = new JSONObject(jsonContent);
+			JSONArray choices = root.getJSONArray("choices");
+			if (choices.length() > 0) {
+				JSONObject firstChoice = choices.getJSONObject(0);
+				JSONObject message = firstChoice.getJSONObject("message");
+				sb.append(message.getString("content").trim());
+			} else {
+				sb.append("No choices found in the response.");
+			}
+		} catch (JSONException e) {
+			sb.append("Error parsing OpenAI response: " + e.getMessage());
+		}
+
+		return sb.toString();
+	}
+
+	public static Map<String, String> parseResult(String jsonString) {
+
+		Map<String, String> out = new HashMap<>();
+
+		JSONObject root;
+		try {
+			root = new JSONObject(jsonString);
+
+			// --- Properties ---
+			Object propsObj = root.get("Properties");
+
+			if (propsObj instanceof JSONObject) {
+				JSONObject props = (JSONObject) propsObj;
+				out.put("rProperties", props.toString());
+			}
+			else if (propsObj instanceof JSONArray) {
+				JSONArray props = (JSONArray) propsObj;
+				out.put("rProperties", props.toString());
+			}
+			else {
+				out.put("rProperties", "{}"); 
+			}
+
+			// --- Objects ---
+			Object objsObj = root.get("Objects");
+
+			if (objsObj instanceof JSONArray) {
+				JSONArray objs = (JSONArray) objsObj;
+				out.put("rObjects", objs.toString());
+			}
+			else if (objsObj instanceof JSONObject) {
+				JSONObject objs = (JSONObject) objsObj;
+				out.put("rObjects", objs.toString());
+			}
+			else {
+				out.put("rObjects", "[]"); 
+			}
+
+			// --- Links ---
+			Object linksObj = root.get("Links");
+
+			if (linksObj instanceof JSONArray) {
+				JSONArray links = (JSONArray) linksObj;
+				out.put("rLinks", links.toString());
+			} 
+			else if (linksObj instanceof JSONObject) {
+				JSONObject links = (JSONObject) linksObj;
+				out.put("rLinks", links.toString());
+			} 
+			else {
+				out.put("rLinks", "[]"); 
+			}
+
+			// --- Comment ---
+			String comment = root.getString("Comment");
+			out.put("rComments", comment);	
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		return out;
+	}
+
+
+
+	private void runAnalisis3() {
+		try {
+			panel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			strDefModel=getStrDefModel();   // Cambiar contenido
+			strDefProperties=getStrDefProperties();  // Cambiar contenido
+			strInvariants=getStrInvariants();  // Cambiar contenido
+			strMUS=getStrMUS();  // Cambiar contenido
+			strMSS=getStrMSS(); // Cambiar contenido
+			strObjects=getStrObjects();  // Cambiar contenido
+			strLinks=getStrLinks(); // Cambiar contenido
+
+
+			String json = builJsonRequest3(strNameModel, strDefModel, 
+					strDefProperties, strInvariants, strMUS, strMSS,
+					strObjects, strLinks);
+
+			ObjectMapper mapper = new ObjectMapper();
+			Object jsonWork = mapper.readValue(json, Object.class);
+
+			// Luego lo convierto a JSON bonito
+			jsonPretty = mapper.writerWithDefaultPrettyPrinter()
+					.writeValueAsString(jsonWork);
+
+			System.out.println("jsonPretty 1 =================================================================");
+			System.out.println(jsonPretty);
+			System.out.println("jsonPretty 2 =================================================================");
+
+			// Llamada API
+			jsonResult=callAPIOpenAI3(jsonPretty);
+
+			System.out.println("jsonContent 1 =================================================================");
+			System.out.println(jsonResult);
+			System.out.println("jsonContent 2 =================================================================");
+
+			// Analisis json
+			String jsonAnalysisResult = analysisJsonToString(jsonResult);
+			System.out.println("resultado 1 =================================================================");
+			System.out.println(jsonAnalysisResult);
+			System.out.println("resultado 2 =================================================================");
+
+			Map<String, String> out = parseResult(jsonAnalysisResult);
+
+			String rObjects = out.get("rObjects");
+			String rLinks = out.get("rLinks");
+			String rProperties = out.get("rProperties");
+			String rComments = out.get("rComments");
+
+			//			btnCreateObjects.setEnabled(!rObjects.trim().isEmpty());
+			//			btnCreateLinks.setEnabled(!rLinks.trim().isEmpty());
+
+			System.out.println("rObjects 1 =================================================================");
+			System.out.println(formatJson(rObjects));
+			System.out.println("rObjects 2 =================================================================");
+
+			System.out.println("rLinks 1 =================================================================");
+			System.out.println(formatJson(rLinks));
+			System.out.println("rLinks 2 =================================================================");
+
+			System.out.println("rProperties 1 =================================================================");
+			System.out.println(formatJson(rProperties));
+			System.out.println("rProperties 2 =================================================================");
+
+			System.out.println("rComments 1 =================================================================");
+			System.out.println(formatJson(rComments));
+			System.out.println("rComments 2 =================================================================");
+			System.out.println(out);
+
+			// Llamada visualización OpenAI
+			panel.setCursor(Cursor.getDefaultCursor());
+			showResponseOpenAI3(rObjects, rLinks, rProperties, rComments, mensaje, jsonPretty, jsonResult);
+
+
+		} catch (Exception ex) {
+			panel.setCursor(Cursor.getDefaultCursor());
+			JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	public static String callAPIOpenAI3(String json) {
+
+		//		panel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); // provis
+		String responseBody="";
+		MVMConfigManager config = new MVMConfigManager("config.properties");
+
+		API_KEY = System.getenv("OPENAI_API_KEY");
+		API_URL = config.get("endpoint");
+
+
+		OkHttpClient client = new OkHttpClient.Builder()
+				.connectTimeout(60, TimeUnit.SECONDS)
+				.readTimeout(900, TimeUnit.SECONDS)
+				.writeTimeout(180, TimeUnit.SECONDS)
+				.build();
+
+		RequestBody body = RequestBody.create(MediaType.parse("application/json"), json);
+
+		Request request = new Request.Builder()
+				.url(API_URL)
+				.header("Authorization", "Bearer " + API_KEY)
+				.post(body)
+				.build();
+		try (Response response = client.newCall(request).execute()) {
+
+			if (!response.isSuccessful()) {
+				throw new IOException("HTTP error code: " + response.code() + 
+						" body: " + responseBody);
+			}
+
+			if (response.body() != null) {
+				responseBody = response.body().string();
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			//			panel.setCursor(Cursor.getDefaultCursor()); // provis
+		}
+		//		panel.setCursor(Cursor.getDefaultCursor()); // provis
+
+		return responseBody;
+
+	}
+
+
+	//FIN --- New OpenAI ---------------------------------------------
 
 	public static String callAPIOpenAI(String json) {
 		String responseBody="";
@@ -1590,9 +2061,21 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 
-	private void showResponseOpenAI(String result) {
-		MVMShowResponseOpenAI dialog = new MVMShowResponseOpenAI(result);
-		dialog.setSize(1055, 645);
+//	private void showResponseOpenAI(String result) {
+//		MVMShowResponseOpenAI dialog = new MVMShowResponseOpenAI(result);
+//		dialog.setSize(1055, 645);
+//		dialog.setLocationRelativeTo(null);
+//		dialog.setModal(true);
+//		dialog.setVisible(true);
+//	}
+
+	private void showResponseOpenAI3(String rObjects, 
+			String rLinks, String rProperties,String rComments, String mensaje, String jsonPretty, String jsonResult) {
+		//			public MVMShowResponseOpenAI3(String strNameModel, String rObjects, 
+		//		String rLinks, String mensaje, String jsonPretty, String jsonResult) {
+		MVMShowResponseOpenAI3 dialog = new MVMShowResponseOpenAI3(frame, strNameModel, rObjects, 
+				rLinks, rProperties, rComments,mensaje, jsonPretty, jsonResult);
+		dialog.setSize(853, 925);
 		dialog.setLocationRelativeTo(null);
 		dialog.setModal(true);
 		dialog.setVisible(true);
@@ -3544,7 +4027,7 @@ public class WizardMVMView extends JPanel implements View {
 		return oRes;
 	}
 	public void selObjFromDia(String nomObj, String nomClass) {
-//		System.out.println("Seleccionar nomObj ["+nomObj+"] nomClass ["+nomClass+"]");
+		//		System.out.println("Seleccionar nomObj ["+nomObj+"] nomClass ["+nomClass+"]");
 
 		// Buscar clase dentro de lClass
 		selectClass(nomClass);
@@ -3560,25 +4043,25 @@ public class WizardMVMView extends JPanel implements View {
 
 		selectAssoc(nomAssoc);
 
-//		int nLink=0;
+		//		int nLink=0;
 		for (MLinkEnd oLE : link.linkEnds()) {
 			MClass oClass = oLE.associationEnd().cls();
 			MObject obj = oLE.object();
 
 			String className = oClass.name();
-//			System.out.println("Class: " + className);
+			//			System.out.println("Class: " + className);
 
 			String nomObj = obj.name();
-//			System.out.println("Objeto: " + nomObj);
-//			System.out.println("Ya");
+			//			System.out.println("Objeto: " + nomObj);
+			//			System.out.println("Ya");
 
 			Object objRef = cmbObjectOri.getModel().getElementAt(0);
 
 			MObject objeto = (MObject) objRef; // Cast al tipo real
 			MClassImpl cls = (MClassImpl) objeto.cls(); // Acceder al campo fClass
 			String nameClassRef = cls.name(); // Obtener el nombre
-//			System.out.println("Nombre de la clase: " + nameClassRef);
-		
+			//			System.out.println("Nombre de la clase: " + nameClassRef);
+
 			if (className.equals(nameClassRef)) {
 				selectObjInCombo(cmbObjectOri,nomObj);
 			}else {
@@ -3586,12 +4069,12 @@ public class WizardMVMView extends JPanel implements View {
 			}
 
 		}
-//		for (MObject obj : link.linkedObjects()) {
-//			String nomObj = obj.name();
-//			System.out.println("Objeto: " + nomObj);
-//			// Aquí puedes llamar a otros métodos de MObject
-//
-//		}
+		//		for (MObject obj : link.linkedObjects()) {
+		//			String nomObj = obj.name();
+		//			System.out.println("Objeto: " + nomObj);
+		//			// Aquí puedes llamar a otros métodos de MObject
+		//
+		//		}
 
 	}
 
