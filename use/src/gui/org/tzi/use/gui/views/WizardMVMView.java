@@ -2148,7 +2148,7 @@ public class WizardMVMView extends JPanel implements View {
 		//		String rLinks, String mensaje, String jsonPretty, String jsonResult) {
 		MVMShowResponseOpenAI3 dialog = new MVMShowResponseOpenAI3(frame, strNameModel, rObjects, 
 				rLinks, rProperties, rComments,mensaje, jsonPretty, jsonResult);
-		dialog.setSize(853, 925);
+		dialog.setSize(1254, 900);
 		dialog.setLocationRelativeTo(null);
 		dialog.setModal(true);
 		dialog.setVisible(true);
