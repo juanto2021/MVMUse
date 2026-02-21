@@ -243,7 +243,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		return sb.toString();
 	}
 
-	public static String buildLinksTree(String jsonString) {
+	public static String buildLinksTreeOld(String jsonString) {
 
 		JSONArray arr;
 		StringBuilder sb = new StringBuilder();
@@ -309,7 +309,70 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		return sb.toString();
 	}
 
+	public static String buildLinksTree(String jsonString) {
 
+	    StringBuilder sb = new StringBuilder();
+
+	    try {
+	        JSONArray arr = new JSONArray(jsonString);
+
+	        // Agrupar por nomAssoc
+	        Map<String, List<JSONObject>> data = new LinkedHashMap<>();
+
+	        for (int i = 0; i < arr.length(); i++) {
+	            JSONObject link = arr.getJSONObject(i);
+
+	            String assoc = link.getString("nomAssoc");
+
+	            data.putIfAbsent(assoc, new ArrayList<>());
+	            data.get(assoc).add(link);
+	        }
+
+	        // Construir árbol
+	        for (String assoc : data.keySet()) {
+
+	            sb.append(assoc).append("\n");
+
+	            List<JSONObject> links = data.get(assoc);
+	            int total = links.size();
+	            int count = 0;
+
+	            for (JSONObject link : links) {
+	                count++;
+	                boolean isLast = (count == total);
+
+	                String prefix = isLast ? "└── " : "├── ";
+
+	                String code = link.getString("codeLink");
+
+	                String e1Class = link.getString("end1Class");
+	                String e1Obj   = link.getString("end1Object");
+	                String e1Role  = link.getString("end1Role");
+
+	                String e2Class = link.getString("end2Class");
+	                String e2Obj   = link.getString("end2Object");
+	                String e2Role  = link.getString("end2Role");
+
+	                sb.append(prefix).append("codeLink ").append(code).append("\n");
+
+	                sb.append("    ├── from: ")
+	                  .append(e1Class).append(" ").append(e1Obj)
+	                  .append(" (role=").append(e1Role).append(")\n");
+
+	                sb.append("    └── to:   ")
+	                  .append(e2Class).append(" ").append(e2Obj)
+	                  .append(" (role=").append(e2Role).append(")\n");
+	            }
+
+	            sb.append("\n");
+	        }
+
+	    } catch (JSONException e) {
+	        e.printStackTrace();
+	    }
+
+	    return sb.toString();
+	}
 
 	public String getContentNew() {
 		return contentNew;
@@ -335,7 +398,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		btnCreateObjects.setEnabled(false);
 		btnCreateObjects.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				showDialogCreateObjects(panel.getParent(), rObjects);
+				showDialogCreateObjects(panel.getParent());
 			}
 		});
 		panel.add(btnCreateObjects);
@@ -367,7 +430,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		btnCreateLinks.setEnabled(false);
 		btnCreateLinks.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				showDialogCreateObjectsAndLinks(panel.getParent(), rLinks);
+				showDialogCreateObjectsAndLinks(panel.getParent());
 			}
 		});
 		panel.add(btnCreateLinks);
@@ -484,8 +547,8 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		btnExit.setBounds(fieldWidth*2-130, startY + fieldHeight*4 +90, 150, 30);
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.exit(0); //Provis
-				//				dispose();
+//				System.exit(0); //Provis
+								dispose();
 			}
 		});
 		panel.add(btnExit);
@@ -498,57 +561,90 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
 	}
-
+	
 	public static StringBuilder createTextObjects(String jsonArrayText) {
-		StringBuilder sb = new StringBuilder();
+	    StringBuilder sb = new StringBuilder();
 
-		try {
-			JSONArray arr = new JSONArray(jsonArrayText);
+	    try {
+	        JSONArray arr = new JSONArray(jsonArrayText);
 
-			for (int i = 0; i < arr.length(); i++) {
-				JSONObject obj = arr.getJSONObject(i);
+	        for (int i = 0; i < arr.length(); i++) {
+	            JSONObject obj = arr.getJSONObject(i);
 
-				String name = obj.optString("name", "unknown");
-				String className = obj.optString("class", "unknown");
+	            String className = obj.optString("class", "unknown");
+	            String name = obj.optString("name", "unknown");
+	            JSONObject attributes = obj.optJSONObject("attributes");
 
-				StringBuilder attrs = new StringBuilder();
+	            sb.append("class:\"")
+	              .append(className)
+	              .append("\",name:\"")
+	              .append(name)
+	              .append("\",attributes:")
+	              .append(attributes != null ? attributes.toString() : "{}");
 
-				JSONArray keys = obj.names();
-				for (int j = 0; j < keys.length(); j++) {
-					String key = keys.getString(j);
+	            if (i < arr.length() - 1) {
+	                sb.append("\n");
+	            }
+	        }
 
-					if (!key.equals("name") && !key.equals("class")) {
-						attrs.append(key)
-						.append("=")
-						.append(obj.get(key))
-						.append(", ");
-					}
-				}
+	    } catch (JSONException e) {
+	        sb.append("Error parsing JSON: ").append(e.getMessage());
+	    }
 
-				if (attrs.length() > 0) {
-					attrs.setLength(attrs.length() - 2);
-				}
-
-				sb.append("Object name=[")
-				.append(name)
-				.append("] class=[")
-				.append(className)
-				.append("] attributes=[")
-				.append(attrs)
-				.append("]\n");
-			}
-
-		} catch (JSONException e) {
-			sb.append("Error parsing JSON: ").append(e.getMessage());
-		}
-		return sb;
+	    return sb;
 	}
-	public static void showDialogCreateObjects(Component parent, String jsonArrayText) {
-		StringBuilder sb = createTextObjects( jsonArrayText);
+
+//	public static StringBuilder createTextObjects2(String jsonArrayText) {
+//		StringBuilder sb = new StringBuilder();
+//
+//		try {
+//			JSONArray arr = new JSONArray(jsonArrayText);
+//
+//			for (int i = 0; i < arr.length(); i++) {
+//				JSONObject obj = arr.getJSONObject(i);
+//
+//				String name = obj.optString("name", "unknown");
+//				String className = obj.optString("class", "unknown");
+//
+//				StringBuilder attrs = new StringBuilder();
+//
+//				JSONArray keys = obj.names();
+//				for (int j = 0; j < keys.length(); j++) {
+//					String key = keys.getString(j);
+//
+//					if (!key.equals("name") && !key.equals("class")) {
+//						attrs.append(key)
+//						.append("=")
+//						.append(obj.get(key))
+//						.append(", ");
+//					}
+//				}
+//
+//				if (attrs.length() > 0) {
+//					attrs.setLength(attrs.length() - 2);
+//				}
+//
+//				sb.append("Object name=[")
+//				.append(name)
+//				.append("] class=[")
+//				.append(className)
+//				.append("] attributes=[")
+//				.append(attrs)
+//				.append("]\n");
+//			}
+//
+//		} catch (JSONException e) {
+//			sb.append("Error parsing JSON: ").append(e.getMessage());
+//		}
+//		return sb;
+//	}
+	public static void showDialogCreateObjects(Component parent) {
+//		StringBuilder sb = createTextObjects( jsonArrayText);
+		StringBuilder sb = createTextObjects( rObjects);
 
 		// Crear el dialogo
 		JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(parent), "Objects to Create");
-		dialog.setSize(500, 400);
+		dialog.setSize(700, 400);
 		dialog.setLocationRelativeTo(parent);
 		dialog.setLayout(new BorderLayout());
 
@@ -579,7 +675,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		dialog.setVisible(true);
 	}
 
-	public static StringBuilder createTextLinks(String jsonArrayText) {
+	public static StringBuilder createTextLinksOLd(String jsonArrayText) {
 		StringBuilder sb = new StringBuilder();
 
 		try {
@@ -613,14 +709,57 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		return sb;
 	}
 
-	public static void showDialogCreateObjectsAndLinks(Component parent, String jsonArrayText) {
+	public static StringBuilder createTextLinks(String jsonArrayText) {
+	    StringBuilder sb = new StringBuilder();
 
-		StringBuilder sbObjects = createTextObjects( jsonArrayText);
-		StringBuilder sbLinks = createTextLinks( jsonArrayText);
+	    try {
+	        JSONArray arr = new JSONArray(jsonArrayText);
+
+	        for (int i = 0; i < arr.length(); i++) {
+	            JSONObject obj = arr.getJSONObject(i);
+
+	            String nomAssoc   = obj.optString("nomAssoc", "unknown");
+	            String codeLink   = obj.optString("codeLink", "unknown");
+
+	            String end1Class  = obj.optString("end1Class", "unknown");
+	            String end1Object = obj.optString("end1Object", "unknown");
+	            String end1Role   = obj.optString("end1Role", "unknown");
+
+	            String end2Class  = obj.optString("end2Class", "unknown");
+	            String end2Object = obj.optString("end2Object", "unknown");
+	            String end2Role   = obj.optString("end2Role", "unknown");
+
+	            sb.append("nomAssoc:\"").append(nomAssoc).append("\",")
+	              .append("codeLink:\"").append(codeLink).append("\",")
+	              .append("end1Class:\"").append(end1Class).append("\",")
+	              .append("end1Object:\"").append(end1Object).append("\",")
+	              .append("end1Role:\"").append(end1Role).append("\",")
+	              .append("end2Class:\"").append(end2Class).append("\",")
+	              .append("end2Object:\"").append(end2Object).append("\",")
+	              .append("end2Role:\"").append(end2Role).append("\"");
+
+	            // Si no es el último, añade salto de línea
+	            if (i < arr.length() - 1) {
+	                sb.append("\n");
+	            }
+	        }
+
+	    } catch (JSONException e) {
+	        sb.append("Error parsing JSON: ").append(e.getMessage());
+	    }
+
+	    return sb;
+	}
+	
+	public static void showDialogCreateObjectsAndLinks(Component parent) {
+
+//		StringBuilder sbObjects = createTextObjects( jsonArrayText);
+		StringBuilder sbObjects = createTextObjects( rObjects);
+		StringBuilder sbLinks = createTextLinks( rLinks);
 
 		// Crear el diálogo
 		JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(parent), "Objects & Links to create");
-		dialog.setSize(500, 400);
+		dialog.setSize(700, 400);
 		dialog.setLocationRelativeTo(parent);
 		dialog.setLayout(new BorderLayout());
 
@@ -629,7 +768,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		sbFinal.append("OBJECTS\n");
 		sbFinal.append("=======\n");
 		sbFinal.append(sbObjects.toString());
-		sbFinal.append("\n");
+		sbFinal.append("\n\n");
 		sbFinal.append("LINKS\n");
 		sbFinal.append("=====\n");
 		sbFinal.append(sbLinks.toString());

@@ -180,6 +180,9 @@ public class WizardMVMView extends JPanel implements View {
 	private Session fSession;
 	private MSystem fSystem;
 	private MObject fObject;
+	
+	public static List<String> listStrSatisfiables = new ArrayList<String>();
+	public static List<String> listStrUnSatisfiables = new ArrayList<String>();
 
 	public JFrame frame;
 	private JPanel panel;
@@ -1082,7 +1085,7 @@ public class WizardMVMView extends JPanel implements View {
 					}
 				}
 				if (!existWizard) {
-					fMainWindow.showMVMWizard(NAMEFRAMEMVMWIZARD);
+					fMainWindow.showMVMWizard(NAMEFRAMEMVMWIZARD, listStrSatisfiables, listStrUnSatisfiables);
 				}
 
 				searchObjDiagramAssociated();
@@ -1145,8 +1148,6 @@ public class WizardMVMView extends JPanel implements View {
 		refreshComponents();
 		setResClassInvariants();
 		setResCheckStructure();
-
-		// AQUI Provis. Controlar nulos
 
 		lClass.setSelectedIndex(0);
 		lObjects.setSelectedIndex(0);
@@ -1270,9 +1271,11 @@ public class WizardMVMView extends JPanel implements View {
 
 		return invariants;
 	}
-	public static String getStrMUS() {
+	public String getStrMUS() {
 
-		String gMUS = ""; // en fomato 1-2,3-4-5
+//		String gMUS = ""; // en fomato 1-2,3-4-5
+		//convertir lista fMainWindow.listStrSatisfiables en string
+		String gMUS = fMainWindow.listStrUnSatisfiables.toString().replace("[", "").replace("]", "");
 		List<String> groups = new ArrayList<>();
 		groups = buildInvariantGroups(strInvariants, gMUS);
 		StringBuilder sb = new StringBuilder();
@@ -1334,9 +1337,10 @@ public class WizardMVMView extends JPanel implements View {
 		return result;
 	}
 
-	public static String getStrMSS() {
+	public String getStrMSS() {
 
-		String gMSS = ""; // en fomato 1-2,3-4-5
+//		String gMSS = ""; // en fomato 1-2,3-4-5
+		String gMSS = fMainWindow.listStrSatisfiables.toString().replace("[", "").replace("]", "");
 		List<String> groups = new ArrayList<>();
 		groups = buildInvariantGroups(strInvariants, gMSS);
 		StringBuilder sb = new StringBuilder();
@@ -1350,15 +1354,71 @@ public class WizardMVMView extends JPanel implements View {
 
 		return sb.toString();
 	}	
-	public static String getStrObjects() {
+	//Aqui
+	public String getStrObjects() {
 
 		List<String> lObjects = new ArrayList<>();
+		
+		try {
+			List<MVMObject> lObjs = getMVMObjects();
+
+			int count=0;
+
+			for (MVMObject obj : lObjs) {
+
+			    StringBuilder sb = new StringBuilder();
+			    count+=1;
+
+			    sb.append("Object id=[").append(count).append("]");
+			    sb.append("|name=[").append(obj.getName()).append("]");
+			    sb.append("|class=[").append(obj.getClassName()).append("]");
+
+			    // Recorrer atributos
+			    for (MVMAttribute att : obj.getAttributes()) {
+			        sb.append("|field=[").append(att.getName()).append("] ");
+			        sb.append("value=[").append(att.getValue()).append("]");
+			    }
+
+			    lObjects.add(sb.toString());
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		return String.join("\r\n", lObjects);
 	}
 
-	public static String getStrLinks() {
+	public String getStrLinks() {
 
 		List<String> lLinks = new ArrayList<>();
+		
+		//
+		
+		List<MVMLink> lLinksMVM = getMVMLinks();
+		
+		System.out.println(lLinksMVM.toString());
+		
+//		List<String> lLinks = new ArrayList<>();
+
+		for (MVMLink link : lLinksMVM) {
+
+		    StringBuilder sb = new StringBuilder();
+
+		    sb.append("codeLink=\"").append(link.getCodeLink()).append("\"");
+		    sb.append(" end1Class=\"").append(link.getEnd1Class()).append("\"");
+		    sb.append(" end1Object=\"").append(link.getEnd1Object()).append("\"");
+		    sb.append(" end1Role=\"").append(link.getEnd1Role()).append("\"");
+		    sb.append(" end2Class=\"").append(link.getEnd2Class()).append("\"");
+		    sb.append(" end2Object=\"").append(link.getEnd2Object()).append("\"");
+		    sb.append(" end2Role=\"").append(link.getEnd2Role()).append("\"");
+		    sb.append(" nomAssoc=\"").append(link.getNomAssoc()).append("\"");
+
+		    lLinks.add(sb.toString());
+		}
+		
+		//
+		
 		return String.join("\r\n", lLinks);
 	}
 
@@ -1406,7 +1466,18 @@ public class WizardMVMView extends JPanel implements View {
 		sb2.append("- Therefore, the JSON structure must contain the following parts:\n");
 		sb2.append("  - Properties: properties to be modified\n");
 		sb2.append("  - Objects: for each object, specify class name, object name, field name, field value\n");
-		sb2.append("  - Links: for each link, specify association, source object, target object\n");
+//		sb2.append("  - Links: for each link, specify association, source object, target object\n");
+		
+		//---
+		sb2.append("  - Links: For each link, specify the fields: "+
+		"codeLink,end1Class,end1Object,end1Role,end2Class,end2Object,end2Role,nomAssoc\n");
+		sb2.append("  Example: codeLink=\"1\" | end1Class=\"Person\" end1Object=\"person1\" "+
+		"end1Role=\"person\" end2Class=\"Pet\" end2Object=\"pet1\" end2Role=\"person\" nomAssoc=\"BelongsTo\"");
+		
+		//----
+		
+		
+		
 		sb2.append("  - Comment: Explanation of 'how to correct the model', taking into account the properties that have been indicated for correction as");
 		sb2.append(" if they were already corrected.\n");
 		sb2.append("\nThe only tags to return should be: Properties, Objects, Links, and Comment.\n");
@@ -1459,12 +1530,14 @@ public class WizardMVMView extends JPanel implements View {
 		if (!strMUS.equals("")) {
 			mensaje += "\r\nList of MUS:\r\n"+strMUS +"\r\n";
 			mensaje += LINEASEP;
+		}
+		if (!strMSS.equals("")) {
 			mensaje +="List of MSS:\r\n"+strMSS +"\r\n";
 			mensaje += LINEASEP;
 		}
-		mensaje +="List of objects:"+strObjects+"\r\n";
+		mensaje +="List of objects:\r\n"+strObjects+"\r\n";
 		mensaje += LINEASEP;
-		mensaje +="List of links:"+strLinks+"\r\n";
+		mensaje +="List of links:\r|n"+strLinks+"\r\n";
 		mensaje += LINEASEP;
 		mensaje +=request2+"\r\n";
 
@@ -3330,15 +3403,9 @@ public class WizardMVMView extends JPanel implements View {
 		txDesAssocRole.setText("");
 		txMultiDes.setText("");		
 
-		//AQUIB
-
 		int nObjOri = cmbObjectOri.getModel().getSize();
 		int nObjDes = cmbObjectDes.getModel().getSize();
 		btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
-
-
-		//-------------
-
 
 		Set<MLink> links = fSystem.state().linksOfAssociation(oAssoc).links();
 
