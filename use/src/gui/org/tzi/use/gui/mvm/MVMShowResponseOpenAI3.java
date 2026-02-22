@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -24,7 +25,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -33,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.tzi.use.gui.views.WizardMVMView;
 
 public class MVMShowResponseOpenAI3 extends JDialog {
 
@@ -42,13 +43,11 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	// NEW INI --------------------------
-	private static JLabel lblModel;
 	private static JLabel lblObjects;
 	private static JLabel lblLinks;
 	private static JLabel lblProperties;
 	private static JLabel lblComments;
 
-	private static JTextField txtModel;
 	private static JTextArea txtObjects;
 	private static JTextArea txtLinks;
 	private static JTextArea txtProperties;
@@ -66,7 +65,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 	private static JButton btnCopyJSONResult;
 	private static JToggleButton btnShowButtons;
 
-
 	private static JScrollPane scrollObjects;
 	private static JScrollPane scrollComments;
 	private static JScrollPane scrollLinks;
@@ -81,6 +79,10 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 	private static String rProperties;
 	private static String rComments;
 
+	private static String strCreateObjectsAI;
+	private static String strCreateLinksAI;
+	private static WizardMVMView fWizardMVMView;
+
 	private static String mensaje;
 	private static String jsonPretty;
 	private static String jsonResult;
@@ -89,13 +91,15 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 
 	private String contentNew="";
 
-	public MVMShowResponseOpenAI3(JFrame pParent, String pStrNameModel, String pObjects, 
+	public MVMShowResponseOpenAI3(WizardMVMView pWizardMVMView, JFrame pParent, String pStrNameModel, String pObjects, 
 			String pLinks, String pProperties,String pComments,
 			String pMensaje, String pJsonPretty, String pJsonResult) {
 		super((JFrame) pParent, "Request to OpenAI for '"+pStrNameModel+"'", ModalityType.APPLICATION_MODAL);
 
-		strNameModel=pStrNameModel;	
+		setStrNameModel(pStrNameModel);	
 		parent=pParent;
+		fWizardMVMView=pWizardMVMView;
+
 
 		rObjects=pObjects;
 		rLinks=pLinks;
@@ -131,14 +135,12 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		StringBuilder sb = new StringBuilder();
 		try {
 			obj = new JSONObject(json);
-			// Obtener claves usando keys() (compatible con todas las versiones)
 			List<String> keys = new ArrayList<>();
 			Iterator<String> it = obj.keys();
 			while (it.hasNext()) {
 				keys.add(it.next());
 			}
 
-			// Ordenar alfabéticamente (opcional)
 			Collections.sort(keys);
 			for (String key : keys) {
 				try {
@@ -175,7 +177,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 					arr.put(obj.getJSONObject(key));
 				}
 			}
-			// Si ya es JSONArray, usarlo directamente
 			else {
 				arr = (JSONArray) parsed;
 			}
@@ -253,7 +254,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		try {
 			Object parsed = new JSONTokener(jsonString).nextValue();
 
-			// Si es JSONObject, convertirlo a JSONArray
 			if (parsed instanceof JSONObject) {
 				JSONObject obj = (JSONObject) parsed;
 				arr = new JSONArray();
@@ -264,7 +264,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 					arr.put(obj.getJSONObject(key));
 				}
 			}
-			// Si ya es JSONArray, usarlo directamente
 			else {
 				arr = (JSONArray) parsed;
 			}
@@ -330,7 +329,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 				data.get(assoc).add(link);
 			}
 
-			// Construir árbol
+			// Construir arbol
 			for (String assoc : data.keySet()) {
 
 				sb.append(assoc).append("\n");
@@ -390,7 +389,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		int fieldHeight = 180;
 		int startY = 10;
 
-
 		lblObjects = new JLabel("Objects:");
 		lblObjects.setBounds(15, startY , labelWidth, 25);
 		lblObjects.setFont(fontBold);
@@ -400,7 +398,8 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		btnCreateObjects.setEnabled(false);
 		btnCreateObjects.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				showDialogCreateObjects(panel.getParent());
+				//				showDialogCreateObjects(panel.getParent());
+				showDialogCreateObjects(panel);
 			}
 		});
 		panel.add(btnCreateObjects);
@@ -432,7 +431,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		btnCreateLinks.setEnabled(false);
 		btnCreateLinks.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				showDialogCreateObjectsAndLinks(panel.getParent());
+				showDialogCreateObjectsAndLinks(panel);
 			}
 		});
 		panel.add(btnCreateLinks);
@@ -519,8 +518,8 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 				StringSelection selection = new StringSelection(mensaje); 
 				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
 			}
-
 		});
+
 		panel.add(btnCopyTXTRequest);
 
 		btnCopyJSONRequest = new JButton("JSON Request");
@@ -530,7 +529,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 				StringSelection selection = new StringSelection(jsonPretty); 
 				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
 			}
-
 		});
 		panel.add(btnCopyJSONRequest);
 
@@ -541,7 +539,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 				StringSelection selection = new StringSelection(jsonResult); 
 				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
 			}
-
 		});
 		panel.add(btnCopyJSONResult);
 
@@ -558,7 +555,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		getRootPane().setDefaultButton(btnExit);
 
 		//---
-		
+
 		btnCopyComment.setVisible(false);
 		btnCopyTXTRequest.setVisible(false);
 		btnCopyJSONRequest.setVisible(false);
@@ -587,13 +584,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		});
 		panel.add(btnShowButtons);
 
-		//---
-
-
-
-
 		this.add(panel);
-		//		this.setSize(1253, 925);
 		this.setLocationRelativeTo(parent);
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setResizable(false);
@@ -632,58 +623,11 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		return sb;
 	}
 
-	//	public static StringBuilder createTextObjects2(String jsonArrayText) {
-	//		StringBuilder sb = new StringBuilder();
-	//
-	//		try {
-	//			JSONArray arr = new JSONArray(jsonArrayText);
-	//
-	//			for (int i = 0; i < arr.length(); i++) {
-	//				JSONObject obj = arr.getJSONObject(i);
-	//
-	//				String name = obj.optString("name", "unknown");
-	//				String className = obj.optString("class", "unknown");
-	//
-	//				StringBuilder attrs = new StringBuilder();
-	//
-	//				JSONArray keys = obj.names();
-	//				for (int j = 0; j < keys.length(); j++) {
-	//					String key = keys.getString(j);
-	//
-	//					if (!key.equals("name") && !key.equals("class")) {
-	//						attrs.append(key)
-	//						.append("=")
-	//						.append(obj.get(key))
-	//						.append(", ");
-	//					}
-	//				}
-	//
-	//				if (attrs.length() > 0) {
-	//					attrs.setLength(attrs.length() - 2);
-	//				}
-	//
-	//				sb.append("Object name=[")
-	//				.append(name)
-	//				.append("] class=[")
-	//				.append(className)
-	//				.append("] attributes=[")
-	//				.append(attrs)
-	//				.append("]\n");
-	//			}
-	//
-	//		} catch (JSONException e) {
-	//			sb.append("Error parsing JSON: ").append(e.getMessage());
-	//		}
-	//		return sb;
-	//	}
-	public static void showDialogCreateObjects(Component parent) {
-		//		StringBuilder sb = createTextObjects( jsonArrayText);
+	public static void showDialogCreateObjects(JPanel parent) {
 		StringBuilder sb = createTextObjects( rObjects);
 
 		// Crear el dialogo
 		JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(parent), "Objects to Create");
-//		dialog.setSize(1000, 400);
-//		dialog.setLocationRelativeTo(parent);
 		dialog.setLayout(new BorderLayout());
 
 		// Área de texto con scroll
@@ -694,6 +638,40 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 
 		// Añadir componentes
 		dialog.add(scroll, BorderLayout.CENTER);
+
+		JPanel panelButton = new JPanel();
+		//.--
+
+		// Crear el botón Create
+		JButton btnCreate = new JButton("Create");
+		btnCreate.setPreferredSize(new Dimension(150, 30));
+
+		// Listener del botón Create (si lo necesitas)
+		btnCreate.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// acción del botón Create
+				System.out.println("Create");
+
+
+				fWizardMVMView.setStrCreateObjectsAI(rObjects);
+				//		    	fWizardMVMView.setStrCreateLinksAI(rLinks);
+
+				dialog.dispose();
+				// cerrar el JFrame padre
+				//aqui
+				Window window = SwingUtilities.getWindowAncestor(parent.getParent());
+				if (window instanceof MVMShowResponseOpenAI3) {
+					((MVMShowResponseOpenAI3) window).dispose();
+				}
+
+			}
+		});
+		panelButton.add(btnCreate);
+
+		//---
+
+
 
 		// Botón Exit
 		JButton btnExit = new JButton("Exit");
@@ -707,61 +685,53 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		});
 
 		// Panel para centrar el botón
-		JPanel panelButton = new JPanel();
+		//		JPanel panelButton = new JPanel();
 		panelButton.add(btnExit);
 
 		dialog.add(panelButton, BorderLayout.SOUTH);
-		
-		
-		//--
-	    dialog.pack();
-	    int width = dialog.getWidth();
-	    if (width > 1500) {
-	        width = 1500;
-	    }
-	    dialog.setSize(width, dialog.getHeight());
-	    dialog.setLocationRelativeTo(parent);
-		//--
-		
-		
-		
-		
+
+		dialog.pack();
+		int width = dialog.getWidth();
+		if (width > 1500) {
+			width = 1500;
+		}
+		dialog.setSize(width, dialog.getHeight());
+		dialog.setLocationRelativeTo(parent);
 		dialog.setVisible(true);
 	}
 
-	public static StringBuilder createTextLinksOLd(String jsonArrayText) {
-		StringBuilder sb = new StringBuilder();
-
-		try {
-			JSONArray arr = new JSONArray(jsonArrayText);
-
-			for (int i = 0; i < arr.length(); i++) {
-				JSONObject obj = arr.getJSONObject(i);
-
-				String association = obj.optString("association", "unknown");
-				String from = obj.optString("from", "unknown");
-				String to = obj.optString("to", "unknown");
-
-				int id = i + 1;
-
-				sb.append("Link id=[")
-				.append(id)
-				.append("]|association=[")
-				.append(association)
-				.append("] from=[")
-				.append(from)
-				.append("] to=[")
-				.append(to)
-				.append("]\n");
-			}
-
-		} catch (JSONException e) {
-			sb.append("Error parsing JSON: ").append(e.getMessage());
-		}
-
-
-		return sb;
-	}
+	//	public static StringBuilder createTextLinksOLd(String jsonArrayText) {
+	//		StringBuilder sb = new StringBuilder();
+	//
+	//		try {
+	//			JSONArray arr = new JSONArray(jsonArrayText);
+	//
+	//			for (int i = 0; i < arr.length(); i++) {
+	//				JSONObject obj = arr.getJSONObject(i);
+	//
+	//				String association = obj.optString("association", "unknown");
+	//				String from = obj.optString("from", "unknown");
+	//				String to = obj.optString("to", "unknown");
+	//
+	//				int id = i + 1;
+	//
+	//				sb.append("Link id=[")
+	//				.append(id)
+	//				.append("]|association=[")
+	//				.append(association)
+	//				.append("] from=[")
+	//				.append(from)
+	//				.append("] to=[")
+	//				.append(to)
+	//				.append("]\n");
+	//			}
+	//
+	//		} catch (JSONException e) {
+	//			sb.append("Error parsing JSON: ").append(e.getMessage());
+	//		}
+	//
+	//		return sb;
+	//	}
 
 	public static StringBuilder createTextLinks(String jsonArrayText) {
 		StringBuilder sb = new StringBuilder();
@@ -805,16 +775,12 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		return sb;
 	}
 
-	public static void showDialogCreateObjectsAndLinks(Component parent) {
+	public static void showDialogCreateObjectsAndLinks(JPanel parent) {
 
-		//		StringBuilder sbObjects = createTextObjects( jsonArrayText);
 		StringBuilder sbObjects = createTextObjects( rObjects);
 		StringBuilder sbLinks = createTextLinks( rLinks);
 
-		// Crear el diálogo
 		JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(parent), "Objects & Links to create");
-//		dialog.setSize(1000, 400);
-//		dialog.setLocationRelativeTo(parent);
 		dialog.setLayout(new BorderLayout());
 
 		StringBuilder sbFinal = new StringBuilder();
@@ -829,16 +795,13 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		sbFinal.append(sbLinks.toString());
 		sbFinal.append("\n");
 
-		// Área de texto con scroll
 		JTextArea textArea = new JTextArea(sbFinal.toString());
 		textArea.setFont(font);
 		textArea.setEditable(false);
 		JScrollPane scroll = new JScrollPane(textArea);
 
-		// Añadir componentes
 		dialog.add(scroll, BorderLayout.CENTER);
 
-		// Botón Exit
 		JButton btnExit = new JButton("Exit");
 		btnExit.setPreferredSize(new Dimension(150, 30));
 
@@ -849,25 +812,74 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 			}
 		});
 
-		// Panel para centrar el botón
+		//		JPanel panelButton = new JPanel();
+
+
 		JPanel panelButton = new JPanel();
+		//.--
+
+		// Crear el botón Create
+		JButton btnCreate = new JButton("Create");
+		btnCreate.setPreferredSize(new Dimension(150, 30));
+
+		// Listener del botón Create (si lo necesitas)
+		btnCreate.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// acción del botón Create
+				System.out.println("Create");
+
+
+				fWizardMVMView.setStrCreateObjectsAI(rObjects);
+				fWizardMVMView.setStrCreateLinksAI(rLinks);
+
+				dialog.dispose();
+
+				// cerrar el JFrame padre
+				//aqui
+				Window window = SwingUtilities.getWindowAncestor(parent.getParent());
+				if (window instanceof MVMShowResponseOpenAI3) {
+					((MVMShowResponseOpenAI3) window).dispose();
+				}
+
+			}
+		});
+		panelButton.add(btnCreate);
+
+		//---
+
+
+
 		panelButton.add(btnExit);
 
 		dialog.add(panelButton, BorderLayout.SOUTH);
-		
-		//--
-	    dialog.pack();
-	    int width = dialog.getWidth();
-	    if (width > 1500) {
-	        width = 1500;
-	    }
-	    dialog.setSize(width, dialog.getHeight());
-	    dialog.setLocationRelativeTo(parent);
-		//--
-		
-		
+
+		dialog.pack();
+		int width = dialog.getWidth();
+		if (width > 1500) {
+			width = 1500;
+		}
+		dialog.setSize(width, dialog.getHeight());
+		dialog.setLocationRelativeTo(parent);
 		dialog.setVisible(true);
 	}
-
+	public static String getStrNameModel() {
+		return strNameModel;
+	}
+	public static void setStrNameModel(String strNameModel) {
+		MVMShowResponseOpenAI3.strNameModel = strNameModel;
+	}
+	public static String getStrCreateObjectsAI() {
+		return strCreateObjectsAI;
+	}
+	public static void setStrCreateObjectsAI(String strCreateObjectsAI) {
+		MVMShowResponseOpenAI3.strCreateObjectsAI = strCreateObjectsAI;
+	}
+	public static String getStrCreateLinksAI() {
+		return strCreateLinksAI;
+	}
+	public static void setStrCreateLinksAI(String strCreateLinksAI) {
+		MVMShowResponseOpenAI3.strCreateLinksAI = strCreateLinksAI;
+	}
 
 }

@@ -50,6 +50,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -180,7 +181,7 @@ public class WizardMVMView extends JPanel implements View {
 	private Session fSession;
 	private MSystem fSystem;
 	private MObject fObject;
-	
+
 	public static List<String> listStrSatisfiables = new ArrayList<String>();
 	public static List<String> listStrUnSatisfiables = new ArrayList<String>();
 
@@ -317,6 +318,10 @@ public class WizardMVMView extends JPanel implements View {
 	private static String jsonPretty;
 	private static String jsonResult;
 
+	private static String strCreateObjectsAI="";
+	private static String strCreateLinksAI="";
+	private static WizardMVMView fWizardMVMView;
+
 	// PROVIS ini -----------------------------------------------------------------------------------
 	private static String strNameModel= "Animals.use";
 	private static String strNameProperties = strNameModel.replace(".use", ".properties");
@@ -412,6 +417,7 @@ public class WizardMVMView extends JPanel implements View {
 		this.setFocusable(true);
 		lActions = new ArrayList<MVMAction>();
 		fMainWindow = parent;
+		fWizardMVMView=this;
 
 		fSession = session;
 		fSystem = session.system();
@@ -1273,7 +1279,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 	public String getStrMUS() {
 
-//		String gMUS = ""; // en fomato 1-2,3-4-5
+		//		String gMUS = ""; // en fomato 1-2,3-4-5
 		//convertir lista fMainWindow.listStrSatisfiables en string
 		String gMUS = fMainWindow.listStrUnSatisfiables.toString().replace("[", "").replace("]", "");
 		List<String> groups = new ArrayList<>();
@@ -1339,7 +1345,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	public String getStrMSS() {
 
-//		String gMSS = ""; // en fomato 1-2,3-4-5
+		//		String gMSS = ""; // en fomato 1-2,3-4-5
 		String gMSS = fMainWindow.listStrSatisfiables.toString().replace("[", "").replace("]", "");
 		List<String> groups = new ArrayList<>();
 		groups = buildInvariantGroups(strInvariants, gMSS);
@@ -1358,7 +1364,7 @@ public class WizardMVMView extends JPanel implements View {
 	public String getStrObjects() {
 
 		List<String> lObjects = new ArrayList<>();
-		
+
 		try {
 			List<MVMObject> lObjs = getMVMObjects();
 
@@ -1366,22 +1372,22 @@ public class WizardMVMView extends JPanel implements View {
 
 			for (MVMObject obj : lObjs) {
 
-			    StringBuilder sb = new StringBuilder();
-			    count+=1;
+				StringBuilder sb = new StringBuilder();
+				count+=1;
 
-			    sb.append("Object id=[").append(count).append("]");
-			    sb.append("|name=[").append(obj.getName()).append("]");
-			    sb.append("|class=[").append(obj.getClassName()).append("]");
+				sb.append("Object id=[").append(count).append("]");
+				sb.append("|name=[").append(obj.getName()).append("]");
+				sb.append("|class=[").append(obj.getClassName()).append("]");
 
-			    // Recorrer atributos
-			    for (MVMAttribute att : obj.getAttributes()) {
-			        sb.append("|field=[").append(att.getName()).append("] ");
-			        sb.append("value=[").append(att.getValue()).append("]");
-			    }
+				// Recorrer atributos
+				for (MVMAttribute att : obj.getAttributes()) {
+					sb.append("|field=[").append(att.getName()).append("] ");
+					sb.append("value=[").append(att.getValue()).append("]");
+				}
 
-			    lObjects.add(sb.toString());
+				lObjects.add(sb.toString());
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1392,33 +1398,33 @@ public class WizardMVMView extends JPanel implements View {
 	public String getStrLinks() {
 
 		List<String> lLinks = new ArrayList<>();
-		
+
 		//
-		
+
 		List<MVMLink> lLinksMVM = getMVMLinks();
-		
+
 		System.out.println(lLinksMVM.toString());
-		
-//		List<String> lLinks = new ArrayList<>();
+
+		//		List<String> lLinks = new ArrayList<>();
 
 		for (MVMLink link : lLinksMVM) {
 
-		    StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder();
 
-		    sb.append("codeLink=\"").append(link.getCodeLink()).append("\"");
-		    sb.append(" end1Class=\"").append(link.getEnd1Class()).append("\"");
-		    sb.append(" end1Object=\"").append(link.getEnd1Object()).append("\"");
-		    sb.append(" end1Role=\"").append(link.getEnd1Role()).append("\"");
-		    sb.append(" end2Class=\"").append(link.getEnd2Class()).append("\"");
-		    sb.append(" end2Object=\"").append(link.getEnd2Object()).append("\"");
-		    sb.append(" end2Role=\"").append(link.getEnd2Role()).append("\"");
-		    sb.append(" nomAssoc=\"").append(link.getNomAssoc()).append("\"");
+			sb.append("codeLink=\"").append(link.getCodeLink()).append("\"");
+			sb.append(" end1Class=\"").append(link.getEnd1Class()).append("\"");
+			sb.append(" end1Object=\"").append(link.getEnd1Object()).append("\"");
+			sb.append(" end1Role=\"").append(link.getEnd1Role()).append("\"");
+			sb.append(" end2Class=\"").append(link.getEnd2Class()).append("\"");
+			sb.append(" end2Object=\"").append(link.getEnd2Object()).append("\"");
+			sb.append(" end2Role=\"").append(link.getEnd2Role()).append("\"");
+			sb.append(" nomAssoc=\"").append(link.getNomAssoc()).append("\"");
 
-		    lLinks.add(sb.toString());
+			lLinks.add(sb.toString());
 		}
-		
+
 		//
-		
+
 		return String.join("\r\n", lLinks);
 	}
 
@@ -1452,7 +1458,11 @@ public class WizardMVMView extends JPanel implements View {
 		sb2.append("- A list of links that satisfy the relationships defined in the model, with their respective parameters. If there are no links to modify or create,");
 		sb2.append(" indicate that link handling is not necessary.");
 		sb2.append(" Please return the same field names specified in the request.");
-		sb2.append(" If you do need to handle links, always specify the `from` and `to` clauses.\n");
+		// New
+		sb2.append(" If I send you a list of objects and links, try to keep them as much as possible,"+
+				"modifying only the attributes you deem necessary to achieve the desired level of satisfaction."+
+				"If you need to create new links, please suggest them.");
+		//		sb2.append(" If you do need to handle links, always specify the `from` and `to` clauses.\n");
 		// Si no hay MUS y MSS se las pido.
 		if (strMUS.equals("")) {
 			sb2.append("Please calculate MUS (Minimal Unsatisfiable Subset) and MSS (Maximal Satisfiable Subset) and include the result in a paragraph-style subsection within the resulting 'Comment' block.\n");
@@ -1466,18 +1476,18 @@ public class WizardMVMView extends JPanel implements View {
 		sb2.append("- Therefore, the JSON structure must contain the following parts:\n");
 		sb2.append("  - Properties: properties to be modified\n");
 		sb2.append("  - Objects: for each object, specify class name, object name, field name, field value\n");
-//		sb2.append("  - Links: for each link, specify association, source object, target object\n");
-		
+		//		sb2.append("  - Links: for each link, specify association, source object, target object\n");
+
 		//---
 		sb2.append("  - Links: For each link, specify the fields: "+
-		"codeLink,end1Class,end1Object,end1Role,end2Class,end2Object,end2Role,nomAssoc\n");
+				"codeLink,end1Class,end1Object,end1Role,end2Class,end2Object,end2Role,nomAssoc\n");
 		sb2.append("  Example: codeLink=\"1\" | end1Class=\"Person\" end1Object=\"person1\" "+
-		"end1Role=\"person\" end2Class=\"Pet\" end2Object=\"pet1\" end2Role=\"person\" nomAssoc=\"BelongsTo\"");
-		
+				"end1Role=\"person\" end2Class=\"Pet\" end2Object=\"pet1\" end2Role=\"person\" nomAssoc=\"BelongsTo\"");
+
 		//----
-		
-		
-		
+
+
+
 		sb2.append("  - Comment: Explanation of 'how to correct the model', taking into account the properties that have been indicated for correction as");
 		sb2.append(" if they were already corrected.\n");
 		sb2.append("\nThe only tags to return should be: Properties, Objects, Links, and Comment.\n");
@@ -1623,7 +1633,9 @@ public class WizardMVMView extends JPanel implements View {
 
 	public static Map<String, String> parseResult(String jsonString) {
 
-		Map<String, String> out = new HashMap<>();
+		//		Map<String, String> out = new HashMap<>();
+
+		Map<String, String> out = new LinkedHashMap<>();
 
 		JSONObject root;
 		try {
@@ -1752,17 +1764,24 @@ public class WizardMVMView extends JPanel implements View {
 			System.out.println("rComments 1 =================================================================");
 			System.out.println(formatJson(rComments));
 			System.out.println("rComments 2 =================================================================");
+			System.out.println("");
 			System.out.println(out);
 
 			// Llamada visualización OpenAI
 			panel.setCursor(Cursor.getDefaultCursor());
 			showResponseOpenAI3(rObjects, rLinks, rProperties, rComments, mensaje, jsonPretty, jsonResult);
 
-
 		} catch (Exception ex) {
 			panel.setCursor(Cursor.getDefaultCursor());
 			JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
+	}
+
+	public static void setStrCreateObjectsAI(String objACrear) {
+		strCreateObjectsAI=objACrear;
+	}
+	public static void setStrCreateLinksAI(String linksACrear) {
+		strCreateLinksAI=linksACrear;
 	}
 
 	public static String callAPIOpenAI3(String json) {
@@ -2134,24 +2153,188 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 
-//	private void showResponseOpenAI(String result) {
-//		MVMShowResponseOpenAI dialog = new MVMShowResponseOpenAI(result);
-//		dialog.setSize(1055, 645);
-//		dialog.setLocationRelativeTo(null);
-//		dialog.setModal(true);
-//		dialog.setVisible(true);
-//	}
+	//	private void showResponseOpenAI(String result) {
+	//		MVMShowResponseOpenAI dialog = new MVMShowResponseOpenAI(result);
+	//		dialog.setSize(1055, 645);
+	//		dialog.setLocationRelativeTo(null);
+	//		dialog.setModal(true);
+	//		dialog.setVisible(true);
+	//	}
 
 	private void showResponseOpenAI3(String rObjects, 
 			String rLinks, String rProperties,String rComments, String mensaje, String jsonPretty, String jsonResult) {
-		//			public MVMShowResponseOpenAI3(String strNameModel, String rObjects, 
-		//		String rLinks, String mensaje, String jsonPretty, String jsonResult) {
-		MVMShowResponseOpenAI3 dialog = new MVMShowResponseOpenAI3(frame, strNameModel, rObjects, 
+		//	Aqui
+		MVMShowResponseOpenAI3 dialog = new MVMShowResponseOpenAI3(fWizardMVMView, frame, strNameModel, rObjects, 
 				rLinks, rProperties, rComments,mensaje, jsonPretty, jsonResult);
 		dialog.setSize(1254, 900);
 		dialog.setLocationRelativeTo(null);
-		dialog.setModal(true);
+		//		dialog.setModal(true);
 		dialog.setVisible(true);
+		//AQUI
+		if (!strCreateObjectsAI.equals("")) {
+			List<MVMObject> lObjs = new ArrayList<MVMObject>();
+			List<MVMLink> lLinks = new ArrayList<MVMLink>();
+			//			List<MVMLink> lLinks =
+			System.out.println("Creamos objetos["+strCreateObjectsAI+"]");
+			lObjs=parseMVMObjects(strCreateObjectsAI);
+			System.out.println("Creamos objetos["+lObjs.toString()+"]");
+			if (!strCreateLinksAI.equals("")) {
+				System.out.println("Creamos links["+strCreateLinksAI+"]");
+				lLinks=parseMVMLinks(strCreateLinksAI);
+				System.out.println("Creamos links["+lLinks.toString()+"]");
+				System.out.println("");
+			}		
+			doCreationsAI(lObjs, lLinks);
+		}
+	}
+	/**
+	 * Creation de objs and links from OpenAI
+	 * @param lObjs
+	 * @param lLinks
+	 */
+
+	private void doCreationsAI(List<MVMObject> lObjs, List<MVMLink> lLinks) {
+		resetObjLinks();
+		createObjsList(lObjs);
+		createLinksList(lLinks);
+
+		setResClassInvariants();
+		setResCheckStructure();
+		bNewObj=false;
+		txNewObject.setEnabled(false);
+		// After loading everything, the first class and the first object of said class must be selected
+
+		if (lClass.getModel().getSize()>0) {
+			oClass = lClass.getModel().getElementAt(0);
+			lClass.setSelectedIndex(0);
+			nomClass = oClass.name();
+			lObjects.setModel(loadListObjects(nomClass));
+			lObjects.setSelectedIndex(0);
+			nomObj = (String) lObjects.getSelectedValue();
+			selectObject( nomObj);
+			txNewObject.setText(nomObj);
+			txNewObject.setEnabled(false);			
+		}
+	}
+
+	public static List<MVMObject> parseMVMObjects(String jsonText) {
+		List<MVMObject> list = new ArrayList<>();
+
+		try {
+			JSONArray arr = new JSONArray(jsonText);
+
+			for (int i = 0; i < arr.length(); i++) {
+
+				JSONObject obj = arr.getJSONObject(i);
+
+				MVMObject mvmObj = new MVMObject();
+				mvmObj.setName(obj.optString("name"));
+				mvmObj.setClassName(obj.optString("class"));
+
+				// Procesar atributos
+				JSONObject attrs = obj.optJSONObject("attributes");
+				List<MVMAttribute> attrList = new ArrayList<>();
+
+				if (attrs != null) {
+					Iterator<String> keys = attrs.keys();
+					while (keys.hasNext()) {
+						String key = keys.next();
+
+						Object raw = attrs.get(key);
+						String value;
+
+						if (raw instanceof String) {
+							value = "'" + raw + "'";   // envolver en comillas simples
+						} else {
+							value = String.valueOf(raw);
+						}
+
+						attrList.add(new MVMAttribute(key, value));
+					}
+				}
+
+				mvmObj.setAttributes(attrList);
+
+				list.add(mvmObj);
+			}
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+
+	public static List<MVMObject> parseMVMObjectsOLD(String jsonText) {
+		List<MVMObject> list = new ArrayList<>();
+
+		try {
+			JSONArray arr = new JSONArray(jsonText);
+
+			for (int i = 0; i < arr.length(); i++) {
+
+				JSONObject obj = arr.getJSONObject(i);
+
+				MVMObject mvmObj = new MVMObject();
+				mvmObj.setName(obj.optString("name"));
+				mvmObj.setClassName(obj.optString("class"));
+
+				// Procesar atributos
+				JSONObject attrs = obj.optJSONObject("attributes");
+				List<MVMAttribute> attrList = new ArrayList<>();
+
+				if (attrs != null) {
+					Iterator<String> keys = attrs.keys();
+					while (keys.hasNext()) {
+						String key = keys.next();
+						String value = String.valueOf(attrs.get(key));
+						attrList.add(new MVMAttribute(key, value));
+					}
+				}
+
+				mvmObj.setAttributes(attrList);
+
+				list.add(mvmObj);
+			}
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+
+	public static List<MVMLink> parseMVMLinks(String jsonText) {
+		List<MVMLink> list = new ArrayList<>();
+
+		try {
+			JSONArray arr = new JSONArray(jsonText);
+
+			for (int i = 0; i < arr.length(); i++) {
+
+				JSONObject obj = arr.getJSONObject(i);
+
+				MVMLink link = new MVMLink();
+
+				link.setCodeLink(obj.optString("codeLink"));
+				link.setNomAssoc(obj.optString("nomAssoc"));
+
+				link.setEnd1Class(obj.optString("end1Class"));
+				link.setEnd1Object(obj.optString("end1Object"));
+				link.setEnd1Role(obj.optString("end1Role"));
+
+				link.setEnd2Class(obj.optString("end2Class"));
+				link.setEnd2Object(obj.optString("end2Object"));
+				link.setEnd2Role(obj.optString("end2Role"));
+
+				list.add(link);
+			}
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		return list;
 	}
 
 	/**
@@ -2547,8 +2730,46 @@ public class WizardMVMView extends JPanel implements View {
 
 		for (int i = 0; i < fAttributes.size(); ++i) {
 			MAttribute attribute = fAttributes.get(i);
-			MVMAttribute attrMVM = lAttrsMVM.get(i);
-			String value = attrMVM.getValue();
+			// hay que buscar attribute fName en lAttrsMVM
+			//---
+//			MVMAttribute attrMVM=new MVMAttribute(); 
+			String value="";
+//		    for (MVMAttribute a : lAttrsMVM) {
+//		        if (a.getName().equals(attribute.name())) {
+//		        	 value2= a.getValue();
+//		        	 attrMVM = a;
+//		        }
+//		    }
+
+		    for (MVMAttribute attrMVM : lAttrsMVM) {
+		        if (attrMVM.getName().equals(attribute.name())) {
+		        	 value= attrMVM.getValue();
+
+		 			System.out.println("attribute ["+attribute+"]");
+					System.out.println("attrMVM ["+attrMVM+"]");
+					System.out.println("value ["+value+"]");
+					
+		        	 break;
+		        }
+		    }
+			
+			//---
+			
+			
+			
+//			MVMAttribute attrMVM = lAttrsMVM.get(i);
+//			String value = attrMVM.getValue();
+			
+//			System.out.println("attribute ["+attribute+"]");
+//			System.out.println("attrMVM ["+attrMVM+"]");
+//			System.out.println("value ["+value+"]");
+			
+			//---
+			
+			
+			
+			//---
+			
 			StringWriter errorOutput = new StringWriter();
 			Expression valueAsExpression = 
 					OCLCompiler.compileExpression(
@@ -2581,6 +2802,60 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	/**
+	 * Creo objetos indicados en una lista
+	 */
+	private void createObjsList(List<MVMObject> lObjs) {
+		for (MVMObject oObj: lObjs) {
+			String nomObj=oObj.getName();
+			String ClassObj = oObj.getClassName();
+			createObjectAccordingMVMObject(oObj, true);
+
+			selectObject( nomObj);
+			applyChanges();
+			String strTypeAction="CO";
+			String strParameters="Creation object ["+nomObj+"] of ["+ClassObj+"]";
+			storeAction(strTypeAction, strParameters);
+			cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
+			cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
+		}
+	}
+
+	/**
+	 * Creo objetos indicados en una lista
+	 */
+	private void createLinksList(List<MVMLink> lLinks) {
+		for (MVMLink oLinkMVM: lLinks) {
+			String nomAssoc=oLinkMVM.getNomAssoc();
+			String end1Object=oLinkMVM.getEnd1Object();
+			String end2Object=oLinkMVM.getEnd2Object();
+
+			MObject oOri=null;
+			MObject oDes=null;
+
+			MObject o1 = findObjectByName(end1Object);
+			MObject o2 = findObjectByName(end2Object);
+			MAssociation oAssoc = findAssocByName(nomAssoc);
+			List<MAssociationEnd> oAsocEnds = oAssoc.associationEnds();
+			int na=0;
+			MAssociationEnd oAssocEnd = oAsocEnds.get(na);
+			MClass oClassAssocEnd = oAssocEnd.cls();
+			if (oClassAssocEnd.name().equals(o1.cls().name())) {
+				oOri = o1;
+				oDes = o2;	
+			}else {
+				oOri = o2;
+				oDes = o1;	
+			}			
+			cmbClassOri.setSelectedItem(oOri.cls());
+			cmbObjectOri.setSelectedItem(oOri);
+			cmbClassDes.setSelectedItem(oDes.cls());
+			cmbObjectDes.setSelectedItem(oDes);
+
+			insertLink(oAssoc,o1,o2);
+		}
+	}
+
+	/**
 	 * Do Actions (create objects & links)
 	 * @param lActionsRes
 	 */
@@ -2592,50 +2867,54 @@ public class WizardMVMView extends JPanel implements View {
 		if (nActions>0) {
 			MVMAction oAction=lActionsRes.get(nActions-1);	
 			List<MVMObject> lObjs=oAction.getlObjs();
-			for (MVMObject oObj: lObjs) {
-				String nomObj=oObj.getName();
-				String ClassObj = oObj.getClassName();
-				createObjectAccordingMVMObject(oObj, true);
+			//			for (MVMObject oObj: lObjs) {
+			//				String nomObj=oObj.getName();
+			//				String ClassObj = oObj.getClassName();
+			//				createObjectAccordingMVMObject(oObj, true);
+			//
+			//				selectObject( nomObj);
+			//				applyChanges();
+			//				String strTypeAction="CO";
+			//				String strParameters="Creation object ["+nomObj+"] of ["+ClassObj+"]";
+			//				storeAction(strTypeAction, strParameters);
+			//				cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
+			//				cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
+			//
+			//			}
+			createObjsList(lObjs);
 
-				selectObject( nomObj);
-				applyChanges();
-				String strTypeAction="CO";
-				String strParameters="Creation object ["+nomObj+"] of ["+ClassObj+"]";
-				storeAction(strTypeAction, strParameters);
-				cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
-				cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
-
-			}
 			List<MVMLink> lLinks = oAction.getlLinks();
-			for (MVMLink oLinkMVM: lLinks) {
-				String nomAssoc=oLinkMVM.getNomAssoc();
-				String end1Object=oLinkMVM.getEnd1Object();
-				String end2Object=oLinkMVM.getEnd2Object();
+			//			for (MVMLink oLinkMVM: lLinks) {
+			//				String nomAssoc=oLinkMVM.getNomAssoc();
+			//				String end1Object=oLinkMVM.getEnd1Object();
+			//				String end2Object=oLinkMVM.getEnd2Object();
+			//
+			//				MObject oOri=null;
+			//				MObject oDes=null;
+			//
+			//				MObject o1 = findObjectByName(end1Object);
+			//				MObject o2 = findObjectByName(end2Object);
+			//				MAssociation oAssoc = findAssocByName(nomAssoc);
+			//				List<MAssociationEnd> oAsocEnds = oAssoc.associationEnds();
+			//				int na=0;
+			//				MAssociationEnd oAssocEnd = oAsocEnds.get(na);
+			//				MClass oClassAssocEnd = oAssocEnd.cls();
+			//				if (oClassAssocEnd.name().equals(o1.cls().name())) {
+			//					oOri = o1;
+			//					oDes = o2;	
+			//				}else {
+			//					oOri = o2;
+			//					oDes = o1;	
+			//				}			
+			//				cmbClassOri.setSelectedItem(oOri.cls());
+			//				cmbObjectOri.setSelectedItem(oOri);
+			//				cmbClassDes.setSelectedItem(oDes.cls());
+			//				cmbObjectDes.setSelectedItem(oDes);
+			//
+			//				insertLink(oAssoc,o1,o2);
+			//			}
+			createLinksList(lLinks);
 
-				MObject oOri=null;
-				MObject oDes=null;
-
-				MObject o1 = findObjectByName(end1Object);
-				MObject o2 = findObjectByName(end2Object);
-				MAssociation oAssoc = findAssocByName(nomAssoc);
-				List<MAssociationEnd> oAsocEnds = oAssoc.associationEnds();
-				int na=0;
-				MAssociationEnd oAssocEnd = oAsocEnds.get(na);
-				MClass oClassAssocEnd = oAssocEnd.cls();
-				if (oClassAssocEnd.name().equals(o1.cls().name())) {
-					oOri = o1;
-					oDes = o2;	
-				}else {
-					oOri = o2;
-					oDes = o1;	
-				}			
-				cmbClassOri.setSelectedItem(oOri.cls());
-				cmbObjectOri.setSelectedItem(oOri);
-				cmbClassDes.setSelectedItem(oDes.cls());
-				cmbObjectDes.setSelectedItem(oDes);
-
-				insertLink(oAssoc,o1,o2);
-			}
 			setResClassInvariants();
 			setResCheckStructure();
 			bNewObj=false;

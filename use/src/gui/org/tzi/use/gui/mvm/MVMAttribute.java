@@ -2,6 +2,16 @@ package org.tzi.use.gui.mvm;
 public class MVMAttribute {
 	private String name;
 	private String value;
+	
+    public MVMAttribute(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
+	
+	public MVMAttribute() {
+
+	}
+
 	public String getName() {
 		return name;
 	}
