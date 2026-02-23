@@ -1423,7 +1423,159 @@ public class WizardMVMView extends JPanel implements View {
 		return String.join("\r\n", lLinks);
 	}
 
+	//---
 	public static String builJsonRequest3(String strNameModel, String strDefModel, 
+			String strDefProperties, String strInvariants, String strMUS, String strMSS,
+			String strObjects, String strLinks) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("*Profile*").append("\n\n");
+		sb.append("You are a software modeling assistant, expert on software design, development and debugging. ");
+		sb.append("You provide concise, concrete and actionable feedback about software design errors.").append("\n\n");
+
+		sb.append("*Task*").append("\n\n");
+		sb.append("Given a UML class diagram annotated with OCL invariants that is inconsistent ");
+		sb.append("(it is not possible to instantiate the diagram without violating some textual or graphical constraint), ");
+		sb.append("you will provide an explanation of the inconsistency and how to fix it. ");
+		sb.append("This explanation should be usable by a software engineer to locate and correct the defects in the model.").append("\n\n");
+
+		sb.append("*Inputs*").append("\n\n");
+		sb.append("- Model: The UML class diagram is provided in the format of the USE tool ");
+		sb.append("(UML-based Specification Environament) developed by the University of Bremen.").append("\n\n");
+
+		sb.append("Here is a name of model: "+strNameModel+"\n");
+		sb.append(LINEASEP);
+		sb.append("Model definition:\n "+strDefModel+"\n");	
+		sb.append(LINEASEP);
+
+		sb.append("- Properties: A textual description of the range of allowed values for each attribute in the model ");
+		sb.append("and the range on the number of objects per class and the number of links per association.").append("\n");
+		//		sb.append("The properties tag only refers to the properties that exist in <"+strNameModel+">.properties.\n");
+		sb.append("Properties: " +strDefProperties+"\n");
+		sb.append(LINEASEP);
+
+		sb.append("- Invariants: A summary of the invariants in the model, extracted from the USE diagram, ");
+		sb.append("and assigning an integer index to each invariant, that will be used to refer to the invariant.").append("\n\n");
+		sb.append("List of invariants:\r\n"+ strInvariants+"\n\n");
+		sb.append(LINEASEP);
+
+		if (!strMUS.equals("")||!strMSS.equals("")) {
+			sb.append("List of MUS:\n\n"+strMUS);
+			sb.append("\n\n");
+			sb.append(LINEASEP);
+			sb.append("List of MSS:\n\n"+strMSS);
+			sb.append("\n\n");
+			sb.append(LINEASEP);
+		}else {
+			sb.append("- MUSs/MSSs: A description of the minimum unsatisfiable subsets of invariants ");
+			sb.append("and the maximal satisfiable subsets.");
+		}
+
+
+		//		sb.append("- MUSs/MSSs: A description of the minimum unsatisfiable subsets of invariants ");
+		//		sb.append("and the maximal satisfiable subsets, described as lists of integers ");
+		//		sb.append("(each integer refers to the index of the corresponding invariant).").append("\n\n");
+
+		//		sb.append("- [Optional] Instance of the model: An instance (a set of objects and links among objects) ");
+		sb.append("- Instance of the model: An instance (a set of objects and links among objects) ");
+		sb.append("of the model, that should be satisfying all the textual invariants and the graphical UML constraints ");
+		sb.append("such as the multiplicities of association ends.");
+
+		sb.append("\n\n");
+		sb.append("List of objects:"+strObjects);
+		sb.append("\n\n");
+		sb.append(LINEASEP);
+		sb.append("List of links:"+strLinks);
+		sb.append("\n\n");
+		sb.append(LINEASEP);
+
+		sb.append("*Outputs*");
+		sb.append("\n\n");
+		sb.append("- Explanation: A brief discussion of the inconsistency problems in the model. ");
+		sb.append("For each problem, the model should identify the invariants involved and outline a potential way to solve the inconsistency. ");
+		sb.append("Do not provide suggestions like \"this value should be valid\". ");
+		sb.append("Instead, provide informative statements like \"this value should be larger\", ");
+		sb.append("\"this values should be within the following range\", ");
+		sb.append("\"the value of attribute X should be different to the value of attribute Y\", ");
+		sb.append("\"this value should be unique\", etc.");
+
+		sb.append("\n\n");
+
+		sb.append("- Updated list of objects and links: If the input included an instance of the model, ");
+		sb.append("provide a modified list of objects and links, with minimal changes, ");
+		sb.append("such that the corresponding instance satisfies all invariants and graphical UML constraints.");
+		sb.append("\n\n");
+
+		sb.append("*Remarks*");
+		sb.append("\n\n");
+		sb.append("- Please return only the JSON structure without any additional explanation, since the result must be delivered to an application.\n");
+		sb.append("- Therefore, the JSON structure must contain the following parts:\n");
+		sb.append("  - Properties: properties to be modified. The properties tag only refers to the properties that exist in <"+strNameModel+">.properties.\n");
+		//		sb.append("  - Objects: for each object, specify class name, object name, field name, field value\n");
+		//		sb.append("  - Links: for each link, specify association, source object, target object\n");
+		sb.append("- A list of objects with their corresponding values as if the modified properties had already been applied."); 
+		sb.append(" Please return the same field names indicated in the request corresponding to each class.");
+		sb.append(" Please ensure that when defining objects, you normalize the output using the tags 'class', 'name', and 'attributes'.");
+
+		//---
+		sb.append("  - Links: For each link, specify the fields: "+
+				"codeLink,end1Class,end1Object,end1Role,end2Class,end2Object,end2Role,nomAssoc\n");
+		sb.append("  Example: codeLink=\"1\" | end1Class=\"Person\" end1Object=\"person1\" "+
+				"end1Role=\"person\" end2Class=\"Pet\" end2Object=\"pet1\" end2Role=\"person\" nomAssoc=\"BelongsTo\"\n");
+		//		sb.append("  If you need more objects to satisfy the multiplicity of associations, it suggests creating those objects.");
+
+		sb.append("  If more objects are needed to satisfy the multiplicity of the association links,"+
+				"especially those multiplicities that require an endpoint, "+
+				"please indicate that these objects should be created and propose a sample "+
+				"in the list of proposed resulting objects.");
+
+
+		sb.append("  - Comment: Explanation of 'how to correct the model', taking into account the properties that have been indicated for correction as");
+		sb.append(" if they were already corrected.\n");
+		sb.append("- The only tags to return should be: Properties, Objects, Links, and Comment.\n");
+		sb.append("- Do not omit the creation of objects or links.\n");
+		sb.append("- Return ONLY valid JSON.\n");
+		sb.append("- Do not include markdown.\n");
+		sb.append("- Don't forget to include the MUS (Minimal Unsatisfiable Subset) and MSS (Maximal Satisfiable Subset) in the 'Comment' tag using the following format: "
+				+ LINEASEP
+				+ "Minimal Unsatisfiable Subset:\n"
+				+ " - Group1:\n"
+				+ "   invariant1\n"
+				+ " \n - Group2:\n"
+				+ "   invariant2\n"
+				+ "   invariant3\n"
+				+ "\n"
+				+ LINEASEP
+				+ "Maximal Satisfiable Subset:\n"
+				+ " - Group1:\n"
+				+ "   invariant4\n"
+				+ "   invariant5\n"
+				+ "   invariant6\n"
+				+ "   invariant7\n"
+				+ " \n - Group2:\n"
+				+ "   invariant8\n"
+				+ "   invariant9\n"
+				+ " \n - Group3:\n"
+				+ "   invariant10\n"
+				+ "   invariant11\n\n"
+				+ "Remember that in the example I use the names invariant1, etc., but you must use the actual name of the invariant and"
+				+ " its associated invariant number from the invariant list provided earlier. Only invariants should be used here, not other object names or links."
+				+ " And please include the invariant number that appears in the list.\n"
+				+LINEASEP);
+		sb.append("\n");
+
+		sb.append("In the 'Comment' tag included in the result of the request, we must display each sentence ending with a '.' on a different line. ");
+		sb.append("In other words, it displays the comments as if you were listing them.\n");
+
+		mensaje=sb.toString();
+
+		String json = buildRequest3(mensaje);
+		return json;
+	}
+
+	//---
+
+	public static String builJsonRequest3OLD(String strNameModel, String strDefModel, 
 			String strDefProperties, String strInvariants, String strMUS, String strMSS,
 			String strObjects, String strLinks) {
 
@@ -1755,12 +1907,20 @@ public class WizardMVMView extends JPanel implements View {
 		}
 	}
 
-	public static void setStrCreateObjectsAI(String objACrear) {
+	//	public static void setStrCreateObjectsAI(String objACrear) {
+	//		strCreateObjectsAI=objACrear;
+	//	}
+	//	public static void setStrCreateLinksAI(String linksACrear) {
+	//		strCreateLinksAI=linksACrear;
+	//	}
+
+	public void setStrCreateObjectsAI(String objACrear) {
 		strCreateObjectsAI=objACrear;
 	}
-	public static void setStrCreateLinksAI(String linksACrear) {
+	public void setStrCreateLinksAI(String linksACrear) {
 		strCreateLinksAI=linksACrear;
 	}
+
 
 	public static String callAPIOpenAI3(String json) {
 

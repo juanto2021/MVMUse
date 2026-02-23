@@ -547,6 +547,8 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//				System.exit(0); //Provis
+				fWizardMVMView.setStrCreateObjectsAI("");
+				fWizardMVMView.setStrCreateLinksAI("");
 				dispose();
 			}
 		});
