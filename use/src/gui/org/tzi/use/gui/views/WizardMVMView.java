@@ -110,7 +110,6 @@ import org.tzi.use.gui.mvm.MVMConfigManager;
 import org.tzi.use.gui.mvm.MVMLink;
 import org.tzi.use.gui.mvm.MVMObjCheckState;
 import org.tzi.use.gui.mvm.MVMObject;
-import org.tzi.use.gui.mvm.MVMShowResponseOpenAI;
 import org.tzi.use.gui.mvm.MVMShowResponseOpenAI3;
 import org.tzi.use.gui.mvm.MVMWizardActions;
 import org.tzi.use.gui.mvm.MVMWizardAssoc;
@@ -322,16 +321,13 @@ public class WizardMVMView extends JPanel implements View {
 	private static String strCreateLinksAI="";
 	private static WizardMVMView fWizardMVMView;
 
-	// PROVIS ini -----------------------------------------------------------------------------------
 	private static String strNameModel= "Animals.use";
 	private static String strNameProperties = strNameModel.replace(".use", ".properties");
 	private static String urlModel="C:\\Temp";
 	private static String pathModel = urlModel+"\\"+strNameModel;
 	private static String pathProperties = urlModel+"\\"+strNameProperties;
 
-	// PROVIS fin -----------------------------------------------------------------------------------
 	// --- FIN New OPenAI
-
 
 	/**
 	 * The table model.
@@ -500,16 +496,11 @@ public class WizardMVMView extends JPanel implements View {
 						nomClass = oClass.name();
 						lObjects.setModel(loadListObjects(nomClass));
 
-						//-- provis
 						nomObj="";
 						btnSaveObject.setEnabled(false);
 						btnCancelObject.setEnabled(false);
-						//						btnCreateObject.setEnabled(false);
-						//						btnNewObjectAuto.setEnabled(false);
-						//--
+
 						if (oClass.isAbstract()) {
-							//							nomObj="";
-							//							btnSaveObject.setEnabled(false);//Provis
 							btnCreateObject.setEnabled(false);
 							btnNewObjectAuto.setEnabled(false);
 						}else {
@@ -645,11 +636,7 @@ public class WizardMVMView extends JPanel implements View {
 		btnCreateObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				initNewObject();
-				//				newObjectAuto();
-				//				txNewObject.setEnabled(true);
-				//				// habilitar boton cancel
 				btnCancelObject.setEnabled(true);
-
 
 				iniObjDiagramAssoc();
 				if (chkAutoLayout.isSelected()) {
@@ -678,9 +665,7 @@ public class WizardMVMView extends JPanel implements View {
 				oClass = lClass.getSelectedValue();
 				// Si bNewObj hay que ver si ya existe un objeto con el mismo nombre
 				if (bNewObj) {
-					System.out.println("Aqui");
 					if (existObject(nomObj, oClass.name())) {
-						System.out.println("ya existe");
 						JOptionPane.showMessageDialog(frame, "Error: [" +nomObj+"] ya existe", "Error", JOptionPane.ERROR_MESSAGE);
 						txNewObject.requestFocusInWindow();
 						return;
@@ -746,9 +731,6 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnDeleteObject);
 
-		//----------------
-
-		// Escuchar cambios en el contenido del JTextField
 		txNewObject.getDocument().addDocumentListener(new DocumentListener() {
 			public void insertUpdate(DocumentEvent e) {
 				actualizarBotones();
@@ -1238,21 +1220,6 @@ public class WizardMVMView extends JPanel implements View {
 
 	}
 
-	//	private void runAnalisis2() {
-	//		try {
-	//			String strJson = builJsonRequest2();
-	//			// Call API
-	//			String jsonContent=callAPIOpenAI(strJson);
-	//			// Analysis jsonContent
-	//			String resultado = analysisJsonToString2(jsonContent);
-	//			// Show result
-	//			showResponseOpenAI(resultado);
-	//		} catch (Exception e) {
-	//			e.printStackTrace();
-	//		}
-	//	}
-	//INI --- New OpenAI ---------------------------------------------
-
 	public static String getStrDefModel() {
 		String sDefModel="";
 
@@ -1367,7 +1334,6 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	public String getStrMSS() {
-
 		//		String gMSS = ""; // en fomato 1-2,3-4-5
 		String gMSS = fMainWindow.listStrSatisfiables.toString().replace("[", "").replace("]", "");
 		List<String> groups = new ArrayList<>();
@@ -1421,14 +1387,7 @@ public class WizardMVMView extends JPanel implements View {
 	public String getStrLinks() {
 
 		List<String> lLinks = new ArrayList<>();
-
-		//
-
 		List<MVMLink> lLinksMVM = getMVMLinks();
-
-		System.out.println(lLinksMVM.toString());
-
-		//		List<String> lLinks = new ArrayList<>();
 
 		for (MVMLink link : lLinksMVM) {
 
@@ -1449,7 +1408,6 @@ public class WizardMVMView extends JPanel implements View {
 		return String.join("\r\n", lLinks);
 	}
 
-	//---
 	public static String builJsonRequest3(String strNameModel, String strDefModel, 
 			String strDefProperties, String strInvariants, String strMUS, String strMSS,
 			String strObjects, String strLinks) {
@@ -1548,13 +1506,10 @@ public class WizardMVMView extends JPanel implements View {
 				"codeLink,end1Class,end1Object,end1Role,end2Class,end2Object,end2Role,nomAssoc\n");
 		sb.append("  Example: codeLink=\"1\" | end1Class=\"Person\" end1Object=\"person1\" "+
 				"end1Role=\"person\" end2Class=\"Pet\" end2Object=\"pet1\" end2Role=\"person\" nomAssoc=\"BelongsTo\"\n");
-		//		sb.append("  If you need more objects to satisfy the multiplicity of associations, it suggests creating those objects.");
-
 		sb.append("  If more objects are needed to satisfy the multiplicity of the association links,"+
 				"especially those multiplicities that require an endpoint, "+
 				"please indicate that these objects should be created and propose a sample "+
 				"in the list of proposed resulting objects.");
-
 
 		sb.append("  - Comment: Explanation of 'how to correct the model', taking into account the properties that have been indicated for correction as");
 		sb.append(" if they were already corrected.\n");
@@ -1599,8 +1554,6 @@ public class WizardMVMView extends JPanel implements View {
 		return json;
 	}
 
-	//---
-
 	public static String builJsonRequest3OLD(String strNameModel, String strDefModel, 
 			String strDefProperties, String strInvariants, String strMUS, String strMSS,
 			String strObjects, String strLinks) {
@@ -1633,7 +1586,7 @@ public class WizardMVMView extends JPanel implements View {
 		sb2.append(" If I send you a list of objects and links, try to keep them as much as possible,"+
 				"modifying only the attributes you deem necessary to achieve the desired level of satisfaction."+
 				"If you need to create new links, please suggest them.");
-		// Si no hay MUS y MSS se las pido.
+		// If there are no MUS and MSS, I'll ask for them.
 		if (strMUS.equals("")) {
 			sb2.append("Please calculate MUS (Minimal Unsatisfiable Subset) and MSS (Maximal Satisfiable Subset) and include the result in a paragraph-style subsection within the resulting 'Comment' block.\n");
 		}
@@ -1645,9 +1598,6 @@ public class WizardMVMView extends JPanel implements View {
 		sb2.append("- Therefore, the JSON structure must contain the following parts:\n");
 		sb2.append("  - Properties: properties to be modified\n");
 		sb2.append("  - Objects: for each object, specify class name, object name, field name, field value\n");
-		//		sb2.append("  - Links: for each link, specify association, source object, target object\n");
-
-		//---
 		sb2.append("  - Links: For each link, specify the fields: "+
 				"codeLink,end1Class,end1Object,end1Role,end2Class,end2Object,end2Role,nomAssoc\n");
 		sb2.append("  Example: codeLink=\"1\" | end1Class=\"Person\" end1Object=\"person1\" "+
@@ -1686,7 +1636,7 @@ public class WizardMVMView extends JPanel implements View {
 				+ " And please include the invariant number that appears in the list.\n"
 				+LINEASEP);
 		sb2.append("\n");
-		//		}
+
 		sb2.append("In the 'Comment' tag included in the result of the request, we must display each sentence ending with a '.' on a different line. ");
 		sb2.append("In other words, it displays the comments as if you were listing them.\n");
 
@@ -1933,20 +1883,12 @@ public class WizardMVMView extends JPanel implements View {
 		}
 	}
 
-	//	public static void setStrCreateObjectsAI(String objACrear) {
-	//		strCreateObjectsAI=objACrear;
-	//	}
-	//	public static void setStrCreateLinksAI(String linksACrear) {
-	//		strCreateLinksAI=linksACrear;
-	//	}
-
 	public void setStrCreateObjectsAI(String objACrear) {
 		strCreateObjectsAI=objACrear;
 	}
 	public void setStrCreateLinksAI(String linksACrear) {
 		strCreateLinksAI=linksACrear;
 	}
-
 
 	public static String callAPIOpenAI3(String json) {
 
@@ -1986,9 +1928,6 @@ public class WizardMVMView extends JPanel implements View {
 
 		return responseBody;
 	}
-
-
-	//FIN --- New OpenAI ---------------------------------------------
 
 	public static String callAPIOpenAI(String json) {
 		String responseBody="";
@@ -2319,15 +2258,10 @@ public class WizardMVMView extends JPanel implements View {
 		if (!strCreateObjectsAI.equals("")) {
 			List<MVMObject> lObjs = new ArrayList<MVMObject>();
 			List<MVMLink> lLinks = new ArrayList<MVMLink>();
-			//			List<MVMLink> lLinks =
-			System.out.println("Creamos objetos["+strCreateObjectsAI+"]");
+
 			lObjs=parseMVMObjects(strCreateObjectsAI);
-			System.out.println("Creamos objetos["+lObjs.toString()+"]");
 			if (!strCreateLinksAI.equals("")) {
-				System.out.println("Creamos links["+strCreateLinksAI+"]");
 				lLinks=parseMVMLinks(strCreateLinksAI);
-				System.out.println("Creamos links["+lLinks.toString()+"]");
-				System.out.println("");
 			}		
 			doCreationsAI(lObjs, lLinks);
 		}
@@ -3207,8 +3141,9 @@ public class WizardMVMView extends JPanel implements View {
 		Set<MObject> allObjects = state.allObjects();
 
 		for (MObject obj : allObjects) {
-			// Para que se comporte igual que USE, no pueden existir 2 objetos con el mismo nombre aunque
-			// sean de distinta vlase
+			// For it to behave the same as USE, there cannot be two objects with the same name even if
+			// they are of different classes.
+
 			//			if (obj.name().equals(name)&&obj.cls().name().equals(className)) {
 			if (obj.name().equals(name)) {
 				bRes=true;
@@ -3770,8 +3705,6 @@ public class WizardMVMView extends JPanel implements View {
 
 		Set<MLink> links = fSystem.state().linksOfAssociation(oAssoc).links();
 
-		//-- provis
-		//		btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
 		btnDeleteLink.setEnabled(links.size()>0);	
 		//--
 
@@ -4061,20 +3994,13 @@ public class WizardMVMView extends JPanel implements View {
 		txNewObject.setEnabled(true);
 		bNewObj=true;
 
-		//Aqui
-		// habilitar boton cancel
 		btnCancelObject.setEnabled(true);
-		//Mostrar tabla de objetos vacia
 
-		// Después de preparar el nuevo objeto en initNewObject()
 		fAttributes = new ArrayList<>(oClass.allAttributes());
 
 		if (fAttributes != null) {
 			fValues = new String[fAttributes.size()];
 			for (int i = 0; i < fValues.length; i++) {
-				//		        fValues[i] = "99";   // Valor por defecto
-				//---
-
 				MAttribute attr = (MAttribute) fAttributes.get(i);
 				attr.type();
 				if (attr.type().isTypeOfInteger()) {
@@ -4086,12 +4012,6 @@ public class WizardMVMView extends JPanel implements View {
 				}if (attr.type().isTypeOfReal()) {
 					fValues[i] = "1.0";
 				}
-
-				//---
-
-
-
-
 			}
 			fTableModel.fireTableDataChanged();
 		}
@@ -4104,7 +4024,7 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	private void cancelObject(String nomObj) {
 		selectObject(nomObj);
-		btnCancelObject.setEnabled(false);// Provis
+		btnCancelObject.setEnabled(false);
 	}
 
 	/**
@@ -4196,7 +4116,6 @@ public class WizardMVMView extends JPanel implements View {
 				}
 			}
 
-			//provis
 			if (!nomObj.equals("")) {
 				if (!existObject(nomObj, oClass.name())) {
 					createObject(oClass, nomObj);
@@ -4204,11 +4123,7 @@ public class WizardMVMView extends JPanel implements View {
 
 				selectObject( nomObj);
 			}
-			//			if (!existObject(nomObj, oClass.name())) {
-			//				createObject(oClass, nomObj);
-			//			}
-			//
-			//			selectObject( nomObj);
+
 
 			if (fValues.length == fValuesAnt.length && sameClass) {
 				for (int i = 0; i < fAttributes.size(); i++) {
@@ -4244,12 +4159,12 @@ public class WizardMVMView extends JPanel implements View {
 		}else {
 			storeAction("MA", "Modification object ["+nomObj+"] of ["+oClass.name()+"]");	
 		}
-		//-- provis
+
 		lAssocs.setSelectedIndex(lAssocs.getSelectedIndex());
 		int nObjOri = cmbObjectOri.getModel().getSize();
 		int nObjDes = cmbObjectDes.getModel().getSize();
 		btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
-		//-- provis				 
+			 
 	}
 
 	/**
@@ -4314,14 +4229,10 @@ public class WizardMVMView extends JPanel implements View {
 		setResClassInvariants();
 		setResCheckStructure();
 
-		//-- provis
-
 		MAssociation oAssoc = lAssocs.getSelectedValue();
 		if (oAssoc!=null) {
 			setComposAssoc(oAssoc);
 		}
-
-		//-- provis
 
 		boolean hayTexto = !txNewObject.getText().trim().isEmpty();
 		btnSaveObject.setEnabled(hayTexto);
@@ -4520,18 +4431,13 @@ public class WizardMVMView extends JPanel implements View {
 			MObject obj = oLE.object();
 
 			String className = oClass.name();
-			//			System.out.println("Class: " + className);
-
 			String nomObj = obj.name();
-			//			System.out.println("Objeto: " + nomObj);
-			//			System.out.println("Ya");
 
 			Object objRef = cmbObjectOri.getModel().getElementAt(0);
 
 			MObject objeto = (MObject) objRef; // Cast al tipo real
 			MClassImpl cls = (MClassImpl) objeto.cls(); // Acceder al campo fClass
 			String nameClassRef = cls.name(); // Obtener el nombre
-			//			System.out.println("Nombre de la clase: " + nameClassRef);
 
 			if (className.equals(nameClassRef)) {
 				selectObjInCombo(cmbObjectOri,nomObj);
@@ -4709,7 +4615,6 @@ public class WizardMVMView extends JPanel implements View {
 				MSystemState postState=state;
 				VarBindings bindings=new VarBindings();
 
-				//				fEnableEvalTree = true;
 				fEvalContext = new SimpleEvalContext(preState, postState, bindings);
 				EvalContext ctx=fEvalContext;
 
@@ -4718,7 +4623,7 @@ public class WizardMVMView extends JPanel implements View {
 				VarDeclList elemVarDecls=null;
 				Expression rangeExp=null;
 				Expression queryExp=null;
-				//				Expression exp;
+
 				String simpleName = cl.getSimpleName();
 				if (simpleName.equals("ExpForAll")) {
 					ExpForAll exp2 = (ExpForAll) expr;
@@ -4727,9 +4632,7 @@ public class WizardMVMView extends JPanel implements View {
 					rangeExp=exp2.getRangeExpression();
 					queryExp=exp2.getQueryExpression();
 					fQueryExp=queryExp;
-					//					exp = (ExpForAll) expr;
 				}else {
-					//					exp = (ExpStdOp) expr;
 					// Do nothing
 				}
 
@@ -4804,7 +4707,6 @@ public class WizardMVMView extends JPanel implements View {
 			} else {
 				// evaluate predicate expression
 				Value queryVal = fQueryExp.eval(ctx);
-				//				Boolean boolRes = ((BooleanValue)queryVal).value();
 				Boolean boolRes = false;
 				if (!queryVal.isUndefined()) {
 					boolRes = ((BooleanValue)queryVal).value();
@@ -4843,7 +4745,6 @@ public class WizardMVMView extends JPanel implements View {
 						}
 					}
 				}
-
 			}
 
 			if (!fElemVarDecls.isEmpty()) {
@@ -4852,9 +4753,7 @@ public class WizardMVMView extends JPanel implements View {
 				}
 			}
 		}
-
 		return res;
 	}
-
 }
 
