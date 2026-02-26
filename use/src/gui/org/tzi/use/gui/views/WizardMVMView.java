@@ -645,6 +645,12 @@ public class WizardMVMView extends JPanel implements View {
 		btnCreateObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				initNewObject();
+				//				newObjectAuto();
+				//				txNewObject.setEnabled(true);
+				//				// habilitar boton cancel
+				btnCancelObject.setEnabled(true);
+
+
 				iniObjDiagramAssoc();
 				if (chkAutoLayout.isSelected()) {
 					if (odvAssoc!=null) {
@@ -658,6 +664,7 @@ public class WizardMVMView extends JPanel implements View {
 						}
 					}
 				}
+				txNewObject.requestFocusInWindow();
 			}
 		});
 		panel.add(btnCreateObject);
@@ -669,6 +676,16 @@ public class WizardMVMView extends JPanel implements View {
 			public void actionPerformed(ActionEvent e) {
 				nomObj = txNewObject.getText();
 				oClass = lClass.getSelectedValue();
+				// Si bNewObj hay que ver si ya existe un objeto con el mismo nombre
+				if (bNewObj) {
+					System.out.println("Aqui");
+					if (existObject(nomObj, oClass.name())) {
+						System.out.println("ya existe");
+						JOptionPane.showMessageDialog(frame, "Error: [" +nomObj+"] ya existe", "Error", JOptionPane.ERROR_MESSAGE);
+						txNewObject.requestFocusInWindow();
+						return;
+					}
+				}
 				saveObject(oClass, nomObj);
 				setResClassInvariants();
 				setResCheckStructure();
@@ -700,6 +717,15 @@ public class WizardMVMView extends JPanel implements View {
 		btnCancelObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				cancelObject(nomObj);
+				if (nomObj!=null){
+					if (!nomObj.equals("")){
+						selectObject(nomObj);
+						btnSaveObject.setEnabled(true);
+						btnCancelObject.setEnabled(true);
+						btnCreateObject.setEnabled(true);
+						btnNewObjectAuto.setEnabled(true);
+					}
+				}
 			}
 		});
 		panel.add(btnCancelObject);
@@ -3181,7 +3207,10 @@ public class WizardMVMView extends JPanel implements View {
 		Set<MObject> allObjects = state.allObjects();
 
 		for (MObject obj : allObjects) {
-			if (obj.name().equals(name)&&obj.cls().name().equals(className)) {
+			// Para que se comporte igual que USE, no pueden existir 2 objetos con el mismo nombre aunque
+			// sean de distinta vlase
+			//			if (obj.name().equals(name)&&obj.cls().name().equals(className)) {
+			if (obj.name().equals(name)) {
 				bRes=true;
 				return bRes;
 			}
@@ -4031,6 +4060,42 @@ public class WizardMVMView extends JPanel implements View {
 		txNewObject.setText("");
 		txNewObject.setEnabled(true);
 		bNewObj=true;
+
+		//Aqui
+		// habilitar boton cancel
+		btnCancelObject.setEnabled(true);
+		//Mostrar tabla de objetos vacia
+
+		// Después de preparar el nuevo objeto en initNewObject()
+		fAttributes = new ArrayList<>(oClass.allAttributes());
+
+		if (fAttributes != null) {
+			fValues = new String[fAttributes.size()];
+			for (int i = 0; i < fValues.length; i++) {
+				//		        fValues[i] = "99";   // Valor por defecto
+				//---
+
+				MAttribute attr = (MAttribute) fAttributes.get(i);
+				attr.type();
+				if (attr.type().isTypeOfInteger()) {
+					fValues[i] = "1";
+				}else if (attr.type().isTypeOfString()) {
+					fValues[i] = "'x'";
+				}if (attr.type().isTypeOfBoolean()) {
+					fValues[i] = "true";
+				}if (attr.type().isTypeOfReal()) {
+					fValues[i] = "1.0";
+				}
+
+				//---
+
+
+
+
+			}
+			fTableModel.fireTableDataChanged();
+		}
+
 	}
 
 	/**
@@ -4039,6 +4104,7 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	private void cancelObject(String nomObj) {
 		selectObject(nomObj);
+		btnCancelObject.setEnabled(false);// Provis
 	}
 
 	/**
@@ -4129,11 +4195,21 @@ public class WizardMVMView extends JPanel implements View {
 					fValuesAnt[i] = fValues[i];
 				}
 			}
-			if (!existObject(nomObj, oClass.name())) {
-				createObject(oClass, nomObj);
-			}
 
-			selectObject( nomObj);
+			//provis
+			if (!nomObj.equals("")) {
+				if (!existObject(nomObj, oClass.name())) {
+					createObject(oClass, nomObj);
+				}
+
+				selectObject( nomObj);
+			}
+			//			if (!existObject(nomObj, oClass.name())) {
+			//				createObject(oClass, nomObj);
+			//			}
+			//
+			//			selectObject( nomObj);
+
 			if (fValues.length == fValuesAnt.length && sameClass) {
 				for (int i = 0; i < fAttributes.size(); i++) {
 					fValues[i] = fValuesAnt[i];
