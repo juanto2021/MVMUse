@@ -57,7 +57,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 	private static Font fontBold = new Font(UIManager.getFont("Label.font").getFamily(), Font.BOLD, 16);
 
 	private static JButton btnExit;	
-	private static JButton btnCreateObjects;
+	//	private static JButton btnCreateObjects;
 	private static JButton btnCreateLinks;
 	private static JButton btnCopyComment;
 	private static JButton btnCopyTXTRequest;
@@ -125,7 +125,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		txtComments.setText(rComments);
 		txtComments.setCaretPosition(0);
 
-		btnCreateObjects.setEnabled(!rObjects.trim().isEmpty());
+		//		btnCreateObjects.setEnabled(!rObjects.trim().isEmpty());
 		btnCreateLinks.setEnabled(!rLinks.trim().isEmpty());
 
 
@@ -384,7 +384,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		panel = new JPanel(null);
 		panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-		int labelWidth = 130;
+		int labelWidth = 180;
 		int fieldWidth = 600;
 		int fieldHeight = 180;
 		int startY = 10;
@@ -393,16 +393,16 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		lblObjects.setBounds(15, startY , labelWidth, 25);
 		lblObjects.setFont(fontBold);
 
-		btnCreateObjects = new JButton("Create Objects");
-		btnCreateObjects.setBounds(15 + fieldWidth - 150, startY + fieldHeight + 80 , 150, 30);
-		btnCreateObjects.setEnabled(false);
-		btnCreateObjects.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				//				showDialogCreateObjects(panel.getParent());
-				showDialogCreateObjects(panel);
-			}
-		});
-		panel.add(btnCreateObjects);
+		//		btnCreateObjects = new JButton("Create Objects");
+		//		btnCreateObjects.setBounds(15 + fieldWidth - 150, startY + fieldHeight + 80 , 150, 30);
+		//		btnCreateObjects.setEnabled(false);
+		//		btnCreateObjects.addActionListener(new ActionListener() {
+		//			public void actionPerformed(ActionEvent e) {
+		//				//				showDialogCreateObjects(panel.getParent());
+		//				showDialogCreateObjects(panel);
+		//			}
+		//		});
+		//		panel.add(btnCreateObjects);
 
 		txtObjects = new JTextArea();
 		txtObjects.setLineWrap(true);
@@ -423,7 +423,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		panel.add(scrollObjects);
 
 		lblLinks = new JLabel("Links:");
-		lblLinks.setBounds(15+fieldWidth+60, startY , labelWidth, 25);
+		lblLinks.setBounds(15+fieldWidth+10, startY , labelWidth, 25);
 		lblLinks.setFont(fontBold);
 
 		btnCreateLinks = new JButton("Create Objects + Links");
@@ -479,7 +479,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		panel.add(lblProperties);
 		panel.add(scrollProperties);
 
-		lblComments = new JLabel("Comments:");
+		lblComments = new JLabel("Proposed changes");
 		lblComments.setBounds(15, startY + fieldHeight*2 + 140, labelWidth, 25);
 		lblComments.setFont(fontBold);
 

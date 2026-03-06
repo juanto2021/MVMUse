@@ -312,7 +312,7 @@ public class WizardMVMView extends JPanel implements View {
 	private static String strObjects;
 	private static String strLinks;
 
-	private static String LINEASEP = "-------------------------------------------------\n";
+	private static String LINEASEP = "-----------------------------------------------------------\n";
 	private static String mensaje;
 	private static String jsonPretty;
 	private static String jsonResult;
@@ -328,6 +328,7 @@ public class WizardMVMView extends JPanel implements View {
 	private static String pathProperties = urlModel+"\\"+strNameProperties;
 
 	// --- FIN New OPenAI
+	private boolean showTxtBlocks=false;
 
 	/**
 	 * The table model.
@@ -414,6 +415,8 @@ public class WizardMVMView extends JPanel implements View {
 		lActions = new ArrayList<MVMAction>();
 		fMainWindow = parent;
 		fWizardMVMView=this;
+		listStrSatisfiables.clear();
+		listStrUnSatisfiables.clear();
 
 		fSession = session;
 		fSystem = session.system();
@@ -844,7 +847,7 @@ public class WizardMVMView extends JPanel implements View {
 		});
 		panel.add(btnActions);
 
-		btnSuggestions = new JButton("Suggestions");
+		btnSuggestions = new JButton("<html><center>Suggest<br>fixes</center></html>");
 		btnSuggestions.setBounds(107, 384, 95, 60);
 		btnSuggestions.setVerticalAlignment(SwingConstants.CENTER);
 		btnSuggestions.setHorizontalAlignment(SwingConstants.CENTER);
@@ -852,6 +855,9 @@ public class WizardMVMView extends JPanel implements View {
 			public void actionPerformed(ActionEvent e) {
 				//				runAnalisis1();
 				//				runAnalisis2();
+				// Ver que contiene listStrSatisfiables y listStrUnSatisfiables
+				System.out.println("listStrSatisfiables ["+listStrSatisfiables+"]");
+				System.out.println("listStrUnSatisfiables ["+listStrUnSatisfiables+"]");
 				runAnalisis3();				
 			}
 		});
@@ -1282,7 +1288,7 @@ public class WizardMVMView extends JPanel implements View {
 				sb.append("\n"); // salto de línea entre grupos
 			}
 		}
-
+		System.out.println("MUS: ["+sb.toString()+"]");
 		return sb.toString();
 	}
 	public static List<String> buildInvariantGroups(String strInvariants, String gMSS) {
@@ -1346,7 +1352,7 @@ public class WizardMVMView extends JPanel implements View {
 				sb.append("\n".toUpperCase()); // salto de línea entre grupos
 			}
 		}
-
+		System.out.println("MSS: ["+sb.toString()+"]");
 		return sb.toString();
 	}	
 	//Aqui
@@ -1464,14 +1470,17 @@ public class WizardMVMView extends JPanel implements View {
 		sb.append("- Instance of the model: An instance (a set of objects and links among objects) ");
 		sb.append("of the model, that should be satisfying all the textual invariants and the graphical UML constraints ");
 		sb.append("such as the multiplicities of association ends.");
-
-		sb.append("\n\n");
-		sb.append("List of objects:"+strObjects);
-		sb.append("\n\n");
-		sb.append(LINEASEP);
-		sb.append("List of links:"+strLinks);
-		sb.append("\n\n");
-		sb.append(LINEASEP);
+		if (!strObjects.equals("")) {
+			sb.append("\n\n");
+			sb.append("List of objects:"+strObjects);
+			sb.append("\n\n");
+			sb.append(LINEASEP);
+			if (!strLinks.equals("")) {
+				sb.append("List of links:"+strLinks);
+				sb.append("\n\n");
+				sb.append(LINEASEP);
+			}
+		}		
 
 		sb.append("*Outputs*");
 		sb.append("\n\n");
@@ -1497,56 +1506,72 @@ public class WizardMVMView extends JPanel implements View {
 		sb.append("  - Properties: properties to be modified. The properties tag only refers to the properties that exist in <"+strNameModel+">.properties.\n");
 		//		sb.append("  - Objects: for each object, specify class name, object name, field name, field value\n");
 		//		sb.append("  - Links: for each link, specify association, source object, target object\n");
-		sb.append("- A list of objects with their corresponding values as if the modified properties had already been applied."); 
-		sb.append(" Please return the same field names indicated in the request corresponding to each class.");
-		sb.append(" Please ensure that when defining objects, you normalize the output using the tags 'class', 'name', and 'attributes'.");
+		sb.append("  - A list of objects with their corresponding values as if the modified properties had already been applied.\n"); 
+		sb.append("   Please return the same field names indicated in the request corresponding to each class.\n");
+		sb.append("   Please ensure that when defining objects, you normalize the output using the tags 'class', 'name', and 'attributes'.\n");
 
 		//---
 		sb.append("  - Links: For each link, specify the fields: "+
 				"codeLink,end1Class,end1Object,end1Role,end2Class,end2Object,end2Role,nomAssoc\n");
-		sb.append("  Example: codeLink=\"1\" | end1Class=\"Person\" end1Object=\"person1\" "+
+		sb.append("    Example: codeLink=\"1\" | end1Class=\"Person\" end1Object=\"person1\" "+
 				"end1Role=\"person\" end2Class=\"Pet\" end2Object=\"pet1\" end2Role=\"person\" nomAssoc=\"BelongsTo\"\n");
-		sb.append("  If more objects are needed to satisfy the multiplicity of the association links,"+
+		sb.append("- If more objects are needed to satisfy the multiplicity of the association links,"+
 				"especially those multiplicities that require an endpoint, "+
 				"please indicate that these objects should be created and propose a sample "+
-				"in the list of proposed resulting objects.");
+				"in the list of proposed resulting objects.\n");
 
-		sb.append("  - Comment: Explanation of 'how to correct the model', taking into account the properties that have been indicated for correction as");
+		sb.append("- Comment: Explanation of 'how to correct the model', taking into account the properties that have been indicated for correction as");
 		sb.append(" if they were already corrected.\n");
 		sb.append("- The only tags to return should be: Properties, Objects, Links, and Comment.\n");
 		sb.append("- Do not omit the creation of objects or links.\n");
 		sb.append("- Return ONLY valid JSON.\n");
 		sb.append("- Do not include markdown.\n");
-		sb.append("- Don't forget to include the MUS (Minimal Unsatisfiable Subset) and MSS (Maximal Satisfiable Subset) in the 'Comment' tag using the following format: "
-				+ LINEASEP
-				+ "Minimal Unsatisfiable Subset:\n"
-				+ " - Group1:\n"
-				+ "   invariant1\n"
-				+ " \n - Group2:\n"
-				+ "   invariant2\n"
-				+ "   invariant3\n"
-				+ "\n"
-				+ LINEASEP
-				+ "Maximal Satisfiable Subset:\n"
-				+ " - Group1:\n"
-				+ "   invariant4\n"
-				+ "   invariant5\n"
-				+ "   invariant6\n"
-				+ "   invariant7\n"
-				+ " \n - Group2:\n"
-				+ "   invariant8\n"
-				+ "   invariant9\n"
-				+ " \n - Group3:\n"
-				+ "   invariant10\n"
-				+ "   invariant11\n\n"
-				+ "Remember that in the example I use the names invariant1, etc., but you must use the actual name of the invariant and"
-				+ " its associated invariant number from the invariant list provided earlier. Only invariants should be used here, not other object names or links."
-				+ " And please include the invariant number that appears in the list.\n"
-				+LINEASEP);
-		sb.append("\n");
+		// Si no se pasan MUSS/MSS
+		if (strMUS.equals("")&&strMSS.equals("")) {
+			sb.append("- Don't forget to include the MUS (Minimal Unsatisfiable Subset) and MSS (Maximal Satisfiable Subset) in the 'Comment' tag using the following format: "
+					+ "\n\n"
+					+ LINEASEP
+					+ "ADDITIONAL INFORMATION ABOUT MSS/MUS\n"
+					+ "\n"
+					+ "Minimal Unsatisfiable Subset:\n"
+					+ " - Group1:\n"
+					+ "   invariant1\n"
+					+ " \n - Group2:\n"
+					+ "   invariant2\n"
+					+ "   invariant3\n"
+					+ "\n"
+					+ LINEASEP
+					+ "Maximal Satisfiable Subset:\n"
+					+ " - Group1:\n"
+					+ "   invariant4\n"
+					+ "   invariant5\n"
+					+ "   invariant6\n"
+					+ "   invariant7\n"
+					+ " \n - Group2:\n"
+					+ "   invariant8\n"
+					+ "   invariant9\n"
+					+ " \n - Group3:\n"
+					+ "   invariant10\n"
+					+ "   invariant11\n\n"
+					+ "Remember that in the example I use the names invariant1, etc., but you must use the actual name of the invariant and"
+					+ " its associated invariant number from the invariant list provided earlier. Only invariants should be used here, not other object names or links."
+					+ " And please include the invariant number that appears in the list.\n"
+					+LINEASEP);
+			sb.append("\n");
+		}
+		//		sb.append("In the 'Comment' tag included in the result of the request, we must display each sentence ending with a '.' on a different line. ");
+		//		sb.append("In other words, it displays the comments as if you were listing them.\n");
+		//		sb.append("- In the 'Comment' tag, display each comment as a separate paragraph including"+
+		//				"a line break and carriage return between paragraphs.\n");
+		sb.append("- Return each sentence on a separate line, using a line break between sentences.\n");
+		sb.append("  For example:\n");
+		sb.append("  Input:  Sentence1. Sentence2. Sentence3.\n");
+		sb.append("  Output:\n");
+		sb.append("  Sentence1.\n");
+		sb.append("  Sentence2.\n");
+		sb.append("  Sentence3.\n");
 
-		sb.append("In the 'Comment' tag included in the result of the request, we must display each sentence ending with a '.' on a different line. ");
-		sb.append("In other words, it displays the comments as if you were listing them.\n");
+
 
 		mensaje=sb.toString();
 
@@ -1831,22 +1856,28 @@ public class WizardMVMView extends JPanel implements View {
 			jsonPretty = mapper.writerWithDefaultPrettyPrinter()
 					.writeValueAsString(jsonWork);
 
-			System.out.println("jsonPretty 1 =================================================================");
-			System.out.println(jsonPretty);
-			System.out.println("jsonPretty 2 =================================================================");
+			if (showTxtBlocks) {
+				System.out.println("jsonPretty 1 =================================================================");
+				System.out.println(jsonPretty);
+				System.out.println("jsonPretty 2 =================================================================");
+			}
 
 			// Llamada API
 			jsonResult=callAPIOpenAI3(jsonPretty);
 
-			System.out.println("jsonContent 1 =================================================================");
-			System.out.println(jsonResult);
-			System.out.println("jsonContent 2 =================================================================");
+			if (showTxtBlocks) {
+				System.out.println("jsonContent 1 =================================================================");
+				System.out.println(jsonResult);
+				System.out.println("jsonContent 2 =================================================================");
+			}
 
 			// Analisis json
 			String jsonAnalysisResult = analysisJsonToString(jsonResult);
-			System.out.println("resultado 1 =================================================================");
-			System.out.println(jsonAnalysisResult);
-			System.out.println("resultado 2 =================================================================");
+			if (showTxtBlocks) {
+				System.out.println("resultado 1 =================================================================");
+				System.out.println(jsonAnalysisResult);
+				System.out.println("resultado 2 =================================================================");
+			}
 
 			Map<String, String> out = parseResult(jsonAnalysisResult);
 
@@ -1855,24 +1886,37 @@ public class WizardMVMView extends JPanel implements View {
 			String rProperties = out.get("rProperties");
 			String rComments = out.get("rComments");
 
-			System.out.println("rObjects 1 =================================================================");
-			System.out.println(formatJson(rObjects));
-			System.out.println("rObjects 2 =================================================================");
+			// rComments contiene el texto original devuelto por OpenAI
+			String original = rComments.trim();
 
-			System.out.println("rLinks 1 =================================================================");
-			System.out.println(formatJson(rLinks));
-			System.out.println("rLinks 2 =================================================================");
+			// Divide por frases terminadas en punto, conservando el punto
+			String[] sentences = original.split("(?<=\\.)\\s+");
 
-			System.out.println("rProperties 1 =================================================================");
-			System.out.println(formatJson(rProperties));
-			System.out.println("rProperties 2 =================================================================");
+			// Une cada frase en una línea distinta con CRLF
+			String formatted = String.join("\r\n", sentences);
 
-			System.out.println("rComments 1 =================================================================");
-			System.out.println(formatJson(rComments));
-			System.out.println("rComments 2 =================================================================");
-			System.out.println("");
-			System.out.println(out);
+			// Si quieres reemplazar el original:
+			rComments = formatted;
 
+			if (showTxtBlocks) {
+				System.out.println("rObjects 1 =================================================================");
+				System.out.println(formatJson(rObjects));
+				System.out.println("rObjects 2 =================================================================");
+
+				System.out.println("rLinks 1 =================================================================");
+				System.out.println(formatJson(rLinks));
+				System.out.println("rLinks 2 =================================================================");
+
+				System.out.println("rProperties 1 =================================================================");
+				System.out.println(formatJson(rProperties));
+				System.out.println("rProperties 2 =================================================================");
+
+				System.out.println("rComments 1 =================================================================");
+				System.out.println(formatJson(rComments));
+				System.out.println("rComments 2 =================================================================");
+				System.out.println("");
+				System.out.println(out);
+			}
 			// Llamada visualización OpenAI
 			panel.setCursor(Cursor.getDefaultCursor());
 			showResponseOpenAI3(rObjects, rLinks, rProperties, rComments, mensaje, jsonPretty, jsonResult);
@@ -4164,7 +4208,7 @@ public class WizardMVMView extends JPanel implements View {
 		int nObjOri = cmbObjectOri.getModel().getSize();
 		int nObjDes = cmbObjectDes.getModel().getSize();
 		btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
-			 
+
 	}
 
 	/**
