@@ -1433,32 +1433,32 @@ public class WizardMVMView extends JPanel implements View {
 		sb.append("- Model: The UML class diagram is provided in the format of the USE tool ");
 		sb.append("(UML-based Specification Environament) developed by the University of Bremen.").append("\n\n");
 
-		sb.append("Here is a name of model: "+strNameModel+"\n");
+		sb.append("Here is a name of model: \"\"\""+strNameModel+"\\\"\\\"\\\"\n");
 		sb.append(LINEASEP);
-		sb.append("Model definition:\n "+strDefModel+"\n");	
+		sb.append("Model definition:\n\"\"\""+strDefModel+"\"\"\"\n");	
 		sb.append(LINEASEP);
 
 		sb.append("- Properties: A textual description of the range of allowed values for each attribute in the model ");
 		sb.append("and the range on the number of objects per class and the number of links per association.").append("\n");
-		//		sb.append("The properties tag only refers to the properties that exist in <"+strNameModel+">.properties.\n");
-		sb.append("Properties: " +strDefProperties+"\n");
+		//		sb.append("The properties tag only refers to the properties that exist in "+strNameProperties+".\n");
+		sb.append("Properties: \"\"\"" +strDefProperties+"\"\"\"\n");
 		sb.append(LINEASEP);
 
 		sb.append("- Invariants: A summary of the invariants in the model, extracted from the USE diagram, ");
 		sb.append("and assigning an integer index to each invariant, that will be used to refer to the invariant.").append("\n\n");
-		sb.append("List of invariants:\r\n"+ strInvariants+"\n\n");
+		sb.append("List of invariants:\n\"\"\""+ strInvariants+"\"\"\"\n\n");
 		sb.append(LINEASEP);
 
 		if (!strMUS.equals("")||!strMSS.equals("")) {
-			sb.append("List of MUS:\n\n"+strMUS);
+			sb.append("List of MUS:\n\n\"\"\""+strMUS+"\"\"\"");
 			sb.append("\n\n");
 			sb.append(LINEASEP);
-			sb.append("List of MSS:\n\n"+strMSS);
+			sb.append("List of MSS:\n\n\"\"\""+strMSS+"\"\"\"");
 			sb.append("\n\n");
 			sb.append(LINEASEP);
 		}else {
 			sb.append("- MUSs/MSSs: A description of the minimum unsatisfiable subsets of invariants ");
-			sb.append("and the maximal satisfiable subsets.");
+			sb.append("and the maximal satisfiable subsets.\n");
 		}
 
 
@@ -1469,14 +1469,14 @@ public class WizardMVMView extends JPanel implements View {
 		//		sb.append("- [Optional] Instance of the model: An instance (a set of objects and links among objects) ");
 		sb.append("- Instance of the model: An instance (a set of objects and links among objects) ");
 		sb.append("of the model, that should be satisfying all the textual invariants and the graphical UML constraints ");
-		sb.append("such as the multiplicities of association ends.");
+		sb.append("such as the multiplicities of association ends.\n");
 		if (!strObjects.equals("")) {
-			sb.append("\n\n");
-			sb.append("List of objects:"+strObjects);
+			sb.append("\n");
+			sb.append("List of objects: \"\"\""+strObjects+"\"\"\"");
 			sb.append("\n\n");
 			sb.append(LINEASEP);
 			if (!strLinks.equals("")) {
-				sb.append("List of links:"+strLinks);
+				sb.append("List of links: \"\"\""+strLinks+"\"\"\"");
 				sb.append("\n\n");
 				sb.append(LINEASEP);
 			}
@@ -1503,16 +1503,17 @@ public class WizardMVMView extends JPanel implements View {
 		sb.append("\n\n");
 		sb.append("- Please return only the JSON structure without any additional explanation, since the result must be delivered to an application.\n");
 		sb.append("- Therefore, the JSON structure must contain the following parts:\n");
-		sb.append("  - Properties: properties to be modified. The properties tag only refers to the properties that exist in <"+strNameModel+">.properties.\n");
+		sb.append("  - Properties: properties to be modified. The properties tag only refers to the properties "+
+				"that exist in "+strNameProperties+".\n");
 		//		sb.append("  - Objects: for each object, specify class name, object name, field name, field value\n");
 		//		sb.append("  - Links: for each link, specify association, source object, target object\n");
 		sb.append("  - A list of objects with their corresponding values as if the modified properties had already been applied.\n"); 
-		sb.append("   Please return the same field names indicated in the request corresponding to each class.\n");
-		sb.append("   Please ensure that when defining objects, you normalize the output using the tags 'class', 'name', and 'attributes'.\n");
+		sb.append("    Please return the same field names indicated in the request corresponding to each class.\n");
+		sb.append("    Please ensure that when defining objects, you normalize the output using the tags 'class', 'name', and 'attributes'.\n");
 
 		//---
 		sb.append("  - Links: For each link, specify the fields: "+
-				"codeLink,end1Class,end1Object,end1Role,end2Class,end2Object,end2Role,nomAssoc\n");
+				"codeLink,end1Class,end1Object,end1Role,end2Class,end2Object,end2Role,nomAssoc.\n");
 		sb.append("    Example: codeLink=\"1\" | end1Class=\"Person\" end1Object=\"person1\" "+
 				"end1Role=\"person\" end2Class=\"Pet\" end2Object=\"pet1\" end2Role=\"person\" nomAssoc=\"BelongsTo\"\n");
 		sb.append("- If more objects are needed to satisfy the multiplicity of the association links,"+
@@ -1521,7 +1522,9 @@ public class WizardMVMView extends JPanel implements View {
 				"in the list of proposed resulting objects.\n");
 
 		sb.append("- Comment: Explanation of 'how to correct the model', taking into account the properties that have been indicated for correction as");
-		sb.append(" if they were already corrected.\n");
+		sb.append(" if they were already corrected. Focus only on modifying invariants (not objects or properties).");
+		sb.append(" The explanation should not be in the past tense but in the present or future tense.\n");
+//		sb.append("In the comments tag, focus only on modifying invariants (not objects or properties).");
 		sb.append("- The only tags to return should be: Properties, Objects, Links, and Comment.\n");
 		sb.append("- Do not omit the creation of objects or links.\n");
 		sb.append("- Return ONLY valid JSON.\n");
@@ -1531,7 +1534,7 @@ public class WizardMVMView extends JPanel implements View {
 			sb.append("- Don't forget to include the MUS (Minimal Unsatisfiable Subset) and MSS (Maximal Satisfiable Subset) in the 'Comment' tag using the following format: "
 					+ "\n\n"
 					+ LINEASEP
-					+ "ADDITIONAL INFORMATION ABOUT MSS/MUS\n"
+					+ "ADDITIONAL INFORMATION ABOUT MUS/MSS\n"
 					+ "\n"
 					+ "Minimal Unsatisfiable Subset:\n"
 					+ " - Group1:\n"
@@ -2295,7 +2298,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		MVMShowResponseOpenAI3 dialog = new MVMShowResponseOpenAI3(fWizardMVMView, frame, strNameModel, rObjects, 
 				rLinks, rProperties, rComments,mensaje, jsonPretty, jsonResult);
-		dialog.setSize(1254, 900);
+		dialog.setSize(1254, 930);
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
 

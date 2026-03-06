@@ -1,9 +1,12 @@
 package org.tzi.use.gui.mvm;
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
@@ -54,7 +57,8 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 	private static JTextArea txtComments;
 
 	private static Font font = new Font("Courier New", Font.PLAIN, 13);
-	private static Font fontBold = new Font(UIManager.getFont("Label.font").getFamily(), Font.BOLD, 16);
+	private static Font fontBold1 = new Font(UIManager.getFont("Label.font").getFamily(), Font.BOLD, 16);
+	private static Font fontBold2 = new Font(UIManager.getFont("Label.font").getFamily(), Font.BOLD, 14);
 
 	private static JButton btnExit;	
 	//	private static JButton btnCreateObjects;
@@ -381,17 +385,63 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 
 	private void initUI() {
 
-		panel = new JPanel(null);
-		panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
 		int labelWidth = 180;
 		int fieldWidth = 600;
 		int fieldHeight = 180;
-		int startY = 10;
+		int startY = 30;
+
+		panel = new JPanel(null) {
+			@Override
+			protected void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				Graphics2D g2 = (Graphics2D) g;
+
+				g2.setColor(Color.BLACK);
+				g2.setStroke(new BasicStroke(1)); // grosor del borde
+
+				// Rectángulo alrededor del bloque Objects + Links
+				g2.drawRect(
+						10,                 // X
+						startY - 10,        // Y
+						fieldWidth*2 + 18,  // ancho
+						fieldHeight + 85   // alto
+						);
+				// --- Rectángulo Fix2 (Properties)
+				g2.drawRect(
+						10,
+						startY + fieldHeight + 90,
+						fieldWidth*2 + 18,
+						fieldHeight + 39
+						);
+
+				// --- Rectángulo Fix3 (Comments)
+				g2.drawRect(
+						10,
+						startY + fieldHeight*2 + 145,
+						fieldWidth*2 + 18,
+						fieldHeight + 125
+						);
+
+
+			}
+		};
+
+
+
+		//		panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+
+		JLabel lblFix1 = new JLabel("Potential fix 1 - Modify object diagram");
+		lblFix1.setBounds(15, startY - 20, 287, 20);
+		lblFix1.setOpaque(true);
+		lblFix1.setBackground(panel.getBackground()); // mismo color que el panel
+		lblFix1.setFont(fontBold1);
+
+		panel.add(lblFix1);
 
 		lblObjects = new JLabel("Objects:");
-		lblObjects.setBounds(15, startY , labelWidth, 25);
-		lblObjects.setFont(fontBold);
+		lblObjects.setBounds(15, startY+4 , labelWidth, 25);
+		lblObjects.setFont(fontBold2);
 
 		//		btnCreateObjects = new JButton("Create Objects");
 		//		btnCreateObjects.setBounds(15 + fieldWidth - 150, startY + fieldHeight + 80 , 150, 30);
@@ -417,17 +467,17 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
 				);
-		scrollObjects.setBounds(15, startY + 30, fieldWidth, fieldHeight+40);
+		scrollObjects.setBounds(15, startY + 33, fieldWidth, fieldHeight+39);
 
 		panel.add(lblObjects);
 		panel.add(scrollObjects);
 
 		lblLinks = new JLabel("Links:");
-		lblLinks.setBounds(15+fieldWidth+10, startY , labelWidth, 25);
-		lblLinks.setFont(fontBold);
+		lblLinks.setBounds(15+fieldWidth+10, startY+4 , labelWidth, 25);
+		lblLinks.setFont(fontBold2);
 
 		btnCreateLinks = new JButton("Create Objects + Links");
-		btnCreateLinks.setBounds(15 + fieldWidth*2 - 140, startY + fieldHeight + 80 , 150, 30);
+		btnCreateLinks.setBounds(15 + fieldWidth*2 - 140, startY , 150, 30);
 		btnCreateLinks.setEnabled(false);
 		btnCreateLinks.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -450,14 +500,21 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
 				);
 
-		scrollLinks.setBounds(15+fieldWidth+10, startY + 30, fieldWidth, fieldHeight+40);
+		scrollLinks.setBounds(15+fieldWidth+10, startY + 33, fieldWidth, fieldHeight+39);
 
 		panel.add(lblLinks);
 		panel.add(scrollLinks);
 
+		JLabel lblFix2 = new JLabel("Potential fix 2 - Modify properties");
+		lblFix2.setBounds(15, startY + fieldHeight + 80, 255, 20);
+		lblFix2.setFont(fontBold1);
+		lblFix2.setOpaque(true);
+		lblFix2.setBackground(panel.getBackground());
+		panel.add(lblFix2);
+
 		lblProperties = new JLabel("Properties:");
-		lblProperties.setBounds(15, startY + fieldHeight + 100, labelWidth, 25);
-		lblProperties.setFont(fontBold);
+		lblProperties.setBounds(15, startY + fieldHeight + 104, labelWidth, 25);
+		lblProperties.setFont(fontBold2);
 
 		txtProperties = new JTextArea();
 		txtProperties.setLineWrap(true);
@@ -474,14 +531,21 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 				);
 
 
-		scrollProperties.setBounds(15, startY + fieldHeight + 130, fieldWidth*2+10, fieldHeight);
+		scrollProperties.setBounds(15, startY + fieldHeight + 133, fieldWidth*2+10, fieldHeight-6);
 
 		panel.add(lblProperties);
 		panel.add(scrollProperties);
 
-		lblComments = new JLabel("Proposed changes");
-		lblComments.setBounds(15, startY + fieldHeight*2 + 140, labelWidth, 25);
-		lblComments.setFont(fontBold);
+		JLabel lblFix3 = new JLabel("Potential fix 3 - Modify invariants");
+		lblFix3.setBounds(15, startY + fieldHeight*2 + 135, 250, 20);
+		lblFix3.setOpaque(true);
+		lblFix3.setBackground(panel.getBackground());
+		lblFix3.setFont(fontBold1);
+		panel.add(lblFix3);
+
+		lblComments = new JLabel("Proposed changes:");
+		lblComments.setBounds(15, startY + fieldHeight*2 + 159, labelWidth, 25);
+		lblComments.setFont(fontBold2);
 
 		txtComments = new JTextArea();
 		txtComments.setLineWrap(true);
@@ -492,13 +556,13 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		txtComments.setFont(font);
 
 		scrollComments = new JScrollPane(txtComments);
-		scrollComments.setBounds(15, startY + fieldHeight*2 + 170, fieldWidth*2+10, fieldHeight+90);
+		scrollComments.setBounds(15, startY + fieldHeight*2 + 188, fieldWidth*2+9, fieldHeight+79);
 
 		panel.add(lblComments);
 		panel.add(scrollComments);
 
 		btnCopyComment = new JButton("Copy Comment");
-		btnCopyComment.setBounds(175, startY + fieldHeight*4 +90, 150, 30);
+		btnCopyComment.setBounds(175, startY + fieldHeight*4 +100, 150, 30);
 		btnCopyComment.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String text = txtComments.getText();
@@ -512,7 +576,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		panel.add(btnCopyComment);
 
 		btnCopyTXTRequest = new JButton("Request txt");
-		btnCopyTXTRequest.setBounds(335, startY + fieldHeight*4 +90, 150, 30);
+		btnCopyTXTRequest.setBounds(335, startY + fieldHeight*4 +100, 150, 30);
 		btnCopyTXTRequest.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				StringSelection selection = new StringSelection(mensaje); 
@@ -523,7 +587,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		panel.add(btnCopyTXTRequest);
 
 		btnCopyJSONRequest = new JButton("JSON Request");
-		btnCopyJSONRequest.setBounds(495, startY + fieldHeight*4 +90, 150, 30);
+		btnCopyJSONRequest.setBounds(495, startY + fieldHeight*4 +100, 150, 30);
 		btnCopyJSONRequest.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				StringSelection selection = new StringSelection(jsonPretty); 
@@ -533,7 +597,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		panel.add(btnCopyJSONRequest);
 
 		btnCopyJSONResult = new JButton("JSON Result");
-		btnCopyJSONResult.setBounds(655, startY + fieldHeight*4 +90, 150, 30);
+		btnCopyJSONResult.setBounds(655, startY + fieldHeight*4 +100, 150, 30);
 		btnCopyJSONResult.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				StringSelection selection = new StringSelection(jsonResult); 
@@ -543,7 +607,7 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		panel.add(btnCopyJSONResult);
 
 		btnExit = new JButton("Exit");
-		btnExit.setBounds(fieldWidth*2-130, startY + fieldHeight*4 +90, 150, 30);
+		btnExit.setBounds(fieldWidth*2-130, startY + fieldHeight*4 +100, 150, 30);
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//				System.exit(0); //Provis
@@ -556,15 +620,13 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 
 		getRootPane().setDefaultButton(btnExit);
 
-		//---
-
 		btnCopyComment.setVisible(false);
 		btnCopyTXTRequest.setVisible(false);
 		btnCopyJSONRequest.setVisible(false);
 		btnCopyJSONResult.setVisible(false);
 
 		btnShowButtons = new JToggleButton("Show options");
-		btnShowButtons.setBounds(15, startY + fieldHeight*4 +90, 150, 30);
+		btnShowButtons.setBounds(15, startY + fieldHeight*4 +100, 150, 30);
 		btnShowButtons.setSelected(false); // inicialmente ocultos
 
 		btnShowButtons.addActionListener(new ActionListener() {
@@ -576,7 +638,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 				btnCopyTXTRequest.setVisible(visible);
 				btnCopyJSONRequest.setVisible(visible);
 				btnCopyJSONResult.setVisible(visible);
-
 				btnShowButtons.setText(visible ? "Hide options" : "Show options");
 
 				// refrescar layout si es necesario
@@ -671,10 +732,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		});
 		panelButton.add(btnCreate);
 
-		//---
-
-
-
 		// Botón Exit
 		JButton btnExit = new JButton("Exit");
 		btnExit.setPreferredSize(new Dimension(150, 30));
@@ -701,39 +758,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 		dialog.setLocationRelativeTo(parent);
 		dialog.setVisible(true);
 	}
-
-	//	public static StringBuilder createTextLinksOLd(String jsonArrayText) {
-	//		StringBuilder sb = new StringBuilder();
-	//
-	//		try {
-	//			JSONArray arr = new JSONArray(jsonArrayText);
-	//
-	//			for (int i = 0; i < arr.length(); i++) {
-	//				JSONObject obj = arr.getJSONObject(i);
-	//
-	//				String association = obj.optString("association", "unknown");
-	//				String from = obj.optString("from", "unknown");
-	//				String to = obj.optString("to", "unknown");
-	//
-	//				int id = i + 1;
-	//
-	//				sb.append("Link id=[")
-	//				.append(id)
-	//				.append("]|association=[")
-	//				.append(association)
-	//				.append("] from=[")
-	//				.append(from)
-	//				.append("] to=[")
-	//				.append(to)
-	//				.append("]\n");
-	//			}
-	//
-	//		} catch (JSONException e) {
-	//			sb.append("Error parsing JSON: ").append(e.getMessage());
-	//		}
-	//
-	//		return sb;
-	//	}
 
 	public static StringBuilder createTextLinks(String jsonArrayText) {
 		StringBuilder sb = new StringBuilder();
@@ -814,9 +838,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 			}
 		});
 
-		//		JPanel panelButton = new JPanel();
-
-
 		JPanel panelButton = new JPanel();
 		//.--
 
@@ -837,8 +858,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 
 				dialog.dispose();
 
-				// cerrar el JFrame padre
-				//aqui
 				Window window = SwingUtilities.getWindowAncestor(parent.getParent());
 				if (window instanceof MVMShowResponseOpenAI3) {
 					((MVMShowResponseOpenAI3) window).dispose();
@@ -847,11 +866,6 @@ public class MVMShowResponseOpenAI3 extends JDialog {
 			}
 		});
 		panelButton.add(btnCreate);
-
-		//---
-
-
-
 		panelButton.add(btnExit);
 
 		dialog.add(panelButton, BorderLayout.SOUTH);
