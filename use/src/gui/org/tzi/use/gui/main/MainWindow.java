@@ -214,6 +214,8 @@ public class MainWindow extends JFrame {
 	public boolean existDiagram=false;
 	public boolean existWizard=false;
 	public boolean existDialogMVM=false;
+	
+	public boolean showTrace=false;
 
 	private static final String STATE_EVAL_OCL = "Evaluate OCL expression";
 
@@ -1478,6 +1480,9 @@ public class MainWindow extends JFrame {
 //						enableAction("ShowDiaCmb", false);
 						enableAction("ValidationMVMG", true);
 						enableAction("ValidationMVMB", true);
+						// AQUI Limpiar 
+						listStrSatisfiables.clear();
+						listStrUnSatisfiables.clear();
 					}else {
 						return;
 					}
