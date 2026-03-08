@@ -63,6 +63,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 	private static JButton btnExit;	
 	//	private static JButton btnCreateObjects;
 	private static JButton btnCreateLinks;
+	private static JButton btnShowDiffObjs;
 	private static JButton btnCopyComment;
 	private static JButton btnCopyTXTRequest;
 	private static JButton btnCopyJSONRequest;
@@ -79,6 +80,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 	private static String strNameModel;
 	private static String rObjects;
+	private static String rObjectsOld;
 	private static String rLinks;
 	private static String rProperties;
 	private static String rComments;
@@ -97,7 +99,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 	public MVMShowResponseOpenAI(WizardMVMView pWizardMVMView, JFrame pParent, String pStrNameModel, String pObjects, 
 			String pLinks, String pProperties,String pComments,
-			String pMensaje, String pJsonPretty, String pJsonResult) {
+			String pMensaje, String pJsonPretty, String pJsonResult,String pObjectsOld) {
 		super((JFrame) pParent, "Request to OpenAI for '"+pStrNameModel+"'", ModalityType.APPLICATION_MODAL);
 
 		setStrNameModel(pStrNameModel);	
@@ -106,6 +108,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 
 		rObjects=pObjects;
+		rObjectsOld=pObjectsOld;
 		rLinks=pLinks;
 		rProperties=pProperties;
 		rComments=pComments;
@@ -468,9 +471,21 @@ public class MVMShowResponseOpenAI extends JDialog {
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
 				);
 		scrollObjects.setBounds(15, startY + 33, fieldWidth, fieldHeight+39);
+		btnShowDiffObjs = new JButton("Show Diff Objects");
+		btnShowDiffObjs.setBounds(15 + fieldWidth-150, startY , 150, 30);
+		btnShowDiffObjs.setEnabled(true);
+		btnShowDiffObjs.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+//				showDialogCreateObjectsAndLinks(panel);
+				String strObjOld=buildObjectsTree(rObjectsOld);
+				String strObjNew=buildObjectsTree(rObjects);
+				showDiffObjects(parent, strObjOld,  strObjNew);
+			}
+		});
 
 		panel.add(lblObjects);
 		panel.add(scrollObjects);
+		panel.add(btnShowDiffObjs);
 
 		lblLinks = new JLabel("Links:");
 		lblLinks.setBounds(15+fieldWidth+10, startY+4 , labelWidth, 25);
@@ -803,7 +818,15 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 		return sb;
 	}
-
+	public static void showDiffObjects(JFrame parent, String strObjOld, String strObjNew) {
+		System.out.println("Obj old:\n"+strObjOld);
+		System.out.println("\n");
+		System.out.println("Obj new:\n"+strObjNew);
+		MVMDiffDialog dialog = new MVMDiffDialog(parent, strObjOld, strObjNew);
+		dialog.setSize(1500, 800);
+		dialog.setLocationRelativeTo(null);
+		dialog.setVisible(true);
+	}
 	public static void showDialogCreateObjectsAndLinks(JPanel parent) {
 
 		StringBuilder sbObjects = createTextObjects( rObjects);
