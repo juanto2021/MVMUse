@@ -823,7 +823,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 		System.out.println("\n");
 		System.out.println("Obj new:\n"+strObjNew);
 		MVMDiffDialog dialog = new MVMDiffDialog(parent, strObjOld, strObjNew);
-		dialog.setSize(1500, 800);
+//		dialog.setSize(1500, 800);
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
 	}

@@ -1,5 +1,8 @@
 package org.tzi.use.gui.mvm;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,18 +13,18 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.Timer;
-
-//import diff_match_patch;
-
-
+import javax.swing.border.TitledBorder;
 
 public class MVMDiffDialog extends JDialog {
 
@@ -30,21 +33,89 @@ public class MVMDiffDialog extends JDialog {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public MVMDiffDialog(Frame parent, String s1, String s2) {
-		super(parent, "Comparador de textos", true); // true = modal
+	private int initialWidth;
+	private int initialHeight;
+	private int initialWidthMin=900;
+	private int initialHeightMin=500;
 
-		setTitle("Comparador de textos");
-//		setSize(1500, 800);
-//		setLocationRelativeTo(null);
+	private JButton btnExit;
+	private JButton btnMax;
+	private JButton btnRestore;
+
+	private int buttonWidth=120;
+	private int buttonHeight = 28;
+
+	public MVMDiffDialog(Frame parent, String s1, String s2) {
+		super(parent, "Compare blocks", true); // true = modal
+
+		setSize(initialWidthMin, initialHeightMin);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setLayout(new BorderLayout());
 
-		// --- CHECKBOX PARA ACTIVAR/DESACTIVAR SINCRONIZACIÓN ---
-		JCheckBox syncCheck = new JCheckBox("Sincronizar scroll", true);
+		setUndecorated(true);
+		getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
+		setResizable(true);
 
-		JPanel topPanel = new JPanel();
-		topPanel.add(syncCheck);
+		Font fontTittle = new Font("SansSerif", Font.BOLD, 16);
+		Dimension btnSize = new Dimension(buttonWidth, buttonHeight);
+
+
+		btnExit = new JButton("Exit");
+
+		btnMax = new JButton("Maximize");
+		btnRestore = new JButton("Restore");
+
+		btnMax.setPreferredSize(btnSize);	
+		btnRestore.setPreferredSize(btnSize);
+		btnExit.setPreferredSize(btnSize);
+
+
+		btnRestore.setVisible(false);
+
+		// --- CHECKBOX PARA ACTIVAR/DESACTIVAR SINCRONIZACIÓN ---
+		JCheckBox syncCheck = new JCheckBox("Synchronize scroll", true);
+
+		JPanel topPanel = new JPanel(new BorderLayout());
 		add(topPanel, BorderLayout.NORTH);
+
+		// Panel izquierdo → checkbox
+		JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+		leftPanel.add(syncCheck);
+		topPanel.add(leftPanel, BorderLayout.WEST);
+
+		// Panel derecho → botones alineados a la derecha
+		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+		rightPanel.add(btnMax);
+		rightPanel.add(btnRestore);
+		rightPanel.add(btnExit);
+		topPanel.add(rightPanel, BorderLayout.EAST);
+
+		btnExit.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dispose(); // close the dialogue
+			}
+		});
+
+		btnMax.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				java.awt.Dimension screen = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+				MVMDiffDialog.this.setBounds(0, 0, screen.width, screen.height);
+				btnMax.setVisible(false);
+				btnRestore.setVisible(true);
+			}
+		});
+
+		btnRestore.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				MVMDiffDialog.this.setSize(initialWidth, initialHeight);
+				MVMDiffDialog.this.setLocationRelativeTo(getParent());
+				btnRestore.setVisible(false);
+				btnMax.setVisible(true);
+			}
+		});
 
 		// --- SPLITPANE ---
 		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -66,7 +137,14 @@ public class MVMDiffDialog extends JDialog {
 		rightPane.setText(renderRight(aligned));
 
 		JScrollPane leftScroll = new JScrollPane(leftPane);
+		TitledBorder leftBorder = BorderFactory.createTitledBorder("Actual");
+		leftBorder.setTitleFont(fontTittle);
+		leftScroll.setBorder(leftBorder);
+
 		JScrollPane rightScroll = new JScrollPane(rightPane);
+		TitledBorder rightBorder = BorderFactory.createTitledBorder("Proposal");
+		rightBorder.setTitleFont(fontTittle);
+		rightScroll.setBorder(rightBorder);
 
 		// --- SINCRONIZACIÓN SUAVE SIN LAMBDAS ---
 		final boolean[] adjusting = { false };
@@ -116,14 +194,24 @@ public class MVMDiffDialog extends JDialog {
 		leftScroll.getVerticalScrollBar().addAdjustmentListener(smoothSync);
 		rightScroll.getVerticalScrollBar().addAdjustmentListener(smoothSync);
 		// --- FIN SINCRONIZACIÓN SUAVE ---
-		// --- FIN SINCRONIZACIÓN SUAVE ---
 
 		split.setLeftComponent(leftScroll);
 		split.setRightComponent(rightScroll);
 
 		add(split, BorderLayout.CENTER);
 
-//		setVisible(true);
+		pack(); // calculate the optimal size of the dialog
+
+		initialWidth = getWidth();
+		if (initialWidth<initialWidthMin) {
+			initialWidth=initialWidthMin;
+		}
+		initialHeight = getHeight();
+		if (initialHeight<initialHeightMin) {
+			initialHeight=initialHeightMin;
+		}
+
+		setSize(initialWidth, initialHeight);
 	}
 
 	private static class Pair {

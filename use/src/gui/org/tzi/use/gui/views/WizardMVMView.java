@@ -2491,6 +2491,86 @@ public class WizardMVMView extends JPanel implements View {
 	//
 	//	}
 	
+//	public static String convertOldToNew(String oldText) {
+//
+//	    String[] lines = oldText.split("\n");
+//	    StringBuilder json = new StringBuilder();
+//	    json.append("[");
+//
+//	    for (int i = 0; i < lines.length; i++) {
+//
+//	        String line = lines[i].trim();
+//	        if (line.isEmpty()) continue;
+//
+//	        String[] parts = line.split("\\|");
+//
+//	        String name = null;
+//	        String clazz = null;
+//
+//	        // atributos en formato clave → valor
+//	        LinkedHashMap<String, String> attributes = new LinkedHashMap<>();
+//
+//	        for (int j = 0; j < parts.length; j++) {
+//
+//	            String p = parts[j].trim();
+//
+//	            if (p.startsWith("name=[")) {
+//	                name = p.substring(6, p.length() - 1);
+//	            }
+//	            else if (p.startsWith("class=[")) {
+//	                clazz = p.substring(7, p.length() - 1);
+//	            }
+//	            else if (p.startsWith("field=[")) {
+//
+//	                int endField = p.indexOf("]");
+//	                String fieldName = p.substring(7, endField);
+//
+//	                int valuePos = p.indexOf("value=[");
+//	                String rawValue = p.substring(valuePos + 7, p.length() - 1);
+//
+//	                // quitar comillas simples si existen
+//	                if (rawValue.startsWith("'") && rawValue.endsWith("'")) {
+//	                    rawValue = rawValue.substring(1, rawValue.length() - 1);
+//	                    rawValue = "\"" + rawValue + "\""; // string JSON
+//	                } else {
+//	                    // intentar número
+//	                    try {
+//	                        Integer.parseInt(rawValue);
+//	                        // es número → dejarlo tal cual
+//	                    } catch (Exception ex) {
+//	                        rawValue = "\"" + rawValue + "\"";
+//	                    }
+//	                }
+//
+//	                attributes.put(fieldName, rawValue);
+//	            }
+//	        }
+//
+//	        // construir objeto JSON
+//	        json.append("{");
+//
+//	        json.append("\"name\":\"").append(name).append("\",");
+//
+//	        json.append("\"attributes\":{");
+//	        int k = 0;
+//	        for (String key : attributes.keySet()) {
+//	            json.append("\"").append(key).append("\":").append(attributes.get(key));
+//	            if (k < attributes.size() - 1) json.append(",");
+//	            k++;
+//	        }
+//	        json.append("},");
+//
+//	        json.append("\"class\":\"").append(clazz).append("\"");
+//
+//	        json.append("}");
+//
+//	        if (i < lines.length - 1) json.append(",");
+//	    }
+//
+//	    json.append("]");
+//	    return json.toString();
+//	}
+
 	public static String convertOldToNew(String oldText) {
 
 	    String[] lines = oldText.split("\n");
@@ -2507,7 +2587,6 @@ public class WizardMVMView extends JPanel implements View {
 	        String name = null;
 	        String clazz = null;
 
-	        // atributos en formato clave → valor
 	        LinkedHashMap<String, String> attributes = new LinkedHashMap<>();
 
 	        for (int j = 0; j < parts.length; j++) {
@@ -2528,16 +2607,21 @@ public class WizardMVMView extends JPanel implements View {
 	                int valuePos = p.indexOf("value=[");
 	                String rawValue = p.substring(valuePos + 7, p.length() - 1);
 
-	                // quitar comillas simples si existen
-	                if (rawValue.startsWith("'") && rawValue.endsWith("'")) {
-	                    rawValue = rawValue.substring(1, rawValue.length() - 1);
-	                    rawValue = "\"" + rawValue + "\""; // string JSON
-	                } else {
+	                // --- CORRECCIÓN: detectar booleanos ---
+	                if (rawValue.equals("true") || rawValue.equals("false")) {
+	                    // boolean JSON → sin comillas
+	                }
+	                // quitar comillas simples
+	                else if (rawValue.startsWith("'") && rawValue.endsWith("'")) {
+	                    rawValue = "\"" + rawValue.substring(1, rawValue.length() - 1) + "\"";
+	                }
+	                else {
 	                    // intentar número
 	                    try {
 	                        Integer.parseInt(rawValue);
 	                        // es número → dejarlo tal cual
 	                    } catch (Exception ex) {
+	                        // no es número → string JSON
 	                        rawValue = "\"" + rawValue + "\"";
 	                    }
 	                }
@@ -2570,7 +2654,7 @@ public class WizardMVMView extends JPanel implements View {
 	    json.append("]");
 	    return json.toString();
 	}
-
+	
 	private void showResponseOpenAI(String rObjects, 
 			String rLinks, String rProperties,String rComments, String mensaje, String jsonPretty, String jsonResult) {
 
