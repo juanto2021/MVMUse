@@ -220,19 +220,21 @@ public class MVMDiffDialog extends JDialog {
 		Pair(String l, String r) { left = l; right = r; }
 	}
 
-	// ---------------------------------------------------------
-	// SIMILITUD REAL usando diff-match-patch
-	// ---------------------------------------------------------
 	private boolean similar(String a, String b) {
 		if (a == null || b == null) return false;
-		if (a.equals(b)) return true;
+
+		// Versiones neutralizadas para comparar
+		String na = stripForSimilarity(a);
+		String nb = stripForSimilarity(b);
+
+		if (na.equals(nb)) return true;
 
 		diff_match_patch dmp = new diff_match_patch();
-		LinkedList<diff_match_patch.Diff> diffs = dmp.diff_main(a, b);
+		LinkedList<diff_match_patch.Diff> diffs = dmp.diff_main(na, nb);
 		dmp.diff_cleanupSemantic(diffs);
 
 		int equalChars = 0;
-		int total = Math.max(a.length(), b.length());
+		int total = Math.max(na.length(), nb.length());
 
 		for (diff_match_patch.Diff d : diffs) {
 			if (d.operation == diff_match_patch.Operation.EQUAL) {
@@ -243,7 +245,26 @@ public class MVMDiffDialog extends JDialog {
 		double ratio = (double) equalChars / total;
 		return ratio > 0.6;
 	}
+	private String stripForSimilarity(String s) {
+		if (s == null) return null;
 
+		// 1. Eliminar caracteres semigráficos
+		s = s.replaceAll("[│┤┐┘┌└┴┬├┼─━┃┄┅┆┇┈┉┊┋┏┓┗┛┣┫┳┻╋═║╔╗╚╝╠╣╦╩]", "");
+
+		// 2. Eliminar equivalentes ASCII de dibujo
+		s = s.replaceAll("[+\\-|\\\\]", "");
+
+		// 3. Eliminar indentación (espacios/tabs al inicio)
+		s = s.replaceAll("^[ \\t]+", "");
+
+		// 4. Eliminar números de línea al inicio (ej: "12:  text")
+		s = s.replaceAll("^\\d+[:\\.]?\\s*", "");
+
+		// 5. Compactar espacios múltiples
+		s = s.replaceAll("\\s+", " ");
+
+		return s.trim();
+	}
 	// ---------------------------------------------------------
 	// ALINEACIÓN LCS usando similar()
 	// ---------------------------------------------------------
@@ -304,7 +325,8 @@ public class MVMDiffDialog extends JDialog {
 				continue;
 			}
 
-			if (p.left.equals(p.right)) {
+			//			if (p.left.equals(p.right)) {
+			if (stripForSimilarity(p.left).equals(stripForSimilarity(p.right))) {	
 				sb.append("<span style='display:block;'>")
 				.append(escapeHtml(p.left))
 				.append("</span>\n");

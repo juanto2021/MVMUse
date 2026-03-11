@@ -313,7 +313,8 @@ public class WizardMVMView extends JPanel implements View {
 	private static String strLinks;
 	private static String strOriginalInvariants;
 
-	private static String LINEASEP = "-----------------------------------------------------------\n";
+	//	private static String LINEASEP = "-----------------------------------------------------------\n";
+	private static String LINEASEP = repeat("-", 70)+"\n";
 	private static String mensaje;
 	private static String jsonPretty;
 	private static String jsonResult;
@@ -1414,6 +1415,40 @@ public class WizardMVMView extends JPanel implements View {
 		return String.join("\r\n", lLinks);
 	}
 
+	public String getStrLinksJSON() {
+
+		List<MVMLink> lLinksMVM = getMVMLinks();
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("[");
+
+		for (int i = 0; i < lLinksMVM.size(); i++) {
+			MVMLink link = lLinksMVM.get(i);
+
+			if (i > 0) sb.append(",");
+
+			sb.append("{");
+
+			// Orden fijo de claves
+			sb.append("\"codeLink\":\"").append(link.getCodeLink()).append("\",");
+			sb.append("\"nomAssoc\":\"").append(link.getNomAssoc()).append("\",");
+			
+			sb.append("\"end1Class\":\"").append(link.getEnd1Class()).append("\",");
+			sb.append("\"end1Object\":\"").append(link.getEnd1Object()).append("\","); 
+			sb.append("\"end1Role\":\"").append(link.getEnd1Role()).append("\",");
+			
+			sb.append("\"end2Class\":\"").append(link.getEnd2Class()).append("\",");
+			sb.append("\"end2Object\":\"").append(link.getEnd2Object()).append("\",");
+			sb.append("\"end2Role\":\"").append(link.getEnd2Role()).append("\"");
+
+			sb.append("}");
+		}
+
+		sb.append("]");
+
+		return sb.toString();
+	}
+
 	public static String builJsonRequest3(String strNameModel, String strDefModel, 
 			String strDefProperties, String strInvariants, String strMUS, String strMSS,
 			String strObjects, String strLinks) {
@@ -1594,6 +1629,7 @@ public class WizardMVMView extends JPanel implements View {
 				"especially those multiplicities that require an endpoint, please indicate that these objects "+
 				"should be created and propose a sample in the list of proposed resulting objects.\n");
 		sb.append("       If you don't need to change your values, don't change them.\n");
+		sb.append("       However, if there is a value that violates an invariant, it suggests changing it.");
 
 		// LINKS -------------------------------------------------------------------------------------------------------------------
 		sb.append("   1.3 Links: For each link, specify the fields: "+
@@ -1648,7 +1684,6 @@ public class WizardMVMView extends JPanel implements View {
 			sb.append(LINEASEP);
 		}
 
-
 		mensaje=sb.toString();
 
 		String json = buildRequest3(mensaje);
@@ -1683,6 +1718,10 @@ public class WizardMVMView extends JPanel implements View {
 
 		return root.toString();
 	}
+
+	/*
+	 * Formatea un objeto JSON
+	 */
 
 	public static String formatJson(String json) {
 		json = json.trim();
@@ -1726,6 +1765,9 @@ public class WizardMVMView extends JPanel implements View {
 		return sb.toString();
 	}
 
+	/*
+	 * Analiza determinados tags dentro de un JSON
+	 */
 	public static Map<String, String> parseResult(String jsonString) {
 
 		Map<String, String> out = new LinkedHashMap<>();
@@ -1789,8 +1831,6 @@ public class WizardMVMView extends JPanel implements View {
 				out.put("rChangedInvariants", "[]");
 			}
 
-
-
 			// --- Comment ---
 			String comment = root.getString("Comment");
 			out.put("rComments", comment);	
@@ -1801,6 +1841,10 @@ public class WizardMVMView extends JPanel implements View {
 
 		return out;
 	}
+
+	/**
+	 * Ejecuta prompt AI y analiza resultados
+	 */
 
 	private void runAnalisis() {
 		try {
@@ -1813,13 +1857,9 @@ public class WizardMVMView extends JPanel implements View {
 			strObjects=getStrObjects();
 			strLinks=getStrLinks();
 
-			//---
-
 			JSONArray originalInvariants = extractOriginalInvariants(strDefModel);
 
 			strOriginalInvariants = buildOriginalInvariantsString(originalInvariants);
-
-			//---
 
 			String json = builJsonRequest3(strNameModel, strDefModel, 
 					strDefProperties, strInvariants, strMUS, strMSS,
@@ -1857,8 +1897,8 @@ public class WizardMVMView extends JPanel implements View {
 
 			Map<String, String> out = parseResult(jsonAnalysisResult);
 
-			String rObjects = out.get("rObjects");
-			String rLinks = out.get("rLinks");
+			String rObjectsAI = out.get("rObjects");
+			String rLinksAI = out.get("rLinks");
 			String rProperties = out.get("rProperties");
 			String rComments = out.get("rComments");
 			String rchangedInvariants = out.get("rChangedInvariants");
@@ -1874,27 +1914,27 @@ public class WizardMVMView extends JPanel implements View {
 
 			// Si quieres reemplazar el original:
 			rComments = formatted;
-			
+
 			//---------------
 			JSONArray arrChanges = new JSONArray(rchangedInvariants);	
 			// Filtrar solo invariantes que realmente cambian
 			JSONArray filtered = new JSONArray();
 
 			for (int i = 0; i < arrChanges.length(); i++) {
-			    JSONObject obj = arrChanges.getJSONObject(i);
+				JSONObject obj = arrChanges.getJSONObject(i);
 
-			    String originalInvs = obj.getString("original").replaceAll("\\s+", "");
-			    String proposalInvs = obj.getString("proposal").replaceAll("\\s+", "");
+				String originalInvs = obj.getString("original").replaceAll("\\s+", "");
+				String proposalInvs = obj.getString("proposal").replaceAll("\\s+", "");
 
-			    if (!originalInvs.equals(proposalInvs)) {
-			        filtered.put(obj);
-			    }
+				if (!originalInvs.equals(proposalInvs)) {
+					filtered.put(obj);
+				}
 			}
 
 			// Reemplazar arr por filtered
 			arrChanges = filtered;
 			rchangedInvariants = arrChanges.toString();
-//---------------
+			//---------------
 
 			if (!rchangedInvariants.equals("[]")) {
 				// rChangedInvariants reformated
@@ -1912,11 +1952,11 @@ public class WizardMVMView extends JPanel implements View {
 
 			if (showTxtBlocks) {
 				System.out.println("rObjects 1 =================================================================");
-				System.out.println(formatJson(rObjects));
+				System.out.println(formatJson(rObjectsAI));
 				System.out.println("rObjects 2 =================================================================");
 
 				System.out.println("rLinks 1 =================================================================");
-				System.out.println(formatJson(rLinks));
+				System.out.println(formatJson(rLinksAI));
 				System.out.println("rLinks 2 =================================================================");
 
 				System.out.println("rProperties 1 =================================================================");
@@ -1934,15 +1974,430 @@ public class WizardMVMView extends JPanel implements View {
 				System.out.println("");
 				System.out.println(out);
 			}
+
+			// Tenemos que ordenar de la misma manera: AQUI
+			// rObjects
+			String strSwap=sortRObjectsByClassAndName(rObjectsAI);
+			rObjectsAI=strSwap;
+
+			// strObjects
+			strSwap=sortSTRObjectsByClassAndName(strObjects);
+			String strObjectsJSON=strSwap;
+
+			// Tenemos que convertir strLinks a strLinksJSON   AQUI
+			String strLinksJSON = getStrLinksJSON();
+			System.out.println("strLinksJSON:\n"+strLinksJSON);
+			// Tenemos que ordenar Links atendiendo este orden dentro de cada objeto
+//			strSwap=sortStrLinksJSONFields(strLinksJSON);
+//			strLinksJSON=strSwap;
+
+			// Para que la comparacion tenga en cuenta el orden de campos ordenamos tambien rLinks
+			strSwap=sortStrLinksJSONFields(rLinksAI);
+			rLinksAI=strSwap;
+			System.out.println("rLinks:\n"+rLinksAI);
+			
+
+
 			// Llamada visualización OpenAI
 			panel.setCursor(Cursor.getDefaultCursor());
-			showResponseOpenAI(rObjects, rLinks, rProperties, rComments, mensaje, jsonPretty, jsonResult);
+			showResponseOpenAI(rObjectsAI, rLinksAI, rProperties, rComments, mensaje, jsonPretty, jsonResult, strObjectsJSON, strLinksJSON);
 
 		} catch (Exception ex) {
 			panel.setCursor(Cursor.getDefaultCursor());
 			JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
+
+	public static String sortStrLinksJSONFields(String json) {
+
+		json = json.trim();
+
+		// Quitar corchetes exteriores
+		if (json.startsWith("[") && json.endsWith("]")) {
+			json = json.substring(1, json.length() - 1).trim();
+		}
+
+		// Extraer objetos completos respetando llaves
+		List<String> rawObjects = new ArrayList<String>();
+		int depth = 0;
+		int start = -1;
+
+		for (int i = 0; i < json.length(); i++) {
+			char c = json.charAt(i);
+
+			if (c == '{') {
+				if (depth == 0) start = i;
+				depth++;
+			} else if (c == '}') {
+				depth--;
+				if (depth == 0 && start != -1) {
+					rawObjects.add(json.substring(start, i + 1));
+					start = -1;
+				}
+			}
+		}
+
+		// Orden deseado
+		String[] order = {
+				"codeLink",
+				"nomAssoc",
+				"end1Class",
+				"end1Object",
+				"end1Role",
+				"end2Class",
+				"end2Object",
+				"end2Role"
+		};
+
+		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+
+		// Parsear cada objeto
+		for (String obj : rawObjects) {
+
+			Map<String, String> map = new HashMap<String, String>();
+
+			for (int i = 0; i < order.length; i++) {
+				String key = order[i];
+				String value = extractJsonStringValue(obj, key);
+				map.put(key, value);
+			}
+
+			list.add(map);
+		}
+
+		// Reconstruir JSON ordenado
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+
+		for (int i = 0; i < list.size(); i++) {
+			Map<String, String> map = list.get(i);
+
+			if (i > 0) sb.append(",");
+
+			sb.append("{");
+
+			for (int j = 0; j < order.length; j++) {
+				String key = order[j];
+				String value = map.get(key);
+
+				if (j > 0) sb.append(",");
+
+				sb.append("\"").append(key).append("\":");
+
+				// Detectar números
+				if (value != null && value.matches("-?\\d+")) {
+					sb.append(value);
+				}
+				// Detectar booleanos
+				else if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+					sb.append(value.toLowerCase());
+				}
+				// Strings
+				else {
+					sb.append("\"").append(value).append("\"");
+				}
+			}
+
+			sb.append("}");
+		}
+
+		sb.append("]");
+
+		return sb.toString();
+	}
+	private static String extractJsonStringValue(String obj, String key) {
+		String pattern = "\"" + key + "\":";
+		int p = obj.indexOf(pattern);
+		if (p == -1) return "";
+
+		p += pattern.length();
+
+		// Si empieza con comillas → string
+		if (obj.charAt(p) == '\"') {
+			int start = p + 1;
+			int end = obj.indexOf("\"", start);
+			return obj.substring(start, end);
+		}
+
+		// Si no → número o booleano
+		int end = p;
+		while (end < obj.length() && obj.charAt(end) != ',' && obj.charAt(end) != '}') {
+			end++;
+		}
+
+		return obj.substring(p, end).trim();
+	}
+
+	/**
+	 * Ordena String de objetos MVM por nombre y le da forma de String JSON 
+	 * @param input
+	 * @return
+	 */
+	public static String sortSTRObjectsByClassAndName(String input) {
+
+		String[] lines = input.split("\\r?\\n");
+
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+		for (int i = 0; i < lines.length; i++) {
+
+			String line = lines[i].trim();
+			if (line.length() == 0) continue;
+
+			Map<String, Object> map = new HashMap<String, Object>();
+			Map<String, String> attributes = new HashMap<String, String>();
+
+			// Extraer name
+			String name = extractBracketValue(line, "name=");
+			map.put("name", name);
+
+			// Extraer class
+			String clazz = extractBracketValue(line, "class=");
+			map.put("class", clazz);
+
+			// Extraer fields
+			int pos = 0;
+			while (true) {
+				int f = line.indexOf("field=[", pos);
+				if (f == -1) break;
+
+				int fEnd = line.indexOf("]", f + 7);
+				String fieldName = line.substring(f + 7, fEnd);
+
+				int v = line.indexOf("value=[", fEnd);
+				int vEnd = line.indexOf("]", v + 7);
+				String fieldValue = line.substring(v + 7, vEnd);
+
+				// limpiar comillas simples
+				if (fieldValue.startsWith("'") && fieldValue.endsWith("'")) {
+					fieldValue = fieldValue.substring(1, fieldValue.length() - 1);
+				}
+
+				attributes.put(fieldName, fieldValue);
+
+				pos = vEnd + 1;
+			}
+
+			map.put("attributes", attributes);
+			list.add(map);
+		}
+
+		// ORDENAR SIN LAMBDAS
+		Collections.sort(list, new Comparator<Map<String, Object>>() {
+			public int compare(Map<String, Object> a, Map<String, Object> b) {
+
+				String ca = (String) a.get("class");
+				String cb = (String) b.get("class");
+
+				int cmp = ca.compareTo(cb);
+				if (cmp != 0) return cmp;
+
+				String na = (String) a.get("name");
+				String nb = (String) b.get("name");
+
+				return na.compareTo(nb);
+			}
+		});
+
+		// CONSTRUIR JSON
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+
+		for (int i = 0; i < list.size(); i++) {
+			Map<String, Object> obj = list.get(i);
+			if (i > 0) sb.append(",");
+
+			sb.append("{");
+
+			sb.append("\"class\":\"").append(obj.get("class")).append("\",");
+			sb.append("\"name\":\"").append(obj.get("name")).append("\",");
+
+			sb.append("\"attributes\":{");
+
+			Map<String, String> attrs = (Map<String, String>) obj.get("attributes");
+			int j = 0;
+			for (Map.Entry<String, String> e : attrs.entrySet()) {
+				if (j > 0) sb.append(",");
+				sb.append("\"").append(e.getKey()).append("\":");
+
+				//				// Detectar números enteros con signo
+				//				if (e.getValue().matches("-?\\d+")) {
+				//				    sb.append(e.getValue());
+				//				} else {
+				//				    sb.append("\"").append(e.getValue()).append("\"");
+				//				}
+
+				String val = e.getValue();
+
+				// Detectar booleanos
+				if (val.equalsIgnoreCase("true") || val.equalsIgnoreCase("false")) {
+					sb.append(val.toLowerCase());
+				}
+				// Detectar números enteros con signo
+				else if (val.matches("-?\\d+")) {
+					sb.append(val);
+				}
+				// Detectar decimales (opcional)
+				else if (val.matches("-?\\d+(\\.\\d+)?")) {
+					sb.append(val);
+				}
+				// Todo lo demás → string
+				else {
+					sb.append("\"").append(val).append("\"");
+				}
+
+				j++;
+			}
+
+			sb.append("}");
+
+			sb.append("}");
+		}
+
+		sb.append("]");
+
+		return sb.toString();
+	}
+
+	/**
+	 * Extrae brackets 'extras'
+	 * @param line
+	 * @param key
+	 * @return
+	 */
+	private static String extractBracketValue(String line, String key) {
+		int p = line.indexOf(key);
+		if (p == -1) return "";
+		int start = line.indexOf("[", p);
+		int end = line.indexOf("]", start);
+		return line.substring(start + 1, end);
+	}
+
+	/**
+	 * Ordena rObjects (Respuesta de AI) por nombre de clase y nombre de objeto
+	 * @param json
+	 * @return
+	 */
+	public static String sortRObjectsByClassAndName(String json) {
+
+		json = json.trim();
+
+		// Quitar corchetes exteriores
+		if (json.startsWith("[") && json.endsWith("]")) {
+			json = json.substring(1, json.length() - 1);
+		}
+
+		// Extraer objetos completos respetando llaves
+		List<String> rawObjects = new ArrayList<String>();
+		int depth = 0;
+		int start = 0;
+
+		for (int i = 0; i < json.length(); i++) {
+			char c = json.charAt(i);
+
+			if (c == '{') {
+				if (depth == 0) start = i;
+				depth++;
+			} else if (c == '}') {
+				depth--;
+				if (depth == 0) {
+					rawObjects.add(json.substring(start, i + 1));
+				}
+			}
+		}
+
+		// Parsear cada objeto
+		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+
+		for (String obj : rawObjects) {
+
+			Map<String, String> map = new HashMap<String, String>();
+
+			// Extraer "class"
+			map.put("class", extractSimpleField(obj, "class"));
+
+			// Extraer "name"
+			map.put("name", extractSimpleField(obj, "name"));
+
+			// Extraer "attributes" como objeto completo
+			map.put("attributes", extractObjectField(obj, "attributes"));
+
+			list.add(map);
+		}
+
+		// Ordenar sin lambdas
+		Collections.sort(list, new Comparator<Map<String, String>>() {
+			public int compare(Map<String, String> a, Map<String, String> b) {
+
+				int cmp = a.get("class").compareTo(b.get("class"));
+				if (cmp != 0) return cmp;
+
+				return a.get("name").compareTo(b.get("name"));
+			}
+		});
+
+		// Reconstruir JSON
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+
+		for (int i = 0; i < list.size(); i++) {
+			Map<String, String> map = list.get(i);
+
+			if (i > 0) sb.append(",");
+
+			sb.append("{");
+			sb.append("\"class\":\"").append(map.get("class")).append("\",");
+			sb.append("\"name\":\"").append(map.get("name")).append("\",");
+			sb.append("\"attributes\":").append(map.get("attributes"));
+			sb.append("}");
+		}
+
+		sb.append("]");
+
+		return sb.toString();
+	}
+
+	/**
+	 * Extrae un campo de un objeto
+	 * @param obj
+	 * @param field
+	 * @return
+	 */
+	private static String extractSimpleField(String obj, String field) {
+		String pattern = "\"" + field + "\":\"";
+		int start = obj.indexOf(pattern);
+		if (start == -1) return "";
+		start += pattern.length();
+		int end = obj.indexOf("\"", start);
+		return obj.substring(start, end);
+	}
+	/*
+	 * Extrae un objeto JSON de un objeto
+	 */
+	private static String extractObjectField(String obj, String field) {
+		String pattern = "\"" + field + "\":{";
+		int start = obj.indexOf(pattern);
+		if (start == -1) return "{}";
+		start += pattern.length() - 1;
+
+		int depth = 0;
+		for (int i = start; i < obj.length(); i++) {
+			char c = obj.charAt(i);
+			if (c == '{') depth++;
+			if (c == '}') depth--;
+			if (depth == 0) {
+				return obj.substring(start, i + 1);
+			}
+		}
+		return "{}";
+	}
+
+	/**
+	 * Obtiene invariantes originales con su definición
+	 * @param originalInvariants
+	 * @return
+	 */
+
 	public static String buildOriginalInvariantsString(JSONArray originalInvariants) {
 		String strRes="";
 		try {
@@ -1952,6 +2407,12 @@ public class WizardMVMView extends JPanel implements View {
 		} // indentación de 2 espacios
 		return strRes;
 	}
+
+	/**
+	 * Extrae las invariantes del modelo original
+	 * @param modelText
+	 * @return
+	 */
 
 	public static JSONArray extractOriginalInvariants(String modelText) {
 		JSONArray result = new JSONArray();
@@ -2002,132 +2463,93 @@ public class WizardMVMView extends JPanel implements View {
 		return result;
 	}
 
-//	public static String jsonToAsciiTable(String jsonString) {
-//
-//		JSONArray arr;
-//		StringBuilder sb = new StringBuilder();
-//		try {
-//
-//			arr = new JSONArray(jsonString);
-//			String[] headers = { "Name", "Original", "Proposal" };
-//			int[] widths = { headers[0].length(), headers[1].length(), headers[2].length() };
-//
-//			// Calculate max width
-//			for (int i = 0; i < arr.length(); i++) {
-//				JSONObject obj = arr.getJSONObject(i);
-//				widths[0] = Math.max(widths[0], obj.getString("name").length());
-//				widths[1] = Math.max(widths[1], obj.getString("original").length());
-//				widths[2] = Math.max(widths[2], obj.getString("proposal").length());
-//			}
-//
-//			// Padding helper
-//			java.util.function.BiFunction<String, Integer, String> pad =
-//					(text, width) -> String.format("%-" + width + "s", text);
-//
-//					// Separator
-//					String sep = "+" +
-//							"-".repeat(widths[0] + 2) + "+" +
-//							"-".repeat(widths[1] + 2) + "+" +
-//							"-".repeat(widths[2] + 2) + "+\n";
-//
-//					sb.append(sep);
-//
-//					// Header
-//					sb.append("| ")
-//					.append(pad.apply(headers[0], widths[0])).append(" | ")
-//					.append(pad.apply(headers[1], widths[1])).append(" | ")
-//					.append(pad.apply(headers[2], widths[2])).append(" |\n");
-//
-//					sb.append(sep);
-//
-//					// Rows
-//					for (int i = 0; i < arr.length(); i++) {
-//						JSONObject obj = arr.getJSONObject(i);
-//
-//						sb.append("| ")
-//						.append(pad.apply(obj.getString("name"), widths[0])).append(" | ")
-//						.append(pad.apply(obj.getString("original"), widths[1])).append(" | ")
-//						.append(pad.apply(obj.getString("proposal"), widths[2])).append(" |\n");
-//					}
-//
-//					sb.append(sep);
-//		} catch (JSONException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return sb.toString();
-//	}
-
+	/**
+	 * Convierte un string de un JSON de comparación de invariantes a modificar en un a tabla visual de texto
+	 * @param jsonString
+	 * @return
+	 */
 	public static String jsonToAsciiTable(String jsonString) {
 
-	    JSONArray arr;
-	    StringBuilder sb = new StringBuilder();
+		JSONArray arr;
+		StringBuilder sb = new StringBuilder();
 
-	    try {
-	        arr = new JSONArray(jsonString);
+		try {
+			arr = new JSONArray(jsonString);
 
-	        String[] headers = { "Name", "Original", "Proposal" };
-	        int[] widths = { headers[0].length(), headers[1].length(), headers[2].length() };
+			String[] headers = { "Name", "Original", "Proposal" };
+			int[] widths = { headers[0].length(), headers[1].length(), headers[2].length() };
 
-	        // Calculate max width
-	        for (int i = 0; i < arr.length(); i++) {
-	            JSONObject obj = arr.getJSONObject(i);
-	            widths[0] = Math.max(widths[0], obj.getString("name").length());
-	            widths[1] = Math.max(widths[1], obj.getString("original").length());
-	            widths[2] = Math.max(widths[2], obj.getString("proposal").length());
-	        }
+			// Calculate max width
+			for (int i = 0; i < arr.length(); i++) {
+				JSONObject obj = arr.getJSONObject(i);
+				widths[0] = Math.max(widths[0], obj.getString("name").length());
+				widths[1] = Math.max(widths[1], obj.getString("original").length());
+				widths[2] = Math.max(widths[2], obj.getString("proposal").length());
+			}
 
-	        // Separator
-	        String sep =
-	                "+" + repeat("-", widths[0] + 2) +
-	                "+" + repeat("-", widths[1] + 2) +
-	                "+" + repeat("-", widths[2] + 2) + "+\n";
+			// Separator
+			String sep =
+					"+" + repeat("-", widths[0] + 2) +
+					"+" + repeat("-", widths[1] + 2) +
+					"+" + repeat("-", widths[2] + 2) + "+\n";
 
-	        sb.append(sep);
+			sb.append(sep);
 
-	        // Header
-	        sb.append("| ")
-	          .append(pad(headers[0], widths[0])).append(" | ")
-	          .append(pad(headers[1], widths[1])).append(" | ")
-	          .append(pad(headers[2], widths[2])).append(" |\n");
+			// Header
+			sb.append("| ")
+			.append(pad(headers[0], widths[0])).append(" | ")
+			.append(pad(headers[1], widths[1])).append(" | ")
+			.append(pad(headers[2], widths[2])).append(" |\n");
 
-	        sb.append(sep);
+			sb.append(sep);
 
-	        // Rows
-	        for (int i = 0; i < arr.length(); i++) {
-	            JSONObject obj = arr.getJSONObject(i);
+			// Rows
+			for (int i = 0; i < arr.length(); i++) {
+				JSONObject obj = arr.getJSONObject(i);
 
-	            sb.append("| ")
-	              .append(pad(obj.getString("name"), widths[0])).append(" | ")
-	              .append(pad(obj.getString("original"), widths[1])).append(" | ")
-	              .append(pad(obj.getString("proposal"), widths[2])).append(" |\n");
-	        }
+				sb.append("| ")
+				.append(pad(obj.getString("name"), widths[0])).append(" | ")
+				.append(pad(obj.getString("original"), widths[1])).append(" | ")
+				.append(pad(obj.getString("proposal"), widths[2])).append(" |\n");
+			}
 
-	        sb.append(sep);
+			sb.append(sep);
 
-	    } catch (JSONException e) {
-	        e.printStackTrace();
-	    }
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 
-	    return sb.toString();
+		return sb.toString();
 	}
 
 	// -------------------------
 	// Métodos auxiliares
 	// -------------------------
 
+	/**
+	 * Formatea un Strng a un ancho determinado rellenandolo con espacios
+	 * @param text
+	 * @param width
+	 * @return
+	 */
 	private static String pad(String text, int width) {
-	    return String.format("%-" + width + "s", text);
+		return String.format("%-" + width + "s", text);
 	}
 
+	/**
+	 * Repite un determinado caracter
+	 * @param s
+	 * @param count
+	 * @return
+	 */
 	private static String repeat(String s, int count) {
-	    StringBuilder sb = new StringBuilder();
-	    for (int i = 0; i < count; i++) {
-	        sb.append(s);
-	    }
-	    return sb.toString();
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < count; i++) {
+			sb.append(s);
+		}
+		return sb.toString();
 	}
-	
+
 	public void setStrCreateObjectsAI(String objACrear) {
 		strCreateObjectsAI=objACrear;
 	}
@@ -2135,6 +2557,11 @@ public class WizardMVMView extends JPanel implements View {
 		strCreateLinksAI=linksACrear;
 	}
 
+	/**
+	 * Ejectua llamad a OpenAI
+	 * @param json
+	 * @return
+	 */
 	public static String callAPIOpenAI3(String json) {
 
 		String responseBody="";
@@ -2174,497 +2601,25 @@ public class WizardMVMView extends JPanel implements View {
 		return responseBody;
 	}
 
-	//	public static String callAPIOpenAI(String json) {
-	//		String responseBody="";
-	//		MVMConfigManager config = new MVMConfigManager("config.properties");
-	//
-	//		API_KEY = System.getenv("OPENAI_API_KEY");  
-	//		API_URL = config.get("endpoint");
-	//
-	//		OkHttpClient client = new OkHttpClient();
-	//
-	//		RequestBody body = RequestBody.create(MediaType.parse("application/json"), json);
-	//
-	//		Request request = new Request.Builder()
-	//				.url(API_URL)
-	//				.header("Authorization", "Bearer " + API_KEY)
-	//				.post(body)
-	//				.build();
-	//		try (Response response = client.newCall(request).execute()) {
-	//
-	//			if (response.body() != null) {
-	//				responseBody = response.body().string();
-	//			}
-	//
-	//		} catch (IOException e) {
-	//			e.printStackTrace();
-	//		}
-	//		return responseBody;
-	//
-	//	}
-	//	public String builJsonRequest1(){
-	//
-	//		StringBuilder blockForOpenAI=new StringBuilder();
-	//		blockForOpenAI.append("In this model: ");	
-	//		String fileName = fSystem.model().filename();
-	//		StringBuilder contentModel = new StringBuilder();
-	//
-	//		try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
-	//			String line;
-	//			while ((line = reader.readLine()) != null) {
-	//				contentModel.append(line).append("\n");
-	//			}
-	//		} catch (IOException e) {
-	//			e.printStackTrace();
-	//		}
-	//
-	//		blockForOpenAI.append(contentModel);
-	//		blockForOpenAI.append(System.lineSeparator());
-	//		blockForOpenAI.append(System.lineSeparator());
-	//		blockForOpenAI.append("I have these errors in association links: ");
-	//		blockForOpenAI.append(System.lineSeparator());
-	//
-	//		getErrorsEstructure();
-	//
-	//		blockForOpenAI.append(blockForAssocFailOpenAI);
-	//
-	//		blockForOpenAI.append(System.lineSeparator());
-	//		blockForOpenAI.append("I have these objects with these invariants where some are true and others are not: ");
-	//		blockForOpenAI.append(System.lineSeparator());
-	//		blockForOpenAI.append(System.lineSeparator());
-	//
-	//		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
-	//		blockForInvsFailOpenAI= new StringBuilder();
-	//		for (Map.Entry<MVMObject, Map<MClassInvariant, Boolean>> entry : mapaOrdenado.entrySet()) {
-	//			MVMObject obj = entry.getKey();
-	//			Map<MClassInvariant, Boolean> invariants = entry.getValue();
-	//
-	//			blockForInvsFailOpenAI.append("Object: ").append(obj.getName())
-	//			.append(" (Class: ").append(obj.getClassName()).append(")\n");
-	//
-	//			for (MVMAttribute attr : obj.getAttributes()) {
-	//				blockForInvsFailOpenAI.append("   Attribute: ").append(attr.getName())
-	//				.append(" = ").append(attr.getValue()).append("\n");
-	//			}
-	//
-	//			for (Map.Entry<MClassInvariant, Boolean> invEntry : invariants.entrySet()) {
-	//				MClassInvariant invariant = invEntry.getKey();
-	//				Boolean valor = invEntry.getValue();
-	//				blockForInvsFailOpenAI.append("   Invariant: ").append(invariant.name())
-	//				.append(" -> ").append(valor ? "Complies" : "Does not comply").append("\n");
-	//			}
-	//
-	//			blockForInvsFailOpenAI.append("-------------------------------------------\n");
-	//		}
-	//		blockForOpenAI.append(blockForInvsFailOpenAI);
-	//
-	//		blockForOpenAI.append(System.lineSeparator());
-	//		blockForOpenAI.append("What can I do to obtain an instance of this model that satisfies the largest number of invariants"
-	//				+ "and identify those that cannot be met, and what values should I assign to which objects to solve this?\n"
-	//				+ "Please provide the output as a  JSON format, with a field named \"content\" containing the full explanation.");
-	//
-	//		System.out.println("--------------------------------------------");
-	//		System.out.println("BLOCK TO OPENAI");
-	//		System.out.println(blockForOpenAI);
-	//		System.out.println("--------------------------------------------");	
-	//
-	//		String json = "{"
-	//				+ "\"model\": \"gpt-3.5-turbo\","
-	//				+ "\"messages\": [{\"role\": \"user\", \"content\": " + JSONObject.quote(blockForOpenAI.toString()) + "}]"
-	//				+ "}";
-	//		return json;
-	//	}
+	/**
+	 * Invoca dialogo para visualizar resultado OpenAI
+	 * @param rObjects
+	 * @param rLinks
+	 * @param rProperties
+	 * @param rComments
+	 * @param mensaje
+	 * @param jsonPretty
+	 * @param jsonResult
+	 * @param strObjectsJSON
+	 */
 
-	//	public String builJsonRequest2(){
-	//
-	//		String LF = "\n";
-	//		StringBuilder blockForOpenAI=new StringBuilder();
-	//		blockForOpenAI.append("Your role is to assist a software developer to whom you have given advice"
-	//				+" on how to correct a software model and understand the errors that may exist in it.\n");
-	//
-	//		String filePath = fSystem.model().filename();
-	//		File file = new File(filePath);
-	//		String fileName = file.getName(); 
-	//		getErrorsEstructure();
-	//
-	//		// The error is in the variable blockForAssocFailOpenAI
-	//		int nLinesFail=0;
-	//		String contenido = blockForAssocFailOpenAI.toString();
-	//		String[] lineas = contenido.split("\\R"); // "\\R" captures any type of line break (\r\n, \n, \r)
-	//		nLinesFail= lineas.length;
-	//		boolean ErrorsExist=nLinesFail > 2;
-	//
-	//		blockForOpenAI.append("I am going to provide you with the following information" + LF
-	//				+ "- " + fileName + " : " 
-	//				+"contains the definition of the model in USE format (University of Bremen)" + LF
-	//				+"- List of objects and links" + LF);		
-	//		blockForOpenAI.append(System.lineSeparator());
-	//
-	//		// If there are structural errors
-	//		if (ErrorsExist) {
-	//			blockForOpenAI.append("- Errors detected in association links" + LF);
-	//		}
-	//
-	//		StringBuilder contentModel = new StringBuilder();
-	//
-	//		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-	//			String line;
-	//			while ((line = reader.readLine()) != null) {
-	//				contentModel.append(line).append(LF);
-	//			}
-	//		} catch (IOException e) {
-	//			e.printStackTrace();
-	//		}
-	//
-	//		blockForOpenAI.append(contentModel);
-	//		blockForOpenAI.append(System.lineSeparator());
-	//		blockForOpenAI.append("I have these objects with these invariants where some are true and others are not: " + LF);
-	//		blockForOpenAI.append(System.lineSeparator());
-	//
-	//		TreeMap<MVMObject, Map<MClassInvariant, Boolean>> mapaOrdenado = new TreeMap<>(mapObjects);
-	//		blockForInvsFailOpenAI= new StringBuilder();
-	//		for (Map.Entry<MVMObject, Map<MClassInvariant, Boolean>> entry : mapaOrdenado.entrySet()) {
-	//			MVMObject obj = entry.getKey();
-	//			Map<MClassInvariant, Boolean> invariants = entry.getValue();
-	//
-	//			blockForInvsFailOpenAI.append("Object: ").append(obj.getName())
-	//			.append(" (Class: ").append(obj.getClassName()).append(")" + LF);
-	//
-	//			for (MVMAttribute attr : obj.getAttributes()) {
-	//				blockForInvsFailOpenAI.append("   Attribute: ").append(attr.getName())
-	//				.append(" = ").append(attr.getValue()).append(LF);
-	//			}
-	//
-	//			for (Map.Entry<MClassInvariant, Boolean> invEntry : invariants.entrySet()) {
-	//				MClassInvariant invariant = invEntry.getKey();
-	//				Boolean valor = invEntry.getValue();
-	//				blockForInvsFailOpenAI.append("   Invariant: ").append(invariant.name())
-	//				.append(" -> ").append(valor ? "Complies" : "Does not comply").append(LF);
-	//			}
-	//
-	//			blockForInvsFailOpenAI.append("-------------------------------------------" + LF);
-	//		}
-	//		blockForOpenAI.append(blockForInvsFailOpenAI);
-	//
-	//		if (ErrorsExist) {
-	//			blockForOpenAI.append(System.lineSeparator());
-	//			blockForOpenAI.append("Errors detected in association links: " + LF);
-	//			blockForOpenAI.append(System.lineSeparator());
-	//			blockForOpenAI.append(blockForAssocFailOpenAI);
-	//		}
-	//
-	//		blockForOpenAI.append(System.lineSeparator());
-	//		blockForOpenAI.append(System.lineSeparator());
-	//		blockForOpenAI.append("Please provide the result in JSON format with only two tags:" + LF
-	//				+ "\"contentProblem\" tag for a textual explanation of the problem and its elements,"
-	//				+ " indicating where there are consistency issues." + LF
-	//				+ "\"contentSolution\" tag to provide a textual explanation for correcting the problems,"
-	//				+ " detailing which objects, attributes and links need to be created,  modified or deleted, or, alternatively,"
-	//				+ "which invariants need to be rewritten.\r\n"
-	//				+ "Introduce a line break for each object or link you explain.");
-	//
-	//		System.out.println("--------------------------------------------");
-	//		System.out.println("BLOCK TO OPENAI");
-	//		System.out.println(blockForOpenAI);
-	//		System.out.println("--------------------------------------------");	
-	//
-	//		String json = "{"
-	//				+ "\"model\": \"gpt-3.5-turbo\","
-	//				+ "\"messages\": [{\"role\": \"user\", \"content\": " + JSONObject.quote(blockForOpenAI.toString()) + "}]"
-	//				+ "}";
-	//
-	//		return json;
-	//
-	//	}
-	//
-	//	public static String analysisJsonToString1(String jsonString) {
-	//		JSONObject root;
-	//		String result="";
-	//		try {
-	//			root = new JSONObject(jsonString);
-	//			JSONArray choices = root.getJSONArray("choices");
-	//			JSONObject firstChoice = choices.getJSONObject(0);
-	//			JSONObject message = firstChoice.getJSONObject("message");
-	//			String innerContent = message.getString("content");
-	//
-	//			// Now 'innerContent' is another JSON with field 'content'
-	//			JSONObject innerJson = new JSONObject(innerContent);
-	//			result=innerJson.getString("content");
-	//		} catch (JSONException e) {
-	//			e.printStackTrace();
-	//		}
-	//
-	//		return result;
-	//	}
-
-
-	//	public static String analysisJsonToString2(String jsonString) {
-	//		String LF = "\n";
-	//		String result = "";
-	//		String result1 = "";
-	//		String result2 = "";
-	//		try {
-	//			// Main JSON parsing
-	//			JSONObject root = new JSONObject(jsonString);
-	//			JSONArray choices = root.getJSONArray("choices");
-	//			JSONObject firstChoice = choices.getJSONObject(0);
-	//			JSONObject message = firstChoice.getJSONObject("message");
-	//
-	//			// Content with embedded JSON
-	//			String innerContentRaw = message.getString("content");
-	//
-	//			// Find and extract only the JSON inside the ```json ...``` block
-	//			int start = innerContentRaw.indexOf("{");
-	//			int end = innerContentRaw.lastIndexOf("}");
-	//
-	//			if (start >= 0 && end > start) {
-	//				String innerJsonStr = innerContentRaw.substring(start, end + 1);
-	//
-	//				// Parse that block as JSON
-	//				JSONObject innerJson = new JSONObject(innerJsonStr);
-	//				result1 = innerJson.getString("contentProblem");
-	//				result2 = innerJson.getString("contentSolution");
-	//
-	//				result = "Cause: " + LF;
-	//				result += result1+ LF + LF;
-	//				result += "Solution: "+ LF;
-	//				result += result2+ LF;
-	//
-	//			} else {
-	//				result = "No valid JSON block found within content.";
-	//			}
-	//		} catch (JSONException e) {
-	//			e.printStackTrace();
-	//			result = "Error processing JSON: " + e.getMessage();
-	//		}
-	//
-	//		System.out.println("--------------------------------------------");
-	//		System.out.println("Result");
-	//		System.out.println(result);
-	//		System.out.println("--------------------------------------------");
-	//
-	//		return result;
-	//	}
-
-	//	public static String analysisJsonToString1_old(String jsonContent) {
-	//		StringBuilder sb = new StringBuilder();
-	//
-	//		try {
-	//			JSONObject root = new JSONObject(jsonContent);
-	//			JSONArray choices = root.getJSONArray("choices");
-	//			if (choices.length() > 0) {
-	//				JSONObject firstChoice = choices.getJSONObject(0);
-	//				JSONObject message = firstChoice.getJSONObject("message");
-	//				sb.append(message.getString("content").trim());
-	//			} else {
-	//				sb.append("No choices found in the response.");
-	//			}
-	//		} catch (JSONException e) {
-	//			sb.append("Error parsing OpenAI response: " + e.getMessage());
-	//		}
-	//
-	//		return sb.toString();
-	//	}
-
-	//	public static String builJsonRequest2(String modelo, String invariants, 
-	//			String invariantsFail, String associationsFail, String combinationsFail) {
-	//
-	//		String request="Can you analyze and explain why they fail and how to fix them?\r\n"
-	//				+ "When writing your answer, write the invariant first, then its definition or association, followed by a line break, and then its comment.";
-	//
-	//		String mensaje = String.format(
-	//				"Here is a model definition:\n%s\n\n" +
-	//						"Total invariants:\n%s\n\n" +
-	//						"Failing invariants:\n%s\n\n" +
-	//						"Problematic associations:\n%s\n\n" +
-	//						"Conflicting combinations:\n%s\n\n" +
-	//						request, modelo, invariants, invariantsFail, associationsFail, combinationsFail
-	//				);
-	//
-	//		String json = "{"
-	//				+ "\"model\": \"gpt-3.5-turbo\","
-	//				+ "\"messages\": [{\"role\": \"user\", \"content\": " + JSONObject.quote(mensaje) + "}]"
-	//				+ "}";
-	//
-	//
-	//		return json;
-	//
-	//	}
-	
-//	public static String convertOldToNew(String oldText) {
-//
-//	    String[] lines = oldText.split("\n");
-//	    StringBuilder json = new StringBuilder();
-//	    json.append("[");
-//
-//	    for (int i = 0; i < lines.length; i++) {
-//
-//	        String line = lines[i].trim();
-//	        if (line.isEmpty()) continue;
-//
-//	        String[] parts = line.split("\\|");
-//
-//	        String name = null;
-//	        String clazz = null;
-//
-//	        // atributos en formato clave → valor
-//	        LinkedHashMap<String, String> attributes = new LinkedHashMap<>();
-//
-//	        for (int j = 0; j < parts.length; j++) {
-//
-//	            String p = parts[j].trim();
-//
-//	            if (p.startsWith("name=[")) {
-//	                name = p.substring(6, p.length() - 1);
-//	            }
-//	            else if (p.startsWith("class=[")) {
-//	                clazz = p.substring(7, p.length() - 1);
-//	            }
-//	            else if (p.startsWith("field=[")) {
-//
-//	                int endField = p.indexOf("]");
-//	                String fieldName = p.substring(7, endField);
-//
-//	                int valuePos = p.indexOf("value=[");
-//	                String rawValue = p.substring(valuePos + 7, p.length() - 1);
-//
-//	                // quitar comillas simples si existen
-//	                if (rawValue.startsWith("'") && rawValue.endsWith("'")) {
-//	                    rawValue = rawValue.substring(1, rawValue.length() - 1);
-//	                    rawValue = "\"" + rawValue + "\""; // string JSON
-//	                } else {
-//	                    // intentar número
-//	                    try {
-//	                        Integer.parseInt(rawValue);
-//	                        // es número → dejarlo tal cual
-//	                    } catch (Exception ex) {
-//	                        rawValue = "\"" + rawValue + "\"";
-//	                    }
-//	                }
-//
-//	                attributes.put(fieldName, rawValue);
-//	            }
-//	        }
-//
-//	        // construir objeto JSON
-//	        json.append("{");
-//
-//	        json.append("\"name\":\"").append(name).append("\",");
-//
-//	        json.append("\"attributes\":{");
-//	        int k = 0;
-//	        for (String key : attributes.keySet()) {
-//	            json.append("\"").append(key).append("\":").append(attributes.get(key));
-//	            if (k < attributes.size() - 1) json.append(",");
-//	            k++;
-//	        }
-//	        json.append("},");
-//
-//	        json.append("\"class\":\"").append(clazz).append("\"");
-//
-//	        json.append("}");
-//
-//	        if (i < lines.length - 1) json.append(",");
-//	    }
-//
-//	    json.append("]");
-//	    return json.toString();
-//	}
-
-	public static String convertOldToNew(String oldText) {
-
-	    String[] lines = oldText.split("\n");
-	    StringBuilder json = new StringBuilder();
-	    json.append("[");
-
-	    for (int i = 0; i < lines.length; i++) {
-
-	        String line = lines[i].trim();
-	        if (line.isEmpty()) continue;
-
-	        String[] parts = line.split("\\|");
-
-	        String name = null;
-	        String clazz = null;
-
-	        LinkedHashMap<String, String> attributes = new LinkedHashMap<>();
-
-	        for (int j = 0; j < parts.length; j++) {
-
-	            String p = parts[j].trim();
-
-	            if (p.startsWith("name=[")) {
-	                name = p.substring(6, p.length() - 1);
-	            }
-	            else if (p.startsWith("class=[")) {
-	                clazz = p.substring(7, p.length() - 1);
-	            }
-	            else if (p.startsWith("field=[")) {
-
-	                int endField = p.indexOf("]");
-	                String fieldName = p.substring(7, endField);
-
-	                int valuePos = p.indexOf("value=[");
-	                String rawValue = p.substring(valuePos + 7, p.length() - 1);
-
-	                // --- CORRECCIÓN: detectar booleanos ---
-	                if (rawValue.equals("true") || rawValue.equals("false")) {
-	                    // boolean JSON → sin comillas
-	                }
-	                // quitar comillas simples
-	                else if (rawValue.startsWith("'") && rawValue.endsWith("'")) {
-	                    rawValue = "\"" + rawValue.substring(1, rawValue.length() - 1) + "\"";
-	                }
-	                else {
-	                    // intentar número
-	                    try {
-	                        Integer.parseInt(rawValue);
-	                        // es número → dejarlo tal cual
-	                    } catch (Exception ex) {
-	                        // no es número → string JSON
-	                        rawValue = "\"" + rawValue + "\"";
-	                    }
-	                }
-
-	                attributes.put(fieldName, rawValue);
-	            }
-	        }
-
-	        // construir objeto JSON
-	        json.append("{");
-
-	        json.append("\"name\":\"").append(name).append("\",");
-
-	        json.append("\"attributes\":{");
-	        int k = 0;
-	        for (String key : attributes.keySet()) {
-	            json.append("\"").append(key).append("\":").append(attributes.get(key));
-	            if (k < attributes.size() - 1) json.append(",");
-	            k++;
-	        }
-	        json.append("},");
-
-	        json.append("\"class\":\"").append(clazz).append("\"");
-
-	        json.append("}");
-
-	        if (i < lines.length - 1) json.append(",");
-	    }
-
-	    json.append("]");
-	    return json.toString();
-	}
-	
 	private void showResponseOpenAI(String rObjects, 
-			String rLinks, String rProperties,String rComments, String mensaje, String jsonPretty, String jsonResult) {
+			String rLinks, String rProperties,String rComments, String mensaje, String jsonPretty, 
+			String jsonResult, String strObjectsJSON, String strLinksJSON) {
 
-		String newFormatOldObjs = convertOldToNew(strObjects);
 		MVMShowResponseOpenAI dialog = new MVMShowResponseOpenAI(fWizardMVMView, frame, strNameModel, rObjects,
-				rLinks, rProperties, rComments,mensaje, jsonPretty, jsonResult, newFormatOldObjs);
-//		public MVMShowResponseOpenAI(WizardMVMView pWizardMVMView, JFrame pParent, String pStrNameModel, String pObjects, 
-//				String pLinks, String pProperties,String pComments,
-//				String pMensaje, String pJsonPretty, String pJsonResult, String pObjectsOld)
-		
+				rLinks, rProperties, rComments,mensaje, jsonPretty, jsonResult, strObjectsJSON, strLinksJSON);
+
 		dialog.setSize(1254, 930);
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
@@ -2758,45 +2713,50 @@ public class WizardMVMView extends JPanel implements View {
 		return list;
 	}
 
-	public static List<MVMObject> parseMVMObjectsOLD(String jsonText) {
-		List<MVMObject> list = new ArrayList<>();
+	//	public static List<MVMObject> parseMVMObjectsOLD(String jsonText) {
+	//		List<MVMObject> list = new ArrayList<>();
+	//
+	//		try {
+	//			JSONArray arr = new JSONArray(jsonText);
+	//
+	//			for (int i = 0; i < arr.length(); i++) {
+	//
+	//				JSONObject obj = arr.getJSONObject(i);
+	//
+	//				MVMObject mvmObj = new MVMObject();
+	//				mvmObj.setName(obj.optString("name"));
+	//				mvmObj.setClassName(obj.optString("class"));
+	//
+	//				// Procesar atributos
+	//				JSONObject attrs = obj.optJSONObject("attributes");
+	//				List<MVMAttribute> attrList = new ArrayList<>();
+	//
+	//				if (attrs != null) {
+	//					Iterator<String> keys = attrs.keys();
+	//					while (keys.hasNext()) {
+	//						String key = keys.next();
+	//						String value = String.valueOf(attrs.get(key));
+	//						attrList.add(new MVMAttribute(key, value));
+	//					}
+	//				}
+	//
+	//				mvmObj.setAttributes(attrList);
+	//
+	//				list.add(mvmObj);
+	//			}
+	//
+	//		} catch (JSONException e) {
+	//			e.printStackTrace();
+	//		}
+	//
+	//		return list;
+	//	}
 
-		try {
-			JSONArray arr = new JSONArray(jsonText);
-
-			for (int i = 0; i < arr.length(); i++) {
-
-				JSONObject obj = arr.getJSONObject(i);
-
-				MVMObject mvmObj = new MVMObject();
-				mvmObj.setName(obj.optString("name"));
-				mvmObj.setClassName(obj.optString("class"));
-
-				// Procesar atributos
-				JSONObject attrs = obj.optJSONObject("attributes");
-				List<MVMAttribute> attrList = new ArrayList<>();
-
-				if (attrs != null) {
-					Iterator<String> keys = attrs.keys();
-					while (keys.hasNext()) {
-						String key = keys.next();
-						String value = String.valueOf(attrs.get(key));
-						attrList.add(new MVMAttribute(key, value));
-					}
-				}
-
-				mvmObj.setAttributes(attrList);
-
-				list.add(mvmObj);
-			}
-
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-
-		return list;
-	}
-
+	/**
+	 * Parsea links propuestos por AI
+	 * @param jsonText
+	 * @return
+	 */
 	public static List<MVMLink> parseMVMLinks(String jsonText) {
 		List<MVMLink> list = new ArrayList<>();
 
@@ -3079,6 +3039,7 @@ public class WizardMVMView extends JPanel implements View {
 
 
 	}
+
 	public void enableBtnViewCmbs(){
 		btnViewCmbs.setEnabled(fMainWindow.getValidatorDialog()!=null);
 	}
@@ -3164,7 +3125,7 @@ public class WizardMVMView extends JPanel implements View {
 			link.setEnd1Role(oL0.associationEnd().name());
 			link.setEnd2Class(oL1.object().cls().name());
 			link.setEnd2Object(oL1.object().name());
-			link.setEnd2Role(oL0.associationEnd().name());
+			link.setEnd2Role(oL1.associationEnd().name());
 			lLinks.add(link);
 		}
 		return lLinks;
@@ -3194,6 +3155,11 @@ public class WizardMVMView extends JPanel implements View {
 		lActions.add(oAction);
 	}
 
+	/**
+	 * Crea objetos atendiendo a la estructura MVMObject
+	 * @param oObj
+	 * @param verbose
+	 */
 	private void createObjectAccordingMVMObject(MVMObject oObj, boolean verbose) {
 		String nomObj=oObj.getName();
 		String ClassObj = oObj.getClassName();
@@ -3522,6 +3488,9 @@ public class WizardMVMView extends JPanel implements View {
 		btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
 
 	}
+	/**
+	 * Crea objetos de muestra automaticamente
+	 */
 	public void newObjectSampleAuto() {
 		int nElems=lClass.getModel().getSize();
 		for(int nElem=0;nElem<nElems;nElem++) {
@@ -4825,6 +4794,12 @@ public class WizardMVMView extends JPanel implements View {
 		}
 		return oRes;
 	}
+
+	/**
+	 * Selecciona objeto y clase al hacer clic en dialogo
+	 * @param nomObj
+	 * @param nomClass
+	 */
 	public void selObjFromDia(String nomObj, String nomClass) {
 
 		// Buscar clase dentro de lClass
@@ -4833,6 +4808,10 @@ public class WizardMVMView extends JPanel implements View {
 		selectObject(nomObj);
 	}
 
+	/**
+	 * Selecciona Link al hacer clic en dialogo
+	 * @param selectedEdge
+	 */
 	public void selLinkFromDia(EdgeBase selectedEdge) {
 
 		LinkEdge aEdge = (LinkEdge) selectedEdge;
@@ -4898,6 +4877,11 @@ public class WizardMVMView extends JPanel implements View {
 		return;
 	}
 
+	/**
+	 * Selecciona objeto en combo
+	 * @param cmb
+	 * @param objName
+	 */
 	public void selectObjInCombo(JComboBox<MObject> cmb, String objName) {
 
 		// Search in list
@@ -5074,6 +5058,7 @@ public class WizardMVMView extends JPanel implements View {
 		boolean res = evalExistsOrForAll0MVM(0, rangeVal, ctx, doExists, inv);
 		return BooleanValue.get(res);
 	}
+
 	private boolean evalExistsOrForAll0MVM(int nesting,
 			CollectionValue rangeVal, EvalContext ctx, boolean doExists, MClassInvariant inv) {
 		// loop over range elements

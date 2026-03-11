@@ -13,6 +13,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -64,6 +66,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 	//	private static JButton btnCreateObjects;
 	private static JButton btnCreateLinks;
 	private static JButton btnShowDiffObjs;
+	private static JButton btnShowDiffLinks;
 	private static JButton btnCopyComment;
 	private static JButton btnCopyTXTRequest;
 	private static JButton btnCopyJSONRequest;
@@ -82,6 +85,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 	private static String rObjects;
 	private static String rObjectsOld;
 	private static String rLinks;
+	private static String rLinksOld;
 	private static String rProperties;
 	private static String rComments;
 
@@ -99,17 +103,38 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 	public MVMShowResponseOpenAI(WizardMVMView pWizardMVMView, JFrame pParent, String pStrNameModel, String pObjects, 
 			String pLinks, String pProperties,String pComments,
-			String pMensaje, String pJsonPretty, String pJsonResult,String pObjectsOld) {
+			String pMensaje, String pJsonPretty, String pJsonResult,String pObjectsOld, String pLinksOld) {
 		super((JFrame) pParent, "Request to OpenAI for '"+pStrNameModel+"'", ModalityType.APPLICATION_MODAL);
 
+		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		setStrNameModel(pStrNameModel);	
 		parent=pParent;
 		fWizardMVMView=pWizardMVMView;
+		
+		addWindowListener(new WindowAdapter() {
+		    @Override
+		    public void windowClosing(WindowEvent e) {
+		        // Aquí interceptas la X
+		        System.out.println("El usuario ha pulsado la X");
+		        fWizardMVMView.setStrCreateObjectsAI("");
+				fWizardMVMView.setStrCreateLinksAI("");
+		        // Ejemplo: cerrar manualmente
+		        dispose();
+
+		        // O si quieres preguntar antes:
+		        // int r = JOptionPane.showConfirmDialog(null, "¿Cerrar?", "Confirmar", JOptionPane.YES_NO_OPTION);
+		        // if (r == JOptionPane.YES_OPTION) dispose();
+		    }
+		});
+//		setStrNameModel(pStrNameModel);	
+//		parent=pParent;
+//		fWizardMVMView=pWizardMVMView;
 
 
 		rObjects=pObjects;
 		rObjectsOld=pObjectsOld;
 		rLinks=pLinks;
+		rLinksOld=pLinksOld;
 		rProperties=pProperties;
 		rComments=pComments;
 
@@ -351,7 +376,8 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 					String prefix = isLast ? "└── " : "├── ";
 
-					String code = link.getString("codeLink");
+//					String code = link.getInt("codeLink");
+					int code = link.getInt("codeLink");
 
 					String e1Class = link.getString("end1Class");
 					String e1Obj   = link.getString("end1Object");
@@ -471,15 +497,15 @@ public class MVMShowResponseOpenAI extends JDialog {
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
 				);
 		scrollObjects.setBounds(15, startY + 33, fieldWidth, fieldHeight+39);
+		
 		btnShowDiffObjs = new JButton("Show Diff Objects");
 		btnShowDiffObjs.setBounds(15 + fieldWidth-150, startY , 150, 30);
 		btnShowDiffObjs.setEnabled(true);
 		btnShowDiffObjs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-//				showDialogCreateObjectsAndLinks(panel);
 				String strObjOld=buildObjectsTree(rObjectsOld);
 				String strObjNew=buildObjectsTree(rObjects);
-				showDiffObjects(parent, strObjOld,  strObjNew);
+				showDiffOldMVMNewAI(parent, strObjOld,  strObjNew);
 			}
 		});
 
@@ -517,8 +543,20 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 		scrollLinks.setBounds(15+fieldWidth+10, startY + 33, fieldWidth, fieldHeight+39);
 
+		btnShowDiffLinks = new JButton("Show Diff Objects");
+		btnShowDiffLinks.setBounds(15 + 2* fieldWidth-300, startY , 150, 30);
+		btnShowDiffLinks.setEnabled(true);
+		btnShowDiffLinks.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String strLinksOld=buildLinksTree(rLinksOld);
+				String strLinksNew=buildLinksTree(rLinks);
+				showDiffOldMVMNewAI(parent, strLinksOld,  strLinksNew);
+			}
+		});
+		
 		panel.add(lblLinks);
 		panel.add(scrollLinks);
+		panel.add(btnShowDiffLinks);
 
 		JLabel lblFix2 = new JLabel("Potential fix 2 - Modify properties");
 		lblFix2.setBounds(15, startY + fieldHeight + 80, 255, 20);
@@ -667,7 +705,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 		this.add(panel);
 		this.setLocationRelativeTo(parent);
-		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+//		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setResizable(false);
 
 	}
@@ -818,15 +856,16 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 		return sb;
 	}
-	public static void showDiffObjects(JFrame parent, String strObjOld, String strObjNew) {
-		System.out.println("Obj old:\n"+strObjOld);
-		System.out.println("\n");
-		System.out.println("Obj new:\n"+strObjNew);
-		MVMDiffDialog dialog = new MVMDiffDialog(parent, strObjOld, strObjNew);
-//		dialog.setSize(1500, 800);
+//	public static void showDiffOldMVMNewAI(JFrame parent, String strObjOld, String strObjNew) {
+		public static void showDiffOldMVMNewAI(JFrame parent, String strOld, String strNew) {
+//		System.out.println("Obj old:\n"+strObjOld);
+//		System.out.println("\n");
+//		System.out.println("Obj new:\n"+strObjNew);
+		MVMDiffDialog dialog = new MVMDiffDialog(parent, strOld, strNew);
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
 	}
+	
 	public static void showDialogCreateObjectsAndLinks(JPanel parent) {
 
 		StringBuilder sbObjects = createTextObjects( rObjects);
