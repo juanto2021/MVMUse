@@ -266,6 +266,7 @@ public class WizardMVMView extends JPanel implements View {
 
 	private List<MAttribute> fAttributes;
 	private String[] fValues;
+	private String[] fOriginalValues;
 	private Map<MAttribute, Value> fAttributeValueMap;
 	private NewObjectDiagram odvAssoc;
 	private String aMulti[] = new String[] { 
@@ -292,6 +293,7 @@ public class WizardMVMView extends JPanel implements View {
 	protected Expression fRangeExp;
 	protected VarDeclList fElemVarDecls;
 	protected Expression fQueryExp;
+
 
 	private LayoutThread fLayoutThread;
 
@@ -367,6 +369,8 @@ public class WizardMVMView extends JPanel implements View {
 		public void setValueAt(Object value, int row, int col) {
 			fValues[row] = value.toString();
 			fireTableCellUpdated(row, col);
+			checkForChanges();   // ← NUEVO
+
 		}
 
 		private void update() {
@@ -393,6 +397,7 @@ public class WizardMVMView extends JPanel implements View {
 				fAttributes = Collections.emptyList();
 				fValues = new String[0];
 			}
+			fOriginalValues = Arrays.copyOf(fValues, fValues.length);
 			fireTableDataChanged();
 		}
 
@@ -503,20 +508,17 @@ public class WizardMVMView extends JPanel implements View {
 						lObjects.setModel(loadListObjects(nomClass));
 
 						nomObj="";
-						btnSaveObject.setEnabled(false);
-						btnCancelObject.setEnabled(false);
 
 						if (oClass.isAbstract()) {
 							btnCreateObject.setEnabled(false);
 							btnNewObjectAuto.setEnabled(false);
 						}else {
+							btnCreateObject.setEnabled(true);
 							int nObjects = lObjects.getModel().getSize();
 							if (nObjects>0) {
 								lObjects.setSelectedIndex(0);
 								nomObj = (String) lObjects.getSelectedValue();
 								selectObject( nomObj);
-								btnSaveObject.setEnabled(true);
-								btnCancelObject.setEnabled(true);
 								btnCreateObject.setEnabled(true);
 								btnNewObjectAuto.setEnabled(true);
 							}
@@ -527,6 +529,8 @@ public class WizardMVMView extends JPanel implements View {
 						txNewObject.setText(nomObj);
 						txNewObject.setEnabled(false);
 					}
+					btnSaveObject.setEnabled(false);
+					btnCancelObject.setEnabled(false);
 				}
 			}
 		});
@@ -552,6 +556,8 @@ public class WizardMVMView extends JPanel implements View {
 				selectObject( nomObj);
 				txNewObject.setText(nomObj);
 				txNewObject.setEnabled(false);
+				btnSaveObject.setEnabled(false);  
+				btnCancelObject.setEnabled(false);  
 			}
 		});
 
@@ -616,8 +622,6 @@ public class WizardMVMView extends JPanel implements View {
 						}else {
 							fLayoutThread= odvAssoc.forceStartLayoutThread();
 						}
-
-
 					}else {
 						odvAssoc.forceStopLayoutThread(fLayoutThread);
 					}
@@ -643,6 +647,7 @@ public class WizardMVMView extends JPanel implements View {
 			public void actionPerformed(ActionEvent e) {
 				initNewObject();
 				btnCancelObject.setEnabled(true);
+				btnCreateObject.setEnabled(false);
 
 				iniObjDiagramAssoc();
 				if (chkAutoLayout.isSelected()) {
@@ -677,6 +682,7 @@ public class WizardMVMView extends JPanel implements View {
 						return;
 					}
 				}
+				//				btnCreateObject.setEnabled(true);
 				saveObject(oClass, nomObj);
 				setResClassInvariants();
 				setResCheckStructure();
@@ -687,6 +693,10 @@ public class WizardMVMView extends JPanel implements View {
 				cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 				lObjects.setModel(loadListObjects(oClass.name()));
 				lObjects.setSelectedIndex(selectObject(nomObj));
+				bNewObj=false;
+				btnCreateObject.setEnabled(true);
+				btnSaveObject.setEnabled(false);
+				btnCancelObject.setEnabled(false);
 			}
 		});
 
@@ -707,16 +717,18 @@ public class WizardMVMView extends JPanel implements View {
 
 		btnCancelObject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				btnCreateObject.setEnabled(true);
 				cancelObject(nomObj);
 				if (nomObj!=null){
 					if (!nomObj.equals("")){
 						selectObject(nomObj);
-						btnSaveObject.setEnabled(true);
-						btnCancelObject.setEnabled(true);
-						btnCreateObject.setEnabled(true);
+						btnCreateObject.setEnabled(true); 
+						btnSaveObject.setEnabled(false);  
+						btnCancelObject.setEnabled(false);
 						btnNewObjectAuto.setEnabled(true);
 					}
 				}
+				bNewObj=false;
 			}
 		});
 		panel.add(btnCancelObject);
@@ -733,6 +745,8 @@ public class WizardMVMView extends JPanel implements View {
 					cmbObjectOri.setModel(loadComboObjectMObject(cmbClassOri));
 					cmbObjectDes.setModel(loadComboObjectMObject(cmbClassDes));
 				}
+				btnSaveObject.setEnabled(false);   
+				btnCancelObject.setEnabled(false);  
 			}
 		});
 		panel.add(btnDeleteObject);
@@ -856,9 +870,9 @@ public class WizardMVMView extends JPanel implements View {
 		btnSuggestions.setHorizontalAlignment(SwingConstants.CENTER);
 		btnSuggestions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// Ver que contiene listStrSatisfiables y listStrUnSatisfiables
-				System.out.println("listStrSatisfiables ["+listStrSatisfiables+"]");
-				System.out.println("listStrUnSatisfiables ["+listStrUnSatisfiables+"]");
+				//				// Ver que contiene listStrSatisfiables y listStrUnSatisfiables
+				//				System.out.println("listStrSatisfiables ["+listStrSatisfiables+"]");
+				//				System.out.println("listStrUnSatisfiables ["+listStrUnSatisfiables+"]");
 				runAnalisis();				
 			}
 		});
@@ -1226,7 +1240,21 @@ public class WizardMVMView extends JPanel implements View {
 		});
 
 	}
+	private void checkForChanges() {
+		boolean changed = false;
 
+		if (fOriginalValues != null && fValues != null) {
+			for (int i = 0; i < fValues.length; i++) {
+				if (!fValues[i].equals(fOriginalValues[i])) {
+					changed = true;
+					break;
+				}
+			}
+		}
+
+		btnSaveObject.setEnabled(changed);
+		btnCancelObject.setEnabled(changed);
+	}
 	public static String getStrDefModel() {
 		String sDefModel="";
 
@@ -1432,11 +1460,11 @@ public class WizardMVMView extends JPanel implements View {
 			// Orden fijo de claves
 			sb.append("\"codeLink\":\"").append(link.getCodeLink()).append("\",");
 			sb.append("\"nomAssoc\":\"").append(link.getNomAssoc()).append("\",");
-			
+
 			sb.append("\"end1Class\":\"").append(link.getEnd1Class()).append("\",");
 			sb.append("\"end1Object\":\"").append(link.getEnd1Object()).append("\","); 
 			sb.append("\"end1Role\":\"").append(link.getEnd1Role()).append("\",");
-			
+
 			sb.append("\"end2Class\":\"").append(link.getEnd2Class()).append("\",");
 			sb.append("\"end2Object\":\"").append(link.getEnd2Object()).append("\",");
 			sb.append("\"end2Role\":\"").append(link.getEnd2Role()).append("\"");
@@ -1555,8 +1583,6 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}	
 
-		//		sb.append("\n");
-
 		// OUTPUTS ================================================================================================================
 		sb.append("*Outputs*\n\n");
 
@@ -1636,6 +1662,8 @@ public class WizardMVMView extends JPanel implements View {
 				"codeLink, end1Class, end1Object, end1Role, end2Class, end2Object, end2Role, nomAssoc.\n");
 		sb.append("       Example: codeLink=\"1\" | end1Class=\"Person\" end1Object=\"person1\" "+
 				"end1Role=\"person\" end2Class=\"Pet\" end2Object=\"pet1\" end2Role=\"person\" nomAssoc=\"BelongsTo\"\n");
+		sb.append("       For each association, respect its multiplicity. "+
+				"That is, in a multiplicity of 4, it verifies that there are 4 links.\n");
 
 		// COMMENT -----------------------------------------------------------------------------------------------------------------
 		sb.append("   1.4 Comment: Explanation of 'how to correct the model', taking into account the properties "+
@@ -1741,7 +1769,6 @@ public class WizardMVMView extends JPanel implements View {
 			e.printStackTrace();
 		}
 
-		// Si no es JSON válido, lo devolvemos tal cual
 		return json;
 	}
 
@@ -1975,7 +2002,7 @@ public class WizardMVMView extends JPanel implements View {
 				System.out.println(out);
 			}
 
-			// Tenemos que ordenar de la misma manera: AQUI
+			// We have to order in the same way: 
 			// rObjects
 			String strSwap=sortRObjectsByClassAndName(rObjectsAI);
 			rObjectsAI=strSwap;
@@ -1984,21 +2011,19 @@ public class WizardMVMView extends JPanel implements View {
 			strSwap=sortSTRObjectsByClassAndName(strObjects);
 			String strObjectsJSON=strSwap;
 
-			// Tenemos que convertir strLinks a strLinksJSON   AQUI
+			// We need to convert strLinks to strLinksJSON   
 			String strLinksJSON = getStrLinksJSON();
-			System.out.println("strLinksJSON:\n"+strLinksJSON);
-			// Tenemos que ordenar Links atendiendo este orden dentro de cada objeto
-//			strSwap=sortStrLinksJSONFields(strLinksJSON);
-//			strLinksJSON=strSwap;
+			//			System.out.println("strLinksJSON:\n"+strLinksJSON);
+			//			// Tenemos que ordenar Links atendiendo este orden dentro de cada objeto
+			//			//			strSwap=sortStrLinksJSONFields(strLinksJSON);
+			//			//			strLinksJSON=strSwap;
 
-			// Para que la comparacion tenga en cuenta el orden de campos ordenamos tambien rLinks
+			// To ensure the comparison takes into account the order of fields, we also order rLinks.
 			strSwap=sortStrLinksJSONFields(rLinksAI);
 			rLinksAI=strSwap;
-			System.out.println("rLinks:\n"+rLinksAI);
-			
+			//			System.out.println("rLinks:\n"+rLinksAI);
 
-
-			// Llamada visualización OpenAI
+			// OpenAI visualization callout
 			panel.setCursor(Cursor.getDefaultCursor());
 			showResponseOpenAI(rObjectsAI, rLinksAI, rProperties, rComments, mensaje, jsonPretty, jsonResult, strObjectsJSON, strLinksJSON);
 
@@ -2012,12 +2037,12 @@ public class WizardMVMView extends JPanel implements View {
 
 		json = json.trim();
 
-		// Quitar corchetes exteriores
+		// Remove outer brackets
 		if (json.startsWith("[") && json.endsWith("]")) {
 			json = json.substring(1, json.length() - 1).trim();
 		}
 
-		// Extraer objetos completos respetando llaves
+		// Extract complete objects while respecting keys
 		List<String> rawObjects = new ArrayList<String>();
 		int depth = 0;
 		int start = -1;
@@ -2037,7 +2062,7 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}
 
-		// Orden deseado
+		// Desired order
 		String[] order = {
 				"codeLink",
 				"nomAssoc",
@@ -2051,7 +2076,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
 
-		// Parsear cada objeto
+		// Parse each object
 		for (String obj : rawObjects) {
 
 			Map<String, String> map = new HashMap<String, String>();
@@ -2065,7 +2090,7 @@ public class WizardMVMView extends JPanel implements View {
 			list.add(map);
 		}
 
-		// Reconstruir JSON ordenado
+		// Reconstruct sorted JSON
 		StringBuilder sb = new StringBuilder();
 		sb.append("[");
 
@@ -2084,11 +2109,11 @@ public class WizardMVMView extends JPanel implements View {
 
 				sb.append("\"").append(key).append("\":");
 
-				// Detectar números
+				// Detect numbers
 				if (value != null && value.matches("-?\\d+")) {
 					sb.append(value);
 				}
-				// Detectar booleanos
+				// Detect Booleans
 				else if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
 					sb.append(value.toLowerCase());
 				}
@@ -2112,14 +2137,14 @@ public class WizardMVMView extends JPanel implements View {
 
 		p += pattern.length();
 
-		// Si empieza con comillas → string
+		// If it starts with quotes, it's a String
 		if (obj.charAt(p) == '\"') {
 			int start = p + 1;
 			int end = obj.indexOf("\"", start);
 			return obj.substring(start, end);
 		}
 
-		// Si no → número o booleano
+		// Otherwise, it's a number or a boolean
 		int end = p;
 		while (end < obj.length() && obj.charAt(end) != ',' && obj.charAt(end) != '}') {
 			end++;
@@ -2129,7 +2154,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	/**
-	 * Ordena String de objetos MVM por nombre y le da forma de String JSON 
+	 * Sorts a string of MVM objects by name and formats it as a JSON string. 
 	 * @param input
 	 * @return
 	 */
@@ -2147,15 +2172,15 @@ public class WizardMVMView extends JPanel implements View {
 			Map<String, Object> map = new HashMap<String, Object>();
 			Map<String, String> attributes = new HashMap<String, String>();
 
-			// Extraer name
+			// Extract name
 			String name = extractBracketValue(line, "name=");
 			map.put("name", name);
 
-			// Extraer class
+			// Extract class
 			String clazz = extractBracketValue(line, "class=");
 			map.put("class", clazz);
 
-			// Extraer fields
+			// Extract fields
 			int pos = 0;
 			while (true) {
 				int f = line.indexOf("field=[", pos);
@@ -2168,7 +2193,7 @@ public class WizardMVMView extends JPanel implements View {
 				int vEnd = line.indexOf("]", v + 7);
 				String fieldValue = line.substring(v + 7, vEnd);
 
-				// limpiar comillas simples
+				// clear single quotes
 				if (fieldValue.startsWith("'") && fieldValue.endsWith("'")) {
 					fieldValue = fieldValue.substring(1, fieldValue.length() - 1);
 				}
@@ -2182,7 +2207,7 @@ public class WizardMVMView extends JPanel implements View {
 			list.add(map);
 		}
 
-		// ORDENAR SIN LAMBDAS
+		// ORDENAR
 		Collections.sort(list, new Comparator<Map<String, Object>>() {
 			public int compare(Map<String, Object> a, Map<String, Object> b) {
 
@@ -2199,7 +2224,7 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 
-		// CONSTRUIR JSON
+		// BUILD JSON
 		StringBuilder sb = new StringBuilder();
 		sb.append("[");
 
@@ -2219,29 +2244,21 @@ public class WizardMVMView extends JPanel implements View {
 			for (Map.Entry<String, String> e : attrs.entrySet()) {
 				if (j > 0) sb.append(",");
 				sb.append("\"").append(e.getKey()).append("\":");
-
-				//				// Detectar números enteros con signo
-				//				if (e.getValue().matches("-?\\d+")) {
-				//				    sb.append(e.getValue());
-				//				} else {
-				//				    sb.append("\"").append(e.getValue()).append("\"");
-				//				}
-
 				String val = e.getValue();
 
-				// Detectar booleanos
+				// Detect Booleans
 				if (val.equalsIgnoreCase("true") || val.equalsIgnoreCase("false")) {
 					sb.append(val.toLowerCase());
 				}
-				// Detectar números enteros con signo
+				// Detect signed integers
 				else if (val.matches("-?\\d+")) {
 					sb.append(val);
 				}
-				// Detectar decimales (opcional)
+				// Detect decimals (optional)
 				else if (val.matches("-?\\d+(\\.\\d+)?")) {
 					sb.append(val);
 				}
-				// Todo lo demás → string
+				// Everything else is String
 				else {
 					sb.append("\"").append(val).append("\"");
 				}
@@ -2260,7 +2277,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	/**
-	 * Extrae brackets 'extras'
+	 * Remove 'extra' brackets
 	 * @param line
 	 * @param key
 	 * @return
@@ -2274,7 +2291,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	/**
-	 * Ordena rObjects (Respuesta de AI) por nombre de clase y nombre de objeto
+	 * Sort rObjects (AI Response) by class name and object name
 	 * @param json
 	 * @return
 	 */
@@ -2282,12 +2299,12 @@ public class WizardMVMView extends JPanel implements View {
 
 		json = json.trim();
 
-		// Quitar corchetes exteriores
+		// Remove outer brackets
 		if (json.startsWith("[") && json.endsWith("]")) {
 			json = json.substring(1, json.length() - 1);
 		}
 
-		// Extraer objetos completos respetando llaves
+		// Extract complete objects while respecting keys
 		List<String> rawObjects = new ArrayList<String>();
 		int depth = 0;
 		int start = 0;
@@ -2306,26 +2323,26 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		}
 
-		// Parsear cada objeto
+		// Parse each object
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
 
 		for (String obj : rawObjects) {
 
 			Map<String, String> map = new HashMap<String, String>();
 
-			// Extraer "class"
+			// Extract "class"
 			map.put("class", extractSimpleField(obj, "class"));
 
-			// Extraer "name"
+			// Extract "name"
 			map.put("name", extractSimpleField(obj, "name"));
 
-			// Extraer "attributes" como objeto completo
+			// Extract "attributes" as a complete object
 			map.put("attributes", extractObjectField(obj, "attributes"));
 
 			list.add(map);
 		}
 
-		// Ordenar sin lambdas
+		// Sort
 		Collections.sort(list, new Comparator<Map<String, String>>() {
 			public int compare(Map<String, String> a, Map<String, String> b) {
 
@@ -2336,7 +2353,7 @@ public class WizardMVMView extends JPanel implements View {
 			}
 		});
 
-		// Reconstruir JSON
+		// Rebuild JSON
 		StringBuilder sb = new StringBuilder();
 		sb.append("[");
 
@@ -2358,7 +2375,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	/**
-	 * Extrae un campo de un objeto
+	 * Extract a field from an object
 	 * @param obj
 	 * @param field
 	 * @return
@@ -2372,7 +2389,7 @@ public class WizardMVMView extends JPanel implements View {
 		return obj.substring(start, end);
 	}
 	/*
-	 * Extrae un objeto JSON de un objeto
+	 * Extract a JSON object from an object
 	 */
 	private static String extractObjectField(String obj, String field) {
 		String pattern = "\"" + field + "\":{";
@@ -2393,7 +2410,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	/**
-	 * Obtiene invariantes originales con su definición
+	 * It obtains original invariants with its definition
 	 * @param originalInvariants
 	 * @return
 	 */
@@ -2409,7 +2426,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	/**
-	 * Extrae las invariantes del modelo original
+	 * Extract the invariants from the original model
 	 * @param modelText
 	 * @return
 	 */
@@ -2464,7 +2481,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	/**
-	 * Convierte un string de un JSON de comparación de invariantes a modificar en un a tabla visual de texto
+	 * Converts a string from a JSON invariant comparison to modify into a visual text table
 	 * @param jsonString
 	 * @return
 	 */
@@ -2522,12 +2539,8 @@ public class WizardMVMView extends JPanel implements View {
 		return sb.toString();
 	}
 
-	// -------------------------
-	// Métodos auxiliares
-	// -------------------------
-
 	/**
-	 * Formatea un Strng a un ancho determinado rellenandolo con espacios
+	 * Format a Strng to a specific width by padding it with spaces
 	 * @param text
 	 * @param width
 	 * @return
@@ -3487,6 +3500,9 @@ public class WizardMVMView extends JPanel implements View {
 		int nObjDes = cmbObjectDes.getModel().getSize();
 		btnInsertLinkAssoc.setEnabled(nObjOri>0 && nObjDes>0);
 
+		btnSaveObject.setEnabled(false);   
+		btnCancelObject.setEnabled(false);  
+
 	}
 	/**
 	 * Crea objetos de muestra automaticamente
@@ -3501,18 +3517,20 @@ public class WizardMVMView extends JPanel implements View {
 		if (oClass!=null) {
 			if (oClass.isAbstract()) {
 				nomObj="";
-				btnSaveObject.setEnabled(false);
-				btnCreateObject.setEnabled(false);
+				//				btnSaveObject.setEnabled(false);
+				//				btnCreateObject.setEnabled(false);
 				btnNewObjectAuto.setEnabled(false);
 			}else {
 				lObjects.setSelectedIndex(0);
 				nomObj = (String) lObjects.getSelectedValue();
 				selectObject( nomObj);
-				btnSaveObject.setEnabled(true);
-				btnCreateObject.setEnabled(true);
+				//				btnSaveObject.setEnabled(true);
+				//				btnCreateObject.setEnabled(true);
 				btnNewObjectAuto.setEnabled(true);
 			}
 		}
+		btnSaveObject.setEnabled(false);
+		btnCancelObject.setEnabled(false);
 	}
 	/**
 	 * Checks the existence of an object
@@ -3719,7 +3737,7 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	private boolean checkStructure() {
 		Map<String, List<String>> mapObjectsStr = new HashMap<String, List<String>>();
-		getErrorsEstructure(); //Provis
+		getErrorsEstructure(); 
 		// In one pass the objects that admit a multiplicity of * must be seen so that they are available
 		// You have to see all the final associations that there are and see which objects are always available
 
@@ -4077,7 +4095,6 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	private void setComposAssoc(MAssociation oAssoc) {
 
-		// Provis -----
 		txOriAssocRole.setText("");
 		txMultiOri.setText("");
 		txDesAssocRole.setText("");
@@ -4950,7 +4967,7 @@ public class WizardMVMView extends JPanel implements View {
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols && ((i * cols) + j < count); j++) {
 				JInternalFrame f = allframes[(i * cols) + j];
-				if (f!=null) {//Provis
+				if (f!=null) {
 					if (f.isIcon() && !f.isClosed()) {
 						try {
 							f.setIcon(false);
