@@ -505,7 +505,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				String strObjOld=buildObjectsTree(rObjectsOld);
 				String strObjNew=buildObjectsTree(rObjects);
-				showDiffOldMVMNewAI(parent, strObjOld,  strObjNew);
+				showDiffOldMVMNewAI(parent, strObjOld,  strObjNew, "Diff Objects");
 			}
 		});
 
@@ -543,14 +543,14 @@ public class MVMShowResponseOpenAI extends JDialog {
 
 		scrollLinks.setBounds(15+fieldWidth+10, startY + 33, fieldWidth, fieldHeight+39);
 
-		btnShowDiffLinks = new JButton("Show Diff Objects");
+		btnShowDiffLinks = new JButton("Show Diff Links");
 		btnShowDiffLinks.setBounds(15 + 2* fieldWidth-300, startY , 150, 30);
 		btnShowDiffLinks.setEnabled(true);
 		btnShowDiffLinks.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String strLinksOld=buildLinksTree(rLinksOld);
 				String strLinksNew=buildLinksTree(rLinks);
-				showDiffOldMVMNewAI(parent, strLinksOld,  strLinksNew);
+				showDiffOldMVMNewAI(parent, strLinksOld,  strLinksNew, "Diff Links");
 			}
 		});
 		
@@ -857,11 +857,11 @@ public class MVMShowResponseOpenAI extends JDialog {
 		return sb;
 	}
 //	public static void showDiffOldMVMNewAI(JFrame parent, String strObjOld, String strObjNew) {
-		public static void showDiffOldMVMNewAI(JFrame parent, String strOld, String strNew) {
+		public static void showDiffOldMVMNewAI(JFrame parent, String strOld, String strNew, String tittle) {
 //		System.out.println("Obj old:\n"+strObjOld);
 //		System.out.println("\n");
 //		System.out.println("Obj new:\n"+strObjNew);
-		MVMDiffDialog dialog = new MVMDiffDialog(parent, strOld, strNew);
+		MVMDiffDialog dialog = new MVMDiffDialog(parent, strOld, strNew, tittle);
 		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
 	}

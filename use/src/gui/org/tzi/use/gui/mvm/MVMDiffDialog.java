@@ -45,8 +45,8 @@ public class MVMDiffDialog extends JDialog {
 	private int buttonWidth=120;
 	private int buttonHeight = 28;
 
-	public MVMDiffDialog(Frame parent, String s1, String s2) {
-		super(parent, "Compare blocks", true); // true = modal
+	public MVMDiffDialog(Frame parent, String s1, String s2, String tittle) {
+		super(parent, tittle, true); // true = modal
 
 		setSize(initialWidthMin, initialHeightMin);
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
