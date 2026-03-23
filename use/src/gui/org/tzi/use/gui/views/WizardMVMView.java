@@ -1604,7 +1604,7 @@ public class WizardMVMView extends JPanel implements View {
 		sb.append("   2.1. If the input included an instance of the model, "+
 				"provide a modified list of objects and links, with minimal changes, "+
 				"such that the corresponding instance satisfies all invariants and graphical UML constraints.\n");
-		sb.append("   3.1. If any object has an attribute whose value violates an invariant, please suggest "+
+		sb.append("   2.2. If any object has an attribute whose value violates an invariant, please suggest "+
 				"a new value for that attribute and include it in the list of objects you provide at the end.\n");
 		sb.append("\n");
 
