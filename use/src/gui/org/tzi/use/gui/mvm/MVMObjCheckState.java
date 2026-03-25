@@ -552,7 +552,7 @@ public class MVMObjCheckState extends JDialog {
 			}
 		});
 		btnMetrics.setBounds(900, filGroupTab1+20, 110, 30);
-		panel.add(btnMetrics);
+//		panel.add(btnMetrics); //Provis
 
 		loadTabObjects();
 

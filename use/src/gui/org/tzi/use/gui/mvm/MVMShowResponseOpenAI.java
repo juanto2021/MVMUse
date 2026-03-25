@@ -915,7 +915,7 @@ public class MVMShowResponseOpenAI extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// acción del botón Create
-				System.out.println("Create");
+//				System.out.println("Create");
 
 
 				fWizardMVMView.setStrCreateObjectsAI(rObjects);

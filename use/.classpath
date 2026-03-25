@@ -4,6 +4,7 @@
 	<classpathentry excluding="**/.svn/**|gui/" kind="src" path="src/runtime"/>
 	<classpathentry excluding="**/.svn/**" kind="src" path="src/gui"/>
 	<classpathentry excluding="**/.svn/**" kind="src" path="src/test"/>
+	<classpathentry kind="src" path="resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
 			<attribute name="module" value="true"/>
@@ -26,6 +27,6 @@
 	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/java-json.jar"/>
 	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/okhttp-3.9.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/okio-1.13.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/utopi/git/MVMUse/use/lib/plugins/ModelValidatorPlugin-5.1.0-r1.jar"/>
+	<classpathentry kind="lib" path="lib/plugins/ModelValidatorPlugin-5.1.0-r1.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

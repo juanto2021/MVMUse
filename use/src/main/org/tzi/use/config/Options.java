@@ -409,20 +409,85 @@ public class Options {
             }
         }
         
+//        if (homeDir == null) {
+//        	// Try to get the home from Java
+//        	URL path = Options.class.getProtectionDomain().getCodeSource().getLocation();
+//        	try {
+//        		
+//        		// PROVIS
+////        		URI pathUri = path.toURI();
+////        		Path home = Paths.get(pathUri);
+////				if (Files.isRegularFile(home)) {
+////					// resolve jar file path
+////					home = home.getParent();
+////				}
+////				// resolve lib/ folder path, assuming default folder structure
+////				homeDir = home.getParent();
+//        		
+//        		//--------------------------
+//        		URI pathUri = path.toURI();
+//
+//        		// Si el esquema es "rsrc", estamos dentro de un runnable JAR empaquetado por Eclipse
+//        		if ("rsrc".equals(pathUri.getScheme())) {
+//        		    // En este caso, no podemos usar Paths.get()
+//        		    // Usamos el directorio actual como home
+//        		    homeDir = Paths.get(System.getProperty("user.dir")).toAbsolutePath();
+//        		} else {
+//        		    // Caso normal: ejecución desde Eclipse o desde un JAR estándar
+//        		    Path home = Paths.get(pathUri);
+//        		    if (Files.isRegularFile(home)) {
+//        		        home = home.getParent();
+//        		    }
+//        		    homeDir = home.getParent();
+//        		}
+//
+//        		
+//        		//----------------------------
+//        		
+//			} catch (URISyntaxException e) { }
+//        }
+        
         if (homeDir == null) {
-        	// Try to get the home from Java
-        	URL path = Options.class.getProtectionDomain().getCodeSource().getLocation();
-        	try {
-        		URI pathUri = path.toURI();
-        		Path home = Paths.get(pathUri);
-				if (Files.isRegularFile(home)) {
-					// resolve jar file path
-					home = home.getParent();
-				}
-				// resolve lib/ folder path, assuming default folder structure
-				homeDir = home.getParent();
-			} catch (URISyntaxException e) { }
+            try {
+                // Ruta del JAR o carpeta de clases
+                URI uri = Options.class.getProtectionDomain()
+                        .getCodeSource()
+                        .getLocation()
+                        .toURI();
+
+                File location = new File(uri);
+
+                if (location.isFile()) {
+                    // Ejecutando desde un JAR
+                    homeDir = location.getParentFile().toPath();
+                } else {
+                    // Ejecutando desde Eclipse (carpeta bin/)
+                    Path binDir = location.toPath();
+                    Path projectDir = binDir.getParent(); // raíz del proyecto
+
+                    // Caso 1: etc/ está en la raíz del proyecto
+                    if (Files.exists(projectDir.resolve("etc"))) {
+                        homeDir = projectDir;
+                    }
+                    // Caso 2: etc/ está dentro de use/
+                    else if (Files.exists(projectDir.resolve("use").resolve("etc"))) {
+                        homeDir = projectDir.resolve("use");
+                    }
+                    else {
+                        throw new RuntimeException("etc directory not found");
+                    }
+                }
+
+            } catch (Exception e) {
+            	e.printStackTrace();
+                System.err.println("Unable to determine USE home directory");
+                System.exit(1);
+            }
+//            System.out.println("HOME DETECTADO = " + homeDir.toAbsolutePath());
+
         }
+
+
         
         if (homeDir == null ) {
 			System.err.println("Missing path to USE installation, try `use -h' for help.");
@@ -447,6 +512,7 @@ public class Options {
         if (!compileOnly && !quiet ) {
 			Log.println("USE version " + Options.RELEASE_VERSION + ", " + Options.COPYRIGHT);
         }
+//        System.out.println("Salgo de options");
     }
 
     /**

@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -332,7 +333,7 @@ public class WizardMVMView extends JPanel implements View {
 	private static String pathProperties = urlModel+"\\"+strNameProperties;
 
 	// --- FIN New OPenAI
-	private boolean showTxtBlocks=true;
+	private boolean showTxtBlocks=false;
 	public boolean showTrace=false;
 
 	/**
@@ -431,7 +432,41 @@ public class WizardMVMView extends JPanel implements View {
 
 		strNameModel= fSystem.model().name()+".use";
 		strNameProperties = strNameModel.replace(".use", ".properties");
-		urlModel=fSystem.model().getModelDirectory().getPath();
+//		urlModel=fSystem.model().getModelDirectory().getPath(); // Provis
+		
+		//----
+		
+//		File modelDir = fSystem.model().getModelDirectory();
+//
+//		if (modelDir == null) {
+//		    JOptionPane.showMessageDialog(
+//		        null,
+//		        "El modelo no tiene un directorio asociado.\n" +
+//		        "Abre un archivo .use desde una ruta válida antes de usar el asistente MVM.",
+//		        "Error",
+//		        JOptionPane.ERROR_MESSAGE
+//		    );
+//		    return;
+//		}
+//
+//		urlModel = modelDir.getPath();
+
+		File modelDir = fSystem.model().getModelDirectory();
+
+		if (modelDir == null) {
+		    // Crear un directorio virtual basado en el nombre del modelo
+		    String modelName = fSystem.model().name();
+		    modelDir = new File(modelName).getAbsoluteFile().getParentFile();
+		}
+
+		urlModel = modelDir.getPath();
+
+		
+		
+		//---
+		
+		
+		
 		pathModel = urlModel+"\\"+strNameModel;
 		pathProperties = urlModel+"\\"+strNameProperties;
 
@@ -1256,14 +1291,41 @@ public class WizardMVMView extends JPanel implements View {
 		btnCancelObject.setEnabled(changed);
 	}
 	public static String getStrDefModel() {
-		String sDefModel="";
+//		String sDefModel="";
+//
+//		try {
+//			sDefModel = new String(Files.readAllBytes(Paths.get(pathModel)));
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		return sDefModel;
+		
+		
+		String sDefModel = "";
 
 		try {
-			sDefModel = new String(Files.readAllBytes(Paths.get(pathModel)));
-		} catch (IOException e) {
-			e.printStackTrace();
+		    // Si no se pasó argumento → usar numIter.txt del mismo directorio
+		    if (pathModel == null || pathModel.trim().isEmpty()) {
+		        pathModel = "numIter.txt";
+		    }
+
+		    Path p = Paths.get(pathModel);
+
+		    if (Files.exists(p)) {
+		        // Archivo externo junto al JAR
+		        sDefModel = Files.readString(p);
+		    } else {
+		        System.err.println("No se encontró el archivo externo: " + pathModel);
+		    }
+
+		} catch (Exception e) {
+		    e.printStackTrace();
 		}
 		return sDefModel;
+		
+		
+		
+		
 	}
 
 	public static String getStrDefProperties() {
@@ -1317,7 +1379,7 @@ public class WizardMVMView extends JPanel implements View {
 				sb.append("\n"); // line break between groups
 			}
 		}
-		System.out.println("MUS: ["+sb.toString()+"]");
+//		System.out.println("MUS: ["+sb.toString()+"]");
 		return sb.toString();
 	}
 	public static List<String> buildInvariantGroups(String strInvariants, String gMSS) {
@@ -1381,7 +1443,7 @@ public class WizardMVMView extends JPanel implements View {
 				sb.append("\n".toUpperCase()); // salto de línea entre grupos
 			}
 		}
-		System.out.println("MSS: ["+sb.toString()+"]");
+//		System.out.println("MSS: ["+sb.toString()+"]");
 		return sb.toString();
 	}	
 
