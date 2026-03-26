@@ -552,7 +552,7 @@ public class MVMObjCheckState extends JDialog {
 			}
 		});
 		btnMetrics.setBounds(900, filGroupTab1+20, 110, 30);
-//		panel.add(btnMetrics); //Provis
+		//		panel.add(btnMetrics); //Provis
 
 		loadTabObjects();
 
@@ -907,9 +907,7 @@ public class MVMObjCheckState extends JDialog {
 
 	private boolean testNewBodyInv(String newBody, int nInv, int nObj) {
 		boolean bResTest=false;
-		//		int nInv = tabInvs.getSelectedRow();
 		int nInvAnt=nInv;
-		//		int nObj = tabObjects.getSelectedRow();
 		int nObjAnt=nObj;
 		prepareContentNew(newBody);
 		saveWorkFile(contentNew);
@@ -994,7 +992,7 @@ public class MVMObjCheckState extends JDialog {
 				if (oObjKey.getClassName().equals(nameClass)&& 
 						oObjKey.getName().equals(nameObj)) {
 					nObj=row;
-				
+
 					break;
 				}
 			}
@@ -1393,7 +1391,7 @@ public class MVMObjCheckState extends JDialog {
 
 			for(Expression item: ct) {
 				Expression expOpt = OptimizationVisitor.optimize(item);
-				String expString = expOpt.toString(); // Convertir a cadena para comparación
+				String expString = expOpt.toString(); // Convert to string for comparison
 
 				if (!seenExpressions.contains(expString)) {
 					seenExpressions.add(expString);
@@ -1906,7 +1904,6 @@ public class MVMObjCheckState extends JDialog {
 	}
 
 	private void wit(String line) {
-		//		System.out.print(line);			
 		writer.print(line);
 	}
 

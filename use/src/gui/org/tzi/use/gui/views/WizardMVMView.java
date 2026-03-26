@@ -3768,7 +3768,7 @@ public class WizardMVMView extends JPanel implements View {
 				}
 			}
 		}
-		//		
+
 		MVMObjCheckState w = new MVMObjCheckState(thisMVMView,mapaOrdenado, fSession, lActionsCheck);
 		w.setSize(1038, 820);
 		w.setLocationRelativeTo(null);

@@ -2656,13 +2656,7 @@ public class MainWindow extends JFrame {
 		addNewViewFrame(f);
 		return opv;
 	}
-	//JG
-//	public void selObjFromDia(String strObj) {
-//		System.out.println("Seleccionar obj ["+strObj+"]");
-//	}
-//	public void selObjFromDia(MObject obj) {
-//		System.out.println("Seleccionar obj ["+obj.name()+"]");
-//	}
+
 	public void selObjFromDia(String nomObj, String nomClass) {
 //		System.out.println("Seleccionar nomObj ["+nomObj+"] nomClass ["+nomClass+"]");
 		// Buscar clase dentro de lClass
@@ -2670,7 +2664,7 @@ public class MainWindow extends JFrame {
 	}
 
 	public WizardMVMView showMVMWizard(String name, List<String> pListStrSatisfiables, List<String> pListUnStrSatisfiables) {
-		// Abrir vista si no hay ninguna creada previamente
+		// Open view if none has been created previously.
 		WizardMVMView opv = new WizardMVMView(MainWindow.this,
 				fSession, fLogWriter);
 		ViewFrame f = new ViewFrame("MVM Wizard", opv,
