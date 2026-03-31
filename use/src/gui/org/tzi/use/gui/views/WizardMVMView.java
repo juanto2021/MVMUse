@@ -434,7 +434,15 @@ public class WizardMVMView extends JPanel implements View {
 		fSession = session;
 		fSystem = session.system();
 
-		strNameModel= fSystem.model().name()+".use";
+//		strNameModel= fSystem.model().name()+".use";
+		String fullpath = fSystem.model().filename();
+		File f = new File(fullpath);
+		String fileName = f.getName();
+
+		System.out.println(fileName);  // → machines_v2.use
+
+//		strNameModel= fSystem.model().filename();
+		strNameModel=fileName;
 		strNameProperties = strNameModel.replace(".use", ".properties");
 //		urlModel=fSystem.model().getModelDirectory().getPath(); // Provis
 		
