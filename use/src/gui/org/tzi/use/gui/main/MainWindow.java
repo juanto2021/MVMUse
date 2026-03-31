@@ -1340,6 +1340,8 @@ public class MainWindow extends JFrame {
 			}
 			validatorDialog = null;
 			enableAction("ShowDiaCmb", false);
+			listStrSatisfiables.clear();
+			listStrUnSatisfiables.clear();	
 		}
 
 		protected boolean validateOpenPossible() {
@@ -1447,6 +1449,8 @@ public class MainWindow extends JFrame {
 
 			compile(fileName);
 			enableAction("ShowDiaCmb", false);
+			listStrSatisfiables.clear();
+			listStrUnSatisfiables.clear();	
 		}
 	}
 
@@ -1499,6 +1503,8 @@ public class MainWindow extends JFrame {
 				validatorDialog = null;
 				enableAction("ShowDiaCmb", false);
 			}
+			listStrSatisfiables.clear();
+			listStrUnSatisfiables.clear();
 		}
 	}
 

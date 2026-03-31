@@ -326,8 +326,10 @@ public class WizardMVMView extends JPanel implements View {
 	private static String strCreateLinksAI="";
 	private static WizardMVMView fWizardMVMView;
 
-	private static String strNameModel= "Animals.use";
-	private static String strNameProperties = strNameModel.replace(".use", ".properties");
+//	private static String strNameModel= "Animals.use";
+//	private static String strNameProperties = strNameModel.replace(".use", ".properties");
+	private static String strNameModel= "";
+	private static String strNameProperties = "";	
 	private static String urlModel="C:\\Temp";
 	private static String pathModel = urlModel+"\\"+strNameModel;
 	private static String pathProperties = urlModel+"\\"+strNameProperties;
@@ -424,8 +426,10 @@ public class WizardMVMView extends JPanel implements View {
 		lActions = new ArrayList<MVMAction>();
 		fMainWindow = parent;
 		fWizardMVMView=this;
-		listStrSatisfiables.clear();
-		listStrUnSatisfiables.clear();
+//		listStrSatisfiables.clear();
+//		listStrUnSatisfiables.clear();
+		listStrSatisfiables = fMainWindow.listStrSatisfiables;
+		listStrUnSatisfiables= fMainWindow.listStrUnSatisfiables;
 
 		fSession = session;
 		fSystem = session.system();
@@ -1131,6 +1135,8 @@ public class WizardMVMView extends JPanel implements View {
 		btnShowIndividuals.setFont(new Font("Serif", Font.BOLD, 13));
 		btnShowIndividuals.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				listStrSatisfiables = fMainWindow.listStrSatisfiables;
+				listStrUnSatisfiables = fMainWindow.listStrUnSatisfiables;
 				check_inv_state_individual();
 
 				boolean existDiagram=false;
@@ -1748,7 +1754,7 @@ public class WizardMVMView extends JPanel implements View {
 		sb.append("         Sentence3.\n");
 
 		// MUSS/MSS ----------------------------------------------------------------------------------------------------------------
-		if (strMUS.equals("")&&strMSS.equals("")) {
+		if (strMUS.equals("")&& strMSS.equals("")) {
 			sb.append("   1.5 Include MUS and MSS in the Comment tag using EXACTLY this format:\n\n");
 			sb.append(LINEASEP);
 			sb.append("ADDITIONAL INFORMATION ABOUT MUS/MSS\n");
