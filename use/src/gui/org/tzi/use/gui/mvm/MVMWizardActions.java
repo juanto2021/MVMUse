@@ -115,8 +115,8 @@ public class MVMWizardActions extends JDialog {
 
 	public MVMWizardActions(JFrame fParent, List<MVMAction> pLActions, List<MVMObject> pLObjs, List<MVMLink> pLLinks,
 			String pModel,String pSourceUSE, String pLastFile , Session pSession) {
-		super(fParent, "Prototipo MVM Wizard Actions",ModalityType.APPLICATION_MODAL);
-		frame = new JFrame("Prototipo MVM Wizard Actions");
+		super(fParent, "MVM Wizard Actions",ModalityType.APPLICATION_MODAL);
+		frame = new JFrame("MVM Wizard Actions");
 		frame.setAlwaysOnTop(true);
 		frame.setModalExclusionType(ModalExclusionType.TOOLKIT_EXCLUDE);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//Provis
