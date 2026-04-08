@@ -326,8 +326,8 @@ public class WizardMVMView extends JPanel implements View {
 	private static String strCreateLinksAI="";
 	private static WizardMVMView fWizardMVMView;
 
-//	private static String strNameModel= "Animals.use";
-//	private static String strNameProperties = strNameModel.replace(".use", ".properties");
+	//	private static String strNameModel= "Animals.use";
+	//	private static String strNameProperties = strNameModel.replace(".use", ".properties");
 	private static String strNameModel= "";
 	private static String strNameProperties = "";	
 	private static String urlModel="C:\\Temp";
@@ -426,59 +426,59 @@ public class WizardMVMView extends JPanel implements View {
 		lActions = new ArrayList<MVMAction>();
 		fMainWindow = parent;
 		fWizardMVMView=this;
-//		listStrSatisfiables.clear();
-//		listStrUnSatisfiables.clear();
+		//		listStrSatisfiables.clear();
+		//		listStrUnSatisfiables.clear();
 		listStrSatisfiables = fMainWindow.listStrSatisfiables;
 		listStrUnSatisfiables= fMainWindow.listStrUnSatisfiables;
 
 		fSession = session;
 		fSystem = session.system();
 
-//		strNameModel= fSystem.model().name()+".use";
+		//		strNameModel= fSystem.model().name()+".use";
 		String fullpath = fSystem.model().filename();
 		File f = new File(fullpath);
 		String fileName = f.getName();
 
 		System.out.println(fileName);  // → machines_v2.use
 
-//		strNameModel= fSystem.model().filename();
+		//		strNameModel= fSystem.model().filename();
 		strNameModel=fileName;
 		strNameProperties = strNameModel.replace(".use", ".properties");
-//		urlModel=fSystem.model().getModelDirectory().getPath(); // Provis
-		
+		//		urlModel=fSystem.model().getModelDirectory().getPath(); // Provis
+
 		//----
-		
-//		File modelDir = fSystem.model().getModelDirectory();
-//
-//		if (modelDir == null) {
-//		    JOptionPane.showMessageDialog(
-//		        null,
-//		        "El modelo no tiene un directorio asociado.\n" +
-//		        "Abre un archivo .use desde una ruta válida antes de usar el asistente MVM.",
-//		        "Error",
-//		        JOptionPane.ERROR_MESSAGE
-//		    );
-//		    return;
-//		}
-//
-//		urlModel = modelDir.getPath();
+
+		//		File modelDir = fSystem.model().getModelDirectory();
+		//
+		//		if (modelDir == null) {
+		//		    JOptionPane.showMessageDialog(
+		//		        null,
+		//		        "El modelo no tiene un directorio asociado.\n" +
+		//		        "Abre un archivo .use desde una ruta válida antes de usar el asistente MVM.",
+		//		        "Error",
+		//		        JOptionPane.ERROR_MESSAGE
+		//		    );
+		//		    return;
+		//		}
+		//
+		//		urlModel = modelDir.getPath();
 
 		File modelDir = fSystem.model().getModelDirectory();
 
 		if (modelDir == null) {
-		    // Crear un directorio virtual basado en el nombre del modelo
-		    String modelName = fSystem.model().name();
-		    modelDir = new File(modelName).getAbsoluteFile().getParentFile();
+			// Crear un directorio virtual basado en el nombre del modelo
+			String modelName = fSystem.model().name();
+			modelDir = new File(modelName).getAbsoluteFile().getParentFile();
 		}
 
 		urlModel = modelDir.getPath();
 
-		
-		
+
+
 		//---
-		
-		
-		
+
+
+
 		pathModel = urlModel+"\\"+strNameModel;
 		pathProperties = urlModel+"\\"+strNameProperties;
 
@@ -1305,41 +1305,41 @@ public class WizardMVMView extends JPanel implements View {
 		btnCancelObject.setEnabled(changed);
 	}
 	public static String getStrDefModel() {
-//		String sDefModel="";
-//
-//		try {
-//			sDefModel = new String(Files.readAllBytes(Paths.get(pathModel)));
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		return sDefModel;
-		
-		
+		//		String sDefModel="";
+		//
+		//		try {
+		//			sDefModel = new String(Files.readAllBytes(Paths.get(pathModel)));
+		//		} catch (IOException e) {
+		//			e.printStackTrace();
+		//		}
+		//		return sDefModel;
+
+
 		String sDefModel = "";
 
 		try {
-		    // Si no se pasó argumento → usar numIter.txt del mismo directorio
-		    if (pathModel == null || pathModel.trim().isEmpty()) {
-		        pathModel = "numIter.txt";
-		    }
+			// Si no se pasó argumento → usar numIter.txt del mismo directorio
+			if (pathModel == null || pathModel.trim().isEmpty()) {
+				pathModel = "numIter.txt";
+			}
 
-		    Path p = Paths.get(pathModel);
+			Path p = Paths.get(pathModel);
 
-		    if (Files.exists(p)) {
-		        // Archivo externo junto al JAR
-		        sDefModel = Files.readString(p);
-		    } else {
-		        System.err.println("No se encontró el archivo externo: " + pathModel);
-		    }
+			if (Files.exists(p)) {
+				// Archivo externo junto al JAR
+				sDefModel = Files.readString(p);
+			} else {
+				System.err.println("No se encontró el archivo externo: " + pathModel);
+			}
 
 		} catch (Exception e) {
-		    e.printStackTrace();
+			e.printStackTrace();
 		}
 		return sDefModel;
-		
-		
-		
-		
+
+
+
+
 	}
 
 	public static String getStrDefProperties() {
@@ -1393,7 +1393,7 @@ public class WizardMVMView extends JPanel implements View {
 				sb.append("\n"); // line break between groups
 			}
 		}
-//		System.out.println("MUS: ["+sb.toString()+"]");
+		//		System.out.println("MUS: ["+sb.toString()+"]");
 		return sb.toString();
 	}
 	public static List<String> buildInvariantGroups(String strInvariants, String gMSS) {
@@ -1457,7 +1457,7 @@ public class WizardMVMView extends JPanel implements View {
 				sb.append("\n".toUpperCase()); // salto de línea entre grupos
 			}
 		}
-//		System.out.println("MSS: ["+sb.toString()+"]");
+		//		System.out.println("MSS: ["+sb.toString()+"]");
 		return sb.toString();
 	}	
 
@@ -1677,11 +1677,15 @@ public class WizardMVMView extends JPanel implements View {
 
 		//OBJECTS LIST & LINKS -----------------------------------------------------------------------------------------------------
 		sb.append("2. Updated list of objects and links:\n");
-		sb.append("   2.1. If the input included an instance of the model, "+
+		sb.append("   2.1.1  If the input included an instance of the model, "+
 				"provide a modified list of objects and links, with minimal changes, "+
 				"such that the corresponding instance satisfies all invariants and graphical UML constraints.\n");
-		sb.append("   2.2. If any object has an attribute whose value violates an invariant, please suggest "+
+		sb.append("   2.1.2 Once the list of objects has been compiled, review it again in case any more need to be created and "+
+				"in case there are any classes without objects.\n");
+		sb.append("   2.2.  If any object has an attribute whose value violates an invariant, please suggest "+
 				"a new value for that attribute and include it in the list of objects you provide at the end.\n");
+		sb.append("   2.3.  Please ensure that all objects involved in any link of any association are part of the proposed object list."+
+				"If an object does not exist in the object list, do not use it in any link.\n");
 		sb.append("\n");
 
 		// CHANGEDINVARIANTS -------------------------------------------------------------------------------------------------------
@@ -1731,7 +1735,7 @@ public class WizardMVMView extends JPanel implements View {
 				"especially those multiplicities that require an endpoint, please indicate that these objects "+
 				"should be created and propose a sample in the list of proposed resulting objects.\n");
 		sb.append("       If you don't need to change your values, don't change them.\n");
-		sb.append("       However, if there is a value that violates an invariant, it suggests changing it.");
+		sb.append("       However, if there is a value that violates an invariant, it suggests changing it.\n");
 
 		// LINKS -------------------------------------------------------------------------------------------------------------------
 		sb.append("   1.3 Links: For each link, specify the fields: "+
@@ -1740,9 +1744,10 @@ public class WizardMVMView extends JPanel implements View {
 				"end1Role=\"person\" end2Class=\"Pet\" end2Object=\"pet1\" end2Role=\"person\" nomAssoc=\"BelongsTo\"\n");
 		sb.append("       For each association, respect its multiplicity. "+
 				"That is, in a multiplicity of 4, it verifies that there are 4 links.\n");
+		sb.append("   1.4 Above all, make sure that all links of associations only use objects indicated in the previous object list.\n");
 
 		// COMMENT -----------------------------------------------------------------------------------------------------------------
-		sb.append("   1.4 Comment: Explanation of 'how to correct the model', taking into account the properties "+
+		sb.append("   1.5 Comment: Explanation of 'how to correct the model', taking into account the properties "+
 				"that have been indicated for correction as if they were already corrected.\n");
 		sb.append("       Focus only on modifying invariants (not objects or properties).\n");
 		sb.append("       The explanation should not be in the past tense but in the present or future tense.\n");
@@ -3100,6 +3105,9 @@ public class WizardMVMView extends JPanel implements View {
 			String obj2 = oLink.getLinkEnd(1).object().name();
 			MObject o1 = findObjectByName(obj1);
 			MObject o2 = findObjectByName(obj2);
+			if (o1==null || o2==null) {
+				System.out.println("Hay null");
+			}
 			MObject oOri=null;
 			MObject oDes=null;
 
@@ -3251,6 +3259,7 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	private void createObjectAccordingMVMObject(MVMObject oObj, boolean verbose) {
 		String nomObj=oObj.getName();
+		System.out.println("Crea nomObj ["+nomObj+"] en createObjectAccordingMVMObject");
 		String ClassObj = oObj.getClassName();
 		MClass oClassCreate = findMClassByName(ClassObj);
 
@@ -3358,8 +3367,17 @@ public class WizardMVMView extends JPanel implements View {
 
 			MObject o1 = findObjectByName(end1Object);
 			MObject o2 = findObjectByName(end2Object);
+			// falla el dispensing1
+
+			if (o1==null || o2==null) {
+				System.out.println("OpenAI proporciona un link entre objetos que no existen end1Object["+
+						end1Object+"] end2Object ["+end2Object+"]");
+				return;
+
+			}
 			MAssociation oAssoc = findAssocByName(nomAssoc);
 			List<MAssociationEnd> oAsocEnds = oAssoc.associationEnds();
+
 			int na=0;
 			MAssociationEnd oAssocEnd = oAsocEnds.get(na);
 			MClass oClassAssocEnd = oAssocEnd.cls();
@@ -3369,13 +3387,32 @@ public class WizardMVMView extends JPanel implements View {
 			}else {
 				oOri = o2;
 				oDes = o1;	
-			}			
+			}	
+			if (oOri==null|| oDes==null) {
+				System.out.println("oOri ["+oOri+"] oDes ["+oDes+"]");
+			}
+			//			if (oOri!=null && oDes!=null) {
+			//				try {		
+
+
+
 			cmbClassOri.setSelectedItem(oOri.cls());
 			cmbObjectOri.setSelectedItem(oOri);
 			cmbClassDes.setSelectedItem(oDes.cls());
 			cmbObjectDes.setSelectedItem(oDes);
 
-			insertLink(oAssoc,o1,o2);
+
+			//			insertLink(oAssoc,o1,o2);
+
+			//
+			//					if (o1==null|| o2==null) {
+			//						System.out.println("o1 ["+o1+"] o2 ["+o2+"]");
+			//					}
+			insertLink(oAssoc, o1, o2);
+			//				} catch (Exception ex) {
+			//					ex.printStackTrace();
+			//				}
+			//			}
 		}
 	}
 
@@ -3480,7 +3517,9 @@ public class WizardMVMView extends JPanel implements View {
 					MObject o2 = findObjectByName(objLinkar);
 					// Find out the correct order for oOri i oDes according to oAssocPralWizard
 					List<MAssociationEnd> oAsocEnds = oAssocPralWizard.associationEnds();
-
+					if (o1==null || o2==null) {
+						System.out.println("Hay null");
+					}
 					int na=0;
 					MAssociationEnd oAssocEnd = oAsocEnds.get(na);
 					MClass oClassAssocEnd = oAssocEnd.cls();
@@ -4266,6 +4305,9 @@ public class WizardMVMView extends JPanel implements View {
 			oOri = o2;
 			oDes = o1;	
 		}
+		if (oOri==null|| oDes==null) {
+			System.out.println("oOri ["+oOri+"] oDes ["+oDes+"]");
+		}
 
 		MObject[] fParticipants = new MObject[] {oOri,oDes};
 		try {
@@ -4288,6 +4330,9 @@ public class WizardMVMView extends JPanel implements View {
 	private void insertLink(MAssociation oAssoc) {
 		MObject o1 = cmbObjectOri.getItemAt(cmbObjectOri.getSelectedIndex());
 		MObject o2 = cmbObjectDes.getItemAt(cmbObjectDes.getSelectedIndex());
+		if (o1==null|| o2==null) {
+			System.out.println("o1 ["+o1+"] o2 ["+o2+"]");
+		}
 		insertLink( oAssoc, o1,  o2);
 	}
 

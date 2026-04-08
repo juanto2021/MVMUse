@@ -446,7 +446,8 @@ public class MVMObjCheckState extends JDialog {
 		panelGroupAlt.add(rbAltAll);
 		panelGroupAlt.add(rbAltOk);
 		panelGroupAlt.add(rbAltKo);
-		panelGroupAlt.setBorder(titledBorderInv);
+		TitledBorder titledBorderAlt = new TitledBorder("Filter Alternatives");		
+		panelGroupAlt.setBorder(titledBorderAlt);
 
 		modelTabObjects = new DefaultTableModel();
 		tabObjects = new JTable(modelTabObjects);
