@@ -353,6 +353,7 @@ public class MVMWizardActions extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				openFile();
 				showData();
+				btnLoad.setEnabled(!lActions.isEmpty());
 			}
 		});
 		panel.add(btnOpen);
@@ -382,6 +383,8 @@ public class MVMWizardActions extends JDialog {
 						strLastFile=parteIzquierda;
 					}
 				}
+				btnLoad.setEnabled(!lActions.isEmpty());
+
 			}
 		});
 		panel.add(btnFind);
@@ -450,6 +453,8 @@ public class MVMWizardActions extends JDialog {
 		});
 
 		panel.add(btnLoad);
+		btnLoad.setEnabled(!lActions.isEmpty());
+
 
 
 		btnExit = new JButton("Exit");

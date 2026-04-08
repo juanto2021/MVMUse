@@ -301,15 +301,18 @@ public class MVMFindActions extends JDialog {
 		for (int i=0; i< listado.length; i++) {
 			//			System.out.println(listado[i]);
 			String nomFile = listado[i];
-			String nomFileGroup = directoryName+"/"+nomFile;
-			MVMGroupActions group = readMVMGroup(nomFileGroup);
-			String model = group.getModelName();
-			boolean guardar=true;
-			if (filterMode && !model.equals(modelRef)) {
-				guardar=false;
-			}
-			if (guardar) {
-				mActions.put(nomFile, group);
+			if (nomFile.toLowerCase().endsWith(".mva")) {
+
+				String nomFileGroup = directoryName+"/"+nomFile;
+				MVMGroupActions group = readMVMGroup(nomFileGroup);
+				String model = group.getModelName();
+				boolean guardar=true;
+				if (filterMode && !model.equals(modelRef)) {
+					guardar=false;
+				}
+				if (guardar) {
+					mActions.put(nomFile, group);
+				}
 			}
 		}
 
