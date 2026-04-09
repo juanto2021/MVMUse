@@ -145,7 +145,6 @@ public class MVMDiffDialog extends JDialog {
 		rightBorder.setTitleFont(fontTittle);
 		rightScroll.setBorder(rightBorder);
 
-		// --- SINCRONIZACIÓN SUAVE SIN LAMBDAS ---
 		final boolean[] adjusting = { false };
 
 		AdjustmentListener smoothSync = new AdjustmentListener() {
@@ -200,12 +199,26 @@ public class MVMDiffDialog extends JDialog {
 		add(split, BorderLayout.CENTER);
 
 		pack(); // calculate the optimal size of the dialog
+		
+		//---
+		Dimension screen = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+		int maxW = screen.width;
+		int maxH = screen.height;
 
-		initialWidth = getWidth();
+		// Limitar tamaño si pack() se pasa
+		int newW = Math.min(getWidth(), maxW);
+		int newH = Math.min(getHeight(), maxH);
+		
+		
+		//---
+
+//		initialWidth = getWidth();
+		initialWidth = newW;
 		if (initialWidth<initialWidthMin) {
 			initialWidth=initialWidthMin;
 		}
-		initialHeight = getHeight();
+//		initialHeight = getHeight();
+		initialHeight = newH;
 		if (initialHeight<initialHeightMin) {
 			initialHeight=initialHeightMin;
 		}

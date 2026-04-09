@@ -3259,7 +3259,7 @@ public class WizardMVMView extends JPanel implements View {
 	 */
 	private void createObjectAccordingMVMObject(MVMObject oObj, boolean verbose) {
 		String nomObj=oObj.getName();
-		System.out.println("Crea nomObj ["+nomObj+"] en createObjectAccordingMVMObject");
+//		System.out.println("Crea nomObj ["+nomObj+"] en createObjectAccordingMVMObject");
 		String ClassObj = oObj.getClassName();
 		MClass oClassCreate = findMClassByName(ClassObj);
 
