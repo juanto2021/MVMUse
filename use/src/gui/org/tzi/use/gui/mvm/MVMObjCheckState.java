@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -61,6 +63,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -1173,70 +1176,132 @@ public class MVMObjCheckState extends JDialog {
 		contentNew=w.getContentNew();
 	}
 
-	private String findNewNameModel(String nameFileModel)throws Exception {
-		String fileSinExtBarras=nameFileModel.replace("."+strExtension, "").replace("\\", "/");
-		String fileSinExt=fileSinExtBarras.replace("\\", "/");
-		String fileProposal=fileSinExtBarras; 
-		String nomFile="";
-		String directory="";
+//	private String findNewNameModel(String nameFileModel)throws Exception {
+//		String fileSinExtBarras=nameFileModel.replace("."+strExtension, "").replace("\\", "/");
+//		String fileSinExt=fileSinExtBarras.replace("\\", "/");
+//		String fileProposal=fileSinExtBarras; 
+//		String nomFile="";
+//		String directory="";
+//
+//		if (fileSinExt.contains("/")) {
+//			String[] partes = fileSinExt.split("/");
+//			int nPartes = partes.length;
+//			nomFile=partes[nPartes-1];
+//			for (int n=0;n<(nPartes-1);n++) {
+//				if (directory!="") {
+//					directory+="/";
+//				}
+//				directory+=partes[n];
+//			}
+//
+//		}else {
+//			nomFile=fileSinExt;
+//			directory=directoryName;
+//		}
+//
+//		String base=dirWkr+"/"+nomFile;
+//
+//		int contador=0;
+//		boolean exist=false;
+//		do {
+//			contador++; // Increments the counter by 1
+//
+//			fileProposal=base+"_v"+contador+"."+strExtension;
+//			File archivo = new File(fileProposal);
+//
+//			// Check if the file exists
+//			if (archivo.exists()) {
+//				exist=true;
+//			} else {
+//				exist=false;
+//			}
+//		} while (exist && contador < 5);
+//
+//		if (exist) {
+//			throw new Exception("It is not possible to propose a name for a new file. Too many versions");
+//		}
+//
+//		if (fileProposal.contains("/")) {
+//			String[] partes = fileProposal.split("/");
+//			int nPartes = partes.length;
+//			nomFile=partes[nPartes-1];
+//			for (int n=0;n<(nPartes-1);n++) {
+//				if (directory!="") {
+//					directory+="/";
+//				}
+//				directory+=partes[n];
+//			}
+//		}else {
+//			nomFile=fileProposal;
+//			directory=directoryName;
+//		}
+//
+//		String res=nomFile.replace("."+strExtension, "");
+//		return res;
+//	}
 
-		if (fileSinExt.contains("/")) {
-			String[] partes = fileSinExt.split("/");
-			int nPartes = partes.length;
-			nomFile=partes[nPartes-1];
-			for (int n=0;n<(nPartes-1);n++) {
-				if (directory!="") {
-					directory+="/";
-				}
-				directory+=partes[n];
-			}
+	private String findNewNameModel(String nameFileModel) throws Exception {
 
-		}else {
-			nomFile=fileSinExt;
-			directory=directoryName;
-		}
+	    // Normalizar separadores y quitar extensión
+	    String fileSinExtBarras = nameFileModel.replace("." + strExtension, "").replace("\\", "/");
+	    String fileSinExt = fileSinExtBarras;
+	    String nomFile = "";
+	    String directory = "";
 
-		String base=dirWkr+"/"+nomFile;
+	    // Extraer nombre y directorio
+	    if (fileSinExt.contains("/")) {
+	        String[] partes = fileSinExt.split("/");
+	        int nPartes = partes.length;
+	        nomFile = partes[nPartes - 1];
+	        for (int n = 0; n < (nPartes - 1); n++) {
+	            if (!directory.isEmpty()) directory += "/";
+	            directory += partes[n];
+	        }
+	    } else {
+	        nomFile = fileSinExt;
+	        directory = directoryName;
+	    }
 
-		int contador=0;
-		boolean exist=false;
-		do {
-			contador++; // Increments the counter by 1
+	    // Detectar si nomFile ya tiene _vX
+	    Pattern pattern = Pattern.compile("(.+)_v(\\d+)$");
+	    Matcher matcher = pattern.matcher(nomFile);
 
-			fileProposal=base+"_v"+contador+"."+strExtension;
-			File archivo = new File(fileProposal);
+	    String baseName;
+	    int version;
 
-			// Check if the file exists
-			if (archivo.exists()) {
-				exist=true;
-			} else {
-				exist=false;
-			}
-		} while (exist && contador < 5);
+	    if (matcher.matches()) {
+	        baseName = matcher.group(1);
+	        version = Integer.parseInt(matcher.group(2));
+	    } else {
+	        baseName = nomFile;
+	        version = 0; // para que el primer incremento sea v1
+	    }
 
-		if (exist) {
-			throw new Exception("It is not possible to propose a name for a new file. Too many versions");
-		}
+	    // Construir base completa con directorio de trabajo
+	    String base = dirWkr + "/" + baseName;
 
-		if (fileProposal.contains("/")) {
-			String[] partes = fileProposal.split("/");
-			int nPartes = partes.length;
-			nomFile=partes[nPartes-1];
-			for (int n=0;n<(nPartes-1);n++) {
-				if (directory!="") {
-					directory+="/";
-				}
-				directory+=partes[n];
-			}
-		}else {
-			nomFile=fileProposal;
-			directory=directoryName;
-		}
+	    // Buscar versión disponible
+	    boolean exist;
+	    String fileProposal;
 
-		String res=nomFile.replace("."+strExtension, "");
-		return res;
+	    do {
+	        version++;
+	        fileProposal = base + "_v" + version + "." + strExtension;
+	        File archivo = new File(fileProposal);
+	        exist = archivo.exists();
+	    } while (exist && version < 5);
+
+	    if (exist) {
+	        throw new Exception("It is not possible to propose a name for a new file. Too many versions");
+	    }
+
+	    // Extraer nombre final sin extensión
+	    String nomFinal = baseName + "_v" + version;
+
+	    return nomFinal;
 	}
 
+	
 	/**
 	 * Save file
 	 */
@@ -1246,6 +1311,11 @@ public class MVMObjCheckState extends JDialog {
 
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogTitle("File to save");   
+		
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("USE files (*.use)", "use");
+		fileChooser.setFileFilter(filter);
+		fileChooser.setAcceptAllFileFilterUsed(false);
+
 
 		File directorioInicial = new File(dirWkr);
 		fileChooser.setCurrentDirectory(directorioInicial);

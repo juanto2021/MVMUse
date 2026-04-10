@@ -200,7 +200,6 @@ public class MVMDiffDialog extends JDialog {
 
 		pack(); // calculate the optimal size of the dialog
 		
-		//---
 		Dimension screen = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 		int maxW = screen.width;
 		int maxH = screen.height;
@@ -208,16 +207,12 @@ public class MVMDiffDialog extends JDialog {
 		// Limitar tamaño si pack() se pasa
 		int newW = Math.min(getWidth(), maxW);
 		int newH = Math.min(getHeight(), maxH);
-		
-		
-		//---
 
-//		initialWidth = getWidth();
 		initialWidth = newW;
 		if (initialWidth<initialWidthMin) {
 			initialWidth=initialWidthMin;
 		}
-//		initialHeight = getHeight();
+
 		initialHeight = newH;
 		if (initialHeight<initialHeightMin) {
 			initialHeight=initialHeightMin;

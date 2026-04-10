@@ -82,13 +82,15 @@ public class MVMShowSourceModelInvs extends JDialog {
 		taModelNew.setText(sourceNew);
 		taModelNew.setEditable(false);
 
+
 		scrollPaneNew = new JScrollPane(taModelNew);
 		scrollPaneNew.setBounds(15+WIDTH_TA+10, ROW_TA+20, WIDTH_TA, HEIGHT_TA );
 
 		panel.add(scrollPaneNew);
-
+		// btnReloadNewContent.setBounds(15, ROW_TA+HEIGHT_TA+30, 140, 25);
 		cbSyncScroll = new JCheckBox("Sync scroll");
-		cbSyncScroll.setBounds(170, ROW_TA + HEIGHT_TA + 30, 120, 25);
+//		cbSyncScroll.setBounds(170, ROW_TA + HEIGHT_TA + 30, 120, 25);
+		cbSyncScroll.setBounds(15, ROW_TA+HEIGHT_TA+30, 120, 25);
 		panel.add(cbSyncScroll);
 
 		scrollPaneOri.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
@@ -123,7 +125,7 @@ public class MVMShowSourceModelInvs extends JDialog {
 		});
 
 		btnReloadNewContent.setBounds(15, ROW_TA+HEIGHT_TA+30, 140, 25);
-		panel.add(btnReloadNewContent);
+//		panel.add(btnReloadNewContent); // For the moment no included
 
 
 		btnExit = new JButton("Exit");
