@@ -1768,7 +1768,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		// MUSS/MSS ----------------------------------------------------------------------------------------------------------------
 		if (strMUS.equals("")&& strMSS.equals("")) {
-			sb.append("   1.5 Include MUS and MSS in the Comment tag using EXACTLY this format:\n\n");
+			sb.append("   1.6 Include MUS and MSS in the Comment tag using EXACTLY this format:\n\n");
 			sb.append(LINEASEP);
 			sb.append("ADDITIONAL INFORMATION ABOUT MUS/MSS\n");
 			sb.append(LINEASEP);
