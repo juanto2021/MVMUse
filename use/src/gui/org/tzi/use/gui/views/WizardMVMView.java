@@ -1553,7 +1553,7 @@ public class WizardMVMView extends JPanel implements View {
 
 		return sb.toString();
 	}
-	
+
 	public static String builJsonRequest3(String strNameModel, String strDefModel, 
 			String strDefProperties, String strInvariants, String strMUS, String strMSS,
 			String strObjects, String strLinks) {
@@ -1570,16 +1570,16 @@ public class WizardMVMView extends JPanel implements View {
 		sb.append("Given a UML class diagram annotated with OCL invariants that is inconsistent, you will:\n");
 		sb.append("1. Identify the invariants that cause the inconsistency.\n");
 		sb.append("2. Review the properties file to see if the specified ranges are correct, and if not, suggest values ​​to change.\n");
-//		sb.append("3. Modify ONLY the invariants that MUST be changed to make the model satisfiable.\n");
+		//		sb.append("3. Modify ONLY the invariants that MUST be changed to make the model satisfiable.\n");
 		sb.append("Propose changes ONLY to the invariants that MUST be changed for the model to be satisfactory.\n");
 		sb.append("4. Calculate the MUS/MSS if this prompt does not provide it later.\n");
 		sb.append("5. Produce a JSON output with Properties, Objects, Links, Comment and ChangedInvariants.\n");
-//		sb.append("This explanation should be usable by a software engineer to locate and correct the defects in the model.\n");
+		//		sb.append("This explanation should be usable by a software engineer to locate and correct the defects in the model.\n");
 		sb.append("The explanation included in the 'Comment' tag should be useful for a software engineer to locate and correct defects "+
-                  "in the model by indicating which invariant needs to be modified, what its new OCL code would be and "+
-				  "why it needs to be changed or what the problem is that prevents that invariant from being satisfied.\n");
+				"in the model by indicating which invariant needs to be modified, what its new OCL code would be and "+
+				"why it needs to be changed or what the problem is that prevents that invariant from being satisfied.\n");
 		sb.append("Don't just point out which invariants fail, but also explain why they fail and how they should be fixed.\n");
-		
+
 		sb.append("\n");
 
 		// INPUTS ================================================================================================================
@@ -1676,11 +1676,11 @@ public class WizardMVMView extends JPanel implements View {
 				"a potential way to solve the inconsistency.\n");
 		sb.append("   This explanation should discuss invalid invariants and how to correct them. "+
 				"It should not specify what values ​​objects need to achieve a valid instance.\n");
-//		sb.append("   1.3. Do not provide suggestions like \"this value should be valid\".\n");
-//		sb.append("   1.4. Instead, provide informative statements like \"this value should be larger\", "+
-//				"\"this values should be within the following range\", "+
-//				"\"the value of attribute X should be different to the value of attribute Y\", "+
-//				"\"this value should be unique\", etc.\n");
+		//		sb.append("   1.3. Do not provide suggestions like \"this value should be valid\".\n");
+		//		sb.append("   1.4. Instead, provide informative statements like \"this value should be larger\", "+
+		//				"\"this values should be within the following range\", "+
+		//				"\"the value of attribute X should be different to the value of attribute Y\", "+
+		//				"\"this value should be unique\", etc.\n");
 		sb.append("   1.5. Each sentence must be on its own line.\n");		
 		sb.append("\n");
 
@@ -1758,7 +1758,7 @@ public class WizardMVMView extends JPanel implements View {
 		// COMMENT -----------------------------------------------------------------------------------------------------------------
 		sb.append("   1.5 Comment: Explanation of 'how to correct the model', taking into account the properties "+
 				"that have been indicated for correction as if they were already corrected.\n");
-//		sb.append("       Focus only on modifying invariants (not objects or properties).\n");
+		//		sb.append("       Focus only on modifying invariants (not objects or properties).\n");
 		sb.append("       Focus only on modifying invariants (not objects, values or properties).\n");		
 		sb.append("       The explanation should not be in the past tense but in the present or future tense.\n");
 		sb.append("       The only tags to return should be: Properties, Objects, Links, Comment and ChangedInvariants.\n");
@@ -1809,265 +1809,265 @@ public class WizardMVMView extends JPanel implements View {
 		String json = buildRequest3(mensaje);
 		return json;
 	}		
-	
-	
-	
-	
-// Modif 18:08-14/05/2026
-//	public static String builJsonRequest3(String strNameModel, String strDefModel, 
-//			String strDefProperties, String strInvariants, String strMUS, String strMSS,
-//			String strObjects, String strLinks) {
-//
-//		int count=0;
-//		StringBuilder sb = new StringBuilder();
-//
-//		sb.append("*Profile*\n");
-//		sb.append("1. You are a software modeling assistant, expert on software design, development and debugging.\n"+
-//				"2. You provide concise, concrete and actionable feedback about software design errors.\n\n");
-//
-//		// TASK ====================================================================================================
-//		sb.append("*Task*\n");
-//		sb.append("Given a UML class diagram annotated with OCL invariants that is inconsistent, you will:\n");
-//		sb.append("1. Identify the invariants that cause the inconsistency.\n");
-//		sb.append("2. Review the properties file to see if the specified ranges are correct, and if not, suggest values ​​to change.\n");
-//		sb.append("3. It suggests modifying ONLY the invariants that MUST be changed for the model to be satisfactory.\n");
-//		sb.append("4. Calculate the MUS/MSS if this prompt does not provide it later.\n");
-//		sb.append("5. Produce a JSON output with Properties, Objects, Links, Comment and ChangedInvariants.\n");
-//		sb.append("The explanation given in 'Comment' should be usable by a software engineer to locate and correct the defects in the model.\n");
-//		//		sb.append("This explanation should indicate which variants need to be modified and how to solve the unsatisfiability problem.\n"+
-//		//				"Please provide a separate explanation for each of the invariants to be modified, one by one.\n");
-//		//		sb.append("For each invariant to be modified, tell me what new OCL definition it should have.\n");
-//		//		sb.append("The invariants to be modified indicated in the text must match those indicated in the changeinvariants summary table.\n");
-//		sb.append("\n");
-//
-//		// INPUTS ================================================================================================================
-//		sb.append("*Inputs*\n");
-//		count=1;
-//		sb.append((count)+". Model:\n");
-//		sb.append("\n");
-//		sb.append("The UML model definition provided in the format of the USE tool "+
-//				"(UML-based Specification Environament) developed by the University of Bremen.\n");
-//		sb.append("\n");
-//
-//		// MODEL DEFINITION	------------------------------------------------------------------------------------------------------
-//		sb.append(LINEASEP);
-//		sb.append("Model definition:\n");
-//		sb.append("\"\"\"\n").append(strDefModel).append("\"\"\"\n");
-//		sb.append(LINEASEP);		
-//		sb.append("\n");
-//
-//		// PROPERTIES ------------------------------------------------------------------------------------------------------------
-//		count+=1;
-//		sb.append((count)+". Properties:\n");
-//		sb.append("A textual description of the range of allowed values for each attribute in the model ");
-//		sb.append("and the range on the number of objects per class and the number of links per association.\n");
-//		sb.append("\n");
-//
-//		sb.append("Properties:\n");
-//		sb.append("\"\"\"\n").append(strDefProperties).append("\"\"\"\n");
-//		sb.append(LINEASEP);
-//		sb.append("\n");
-//
-//		// INVARIANTS ------------------------------------------------------------------------------------------------------------
-//		count+=1;
-//		sb.append((count)+". Invariants:\n");
-//		sb.append("A summary of the invariants in the model, extracted from the USE definition model, ");
-//		sb.append("and assigning an integer index to each invariant that will be used to refer to the invariant.");
-//		sb.append("\n\n");
-//
-//		sb.append("List of invariants:\n");
-//		sb.append("\"\"\"\n").append(strInvariants).append("\"\"\"\n");
-//		sb.append(LINEASEP);
-//		sb.append("\n");
-//
-//		// ORIGINALINVARIANTS -----------------------------------------------------------------------------------------------------
-//		count+=1;
-//		sb.append((count)+". OriginalInvariants:\n");
-//		sb.append("A JSON array containing the exact original text of each invariant.\n\n");
-//		sb.append("OriginalInvariants:\n");
-//		sb.append("\"\"\"\n").append(strOriginalInvariants).append("\n\"\"\"\n");
-//		sb.append(LINEASEP);
-//		sb.append("\n");
-//
-//
-//		// MUS/MSS ---------------------------------------------------------------------------------------------------------------		
-//		if (!strMUS.equals("")||!strMSS.equals("")) {
-//			count+=1;
-//			sb.append((count)+". MUS/MSS found so far:\n");
-//			sb.append("\n");
-//			sb.append("List of MUS:\n\n\"\"\"\n"+strMUS+"\n\"\"\"");
-//			sb.append("\n\n");
-//			sb.append(LINEASEP);
-//			sb.append("List of MSS:\n\n\"\"\"\n"+strMSS+"\n\"\"\"");
-//			sb.append("\n\n");
-//			sb.append(LINEASEP);
-//			sb.append("\n");
-//		}		
-//
-//		// OBJECTS & LINKS -------------------------------------------------------------------------------------------------------
-//		if (!strObjects.equals("")) {
-//			count+=1;
-//			sb.append((count)+". Instance of the model:\n");
-//			sb.append("An instance (a set of objects and links among objects of the model, ) ");
-//			sb.append("that should be satisfying all the textual invariants and the graphical UML constraints ");
-//			sb.append("such as the multiplicities of association ends.\n");
-//			sb.append("\n");
-//
-//			sb.append("List of objects:\n\"\"\"\n"+strObjects+"\n\"\"\"");
-//			sb.append("\n\n");
-//			sb.append(LINEASEP);
-//
-//			if (!strLinks.equals("")) {
-//				sb.append("List of links:\n\"\"\"\n"+strLinks+"\n\"\"\"");
-//				sb.append("\n\n");
-//				sb.append(LINEASEP);
-//			}
-//		}	
-//
-//		// OUTPUTS ================================================================================================================
-//		sb.append("*Outputs*\n\n");
-//
-//		// COMMENTS ---------------------------------------------------------------------------------------------------------------
-//		sb.append("1. Explanation:\n");
-//		sb.append("   1.1. A brief discussion of the inconsistency problems in the model.\n");
-//		sb.append("   1.2. For each problem, the model should identify the invariants involved and outline "+
-//				"a potential way to solve the inconsistency.\n");
-//		sb.append("   1.3. Do not provide suggestions like \"this value should be valid\".\n");
-//		//		sb.append("   1.4. Instead, provide informative statements like \"this value should be larger\", "+
-//		//				"\"this values should be within the following range\", "+
-//		//				"\"the value of attribute X should be different to the value of attribute Y\", "+
-//		//				"\"this value should be unique\", etc.\n");
-//		sb.append("   It is mandatory to indicate which invariants must be modified by placing each invariant on separate lines and indicating the new OCL code that"+
-//				"said invariant must have.\n");
-//		sb.append("   Please indicate for each invariant why the modification is necessary based on the proposed new OCL code to make it satisfiable.\n");
-////		sb.append("   The invariants listed must match those listed in the ChangedInvariants structure mentioned below that have changed.\n");
-//		sb.append("   1.5. Each sentence must be on its own line.\n");	
-//
-//		sb.append("\n");
-//
-//		//OBJECTS LIST & LINKS -----------------------------------------------------------------------------------------------------
-//		sb.append("2. Updated list of objects and links:\n");
-//		sb.append("   2.1.1  If the input included an instance of the model, "+
-//				"provide a modified list of objects and links, with minimal changes, "+
-//				"such that the corresponding instance satisfies all invariants and graphical UML constraints.\n");
-//		sb.append("   2.1.2 Once the list of objects has been compiled, review it again in case any more need to be created and "+
-//				"in case there are any classes without objects.\n");
-//		sb.append("   2.2.  If any object has an attribute whose value violates an invariant, please suggest "+
-//				"a new value for that attribute and include it in the list of objects you provide at the end.\n");
-//		sb.append("   2.3.  Please ensure that all objects involved in any link of any association are part of the proposed object list."+
-//				"If an object does not exist in the object list, do not use it in any link.\n");
-//		sb.append("\n");
-//
-//		// CHANGEDINVARIANTS -------------------------------------------------------------------------------------------------------
-//		sb.append("3. ChangedInvariants:\n");
-//		sb.append("   A JSON array containing ONLY the invariants whose text is actually modified.\n");
-//		sb.append("   You MUST follow these rules:\n");
-//		sb.append("     3.1. You MUST compare each proposed invariant with its corresponding entry in OriginalInvariants.\n");
-//		sb.append("     3.2. If the proposal is the same as the original (both textually and semantically), "+
-//				"it MUST NOT include that invariant..\n");
-//		sb.append("     3.3. You MUST modify an invariant ONLY if it is impossible to satisfy the model without modifying it.\n");
-//		sb.append("     3.4. If the MUS contains invariants that CAN be satisfied by adjusting objects or properties, "+
-//				"you MUST NOT modify those invariants.\n");
-//		sb.append("     3.5. If the MUS contains invariants that CANNOT be satisfied without modifying them, "+
-//				"you MUST generate a corrected version.\n");
-//		sb.append("     3.6. The corrected version MUST be syntactically valid OCL.\n");
-//		sb.append("     3.7. ChangedInvariants may be empty IF AND ONLY IF no invariant requires modification.\n");
-//		sb.append("     3.8. If you mention in the 'Comment' that an invariant must be changed, you MUST include it in ChangedInvariants.\n");
-//		sb.append("     3.9. Retain the numbering indicated in each invariant and indicate it in the results table.\n");
-//		sb.append("\n");
-//
-//		sb.append("   Example format:\n");
-//		sb.append("   \"ChangedInvariants\":[\n");
-//		sb.append("     {\n");
-//		sb.append("       \"name\":\"1-validAge\",\n");
-//		sb.append("       \"original\":\"self.age <= 0 and self.age > 99\",\n");
-//		sb.append("       \"proposal\":\"self.age >= 0 and self.age < 99\"\n");
-//		sb.append("     }\n");
-//		sb.append("   ]\n\n");
-//
-//		// REMARKS =================================================================================================================
-//		sb.append("*Remarks*\n");
-//		// JSON --------------------------------------------------------------------------------------------------------------------
-//		sb.append("1. Please return only the JSON structure without any additional explanation, since the result must be delivered "+
-//				"to an application.\n"+
-//				"   Therefore, the JSON structure must contain the following parts:\n");
-//
-//		// PROPERTIES --------------------------------------------------------------------------------------------------------------
-//		sb.append("   1.1 Properties: properties to be modified. The properties tag only refers to the properties "+
-//				"that exist in "+strNameProperties+" and they should review the range limits to see "+
-//				"if it is necessary to modify them to satisfy the invariants.\n");
-//
-//		// OBJECTS -----------------------------------------------------------------------------------------------------------------		
-//		sb.append("   1.2 Objects: A list of objects with their corresponding values as if the modified properties had already been applied.\n"); 
-//		sb.append("       Please return the same field names indicated in the request corresponding to each class.\n");
-//		sb.append("       Please ensure that when defining objects, you normalize the output using the tags 'class', 'name', and 'attributes'.\n");
-//		sb.append("       If more objects are needed to satisfy the multiplicity of the association links,"+
-//				"especially those multiplicities that require an endpoint, please indicate that these objects "+
-//				"should be created and propose a sample in the list of proposed resulting objects.\n");
-//		sb.append("       If you don't need to change your values, don't change them.\n");
-//		sb.append("       However, if there is a value that violates an invariant, it suggests changing it.\n");
-//
-//		// LINKS -------------------------------------------------------------------------------------------------------------------
-//		sb.append("   1.3 Links: For each link, specify the fields: "+
-//				"codeLink, end1Class, end1Object, end1Role, end2Class, end2Object, end2Role, nomAssoc.\n");
-//		sb.append("       Example: codeLink=\"1\" | end1Class=\"Person\" end1Object=\"person1\" "+
-//				"end1Role=\"person\" end2Class=\"Pet\" end2Object=\"pet1\" end2Role=\"person\" nomAssoc=\"BelongsTo\"\n");
-//		sb.append("       For each association, respect its multiplicity. "+
-//				"That is, in a multiplicity of 4, it verifies that there are 4 links.\n");
-//		sb.append("   1.4 Above all, make sure that all links of associations only use objects indicated in the previous object list.\n");
-//
-//		// COMMENT -----------------------------------------------------------------------------------------------------------------
-//		sb.append("   1.5 Comment: Explanation of 'how to correct the model', taking into account the properties "+
-//				"that have been indicated for correction as if they were already corrected.\n");
-//		sb.append("       Focus only on modifying invariants (not objects or properties).\n");
-//		sb.append("       The explanation should not be in the past tense but in the present or future tense.\n");
-//		sb.append("       The only tags to return should be: Properties, Objects, Links, Comment and ChangedInvariants.\n");
-//		sb.append("       Do not omit the creation of objects or links.\n");
-//		sb.append("       If the ChangedInvariants tag contains modified invariants, don't forget to include "+
-//				"the invariant number provided in the initial list.\n");
-//		sb.append("       Return ONLY valid JSON.\n");
-//		sb.append("       Do not include markdown.\n");
-//		sb.append("       If MUS exist, then ChangedInvariants must always exist.\n");
-//		sb.append("       Return each sentence on a separate line, using a line break between sentences.\n");
-//		sb.append("       For example:\n");
-//		sb.append("         Input:  Sentence1. Sentence2. Sentence3.\n");
-//		sb.append("       Output:\n");
-//		sb.append("         Sentence1.\n");
-//		sb.append("         Sentence2.\n");
-//		sb.append("         Sentence3.\n");
-//
-//		// MUSS/MSS ----------------------------------------------------------------------------------------------------------------
-//		if (strMUS.equals("")&& strMSS.equals("")) {
-//			sb.append("   1.6 Include MUS and MSS in the Comment tag using EXACTLY this format:\n\n");
-//			sb.append(LINEASEP);
-//			sb.append("ADDITIONAL INFORMATION ABOUT MUS/MSS\n");
-//			sb.append(LINEASEP);
-//			sb.append("Minimal Unsatisfiable Subset:\n");
-//			sb.append(" - Group1:\n");
-//			sb.append("   1.invariantX\n");
-//			sb.append(" - Group2:\n");
-//			sb.append("   2.invariantY\n");
-//			sb.append("   3.invariantZ\n");
-//			sb.append(LINEASEP);
-//			sb.append("Maximal Satisfiable Subset:\n");
-//			sb.append(" - Group1:\n");
-//			sb.append("   4.invariantA\n");
-//			sb.append("   5.invariantB\n");
-//			sb.append("   6.invariantC\n");
-//			sb.append(" - Group2:\n");
-//			sb.append("   7.invariantD\n");
-//			sb.append("   8.invariantE\n");
-//			sb.append(" - Group3:\n");
-//			sb.append("   9.invariantF\n");
-//			sb.append("  10.invariantG\n");
-//			sb.append(LINEASEP);
-//		}
-//
-//		mensaje=sb.toString();
-//
-//		String json = buildRequest3(mensaje);
-//		return json;
-//	}		
+
+
+
+
+	// Modif 18:08-14/05/2026
+	//	public static String builJsonRequest3(String strNameModel, String strDefModel, 
+	//			String strDefProperties, String strInvariants, String strMUS, String strMSS,
+	//			String strObjects, String strLinks) {
+	//
+	//		int count=0;
+	//		StringBuilder sb = new StringBuilder();
+	//
+	//		sb.append("*Profile*\n");
+	//		sb.append("1. You are a software modeling assistant, expert on software design, development and debugging.\n"+
+	//				"2. You provide concise, concrete and actionable feedback about software design errors.\n\n");
+	//
+	//		// TASK ====================================================================================================
+	//		sb.append("*Task*\n");
+	//		sb.append("Given a UML class diagram annotated with OCL invariants that is inconsistent, you will:\n");
+	//		sb.append("1. Identify the invariants that cause the inconsistency.\n");
+	//		sb.append("2. Review the properties file to see if the specified ranges are correct, and if not, suggest values ​​to change.\n");
+	//		sb.append("3. It suggests modifying ONLY the invariants that MUST be changed for the model to be satisfactory.\n");
+	//		sb.append("4. Calculate the MUS/MSS if this prompt does not provide it later.\n");
+	//		sb.append("5. Produce a JSON output with Properties, Objects, Links, Comment and ChangedInvariants.\n");
+	//		sb.append("The explanation given in 'Comment' should be usable by a software engineer to locate and correct the defects in the model.\n");
+	//		//		sb.append("This explanation should indicate which variants need to be modified and how to solve the unsatisfiability problem.\n"+
+	//		//				"Please provide a separate explanation for each of the invariants to be modified, one by one.\n");
+	//		//		sb.append("For each invariant to be modified, tell me what new OCL definition it should have.\n");
+	//		//		sb.append("The invariants to be modified indicated in the text must match those indicated in the changeinvariants summary table.\n");
+	//		sb.append("\n");
+	//
+	//		// INPUTS ================================================================================================================
+	//		sb.append("*Inputs*\n");
+	//		count=1;
+	//		sb.append((count)+". Model:\n");
+	//		sb.append("\n");
+	//		sb.append("The UML model definition provided in the format of the USE tool "+
+	//				"(UML-based Specification Environament) developed by the University of Bremen.\n");
+	//		sb.append("\n");
+	//
+	//		// MODEL DEFINITION	------------------------------------------------------------------------------------------------------
+	//		sb.append(LINEASEP);
+	//		sb.append("Model definition:\n");
+	//		sb.append("\"\"\"\n").append(strDefModel).append("\"\"\"\n");
+	//		sb.append(LINEASEP);		
+	//		sb.append("\n");
+	//
+	//		// PROPERTIES ------------------------------------------------------------------------------------------------------------
+	//		count+=1;
+	//		sb.append((count)+". Properties:\n");
+	//		sb.append("A textual description of the range of allowed values for each attribute in the model ");
+	//		sb.append("and the range on the number of objects per class and the number of links per association.\n");
+	//		sb.append("\n");
+	//
+	//		sb.append("Properties:\n");
+	//		sb.append("\"\"\"\n").append(strDefProperties).append("\"\"\"\n");
+	//		sb.append(LINEASEP);
+	//		sb.append("\n");
+	//
+	//		// INVARIANTS ------------------------------------------------------------------------------------------------------------
+	//		count+=1;
+	//		sb.append((count)+". Invariants:\n");
+	//		sb.append("A summary of the invariants in the model, extracted from the USE definition model, ");
+	//		sb.append("and assigning an integer index to each invariant that will be used to refer to the invariant.");
+	//		sb.append("\n\n");
+	//
+	//		sb.append("List of invariants:\n");
+	//		sb.append("\"\"\"\n").append(strInvariants).append("\"\"\"\n");
+	//		sb.append(LINEASEP);
+	//		sb.append("\n");
+	//
+	//		// ORIGINALINVARIANTS -----------------------------------------------------------------------------------------------------
+	//		count+=1;
+	//		sb.append((count)+". OriginalInvariants:\n");
+	//		sb.append("A JSON array containing the exact original text of each invariant.\n\n");
+	//		sb.append("OriginalInvariants:\n");
+	//		sb.append("\"\"\"\n").append(strOriginalInvariants).append("\n\"\"\"\n");
+	//		sb.append(LINEASEP);
+	//		sb.append("\n");
+	//
+	//
+	//		// MUS/MSS ---------------------------------------------------------------------------------------------------------------		
+	//		if (!strMUS.equals("")||!strMSS.equals("")) {
+	//			count+=1;
+	//			sb.append((count)+". MUS/MSS found so far:\n");
+	//			sb.append("\n");
+	//			sb.append("List of MUS:\n\n\"\"\"\n"+strMUS+"\n\"\"\"");
+	//			sb.append("\n\n");
+	//			sb.append(LINEASEP);
+	//			sb.append("List of MSS:\n\n\"\"\"\n"+strMSS+"\n\"\"\"");
+	//			sb.append("\n\n");
+	//			sb.append(LINEASEP);
+	//			sb.append("\n");
+	//		}		
+	//
+	//		// OBJECTS & LINKS -------------------------------------------------------------------------------------------------------
+	//		if (!strObjects.equals("")) {
+	//			count+=1;
+	//			sb.append((count)+". Instance of the model:\n");
+	//			sb.append("An instance (a set of objects and links among objects of the model, ) ");
+	//			sb.append("that should be satisfying all the textual invariants and the graphical UML constraints ");
+	//			sb.append("such as the multiplicities of association ends.\n");
+	//			sb.append("\n");
+	//
+	//			sb.append("List of objects:\n\"\"\"\n"+strObjects+"\n\"\"\"");
+	//			sb.append("\n\n");
+	//			sb.append(LINEASEP);
+	//
+	//			if (!strLinks.equals("")) {
+	//				sb.append("List of links:\n\"\"\"\n"+strLinks+"\n\"\"\"");
+	//				sb.append("\n\n");
+	//				sb.append(LINEASEP);
+	//			}
+	//		}	
+	//
+	//		// OUTPUTS ================================================================================================================
+	//		sb.append("*Outputs*\n\n");
+	//
+	//		// COMMENTS ---------------------------------------------------------------------------------------------------------------
+	//		sb.append("1. Explanation:\n");
+	//		sb.append("   1.1. A brief discussion of the inconsistency problems in the model.\n");
+	//		sb.append("   1.2. For each problem, the model should identify the invariants involved and outline "+
+	//				"a potential way to solve the inconsistency.\n");
+	//		sb.append("   1.3. Do not provide suggestions like \"this value should be valid\".\n");
+	//		//		sb.append("   1.4. Instead, provide informative statements like \"this value should be larger\", "+
+	//		//				"\"this values should be within the following range\", "+
+	//		//				"\"the value of attribute X should be different to the value of attribute Y\", "+
+	//		//				"\"this value should be unique\", etc.\n");
+	//		sb.append("   It is mandatory to indicate which invariants must be modified by placing each invariant on separate lines and indicating the new OCL code that"+
+	//				"said invariant must have.\n");
+	//		sb.append("   Please indicate for each invariant why the modification is necessary based on the proposed new OCL code to make it satisfiable.\n");
+	////		sb.append("   The invariants listed must match those listed in the ChangedInvariants structure mentioned below that have changed.\n");
+	//		sb.append("   1.5. Each sentence must be on its own line.\n");	
+	//
+	//		sb.append("\n");
+	//
+	//		//OBJECTS LIST & LINKS -----------------------------------------------------------------------------------------------------
+	//		sb.append("2. Updated list of objects and links:\n");
+	//		sb.append("   2.1.1  If the input included an instance of the model, "+
+	//				"provide a modified list of objects and links, with minimal changes, "+
+	//				"such that the corresponding instance satisfies all invariants and graphical UML constraints.\n");
+	//		sb.append("   2.1.2 Once the list of objects has been compiled, review it again in case any more need to be created and "+
+	//				"in case there are any classes without objects.\n");
+	//		sb.append("   2.2.  If any object has an attribute whose value violates an invariant, please suggest "+
+	//				"a new value for that attribute and include it in the list of objects you provide at the end.\n");
+	//		sb.append("   2.3.  Please ensure that all objects involved in any link of any association are part of the proposed object list."+
+	//				"If an object does not exist in the object list, do not use it in any link.\n");
+	//		sb.append("\n");
+	//
+	//		// CHANGEDINVARIANTS -------------------------------------------------------------------------------------------------------
+	//		sb.append("3. ChangedInvariants:\n");
+	//		sb.append("   A JSON array containing ONLY the invariants whose text is actually modified.\n");
+	//		sb.append("   You MUST follow these rules:\n");
+	//		sb.append("     3.1. You MUST compare each proposed invariant with its corresponding entry in OriginalInvariants.\n");
+	//		sb.append("     3.2. If the proposal is the same as the original (both textually and semantically), "+
+	//				"it MUST NOT include that invariant..\n");
+	//		sb.append("     3.3. You MUST modify an invariant ONLY if it is impossible to satisfy the model without modifying it.\n");
+	//		sb.append("     3.4. If the MUS contains invariants that CAN be satisfied by adjusting objects or properties, "+
+	//				"you MUST NOT modify those invariants.\n");
+	//		sb.append("     3.5. If the MUS contains invariants that CANNOT be satisfied without modifying them, "+
+	//				"you MUST generate a corrected version.\n");
+	//		sb.append("     3.6. The corrected version MUST be syntactically valid OCL.\n");
+	//		sb.append("     3.7. ChangedInvariants may be empty IF AND ONLY IF no invariant requires modification.\n");
+	//		sb.append("     3.8. If you mention in the 'Comment' that an invariant must be changed, you MUST include it in ChangedInvariants.\n");
+	//		sb.append("     3.9. Retain the numbering indicated in each invariant and indicate it in the results table.\n");
+	//		sb.append("\n");
+	//
+	//		sb.append("   Example format:\n");
+	//		sb.append("   \"ChangedInvariants\":[\n");
+	//		sb.append("     {\n");
+	//		sb.append("       \"name\":\"1-validAge\",\n");
+	//		sb.append("       \"original\":\"self.age <= 0 and self.age > 99\",\n");
+	//		sb.append("       \"proposal\":\"self.age >= 0 and self.age < 99\"\n");
+	//		sb.append("     }\n");
+	//		sb.append("   ]\n\n");
+	//
+	//		// REMARKS =================================================================================================================
+	//		sb.append("*Remarks*\n");
+	//		// JSON --------------------------------------------------------------------------------------------------------------------
+	//		sb.append("1. Please return only the JSON structure without any additional explanation, since the result must be delivered "+
+	//				"to an application.\n"+
+	//				"   Therefore, the JSON structure must contain the following parts:\n");
+	//
+	//		// PROPERTIES --------------------------------------------------------------------------------------------------------------
+	//		sb.append("   1.1 Properties: properties to be modified. The properties tag only refers to the properties "+
+	//				"that exist in "+strNameProperties+" and they should review the range limits to see "+
+	//				"if it is necessary to modify them to satisfy the invariants.\n");
+	//
+	//		// OBJECTS -----------------------------------------------------------------------------------------------------------------		
+	//		sb.append("   1.2 Objects: A list of objects with their corresponding values as if the modified properties had already been applied.\n"); 
+	//		sb.append("       Please return the same field names indicated in the request corresponding to each class.\n");
+	//		sb.append("       Please ensure that when defining objects, you normalize the output using the tags 'class', 'name', and 'attributes'.\n");
+	//		sb.append("       If more objects are needed to satisfy the multiplicity of the association links,"+
+	//				"especially those multiplicities that require an endpoint, please indicate that these objects "+
+	//				"should be created and propose a sample in the list of proposed resulting objects.\n");
+	//		sb.append("       If you don't need to change your values, don't change them.\n");
+	//		sb.append("       However, if there is a value that violates an invariant, it suggests changing it.\n");
+	//
+	//		// LINKS -------------------------------------------------------------------------------------------------------------------
+	//		sb.append("   1.3 Links: For each link, specify the fields: "+
+	//				"codeLink, end1Class, end1Object, end1Role, end2Class, end2Object, end2Role, nomAssoc.\n");
+	//		sb.append("       Example: codeLink=\"1\" | end1Class=\"Person\" end1Object=\"person1\" "+
+	//				"end1Role=\"person\" end2Class=\"Pet\" end2Object=\"pet1\" end2Role=\"person\" nomAssoc=\"BelongsTo\"\n");
+	//		sb.append("       For each association, respect its multiplicity. "+
+	//				"That is, in a multiplicity of 4, it verifies that there are 4 links.\n");
+	//		sb.append("   1.4 Above all, make sure that all links of associations only use objects indicated in the previous object list.\n");
+	//
+	//		// COMMENT -----------------------------------------------------------------------------------------------------------------
+	//		sb.append("   1.5 Comment: Explanation of 'how to correct the model', taking into account the properties "+
+	//				"that have been indicated for correction as if they were already corrected.\n");
+	//		sb.append("       Focus only on modifying invariants (not objects or properties).\n");
+	//		sb.append("       The explanation should not be in the past tense but in the present or future tense.\n");
+	//		sb.append("       The only tags to return should be: Properties, Objects, Links, Comment and ChangedInvariants.\n");
+	//		sb.append("       Do not omit the creation of objects or links.\n");
+	//		sb.append("       If the ChangedInvariants tag contains modified invariants, don't forget to include "+
+	//				"the invariant number provided in the initial list.\n");
+	//		sb.append("       Return ONLY valid JSON.\n");
+	//		sb.append("       Do not include markdown.\n");
+	//		sb.append("       If MUS exist, then ChangedInvariants must always exist.\n");
+	//		sb.append("       Return each sentence on a separate line, using a line break between sentences.\n");
+	//		sb.append("       For example:\n");
+	//		sb.append("         Input:  Sentence1. Sentence2. Sentence3.\n");
+	//		sb.append("       Output:\n");
+	//		sb.append("         Sentence1.\n");
+	//		sb.append("         Sentence2.\n");
+	//		sb.append("         Sentence3.\n");
+	//
+	//		// MUSS/MSS ----------------------------------------------------------------------------------------------------------------
+	//		if (strMUS.equals("")&& strMSS.equals("")) {
+	//			sb.append("   1.6 Include MUS and MSS in the Comment tag using EXACTLY this format:\n\n");
+	//			sb.append(LINEASEP);
+	//			sb.append("ADDITIONAL INFORMATION ABOUT MUS/MSS\n");
+	//			sb.append(LINEASEP);
+	//			sb.append("Minimal Unsatisfiable Subset:\n");
+	//			sb.append(" - Group1:\n");
+	//			sb.append("   1.invariantX\n");
+	//			sb.append(" - Group2:\n");
+	//			sb.append("   2.invariantY\n");
+	//			sb.append("   3.invariantZ\n");
+	//			sb.append(LINEASEP);
+	//			sb.append("Maximal Satisfiable Subset:\n");
+	//			sb.append(" - Group1:\n");
+	//			sb.append("   4.invariantA\n");
+	//			sb.append("   5.invariantB\n");
+	//			sb.append("   6.invariantC\n");
+	//			sb.append(" - Group2:\n");
+	//			sb.append("   7.invariantD\n");
+	//			sb.append("   8.invariantE\n");
+	//			sb.append(" - Group3:\n");
+	//			sb.append("   9.invariantF\n");
+	//			sb.append("  10.invariantG\n");
+	//			sb.append(LINEASEP);
+	//		}
+	//
+	//		mensaje=sb.toString();
+	//
+	//		String json = buildRequest3(mensaje);
+	//		return json;
+	//	}		
 
 	public static String buildRequest3(String prompt) {
 
