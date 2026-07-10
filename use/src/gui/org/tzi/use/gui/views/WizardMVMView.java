@@ -3104,7 +3104,7 @@ public class WizardMVMView extends JPanel implements View {
 	}
 
 	/**
-	 * Ejectua llamad a OpenAI
+	 * Ejectua llamada a OpenAI
 	 * @param json
 	 * @return
 	 */
